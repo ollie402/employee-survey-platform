@@ -1,0 +1,1751 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Realworld Employee Survey Platform</title>
+    <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="login-container" class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <div class="logo">
+                    <div class="logo-icon">R</div>
+                    <span>Realworld</span>
+                </div>
+                <h2 data-translate="sign-in-title">Sign In to Your Account</h2>
+                <p data-translate="sign-in-description">Enter your credentials to access the employee survey platform</p>
+            </div>
+
+            <form id="login-form" class="login-form">
+                <div class="form-group">
+                    <label class="form-label" for="email" data-translate="email-address">Email Address</label>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        name="email"
+                        class="form-input" 
+                        required 
+                        autocomplete="email"
+                        placeholder="Enter your email address"
+                        data-translate-placeholder="email-placeholder"
+                        value=""
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="password" data-translate="password">Password</label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password"
+                        class="form-input" 
+                        required 
+                        autocomplete="current-password"
+                        placeholder="Enter your password"
+                        data-translate-placeholder="password-placeholder"
+                        value=""
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="remember-me">
+                        <span class="checkmark"></span>
+                        <span data-translate="remember-me">Remember me</span>
+                    </label>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-full-width" id="login-btn" data-translate="sign-in">
+                    Sign In
+                </button>
+
+                <div class="login-divider">
+                    <span data-translate="or-continue-with">or continue with</span>
+                </div>
+
+                <div class="social-login">
+                    <button type="button" class="btn-social" onclick="handleSocialLogin('google')">
+                        <span>🔍</span>
+                        Google
+                    </button>
+                    <button type="button" class="btn-social" onclick="handleSocialLogin('microsoft')">
+                        <span>🪟</span>
+                        Microsoft
+                    </button>
+                </div>
+
+                <div style="text-align: center; margin-top: 1rem;">
+                    <a href="#" onclick="showForgotPassword()" style="color: var(--primary-color); text-decoration: none; font-size: 0.875rem;" data-translate="forgot-password">Forgot your password?</a>
+                </div>
+            </form>
+
+            <!-- Quick Login Buttons for Testing -->
+            <div class="quick-login">
+                <h4 data-translate="quick-login-testing">Quick Login (Testing)</h4>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="quickLogin('master')" style="margin-right: 0.5rem; margin-bottom: 0.5rem;" data-translate="login-master-admin">
+                    Login as Master Admin
+                </button>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="quickLogin('client1')" style="margin-right: 0.5rem; margin-bottom: 0.5rem;" data-translate="login-sarah-techcorp">
+                    Login as Sarah (TechCorp)
+                </button>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="quickLogin('client2')" style="margin-bottom: 0.5rem;" data-translate="login-mike-startupx">
+                    Login as Mike (StartupX)
+                </button>
+            </div>
+
+            <div class="demo-credentials">
+                <h4 data-translate="demo-credentials">Demo Credentials</h4>
+                <div class="demo-account" onclick="fillCredentials('paul.everitt@rworld.co.uk', 'Doughball8987!')">
+                    <strong data-translate="master-administrator">Master Administrator:</strong><br>
+                    Email: paul.everitt@rworld.co.uk<br>
+                    Password: Doughball8987!
+                </div>
+                <div class="demo-account" onclick="fillCredentials('sarah@techcorp.com', 'demo123')">
+                    <strong data-translate="client-user-techcorp">Client User (TechCorp):</strong><br>
+                    Email: sarah@techcorp.com<br>
+                    Password: demo123
+                </div>
+                <div class="demo-account" onclick="fillCredentials('mike@startupx.com', 'demo123')">
+                    <strong data-translate="client-user-startupx">Client User (StartupX):</strong><br>
+                    Email: mike@startupx.com<br>
+                    Password: demo123
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="app-container hidden" id="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="logo">
+                <div class="logo-icon">R</div>
+                Realworld
+            </div>
+
+            <nav>
+                <div class="nav-section" id="master-admin-section">
+                    <div class="nav-title" data-translate="master-admin">Master Admin</div>
+                    <div class="nav-item active" onclick="showSection('dashboard')">
+                        <div class="nav-icon">📊</div>
+                        <span data-translate="dashboard">Dashboard</span>
+                    </div>
+                    <div class="nav-item" onclick="showSection('organizations')">
+                        <div class="nav-icon">🏢</div>
+                        <span data-translate="organizations">Organizations</span>
+                    </div>
+                    <div class="nav-item" onclick="showSection('users')">
+                        <div class="nav-icon">👥</div>
+                        <span data-translate="users">User Management</span>
+                    </div>
+                    <div class="nav-item" onclick="showSection('branding')">
+                        <div class="nav-icon">🎨</div>
+                        <span data-translate="branding">Branding</span>
+                    </div>
+                </div>
+
+                <div class="nav-section" id="start-listening-section">
+                    <div class="nav-title" data-translate="start-listening">Start Listening</div>
+                    <div class="nav-item" onclick="showSection('chat-feedback')">
+                        <div class="nav-icon">💬</div>
+                        <span data-translate="chat-feedback">Chat Feedback</span>
+                    </div>
+                    <div class="nav-item" onclick="showSection('chat-management')">
+                        <div class="nav-icon">💬</div>
+                        <span data-translate="chat-management">Chat Management</span>
+                    </div>
+                    <div class="nav-item" onclick="showSection('chat-analytics')">
+                        <div class="nav-icon">📈</div>
+                        <span data-translate="analytics">Analytics</span>
+                    </div>
+                    <div class="nav-item" onclick="showSection('chat-reports')">
+                        <div class="nav-icon">📋</div>
+                        <span data-translate="ai-reports">AI Reports</span>
+                    </div>
+                </div>
+
+                <div class="nav-section" id="keep-listening-section">
+                    <div class="nav-title" data-translate="keep-listening">Keep Listening</div>
+                    <div class="nav-item" onclick="showSection('survey-builder')">
+                        <div class="nav-icon">📝</div>
+                        <span data-translate="survey-builder">Survey Builder</span>
+                    </div>
+                    <div class="nav-item" onclick="showSection('survey-analytics')">
+                        <div class="nav-icon">📊</div>
+                        <span data-translate="survey-analytics">Survey Analytics</span>
+                    </div>
+                    <div class="nav-item" onclick="showSection('participants')">
+                        <div class="nav-icon">👤</div>
+                        <span data-translate="participants">Participants</span>
+                    </div>
+                    <div class="nav-item" onclick="showSection('data-management')">
+                        <div class="nav-icon">📊</div>
+                        <span data-translate="data-management">Data Management</span>
+                    </div>
+                    <div class="nav-item" onclick="showSection('ai-data-chat')">
+                        <div class="nav-icon">🤖</div>
+                        <span data-translate="ai-data-chat">AI Data Chat</span>
+                    </div>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="header">
+                <div class="header-left">
+                    <button class="menu-toggle" onclick="toggleSidebar()" aria-label="Toggle Navigation Menu">
+                        ☰
+                    </button>
+                    
+                    <!-- Language Selector -->
+                    <div class="language-selector">
+                        <button class="language-btn" onclick="toggleLanguageDropdown()" id="language-btn">
+                            <span class="language-flag" id="current-flag">🇬🇧</span>
+                            <span id="current-language">English</span>
+                            <span>▼</span>
+                        </button>
+                        <div class="language-dropdown" id="language-dropdown">
+                            <div class="language-option selected" onclick="changeLanguage('en')" data-lang="en">
+                                <span class="language-flag">🇬🇧</span>
+                                <div class="language-info">
+                                    <div class="language-name">English</div>
+                                    <div class="language-native">English</div>
+                                </div>
+                            </div>
+                            <div class="language-option" onclick="changeLanguage('es')" data-lang="es">
+                                <span class="language-flag">🇪🇸</span>
+                                <div class="language-info">
+                                    <div class="language-name">Spanish</div>
+                                    <div class="language-native">Español</div>
+                                </div>
+                            </div>
+                            <div class="language-option" onclick="changeLanguage('fr')" data-lang="fr">
+                                <span class="language-flag">🇫🇷</span>
+                                <div class="language-info">
+                                    <div class="language-name">French</div>
+                                    <div class="language-native">Français</div>
+                                </div>
+                            </div>
+                            <div class="language-option" onclick="changeLanguage('de')" data-lang="de">
+                                <span class="language-flag">🇩🇪</span>
+                                <div class="language-info">
+                                    <div class="language-name">German</div>
+                                    <div class="language-native">Deutsch</div>
+                                </div>
+                            </div>
+                            <div class="language-option" onclick="changeLanguage('it')" data-lang="it">
+                                <span class="language-flag">🇮🇹</span>
+                                <div class="language-info">
+                                    <div class="language-name">Italian</div>
+                                    <div class="language-native">Italiano</div>
+                                </div>
+                            </div>
+                            <div class="language-option" onclick="changeLanguage('pt')" data-lang="pt">
+                                <span class="language-flag">🇵🇹</span>
+                                <div class="language-info">
+                                    <div class="language-name">Portuguese</div>
+                                    <div class="language-native">Português</div>
+                                </div>
+                            </div>
+                            <div class="language-option" onclick="changeLanguage('nl')" data-lang="nl">
+                                <span class="language-flag">🇳🇱</span>
+                                <div class="language-info">
+                                    <div class="language-name">Dutch</div>
+                                    <div class="language-native">Nederlands</div>
+                                </div>
+                            </div>
+                            <div class="language-option" onclick="changeLanguage('zh')" data-lang="zh">
+                                <span class="language-flag">🇨🇳</span>
+                                <div class="language-info">
+                                    <div class="language-name">Chinese</div>
+                                    <div class="language-native">中文</div>
+                                </div>
+                            </div>
+                            <div class="language-option" onclick="changeLanguage('ja')" data-lang="ja">
+                                <span class="language-flag">🇯🇵</span>
+                                <div class="language-info">
+                                    <div class="language-name">Japanese</div>
+                                    <div class="language-native">日本語</div>
+                                </div>
+                            </div>
+                            <div class="language-option" onclick="changeLanguage('ko')" data-lang="ko">
+                                <span class="language-flag">🇰🇷</span>
+                                <div class="language-info">
+                                    <div class="language-name">Korean</div>
+                                    <div class="language-native">한국어</div>
+                                </div>
+                            </div>
+                            <div class="language-option" onclick="changeLanguage('ar')" data-lang="ar">
+                                <span class="language-flag">🇸🇦</span>
+                                <div class="language-info">
+                                    <div class="language-name">Arabic</div>
+                                    <div class="language-native">العربية</div>
+                                </div>
+                            </div>
+                            <div class="language-option" onclick="changeLanguage('ru')" data-lang="ru">
+                                <span class="language-flag">🇷🇺</span>
+                                <div class="language-info">
+                                    <div class="language-name">Russian</div>
+                                    <div class="language-native">Русский</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h1 class="breadcrumb" id="breadcrumb" data-translate="dashboard">Dashboard</h1>
+                </div>
+                <div class="header-right">
+                    <div class="user-menu">
+                        <div class="user-info" onclick="toggleUserMenu()" id="user-info">
+                            <div class="user-avatar" id="user-avatar">PE</div>
+                            <div>
+                                <div style="font-weight: 500;" id="user-name">Paul Everitt</div>
+                                <div style="font-size: 0.75rem; color: var(--text-secondary);" id="user-role">
+                                    Master Administrator
+                                    <span class="user-role-badge master-admin" id="user-role-badge">MASTER</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="user-dropdown" id="user-dropdown">
+                            <div class="user-dropdown-item" onclick="showProfile()">
+                                <span>👤</span> <span data-translate="profile-settings">Profile Settings</span>
+                            </div>
+                            <div class="user-dropdown-item" onclick="showOrganizationSettings()">
+                                <span>🏢</span> <span data-translate="organization-settings">Organization Settings</span>
+                            </div>
+                            <div class="user-dropdown-item" onclick="showSecuritySettings()">
+                                <span>🔒</span> <span data-translate="security">Security</span>
+                            </div>
+                            <div class="user-dropdown-item" onclick="showHelp()">
+                                <span>❓</span> <span data-translate="help-support">Help & Support</span>
+                            </div>
+                            <div class="user-dropdown-item" onclick="handleLogout()" style="color: var(--danger-color); border-top: 1px solid var(--border-color);">
+                                <span>🚪</span> <span data-translate="sign-out">Sign Out</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="content-area" id="content-area">
+                <!-- Dashboard Section -->
+                <div id="dashboard-section" class="fade-in">
+                    <div class="dashboard-grid">
+                        <div class="stat-card" onclick="showStatDetails('organizations', '47')">
+                            <div class="stat-value">47</div>
+                            <div class="stat-label" data-translate="active-organizations">Active Organizations</div>
+                        </div>
+                        <div class="stat-card" onclick="showStatDetails('users', '1,247')">
+                            <div class="stat-value">1,247</div>
+                            <div class="stat-label" data-translate="total-users">Total Users</div>
+                        </div>
+                        <div class="stat-card" onclick="showStatDetails('surveys', '89')">
+                            <div class="stat-value">89</div>
+                            <div class="stat-label" data-translate="active-surveys">Active Surveys</div>
+                        </div>
+                        <div class="stat-card" onclick="showStatDetails('responses', '15,632')">
+                            <div class="stat-value">15,632</div>
+                            <div class="stat-label" data-translate="total-responses">Total Responses</div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title" data-translate="recent-activity">Recent Activity</h2>
+                            <button class="btn btn-secondary" onclick="handleViewAll()" data-translate="view-all">View All</button>
+                        </div>
+                        <table class="table" id="activity-table">
+                            <thead>
+                                <tr>
+                                    <th onclick="sortTable(this, 0)" data-translate="organization">Organization</th>
+                                    <th onclick="sortTable(this, 1)" data-translate="activity">Activity</th>
+                                    <th onclick="sortTable(this, 2)" data-translate="user">User</th>
+                                    <th onclick="sortTable(this, 3)" data-translate="time">Time</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr onclick="showActivityDetails('TechCorp Ltd', 'New survey created')">
+                                    <td>TechCorp Ltd</td>
+                                    <td>New survey created: "Q4 Feedback"</td>
+                                    <td>Sarah Johnson</td>
+                                    <td>2 hours ago</td>
+                                </tr>
+                                <tr onclick="showActivityDetails('Global Industries', 'Chat feedback submitted')">
+                                    <td>Global Industries</td>
+                                    <td>Chat feedback submitted</td>
+                                    <td>Anonymous</td>
+                                    <td>4 hours ago</td>
+                                </tr>
+                                <tr onclick="showActivityDetails('StartupX', 'Survey completed')">
+                                    <td>StartupX</td>
+                                    <td>Survey completed: 127 responses</td>
+                                    <td>Mike Chen</td>
+                                    <td>1 day ago</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Quick Actions Card -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Quick Actions</h2>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                            <button class="btn btn-primary" onclick="showCreateOrganizationModal()" style="padding: 1rem;">
+                                <div>🏢</div>
+                                <div data-translate="add-organization">Add Organization</div>
+                            </button>
+                            <button class="btn btn-success" onclick="createNewChat()" style="padding: 1rem;">
+                                <div>💬</div>
+                                <div data-translate="create-new-chat">Create Chat</div>
+                            </button>
+                            <button class="btn btn-secondary" onclick="showSection('survey-builder')" style="padding: 1rem;">
+                                <div>📝</div>
+                                <div>Build Survey</div>
+                            </button>
+                            <button class="btn btn-warning" onclick="generateNewReport()" style="padding: 1rem;">
+                                <div>📊</div>
+                                <div>Generate Report</div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Organizations Section -->
+                <div id="organizations-section" class="hidden">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title" data-translate="organizations">Organizations</h2>
+                            <div>
+                                <button class="btn btn-secondary" onclick="handleExportData('organizations')">Export</button>
+                                <button class="btn btn-primary" onclick="showCreateOrganizationModal()" data-translate="add-organization">
+                                    Add Organization
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="filters">
+                            <div class="filter-group">
+                                <label class="filter-label">Search</label>
+                                <input type="text" class="form-input" placeholder="Search organizations..." 
+                                       style="min-width: 200px;" oninput="filterOrganizations('search', this.value)">
+                            </div>
+                            <div class="filter-group">
+                                <label class="filter-label" data-translate="plan">Plan</label>
+                                <select class="form-select" style="min-width: 150px;" onchange="filterOrganizations('plan', this.value)">
+                                    <option value="">All Plans</option>
+                                    <option value="start">Start Listening</option>
+                                    <option value="keep">Keep Listening</option>
+                                    <option value="both">Start + Keep</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label class="filter-label" data-translate="status">Status</label>
+                                <select class="form-select" style="min-width: 120px;" onchange="filterOrganizations('status', this.value)">
+                                    <option value="">All Status</option>
+                                    <option value="active">Active</option>
+                                    <option value="suspended">Suspended</option>
+                                    <option value="trial">Trial</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <table class="table" id="organizations-table">
+                            <thead>
+                                <tr>
+                                    <th onclick="sortTable(this, 0)" data-translate="organization-name">Organization Name</th>
+                                    <th onclick="sortTable(this, 1)" data-translate="plan">Plan</th>
+                                    <th onclick="sortTable(this, 2)" data-translate="users">Users</th>
+                                    <th onclick="sortTable(this, 3)" data-translate="status">Status</th>
+                                    <th onclick="sortTable(this, 4)">Last Activity</th>
+                                    <th data-translate="actions">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr onclick="showOrganizationDetails('TechCorp Ltd')">
+                                    <td>TechCorp Ltd</td>
+                                    <td><span class="tag tag-active">Start + Keep Listening</span></td>
+                                    <td>15</td>
+                                    <td><span class="tag tag-active">Active</span></td>
+                                    <td>2 hours ago</td>
+                                    <td onclick="event.stopPropagation()">
+                                        <button class="btn btn-secondary btn-sm" onclick="handleEditOrganization('TechCorp Ltd')" data-translate="edit">Edit</button>
+                                        <button class="btn btn-warning btn-sm" onclick="handleSuspendOrganization('TechCorp Ltd')" data-translate="suspend">Suspend</button>
+                                        <button class="btn btn-danger btn-sm" onclick="handleDeleteOrganization('TechCorp Ltd')">Delete</button>
+                                    </td>
+                                </tr>
+                                <tr onclick="showOrganizationDetails('Global Industries')">
+                                    <td>Global Industries</td>
+                                    <td><span class="tag tag-pending">Start Listening</span></td>
+                                    <td>8</td>
+                                    <td><span class="tag tag-active">Active</span></td>
+                                    <td>4 hours ago</td>
+                                    <td onclick="event.stopPropagation()">
+                                        <button class="btn btn-secondary btn-sm" onclick="handleEditOrganization('Global Industries')" data-translate="edit">Edit</button>
+                                        <button class="btn btn-warning btn-sm" onclick="handleSuspendOrganization('Global Industries')" data-translate="suspend">Suspend</button>
+                                        <button class="btn btn-danger btn-sm" onclick="handleDeleteOrganization('Global Industries')">Delete</button>
+                                    </td>
+                                </tr>
+                                <tr onclick="showOrganizationDetails('StartupX')">
+                                    <td>StartupX</td>
+                                    <td><span class="tag tag-processing">Keep Listening</span></td>
+                                    <td>3</td>
+                                    <td><span class="tag tag-active">Active</span></td>
+                                    <td>1 day ago</td>
+                                    <td onclick="event.stopPropagation()">
+                                        <button class="btn btn-secondary btn-sm" onclick="handleEditOrganization('StartupX')" data-translate="edit">Edit</button>
+                                        <button class="btn btn-warning btn-sm" onclick="handleSuspendOrganization('StartupX')" data-translate="suspend">Suspend</button>
+                                        <button class="btn btn-danger btn-sm" onclick="handleDeleteOrganization('StartupX')">Delete</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Users Section -->
+                <div id="users-section" class="hidden">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title" data-translate="users">User Management</h2>
+                            <div>
+                                <button class="btn btn-secondary" onclick="handleBulkAction('users')">Bulk Actions</button>
+                                <button class="btn btn-secondary" onclick="handleExportData('users')">Export</button>
+                                <button class="btn btn-primary" onclick="showCreateUserModal()" data-translate="add-user">
+                                    Add User
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="filters">
+                            <div class="filter-group">
+                                <label class="filter-label">Search</label>
+                                <input type="text" class="form-input" placeholder="Search users..." 
+                                       style="min-width: 200px;" oninput="filterUsers('search', this.value)">
+                            </div>
+                            <div class="filter-group">
+                                <label class="filter-label" data-translate="organization">Organization</label>
+                                <select class="form-select" style="min-width: 150px;" onchange="filterUsers('organization', this.value)">
+                                    <option value="">All Organizations</option>
+                                    <option value="techcorp">TechCorp Ltd</option>
+                                    <option value="global">Global Industries</option>
+                                    <option value="startupx">StartupX</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label class="filter-label">Role</label>
+                                <select class="form-select" style="min-width: 120px;" onchange="filterUsers('role', this.value)">
+                                    <option value="">All Roles</option>
+                                    <option value="admin">Admin</option>
+                                    <option value="user">User</option>
+                                    <option value="viewer">Viewer</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label class="filter-label" data-translate="status">Status</label>
+                                <select class="form-select" style="min-width: 120px;" onchange="filterUsers('status', this.value)">
+                                    <option value="">All Status</option>
+                                    <option value="active">Active</option>
+                                    <option value="inactive">Inactive</option>
+                                    <option value="pending">Pending</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <table class="table" id="users-table">
+                            <thead>
+                                <tr>
+                                    <th><input type="checkbox" onclick="toggleSelectAll(this, 'users')"></th>
+                                    <th onclick="sortTable(this, 1)" data-translate="name">Name</th>
+                                    <th onclick="sortTable(this, 2)" data-translate="email">Email</th>
+                                    <th onclick="sortTable(this, 3)" data-translate="organization">Organization</th>
+                                    <th onclick="sortTable(this, 4)" data-translate="access">Access</th>
+                                    <th onclick="sortTable(this, 5)" data-translate="status">Status</th>
+                                    <th onclick="sortTable(this, 6)">Last Login</th>
+                                    <th data-translate="actions">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr onclick="showUserDetails('Sarah Johnson')">
+                                    <td onclick="event.stopPropagation()"><input type="checkbox"></td>
+                                    <td>Sarah Johnson</td>
+                                    <td>sarah@techcorp.com</td>
+                                    <td>TechCorp Ltd</td>
+                                    <td><span class="tag tag-active">Start + Keep Listening</span></td>
+                                    <td><span class="tag tag-active">Active</span></td>
+                                    <td>2 hours ago</td>
+                                    <td onclick="event.stopPropagation()">
+                                        <button class="btn btn-secondary btn-sm" onclick="handleEditUser('Sarah Johnson')" data-translate="edit">Edit</button>
+                                        <button class="btn btn-warning btn-sm" onclick="handleSuspendUser('Sarah Johnson')" data-translate="suspend">Suspend</button>
+                                        <button class="btn btn-danger btn-sm" onclick="handleRemoveUser('Sarah Johnson')">Remove</button>
+                                    </td>
+                                </tr>
+                                <tr onclick="showUserDetails('Mike Chen')">
+                                    <td onclick="event.stopPropagation()"><input type="checkbox"></td>
+                                    <td>Mike Chen</td>
+                                    <td>mike@startupx.com</td>
+                                    <td>StartupX</td>
+                                    <td><span class="tag tag-processing">Keep Listening</span></td>
+                                    <td><span class="tag tag-active">Active</span></td>
+                                    <td>1 day ago</td>
+                                    <td onclick="event.stopPropagation()">
+                                        <button class="btn btn-secondary btn-sm" onclick="handleEditUser('Mike Chen')" data-translate="edit">Edit</button>
+                                        <button class="btn btn-warning btn-sm" onclick="handleSuspendUser('Mike Chen')" data-translate="suspend">Suspend</button>
+                                        <button class="btn btn-danger btn-sm" onclick="handleRemoveUser('Mike Chen')">Remove</button>
+                                    </td>
+                                </tr>
+                                <tr onclick="showUserDetails('Lisa Wang')">
+                                    <td onclick="event.stopPropagation()"><input type="checkbox"></td>
+                                    <td>Lisa Wang</td>
+                                    <td>lisa@global.com</td>
+                                    <td>Global Industries</td>
+                                    <td><span class="tag tag-pending">Start Listening</span></td>
+                                    <td><span class="tag tag-pending">Pending</span></td>
+                                    <td>Never</td>
+                                    <td onclick="event.stopPropagation()">
+                                        <button class="btn btn-secondary btn-sm" onclick="handleEditUser('Lisa Wang')" data-translate="edit">Edit</button>
+                                        <button class="btn btn-primary btn-sm" onclick="handleResendInvite('Lisa Wang')">Resend Invite</button>
+                                        <button class="btn btn-danger btn-sm" onclick="handleRemoveUser('Lisa Wang')">Remove</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Branding Section -->
+                <div id="branding-section" class="hidden">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Branding & Customization</h2>
+                            <button class="btn btn-primary" onclick="saveBranding()">Save Changes</button>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                            <div>
+                                <div class="form-group">
+                                    <label class="form-label">Company Name</label>
+                                    <input type="text" id="brand-company-name" class="form-input" value="Realworld" placeholder="Your Company Name">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Primary Color</label>
+                                    <div style="display: flex; gap: 1rem; align-items: center;">
+                                        <input type="color" id="brand-primary-color" value="#2563eb" style="width: 60px; height: 40px; border: none; border-radius: 6px; cursor: pointer;">
+                                        <input type="text" class="form-input" value="#2563eb" style="flex: 1;">
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Secondary Color</label>
+                                    <div style="display: flex; gap: 1rem; align-items: center;">
+                                        <input type="color" id="brand-secondary-color" value="#64748b" style="width: 60px; height: 40px; border: none; border-radius: 6px; cursor: pointer;">
+                                        <input type="text" class="form-input" value="#64748b" style="flex: 1;">
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Font Family</label>
+                                    <select id="brand-font" class="form-select">
+                                        <option value="system">System Default</option>
+                                        <option value="inter">Inter</option>
+                                        <option value="roboto">Roboto</option>
+                                        <option value="open-sans">Open Sans</option>
+                                        <option value="lato">Lato</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <div class="form-group">
+                                    <label class="form-label">Logo Upload</label>
+                                    <div class="file-upload-area" onclick="document.getElementById('logo-upload').click()">
+                                        <input type="file" id="logo-upload" accept="image/*" style="display: none;" onchange="handleLogoUpload(event)">
+                                        <div>
+                                            <div style="font-size: 3rem; margin-bottom: 1rem;">📎</div>
+                                            <div><strong>Click to upload logo</strong></div>
+                                            <div style="color: var(--text-secondary); margin-top: 0.5rem;">PNG, JPG up to 2MB</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Welcome Message</label>
+                            <textarea id="brand-welcome-message" class="form-input" rows="3" placeholder="Welcome! Your feedback helps us improve...">Welcome! Your feedback helps us improve and create a better workplace for everyone.</textarea>
+                        </div>
+                        
+                        <div class="card">
+                            <div class="card-header">
+                                <h4>Preview</h4>
+                            </div>
+                            <div id="brand-preview" style="padding: 2rem; border: 2px dashed var(--border-color); border-radius: 8px; text-align: center; background: var(--bg-secondary);">
+                                <div style="font-size: 2rem; font-weight: bold; color: var(--primary-color); margin-bottom: 1rem;">Realworld</div>
+                                <div style="color: var(--text-secondary);">Welcome! Your feedback helps us improve and create a better workplace for everyone.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat Feedback Section -->
+                <div id="chat-feedback-section" class="hidden">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Chat Feedback</h2>
+                            <button class="btn btn-primary" onclick="createNewChatWidget()">Create Chat Widget</button>
+                        </div>
+                        
+                        <div class="dashboard-grid">
+                            <div class="stat-card">
+                                <div class="stat-value">1,847</div>
+                                <div class="stat-label">Total Chat Sessions</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">4.8</div>
+                                <div class="stat-label">Average Rating</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">92%</div>
+                                <div class="stat-label">Response Rate</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">156</div>
+                                <div class="stat-label">This Week</div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <h4>Recent Chat Feedback</h4>
+                                <button class="btn btn-secondary" onclick="exportChatData()">Export Data</button>
+                            </div>
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>User</th>
+                                        <th>Rating</th>
+                                        <th>Category</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Dec 15, 2024</td>
+                                        <td>Anonymous User</td>
+                                        <td>⭐⭐⭐⭐⭐</td>
+                                        <td><span class="tag tag-active">General</span></td>
+                                        <td><span class="tag tag-active">Reviewed</span></td>
+                                        <td><button class="btn btn-secondary btn-sm">View Details</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Dec 15, 2024</td>
+                                        <td>John D.</td>
+                                        <td>⭐⭐⭐⭐</td>
+                                        <td><span class="tag tag-processing">Support</span></td>
+                                        <td><span class="tag tag-pending">Pending</span></td>
+                                        <td><button class="btn btn-secondary btn-sm">View Details</button></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat Management Section -->
+                <div id="chat-management-section" class="hidden">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Chat Management</h2>
+                            <div>
+                                <button class="btn btn-secondary" onclick="manageChatSettings()">Settings</button>
+                                <button class="btn btn-primary" onclick="createChatTemplate()">Create Template</button>
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h4>Active Chat Widgets</h4>
+                                </div>
+                                <div style="display: grid; gap: 1rem;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; border: 1px solid var(--border-color); border-radius: 8px;">
+                                        <div>
+                                            <strong>General Feedback</strong><br>
+                                            <small style="color: var(--text-secondary);">Website footer widget</small>
+                                        </div>
+                                        <div style="display: flex; gap: 0.5rem;">
+                                            <button class="btn btn-secondary btn-sm">Edit</button>
+                                            <button class="btn btn-danger btn-sm">Delete</button>
+                                        </div>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; border: 1px solid var(--border-color); border-radius: 8px;">
+                                        <div>
+                                            <strong>Support Chat</strong><br>
+                                            <small style="color: var(--text-secondary);">Help page widget</small>
+                                        </div>
+                                        <div style="display: flex; gap: 0.5rem;">
+                                            <button class="btn btn-secondary btn-sm">Edit</button>
+                                            <button class="btn btn-danger btn-sm">Delete</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card">
+                                <div class="card-header">
+                                    <h4>Chat Templates</h4>
+                                </div>
+                                <div style="display: grid; gap: 1rem;">
+                                    <div style="padding: 1rem; border: 1px solid var(--border-color); border-radius: 8px;">
+                                        <strong>Customer Satisfaction</strong><br>
+                                        <small style="color: var(--text-secondary);">5 questions • Rating scale</small>
+                                    </div>
+                                    <div style="padding: 1rem; border: 1px solid var(--border-color); border-radius: 8px;">
+                                        <strong>Product Feedback</strong><br>
+                                        <small style="color: var(--text-secondary);">3 questions • Open text</small>
+                                    </div>
+                                    <div style="padding: 1rem; border: 1px solid var(--border-color); border-radius: 8px;">
+                                        <strong>Support Experience</strong><br>
+                                        <small style="color: var(--text-secondary);">4 questions • Mixed format</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat Analytics Section -->
+                <div id="chat-analytics-section" class="hidden">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Chat Analytics</h2>
+                            <div>
+                                <select class="form-select" style="margin-right: 1rem;">
+                                    <option>Last 30 days</option>
+                                    <option>Last 7 days</option>
+                                    <option>Last 90 days</option>
+                                    <option>Custom range</option>
+                                </select>
+                                <button class="btn btn-secondary">Export Report</button>
+                            </div>
+                        </div>
+
+                        <div class="dashboard-grid">
+                            <div class="stat-card">
+                                <div class="stat-value">89%</div>
+                                <div class="stat-label">Completion Rate</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">2m 15s</div>
+                                <div class="stat-label">Avg. Session Duration</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">4.6/5</div>
+                                <div class="stat-label">Average Rating</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">+23%</div>
+                                <div class="stat-label">Growth vs Last Month</div>
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem;">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h4>Response Trends</h4>
+                                </div>
+                                <div class="chart-placeholder">
+                                    📈 Interactive chart showing response trends over time
+                                </div>
+                            </div>
+
+                            <div class="card">
+                                <div class="card-header">
+                                    <h4>Sentiment Analysis</h4>
+                                </div>
+                                <div style="display: grid; gap: 1rem;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <span>😊 Positive</span>
+                                        <span><strong>68%</strong></span>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <span>😐 Neutral</span>
+                                        <span><strong>24%</strong></span>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <span>😞 Negative</span>
+                                        <span><strong>8%</strong></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat Reports Section -->
+                <div id="chat-reports-section" class="hidden">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">AI Reports</h2>
+                            <button class="btn btn-primary" onclick="generateAIReport()">Generate New Report</button>
+                        </div>
+
+                        <div class="dashboard-grid">
+                            <div class="stat-card">
+                                <div class="stat-value">15</div>
+                                <div class="stat-label">Reports Generated</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">847</div>
+                                <div class="stat-label">Data Points Analyzed</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">23</div>
+                                <div class="stat-label">Insights Discovered</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">94%</div>
+                                <div class="stat-label">Accuracy Score</div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <h4>Recent AI Reports</h4>
+                            </div>
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Report Name</th>
+                                        <th>Generated</th>
+                                        <th>Data Source</th>
+                                        <th>Insights</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>Monthly Sentiment Analysis</strong></td>
+                                        <td>Dec 15, 2024</td>
+                                        <td>Chat Feedback</td>
+                                        <td><span class="tag tag-active">12 insights</span></td>
+                                        <td>
+                                            <button class="btn btn-secondary btn-sm">View</button>
+                                            <button class="btn btn-primary btn-sm">Download</button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>User Experience Trends</strong></td>
+                                        <td>Dec 12, 2024</td>
+                                        <td>All Channels</td>
+                                        <td><span class="tag tag-processing">8 insights</span></td>
+                                        <td>
+                                            <button class="btn btn-secondary btn-sm">View</button>
+                                            <button class="btn btn-primary btn-sm">Download</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Survey Builder Section -->
+                <div id="survey-builder-section" class="hidden">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Survey Builder</h2>
+                            <button class="btn btn-primary" onclick="createNewSurvey()">Create New Survey</button>
+                        </div>
+
+                        <div class="dashboard-grid">
+                            <div class="stat-card">
+                                <div class="stat-value">23</div>
+                                <div class="stat-label">Active Surveys</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">156</div>
+                                <div class="stat-label">Total Surveys</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">2,847</div>
+                                <div class="stat-label">Total Responses</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">78%</div>
+                                <div class="stat-label">Completion Rate</div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <h4>My Surveys</h4>
+                                <div>
+                                    <select class="form-select" style="margin-right: 1rem;">
+                                        <option>All Surveys</option>
+                                        <option>Active</option>
+                                        <option>Draft</option>
+                                        <option>Completed</option>
+                                    </select>
+                                    <button class="btn btn-secondary">Templates</button>
+                                </div>
+                            </div>
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Survey Name</th>
+                                        <th>Status</th>
+                                        <th>Responses</th>
+                                        <th>Created</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>Q4 Employee Satisfaction</strong></td>
+                                        <td><span class="tag tag-active">Active</span></td>
+                                        <td>127/200</td>
+                                        <td>Dec 1, 2024</td>
+                                        <td>
+                                            <button class="btn btn-secondary btn-sm">Edit</button>
+                                            <button class="btn btn-primary btn-sm">Results</button>
+                                            <button class="btn btn-warning btn-sm">Share</button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Product Feedback Survey</strong></td>
+                                        <td><span class="tag tag-processing">Draft</span></td>
+                                        <td>0/∞</td>
+                                        <td>Dec 10, 2024</td>
+                                        <td>
+                                            <button class="btn btn-secondary btn-sm">Edit</button>
+                                            <button class="btn btn-success btn-sm">Publish</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Survey Analytics Section -->
+                <div id="survey-analytics-section" class="hidden">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Survey Analytics</h2>
+                            <div>
+                                <select class="form-select" style="margin-right: 1rem;">
+                                    <option>All Surveys</option>
+                                    <option>Q4 Employee Satisfaction</option>
+                                    <option>Product Feedback</option>
+                                </select>
+                                <button class="btn btn-secondary">Export Results</button>
+                            </div>
+                        </div>
+
+                        <div class="dashboard-grid">
+                            <div class="stat-card">
+                                <div class="stat-value">85%</div>
+                                <div class="stat-label">Response Rate</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">4.2/5</div>
+                                <div class="stat-label">Average Score</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">3m 24s</div>
+                                <div class="stat-label">Avg. Completion Time</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">847</div>
+                                <div class="stat-label">Total Responses</div>
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem;">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h4>Response Timeline</h4>
+                                </div>
+                                <div class="chart-placeholder">
+                                    📊 Response volume over time chart
+                                </div>
+                            </div>
+
+                            <div class="card">
+                                <div class="card-header">
+                                    <h4>Question Performance</h4>
+                                </div>
+                                <div style="display: grid; gap: 1rem;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <span>Overall Satisfaction</span>
+                                        <span><strong>89%</strong></span>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <span>Work-Life Balance</span>
+                                        <span><strong>76%</strong></span>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <span>Management</span>
+                                        <span><strong>82%</strong></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Participants Section -->
+                <div id="participants-section" class="hidden">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Participants</h2>
+                            <div>
+                                <button class="btn btn-secondary" onclick="importParticipants()">Import</button>
+                                <button class="btn btn-primary" onclick="addParticipant()">Add Participant</button>
+                            </div>
+                        </div>
+
+                        <div class="dashboard-grid">
+                            <div class="stat-card">
+                                <div class="stat-value">1,247</div>
+                                <div class="stat-label">Total Participants</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">892</div>
+                                <div class="stat-label">Active This Month</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">156</div>
+                                <div class="stat-label">New This Week</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">23</div>
+                                <div class="stat-label">Pending Invites</div>
+                            </div>
+                        </div>
+
+                        <div class="filters">
+                            <div class="filter-group">
+                                <label class="filter-label">Search</label>
+                                <input type="text" class="form-input" placeholder="Search participants..." style="min-width: 200px;">
+                            </div>
+                            <div class="filter-group">
+                                <label class="filter-label">Department</label>
+                                <select class="form-select">
+                                    <option>All Departments</option>
+                                    <option>Engineering</option>
+                                    <option>Marketing</option>
+                                    <option>Sales</option>
+                                    <option>HR</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label class="filter-label">Status</label>
+                                <select class="form-select">
+                                    <option>All Status</option>
+                                    <option>Active</option>
+                                    <option>Inactive</option>
+                                    <option>Pending</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th><input type="checkbox"></th>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Department</th>
+                                        <th>Last Response</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><input type="checkbox"></td>
+                                        <td>John Smith</td>
+                                        <td>john.smith@techcorp.com</td>
+                                        <td>Engineering</td>
+                                        <td>2 days ago</td>
+                                        <td><span class="tag tag-active">Active</span></td>
+                                        <td>
+                                            <button class="btn btn-secondary btn-sm">Edit</button>
+                                            <button class="btn btn-warning btn-sm">Suspend</button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><input type="checkbox"></td>
+                                        <td>Emma Davis</td>
+                                        <td>emma.davis@techcorp.com</td>
+                                        <td>Marketing</td>
+                                        <td>1 week ago</td>
+                                        <td><span class="tag tag-active">Active</span></td>
+                                        <td>
+                                            <button class="btn btn-secondary btn-sm">Edit</button>
+                                            <button class="btn btn-warning btn-sm">Suspend</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Data Management Section -->
+                <div id="data-management-section" class="hidden">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Data Management</h2>
+                            <div>
+                                <button class="btn btn-secondary" onclick="backupData()">Backup Data</button>
+                                <button class="btn btn-primary" onclick="exportAllData()">Export All</button>
+                            </div>
+                        </div>
+
+                        <div class="dashboard-grid">
+                            <div class="stat-card">
+                                <div class="stat-value">15.4GB</div>
+                                <div class="stat-label">Total Data Size</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">45,847</div>
+                                <div class="stat-label">Total Records</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">Dec 15</div>
+                                <div class="stat-label">Last Backup</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">99.9%</div>
+                                <div class="stat-label">Data Integrity</div>
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h4>Export Data</h4>
+                                </div>
+                                <div style="display: grid; gap: 1rem;">
+                                    <div>
+                                        <label class="form-label">Data Type</label>
+                                        <select class="form-select">
+                                            <option>All Data</option>
+                                            <option>Survey Responses</option>
+                                            <option>Chat Feedback</option>
+                                            <option>Participants</option>
+                                            <option>Analytics Data</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="form-label">Format</label>
+                                        <select class="form-select">
+                                            <option>CSV</option>
+                                            <option>Excel (XLSX)</option>
+                                            <option>JSON</option>
+                                            <option>PDF Report</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="form-label">Date Range</label>
+                                        <select class="form-select">
+                                            <option>All Time</option>
+                                            <option>Last 30 days</option>
+                                            <option>Last 90 days</option>
+                                            <option>This Year</option>
+                                            <option>Custom Range</option>
+                                        </select>
+                                    </div>
+                                    <button class="btn btn-primary">Generate Export</button>
+                                </div>
+                            </div>
+
+                            <div class="card">
+                                <div class="card-header">
+                                    <h4>Data Sources</h4>
+                                </div>
+                                <div style="display: grid; gap: 1rem;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; border: 1px solid var(--border-color); border-radius: 8px;">
+                                        <div>
+                                            <strong>Survey Responses</strong><br>
+                                            <small style="color: var(--text-secondary);">8.2GB • 23,847 records</small>
+                                        </div>
+                                        <span class="tag tag-active">Active</span>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; border: 1px solid var(--border-color); border-radius: 8px;">
+                                        <div>
+                                            <strong>Chat Feedback</strong><br>
+                                            <small style="color: var(--text-secondary);">4.7GB • 15,247 records</small>
+                                        </div>
+                                        <span class="tag tag-active">Active</span>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; border: 1px solid var(--border-color); border-radius: 8px;">
+                                        <div>
+                                            <strong>User Analytics</strong><br>
+                                            <small style="color: var(--text-secondary);">2.5GB • 6,753 records</small>
+                                        </div>
+                                        <span class="tag tag-active">Active</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI Data Chat Section -->
+                <div id="ai-data-chat-section" class="hidden">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">AI Data Chat</h2>
+                            <div>
+                                <select class="form-select" style="margin-right: 1rem;">
+                                    <option>All Data Sources</option>
+                                    <option>Survey Data Only</option>
+                                    <option>Chat Feedback Only</option>
+                                    <option>Combined Analytics</option>
+                                </select>
+                                <button class="btn btn-primary" onclick="clearAIChat()">Clear Chat</button>
+                            </div>
+                        </div>
+
+                        <div class="dashboard-grid">
+                            <div class="stat-card">
+                                <div class="stat-value">847</div>
+                                <div class="stat-label">AI Queries Processed</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">156</div>
+                                <div class="stat-label">Insights Generated</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">98.7%</div>
+                                <div class="stat-label">Accuracy Rate</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">2.3s</div>
+                                <div class="stat-label">Avg. Response Time</div>
+                            </div>
+                        </div>
+
+                        <div class="card" style="height: 500px; display: flex; flex-direction: column;">
+                            <div class="card-header">
+                                <h4>Chat with Your Data</h4>
+                            </div>
+                            <div id="ai-chat-messages" style="flex: 1; overflow-y: auto; padding: 1rem; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-secondary);">
+                                <div style="margin-bottom: 1rem; padding: 1rem; background: var(--bg-primary); border-radius: 8px; border-left: 4px solid var(--primary-color);">
+                                    <strong>AI Assistant:</strong> Hello! I can help you analyze your survey and feedback data. Try asking me questions like "What's the average satisfaction score?" or "Show me trends in customer feedback over the last month."
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                                <input type="text" id="ai-chat-input" class="form-input" placeholder="Ask me anything about your data..." style="flex: 1;" onkeypress="if(event.key==='Enter') sendAIMessage()">
+                                <button class="btn btn-primary" onclick="sendAIMessage()">Send</button>
+                            </div>
+                            <div style="display: flex; gap: 0.5rem; margin-top: 1rem; flex-wrap: wrap;">
+                                <button class="btn btn-secondary btn-sm" onclick="sendSuggestion('What is the average satisfaction score?')">Average satisfaction</button>
+                                <button class="btn btn-secondary btn-sm" onclick="sendSuggestion('Show me feedback trends this month')">Monthly trends</button>
+                                <button class="btn btn-secondary btn-sm" onclick="sendSuggestion('Which departments need improvement?')">Department insights</button>
+                                <button class="btn btn-secondary btn-sm" onclick="sendSuggestion('Generate a summary report')">Summary report</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div id="forgot-password-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 data-translate="reset-password">Reset Password</h3>
+                <button class="close-btn" onclick="closeModal('forgot-password-modal')">&times;</button>
+            </div>
+            <form onsubmit="handleForgotPassword(event)">
+                <div class="form-group">
+                    <label class="form-label" data-translate="email-address">Email Address</label>
+                    <input type="email" class="form-input" required placeholder="Enter your email address">
+                    <small class="form-help" data-translate="reset-password-help">We'll send you a link to reset your password</small>
+                </div>
+                <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('forgot-password-modal')" data-translate="cancel">Cancel</button>
+                    <button type="submit" class="btn btn-primary" data-translate="send-reset-link">Send Reset Link</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Profile Settings Modal -->
+    <div id="profile-settings-modal" class="modal hidden">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3 data-translate="profile-settings">Profile Settings</h3>
+                <button class="close-btn" onclick="closeModal('profile-settings-modal')">&times;</button>
+            </div>
+            <form id="profile-form" onsubmit="handleProfileUpdate(event)">
+                <div class="form-group">
+                    <label class="form-label">Full Name</label>
+                    <input type="text" id="profile-name" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email Address</label>
+                    <input type="email" id="profile-email" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Job Title</label>
+                    <input type="text" id="profile-job-title" class="form-input" placeholder="e.g., Survey Administrator">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Phone Number</label>
+                    <input type="tel" id="profile-phone" class="form-input" placeholder="+44 1234 567890">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Time Zone</label>
+                    <select id="profile-timezone" class="form-select">
+                        <option value="UTC">UTC (Coordinated Universal Time)</option>
+                        <option value="Europe/London">Europe/London (GMT/BST)</option>
+                        <option value="America/New_York">America/New_York (EST/EDT)</option>
+                        <option value="America/Los_Angeles">America/Los_Angeles (PST/PDT)</option>
+                        <option value="Europe/Berlin">Europe/Berlin (CET/CEST)</option>
+                        <option value="Asia/Tokyo">Asia/Tokyo (JST)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Language Preference</label>
+                    <select id="profile-language" class="form-select">
+                        <option value="en">English</option>
+                        <option value="es">Spanish</option>
+                        <option value="fr">French</option>
+                        <option value="de">German</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Bio / Description</label>
+                    <textarea id="profile-bio" class="form-input" rows="3" placeholder="Tell us about yourself..."></textarea>
+                </div>
+                <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('profile-settings-modal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Organization Settings Modal -->
+    <div id="organization-settings-modal" class="modal hidden">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h3 data-translate="organization-settings">Organization Settings</h3>
+                <button class="close-btn" onclick="closeModal('organization-settings-modal')">&times;</button>
+            </div>
+            <form id="organization-form" onsubmit="handleOrganizationUpdate(event)">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                    <div class="form-group">
+                        <label class="form-label">Organization Name</label>
+                        <input type="text" id="org-name" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Industry</label>
+                        <select id="org-industry" class="form-select">
+                            <option value="">Select Industry</option>
+                            <option value="technology">Technology</option>
+                            <option value="healthcare">Healthcare</option>
+                            <option value="finance">Finance</option>
+                            <option value="education">Education</option>
+                            <option value="retail">Retail</option>
+                            <option value="manufacturing">Manufacturing</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                    <div class="form-group">
+                        <label class="form-label">Company Size</label>
+                        <select id="org-size" class="form-select">
+                            <option value="">Select Size</option>
+                            <option value="1-10">1-10 employees</option>
+                            <option value="11-50">11-50 employees</option>
+                            <option value="51-200">51-200 employees</option>
+                            <option value="201-1000">201-1000 employees</option>
+                            <option value="1000+">1000+ employees</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Country</label>
+                        <select id="org-country" class="form-select">
+                            <option value="">Select Country</option>
+                            <option value="GB">United Kingdom</option>
+                            <option value="US">United States</option>
+                            <option value="CA">Canada</option>
+                            <option value="DE">Germany</option>
+                            <option value="FR">France</option>
+                            <option value="ES">Spain</option>
+                            <option value="AU">Australia</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Website</label>
+                    <input type="url" id="org-website" class="form-input" placeholder="https://www.example.com">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <textarea id="org-description" class="form-input" rows="3" placeholder="Describe your organization..."></textarea>
+                </div>
+
+                <div class="card" style="margin: 2rem 0;">
+                    <div class="card-header">
+                        <h4>Notification Settings</h4>
+                    </div>
+                    <div style="display: grid; gap: 1rem;">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="notify-new-responses">
+                            Email notifications for new survey responses
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="notify-weekly-reports">
+                            Weekly summary reports
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="notify-system-updates">
+                            System updates and maintenance notifications
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="notify-feature-updates">
+                            New feature announcements
+                        </label>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('organization-settings-modal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Settings</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Security Settings Modal -->
+    <div id="security-settings-modal" class="modal hidden">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3 data-translate="security">Security Settings</h3>
+                <button class="close-btn" onclick="closeModal('security-settings-modal')">&times;</button>
+            </div>
+            
+            <div class="card" style="margin-bottom: 1.5rem;">
+                <div class="card-header">
+                    <h4>Change Password</h4>
+                </div>
+                <form id="password-form" onsubmit="handlePasswordChange(event)">
+                    <div class="form-group">
+                        <label class="form-label">Current Password</label>
+                        <input type="password" id="current-password" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">New Password</label>
+                        <input type="password" id="new-password" class="form-input" required minlength="8">
+                        <small class="form-help">Must be at least 8 characters long</small>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Confirm New Password</label>
+                        <input type="password" id="confirm-password" class="form-input" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Update Password</button>
+                </form>
+            </div>
+
+            <div class="card" style="margin-bottom: 1.5rem;">
+                <div class="card-header">
+                    <h4>Two-Factor Authentication</h4>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <div>
+                        <p><strong>Status:</strong> <span id="2fa-status" class="tag tag-inactive">Disabled</span></p>
+                        <p style="color: var(--text-secondary); font-size: 0.875rem;">Add an extra layer of security to your account</p>
+                    </div>
+                    <button class="btn btn-primary" id="toggle-2fa" onclick="toggle2FA()">Enable 2FA</button>
+                </div>
+            </div>
+
+            <div class="card" style="margin-bottom: 1.5rem;">
+                <div class="card-header">
+                    <h4>Login Sessions</h4>
+                </div>
+                <div id="login-sessions">
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 0.5rem;">
+                        <div>
+                            <strong>Current Session</strong><br>
+                            <small style="color: var(--text-secondary);">Chrome on Windows • London, UK • Active now</small>
+                        </div>
+                        <span class="tag tag-active">Current</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 0.5rem;">
+                        <div>
+                            <strong>Mobile Session</strong><br>
+                            <small style="color: var(--text-secondary);">Safari on iPhone • London, UK • 2 hours ago</small>
+                        </div>
+                        <button class="btn btn-danger btn-sm" onclick="terminateSession('mobile')">Terminate</button>
+                    </div>
+                </div>
+                <button class="btn btn-warning" onclick="terminateAllSessions()">Terminate All Other Sessions</button>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h4>Privacy Settings</h4>
+                </div>
+                <div style="display: grid; gap: 1rem;">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="privacy-analytics" checked>
+                        Allow usage analytics to improve the platform
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="privacy-marketing">
+                        Receive marketing communications
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="privacy-profile" checked>
+                        Make my profile visible to organization members
+                    </label>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('security-settings-modal')">Close</button>
+                <button type="button" class="btn btn-primary" onclick="saveSecuritySettings()">Save Security Settings</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help & Support Modal -->
+    <div id="help-support-modal" class="modal hidden">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h3 data-translate="help-support">Help & Support</h3>
+                <button class="close-btn" onclick="closeModal('help-support-modal')">&times;</button>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+                <div class="card">
+                    <div class="card-header">
+                        <h4>📚 Documentation</h4>
+                    </div>
+                    <div style="display: grid; gap: 0.5rem;">
+                        <a href="#" onclick="openHelpArticle('getting-started')" style="color: var(--primary-color); text-decoration: none;">Getting Started Guide</a>
+                        <a href="#" onclick="openHelpArticle('survey-builder')" style="color: var(--primary-color); text-decoration: none;">Survey Builder Tutorial</a>
+                        <a href="#" onclick="openHelpArticle('analytics')" style="color: var(--primary-color); text-decoration: none;">Analytics & Reporting</a>
+                        <a href="#" onclick="openHelpArticle('user-management')" style="color: var(--primary-color); text-decoration: none;">User Management</a>
+                        <a href="#" onclick="openHelpArticle('api')" style="color: var(--primary-color); text-decoration: none;">API Documentation</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h4>🎥 Video Tutorials</h4>
+                    </div>
+                    <div style="display: grid; gap: 0.5rem;">
+                        <a href="#" onclick="playVideo('platform-overview')" style="color: var(--primary-color); text-decoration: none;">Platform Overview (5 min)</a>
+                        <a href="#" onclick="playVideo('creating-surveys')" style="color: var(--primary-color); text-decoration: none;">Creating Your First Survey (8 min)</a>
+                        <a href="#" onclick="playVideo('analyzing-results')" style="color: var(--primary-color); text-decoration: none;">Analyzing Survey Results (6 min)</a>
+                        <a href="#" onclick="playVideo('advanced-features')" style="color: var(--primary-color); text-decoration: none;">Advanced Features (12 min)</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="margin-bottom: 2rem;">
+                <div class="card-header">
+                    <h4>💬 Contact Support</h4>
+                </div>
+                <form id="support-form" onsubmit="handleSupportRequest(event)">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                        <div class="form-group">
+                            <label class="form-label">Subject</label>
+                            <select class="form-select" required>
+                                <option value="">Select a topic</option>
+                                <option value="technical">Technical Issue</option>
+                                <option value="billing">Billing Question</option>
+                                <option value="feature">Feature Request</option>
+                                <option value="account">Account Management</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Priority</label>
+                            <select class="form-select" required>
+                                <option value="low">Low</option>
+                                <option value="medium" selected>Medium</option>
+                                <option value="high">High</option>
+                                <option value="urgent">Urgent</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Message</label>
+                        <textarea class="form-input" rows="5" placeholder="Describe your issue or question in detail..." required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox">
+                            Include system information in my request
+                        </label>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Send Support Request</button>
+                </form>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                <div class="stat-card" onclick="openLiveChat()">
+                    <div class="stat-value">💬</div>
+                    <div class="stat-label">Live Chat</div>
+                    <small style="color: var(--success-color);">● Available now</small>
+                </div>
+                <div class="stat-card" onclick="callSupport()">
+                    <div class="stat-value">📞</div>
+                    <div class="stat-label">Phone Support</div>
+                    <small style="color: var(--text-secondary);">+44 20 1234 5678</small>
+                </div>
+                <div class="stat-card" onclick="emailSupport()">
+                    <div class="stat-value">📧</div>
+                    <div class="stat-label">Email Support</div>
+                    <small style="color: var(--text-secondary);">support@realworld.co.uk</small>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h4>ℹ️ System Information</h4>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; font-size: 0.875rem;">
+                    <div><strong>Version:</strong> 2.4.1</div>
+                    <div><strong>Browser:</strong> <span id="browser-info">Chrome 91.0</span></div>
+                    <div><strong>Plan:</strong> <span id="user-plan">Professional</span></div>
+                    <div><strong>Organization:</strong> <span id="user-org">TechCorp Ltd</span></div>
+                    <div><strong>Last Updated:</strong> Dec 15, 2024</div>
+                    <div><strong>Server Status:</strong> <span style="color: var(--success-color);">● All systems operational</span></div>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('help-support-modal')">Close</button>
+            </div>
+        </div>
+    </div>
+
+<script src="assets/js/config.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>

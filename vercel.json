@@ -1,0 +1,23 @@
+{
+  "version": 2,
+  "buildCommand": "npm run build",
+  "outputDirectory": ".",
+  "framework": null,
+  "installCommand": "npm install",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/$1"
+    }
+  ],
+  "build": {
+    "env": {
+      "NODE_ENV": "production"
+    }
+  },
+  "functions": {
+    "api/*.js": {
+      "maxDuration": 10
+    }
+  }
+}

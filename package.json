@@ -1,0 +1,57 @@
+{
+  "name": "employee-survey-platform",
+  "version": "1.0.0",
+  "description": "Employee Survey Platform - A feedback management system",
+  "main": "index.html",
+  "scripts": {
+    "start": "live-server --port=3000 --open=/index.html",
+    "dev": "concurrently \"npm run start\" \"npm run watch\"",
+    "build": "echo 'Building project...' && npm run copy-files",
+    "copy-files": "node build-script.js",
+    "deploy:test": "node deploy.js test",
+    "deploy:live": "node deploy.js live",
+    "surge:deploy": "surge . employee-survey-platform.surge.sh",
+    "surge:deploy-test": "surge . test-employee-survey.surge.sh",
+    "surge:login": "surge login",
+    "surge:logout": "surge logout",
+    "surge:list": "surge list",
+    "surge:teardown": "surge teardown",
+    "watch": "nodemon --watch . --ext html,css,js --ignore node_modules/ --ignore build/ --exec \"npm run surge:deploy\"",
+    "watch-test": "nodemon --watch . --ext html,css,js --ignore node_modules/ --ignore build/ --exec \"npm run surge:deploy-test\"",
+    "auto-deploy": "npm run surge:deploy && npm run watch",
+    "auto-deploy-test": "npm run surge:deploy-test && npm run watch-test",
+    "full-deploy": "npm run build && npm run surge:deploy",
+    "setup": "npm install && npm run surge:login"
+  },
+  "keywords": [
+    "survey",
+    "feedback",
+    "employee",
+    "dashboard"
+  ],
+  "author": "Your Name Here",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^7.6.0",
+    "live-server": "^1.2.2",
+    "nodemon": "^3.1.10",
+    "surge": "^0.23.1"
+  },
+  "nodemonConfig": {
+    "delay": "2000",
+    "verbose": true,
+    "ignore": [
+      "node_modules/*",
+      "*.json",
+      "README.md",
+      ".git/*"
+    ]
+  },
+  "surge": {
+    "domain": "employee-survey-platform.surge.sh"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.1",
+    "express": "^5.1.0"
+  }
+}
