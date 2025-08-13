@@ -406,7 +406,7 @@
 
         // BRANDING FUNCTIONALITY - NEW FUNCTIONS START HERE
         
-        // Function to apply branding changes to the website - FIXED VERSION
+        // Function to apply branding changes to the website - FULLY ADAPTABLE VERSION
         function applyBrandingToWebsite() {
             const branding = appState.branding;
             
@@ -457,26 +457,41 @@
                 }
             }
             
-            // Apply logo if uploaded - FIXED VERSION
+            // Apply logo if uploaded - FULLY ADAPTABLE VERSION
             if (branding.logoUrl) {
                 const logoIcons = document.querySelectorAll('.logo-icon');
                 logoIcons.forEach(icon => {
+                    // Remove default background class and add custom class
+                    icon.classList.remove('has-default');
+                    icon.classList.add('has-custom');
+                    
                     // Clear any existing content
                     icon.innerHTML = '';
+                    
+                    // Remove inline background styles
+                    icon.style.background = 'transparent';
+                    
                     // Create and add the image element
                     const img = document.createElement('img');
                     img.src = branding.logoUrl;
-                    img.alt = 'Logo';
-                    img.style.cssText = 'width: 100%; height: 100%; object-fit: contain; border-radius: 4px;';
+                    img.alt = branding.companyName || 'Logo';
+                    img.style.cssText = 'width: 100%; height: 100%; object-fit: contain;';
                     icon.appendChild(img);
                 });
             } else {
-                // If no logo URL, restore the default "R" text
+                // If no logo URL, restore the default "R" text with colored background
                 const logoIcons = document.querySelectorAll('.logo-icon');
                 logoIcons.forEach(icon => {
-                    if (!icon.querySelector('img')) {
-                        icon.textContent = 'R';
-                    }
+                    // Add default background class and remove custom class
+                    icon.classList.add('has-default');
+                    icon.classList.remove('has-custom');
+                    
+                    // Reset inline styles
+                    icon.style = '';
+                    
+                    // Clear and set default content
+                    icon.innerHTML = '';
+                    icon.textContent = 'R';
                 });
             }
         }
@@ -538,7 +553,7 @@
             }
         }
 
-        // Function to reset branding to defaults - FIXED VERSION
+        // Function to reset branding to defaults - ADAPTABLE VERSION
         function resetBranding() {
             if (confirm('Reset all branding to defaults? This will remove your custom settings.')) {
                 appState.branding = {
@@ -563,7 +578,7 @@
                 document.getElementById('brand-font').value = appState.branding.fontFamily;
                 document.getElementById('brand-welcome-message').value = appState.branding.welcomeMessage;
                 
-                // Reset logo upload area and restore file input - FIXED VERSION
+                // Reset logo upload area and restore file input
                 const uploadArea = document.querySelector('.file-upload-area');
                 if (uploadArea) {
                     uploadArea.innerHTML = `
@@ -572,6 +587,9 @@
                             <div style="font-size: 3rem; margin-bottom: 1rem;">📎</div>
                             <div><strong>Click to upload logo</strong></div>
                             <div style="color: var(--text-secondary); margin-top: 0.5rem;">PNG, JPG up to 2MB</div>
+                            <div style="color: var(--text-secondary); font-size: 0.75rem; margin-top: 0.5rem;">
+                                💡 Tip: Use a transparent PNG for best results
+                            </div>
                         </div>
                     `;
                     // Re-add the click event listener
@@ -580,9 +598,12 @@
                     };
                 }
 
-                // Reset logo icons to default "R"
+                // Reset logo icons to default "R" with colored background
                 const logoIcons = document.querySelectorAll('.logo-icon');
                 logoIcons.forEach(icon => {
+                    icon.classList.add('has-default');
+                    icon.classList.remove('has-custom');
+                    icon.style = '';
                     icon.innerHTML = '';
                     icon.textContent = 'R';
                 });
@@ -1055,13 +1076,23 @@
             const companyName = document.getElementById('brand-company-name').value || 'Realworld';
             const welcomeMessage = document.getElementById('brand-welcome-message').value || 'Welcome! Your feedback helps us improve and create a better workplace for everyone.';
             
+            let logoHtml = '';
+            if (appState.branding.logoUrl) {
+                logoHtml = `
+                    <div style="margin-bottom: 1rem;">
+                        <img src="${appState.branding.logoUrl}" alt="Logo" style="max-height: 60px; max-width: 200px;">
+                    </div>
+                `;
+            }
+            
             preview.innerHTML = `
+                ${logoHtml}
                 <div style="font-size: 2rem; font-weight: bold; color: var(--primary-color); margin-bottom: 1rem;">${companyName}</div>
                 <div style="color: var(--text-secondary);">${welcomeMessage}</div>
             `;
         }
 
-        // FIXED handleLogoUpload function
+        // ENHANCED handleLogoUpload function with aspect ratio and validation
         function handleLogoUpload(event) {
             const file = event.target.files[0];
             if (file) {
@@ -1079,30 +1110,41 @@
                 // Convert to base64 and store
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    appState.branding.logoUrl = e.target.result;
-                    
-                    // Apply the logo immediately
-                    applyBrandingToWebsite();
-                    
-                    // Save to localStorage
-                    saveBrandingToStorage();
-                    
-                    // Update the upload area to show preview
-                    const uploadArea = document.querySelector('.file-upload-area');
-                    if (uploadArea) {
-                        uploadArea.innerHTML = `
-                            <div style="display: flex; flex-direction: column; align-items: center;">
-                                <img src="${e.target.result}" alt="Logo Preview" style="max-width: 200px; max-height: 100px; margin-bottom: 1rem; border-radius: 8px;">
-                                <div><strong>Click to change logo</strong></div>
-                                <div style="color: var(--text-secondary); margin-top: 0.5rem;">Current: ${file.name}</div>
-                            </div>
-                        `;
-                    }
-                    
-                    // Update the preview section
-                    updateBrandingPreview();
-                    
-                    showToast(`Logo "${file.name}" uploaded successfully!`, 'success');
+                    const img = new Image();
+                    img.onload = function() {
+                        // Store original dimensions for aspect ratio
+                        appState.branding.logoUrl = e.target.result;
+                        appState.branding.logoAspectRatio = this.width / this.height;
+                        
+                        // Apply the logo immediately
+                        applyBrandingToWebsite();
+                        
+                        // Save to localStorage
+                        saveBrandingToStorage();
+                        
+                        // Update the upload area to show preview
+                        const uploadArea = document.querySelector('.file-upload-area');
+                        if (uploadArea) {
+                            uploadArea.innerHTML = `
+                                <div style="display: flex; flex-direction: column; align-items: center;">
+                                    <div style="background: white; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                                        <img src="${e.target.result}" alt="Logo Preview" style="max-width: 200px; max-height: 100px;">
+                                    </div>
+                                    <div><strong>Click to change logo</strong></div>
+                                    <div style="color: var(--text-secondary); margin-top: 0.5rem;">Current: ${file.name}</div>
+                                    <div style="color: var(--success-color); font-size: 0.875rem; margin-top: 0.5rem;">
+                                        ✓ Logo will display without background
+                                    </div>
+                                </div>
+                            `;
+                        }
+                        
+                        // Update the preview section
+                        updateBrandingPreview();
+                        
+                        showToast(`Logo "${file.name}" uploaded successfully!`, 'success');
+                    };
+                    img.src = e.target.result;
                 };
                 
                 reader.onerror = function() {
