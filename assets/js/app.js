@@ -406,7 +406,7 @@
 
         // BRANDING FUNCTIONALITY - NEW FUNCTIONS START HERE
         
-        // Function to apply branding changes to the website
+        // Function to apply branding changes to the website - FIXED VERSION
         function applyBrandingToWebsite() {
             const branding = appState.branding;
             
@@ -434,26 +434,49 @@
             if (branding.companyName) {
                 const logoElements = document.querySelectorAll('.logo');
                 logoElements.forEach(logo => {
+                    // Only update text, not the logo icon
                     const logoText = logo.querySelector('span') || logo.lastChild;
                     if (logoText && logoText.nodeType === Node.TEXT_NODE) {
                         logoText.textContent = branding.companyName;
-                    } else if (logoText) {
+                    } else if (logoText && logoText.tagName === 'SPAN') {
                         logoText.textContent = branding.companyName;
+                    } else if (!logo.querySelector('.logo-icon')) {
+                        // If there's no logo-icon, update the text content
+                        logo.childNodes.forEach(node => {
+                            if (node.nodeType === Node.TEXT_NODE) {
+                                node.textContent = branding.companyName;
+                            }
+                        });
                     }
                 });
                 
-                // Update login header logo
-                const loginLogo = document.querySelector('.login-header .logo span');
-                if (loginLogo) {
-                    loginLogo.textContent = branding.companyName;
+                // Update login header logo text separately
+                const loginLogoText = document.querySelector('.login-header .logo span');
+                if (loginLogoText) {
+                    loginLogoText.textContent = branding.companyName;
                 }
             }
             
-            // Apply logo if uploaded
+            // Apply logo if uploaded - FIXED VERSION
             if (branding.logoUrl) {
                 const logoIcons = document.querySelectorAll('.logo-icon');
                 logoIcons.forEach(icon => {
-                    icon.innerHTML = `<img src="${branding.logoUrl}" alt="Logo" style="width: 100%; height: 100%; object-fit: contain;">`;
+                    // Clear any existing content
+                    icon.innerHTML = '';
+                    // Create and add the image element
+                    const img = document.createElement('img');
+                    img.src = branding.logoUrl;
+                    img.alt = 'Logo';
+                    img.style.cssText = 'width: 100%; height: 100%; object-fit: contain; border-radius: 4px;';
+                    icon.appendChild(img);
+                });
+            } else {
+                // If no logo URL, restore the default "R" text
+                const logoIcons = document.querySelectorAll('.logo-icon');
+                logoIcons.forEach(icon => {
+                    if (!icon.querySelector('img')) {
+                        icon.textContent = 'R';
+                    }
                 });
             }
         }
@@ -515,7 +538,7 @@
             }
         }
 
-        // Function to reset branding to defaults
+        // Function to reset branding to defaults - FIXED VERSION
         function resetBranding() {
             if (confirm('Reset all branding to defaults? This will remove your custom settings.')) {
                 appState.branding = {
@@ -540,17 +563,29 @@
                 document.getElementById('brand-font').value = appState.branding.fontFamily;
                 document.getElementById('brand-welcome-message').value = appState.branding.welcomeMessage;
                 
-                // Reset logo upload area
+                // Reset logo upload area and restore file input - FIXED VERSION
                 const uploadArea = document.querySelector('.file-upload-area');
                 if (uploadArea) {
                     uploadArea.innerHTML = `
+                        <input type="file" id="logo-upload" accept="image/*" style="display: none;" onchange="handleLogoUpload(event)">
                         <div>
                             <div style="font-size: 3rem; margin-bottom: 1rem;">📎</div>
                             <div><strong>Click to upload logo</strong></div>
                             <div style="color: var(--text-secondary); margin-top: 0.5rem;">PNG, JPG up to 2MB</div>
                         </div>
                     `;
+                    // Re-add the click event listener
+                    uploadArea.onclick = function() {
+                        document.getElementById('logo-upload').click();
+                    };
                 }
+
+                // Reset logo icons to default "R"
+                const logoIcons = document.querySelectorAll('.logo-icon');
+                logoIcons.forEach(icon => {
+                    icon.innerHTML = '';
+                    icon.textContent = 'R';
+                });
                 
                 updateBrandingPreview();
                 showToast('Branding reset to defaults!', 'success');
@@ -1026,6 +1061,7 @@
             `;
         }
 
+        // FIXED handleLogoUpload function
         function handleLogoUpload(event) {
             const file = event.target.files[0];
             if (file) {
@@ -1034,26 +1070,45 @@
                     return;
                 }
                 
+                // Check if it's an image file
+                if (!file.type.startsWith('image/')) {
+                    showToast('Please upload an image file (PNG, JPG, etc.)', 'error');
+                    return;
+                }
+                
                 // Convert to base64 and store
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     appState.branding.logoUrl = e.target.result;
+                    
+                    // Apply the logo immediately
                     applyBrandingToWebsite();
+                    
+                    // Save to localStorage
                     saveBrandingToStorage();
-                    showToast(`Logo "${file.name}" uploaded successfully!`, 'success');
                     
                     // Update the upload area to show preview
                     const uploadArea = document.querySelector('.file-upload-area');
                     if (uploadArea) {
                         uploadArea.innerHTML = `
-                            <div>
-                                <img src="${e.target.result}" alt="Logo Preview" style="max-width: 200px; max-height: 100px; margin-bottom: 1rem;">
+                            <div style="display: flex; flex-direction: column; align-items: center;">
+                                <img src="${e.target.result}" alt="Logo Preview" style="max-width: 200px; max-height: 100px; margin-bottom: 1rem; border-radius: 8px;">
                                 <div><strong>Click to change logo</strong></div>
                                 <div style="color: var(--text-secondary); margin-top: 0.5rem;">Current: ${file.name}</div>
                             </div>
                         `;
                     }
+                    
+                    // Update the preview section
+                    updateBrandingPreview();
+                    
+                    showToast(`Logo "${file.name}" uploaded successfully!`, 'success');
                 };
+                
+                reader.onerror = function() {
+                    showToast('Error reading file. Please try again.', 'error');
+                };
+                
                 reader.readAsDataURL(file);
             }
         }
