@@ -1,4 +1,4 @@
- // Language functionality
+// Language functionality
         const translations = {
             en: {
                 'sign-in-title': 'Sign In to Your Account',
@@ -403,6 +403,161 @@
         };
 
         let currentUser = null;
+
+        // BRANDING FUNCTIONALITY - NEW FUNCTIONS START HERE
+        
+        // Function to apply branding changes to the website
+        function applyBrandingToWebsite() {
+            const branding = appState.branding;
+            
+            // Apply color changes
+            if (branding.primaryColor) {
+                document.documentElement.style.setProperty('--primary-color', branding.primaryColor);
+            }
+            if (branding.secondaryColor) {
+                document.documentElement.style.setProperty('--secondary-color', branding.secondaryColor);
+            }
+            
+            // Apply font family
+            if (branding.fontFamily) {
+                const fontMap = {
+                    'system': '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                    'inter': '"Inter", sans-serif',
+                    'roboto': '"Roboto", sans-serif',
+                    'open-sans': '"Open Sans", sans-serif',
+                    'lato': '"Lato", sans-serif'
+                };
+                document.body.style.fontFamily = fontMap[branding.fontFamily] || fontMap['system'];
+            }
+            
+            // Apply company name to logo areas
+            if (branding.companyName) {
+                const logoElements = document.querySelectorAll('.logo');
+                logoElements.forEach(logo => {
+                    const logoText = logo.querySelector('span') || logo.lastChild;
+                    if (logoText && logoText.nodeType === Node.TEXT_NODE) {
+                        logoText.textContent = branding.companyName;
+                    } else if (logoText) {
+                        logoText.textContent = branding.companyName;
+                    }
+                });
+                
+                // Update login header logo
+                const loginLogo = document.querySelector('.login-header .logo span');
+                if (loginLogo) {
+                    loginLogo.textContent = branding.companyName;
+                }
+            }
+            
+            // Apply logo if uploaded
+            if (branding.logoUrl) {
+                const logoIcons = document.querySelectorAll('.logo-icon');
+                logoIcons.forEach(icon => {
+                    icon.innerHTML = `<img src="${branding.logoUrl}" alt="Logo" style="width: 100%; height: 100%; object-fit: contain;">`;
+                });
+            }
+        }
+
+        // Function to save branding to localStorage
+        function saveBrandingToStorage() {
+            localStorage.setItem('realworldBranding', JSON.stringify(appState.branding));
+        }
+
+        // Function to load branding from localStorage
+        function loadBrandingFromStorage() {
+            const savedBranding = localStorage.getItem('realworldBranding');
+            if (savedBranding) {
+                try {
+                    appState.branding = { ...appState.branding, ...JSON.parse(savedBranding) };
+                    applyBrandingToWebsite();
+                } catch (e) {
+                    console.error('Error loading saved branding:', e);
+                }
+            }
+        }
+
+        // Function to sync color inputs
+        function initializeColorSync() {
+            // Primary color sync
+            const primaryColorPicker = document.getElementById('brand-primary-color');
+            const primaryColorText = primaryColorPicker?.nextElementSibling;
+            
+            if (primaryColorPicker && primaryColorText) {
+                primaryColorPicker.addEventListener('input', function() {
+                    primaryColorText.value = this.value;
+                    updateBrandingPreview();
+                });
+                
+                primaryColorText.addEventListener('input', function() {
+                    if (/^#[0-9A-F]{6}$/i.test(this.value)) {
+                        primaryColorPicker.value = this.value;
+                        updateBrandingPreview();
+                    }
+                });
+            }
+            
+            // Secondary color sync
+            const secondaryColorPicker = document.getElementById('brand-secondary-color');
+            const secondaryColorText = secondaryColorPicker?.nextElementSibling;
+            
+            if (secondaryColorPicker && secondaryColorText) {
+                secondaryColorPicker.addEventListener('input', function() {
+                    secondaryColorText.value = this.value;
+                    updateBrandingPreview();
+                });
+                
+                secondaryColorText.addEventListener('input', function() {
+                    if (/^#[0-9A-F]{6}$/i.test(this.value)) {
+                        secondaryColorPicker.value = this.value;
+                        updateBrandingPreview();
+                    }
+                });
+            }
+        }
+
+        // Function to reset branding to defaults
+        function resetBranding() {
+            if (confirm('Reset all branding to defaults? This will remove your custom settings.')) {
+                appState.branding = {
+                    primaryColor: '#2563eb',
+                    secondaryColor: '#64748b',
+                    companyName: 'Realworld',
+                    welcomeMessage: 'Welcome! Your feedback helps us improve and create a better workplace for everyone.',
+                    logoUrl: null,
+                    fontFamily: 'system'
+                };
+                
+                // Clear localStorage
+                localStorage.removeItem('realworldBranding');
+                
+                // Apply defaults
+                applyBrandingToWebsite();
+                
+                // Reset form inputs
+                document.getElementById('brand-company-name').value = appState.branding.companyName;
+                document.getElementById('brand-primary-color').value = appState.branding.primaryColor;
+                document.getElementById('brand-secondary-color').value = appState.branding.secondaryColor;
+                document.getElementById('brand-font').value = appState.branding.fontFamily;
+                document.getElementById('brand-welcome-message').value = appState.branding.welcomeMessage;
+                
+                // Reset logo upload area
+                const uploadArea = document.querySelector('.file-upload-area');
+                if (uploadArea) {
+                    uploadArea.innerHTML = `
+                        <div>
+                            <div style="font-size: 3rem; margin-bottom: 1rem;">📎</div>
+                            <div><strong>Click to upload logo</strong></div>
+                            <div style="color: var(--text-secondary); margin-top: 0.5rem;">PNG, JPG up to 2MB</div>
+                        </div>
+                    `;
+                }
+                
+                updateBrandingPreview();
+                showToast('Branding reset to defaults!', 'success');
+            }
+        }
+
+        // BRANDING FUNCTIONALITY - NEW FUNCTIONS END HERE
 
         // Login functionality
         function quickLogin(userType) {
@@ -835,19 +990,29 @@
             showToast('Opening email client: support@realworld.co.uk', 'info');
         }
 
-        // Branding Functions
+        // UPDATED Branding Functions
         function saveBranding() {
             const brandingData = {
                 companyName: document.getElementById('brand-company-name').value,
                 primaryColor: document.getElementById('brand-primary-color').value,
                 secondaryColor: document.getElementById('brand-secondary-color').value,
-                font: document.getElementById('brand-font').value,
-                welcomeMessage: document.getElementById('brand-welcome-message').value
+                fontFamily: document.getElementById('brand-font').value,
+                welcomeMessage: document.getElementById('brand-welcome-message').value,
+                logoUrl: appState.branding.logoUrl // Preserve existing logo
             };
             
             appState.branding = { ...appState.branding, ...brandingData };
+            
+            // Apply the changes immediately
+            applyBrandingToWebsite();
+            
+            // Save to localStorage
+            saveBrandingToStorage();
+            
+            // Update preview
             updateBrandingPreview();
-            showToast('Branding settings saved successfully!', 'success');
+            
+            showToast('Branding settings saved and applied successfully!', 'success');
         }
 
         function updateBrandingPreview() {
@@ -868,7 +1033,28 @@
                     showToast('File size must be less than 2MB', 'error');
                     return;
                 }
-                showToast(`Logo "${file.name}" uploaded successfully!`, 'success');
+                
+                // Convert to base64 and store
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    appState.branding.logoUrl = e.target.result;
+                    applyBrandingToWebsite();
+                    saveBrandingToStorage();
+                    showToast(`Logo "${file.name}" uploaded successfully!`, 'success');
+                    
+                    // Update the upload area to show preview
+                    const uploadArea = document.querySelector('.file-upload-area');
+                    if (uploadArea) {
+                        uploadArea.innerHTML = `
+                            <div>
+                                <img src="${e.target.result}" alt="Logo Preview" style="max-width: 200px; max-height: 100px; margin-bottom: 1rem;">
+                                <div><strong>Click to change logo</strong></div>
+                                <div style="color: var(--text-secondary); margin-top: 0.5rem;">Current: ${file.name}</div>
+                            </div>
+                        `;
+                    }
+                };
+                reader.readAsDataURL(file);
             }
         }
 
@@ -2125,6 +2311,8 @@ Would you recommend us?"></textarea>
         document.addEventListener('DOMContentLoaded', function() {
             showSection('dashboard');
             initializeBrandingListeners();
+            loadBrandingFromStorage();  // Load saved branding on page load
+            initializeColorSync();       // Initialize color input synchronization
             
             const demoAccounts = document.querySelectorAll('.demo-account');
             demoAccounts.forEach(account => {
