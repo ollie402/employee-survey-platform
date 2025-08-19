@@ -18,10 +18,8 @@ export default async function handler(req, res) {
   const SMTP2GO_SENDER_EMAIL = process.env.SMTP2GO_SENDER_EMAIL;
   const SMTP2GO_SENDER_NAME = process.env.SMTP2GO_SENDER_NAME || 'Realworld';
   
-  // Get the website URL (automatically provided by Vercel)
-  const APP_URL = process.env.VERCEL_URL 
-    ? `https://${process.env.VERCEL_URL}` 
-    : 'http://localhost:3000';
+  // FIX: Use your public website URL instead of VERCEL_URL
+  const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://www.rworldfeedback.com';
 
   // Create the email subject line
   const subject = `Welcome to ${organizationName} - Realworld Survey Platform`;
@@ -98,7 +96,7 @@ export default async function handler(req, res) {
           </div>
           
           <div style="text-align: center;">
-            <a href="${APP_URL}" class="button">Access Platform</a>
+            <a href="${APP_URL}/login" class="button">Access Platform</a>
           </div>
           
           <p>If you have any questions, please contact your administrator.</p>
