@@ -404,6 +404,139 @@ const users = {
 
 let currentUser = null;
 
+// ========================================
+// EMAIL INTEGRATION FUNCTIONS - NEW!
+// ========================================
+
+// General function to send any type of email
+async function sendEmail(emailData) {
+    try {
+        // Show loading message
+        console.log('Sending email...');
+        
+        // Send request to our API
+        const response = await fetch('/api/send-email', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(emailData),
+        });
+
+        // Get the response
+        const result = await response.json();
+        
+        // Check if it worked
+        if (response.ok) {
+            console.log('Email sent successfully!');
+            return { success: true, data: result };
+        } else {
+            console.error('Email failed:', result.error);
+            throw new Error(result.error || 'Failed to send email');
+        }
+    } catch (error) {
+        console.error('Email sending error:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+// Function to test if email is working
+async function testEmailSetup() {
+    // IMPORTANT: Replace this with your actual email address for testing!
+    const yourTestEmail = 'your-email@example.com'; // <-- CHANGE THIS TO YOUR EMAIL!
+    
+    const testData = {
+        to: yourTestEmail,
+        subject: 'Test Email from Realworld Platform',
+        htmlBody: `
+            <h2>🎉 Success! Your email system is working!</h2>
+            <p>This is a test email from your Realworld Survey Platform.</p>
+            <p>If you received this, your SMTP2GO integration is working correctly!</p>
+            <p>Timestamp: ${new Date().toLocaleString()}</p>
+            <hr>
+            <p style="color: #666; font-size: 12px;">
+                You can now send emails from your application!
+            </p>
+        `
+    };
+    
+    console.log('Sending test email to:', yourTestEmail);
+    const result = await sendEmail(testData);
+    
+    if (result.success) {
+        showToast('Test email sent! Check your inbox!', 'success');
+        console.log('✅ Email test successful!');
+    } else {
+        showToast('Test failed: ' + result.error, 'error');
+        console.error('❌ Email test failed:', result);
+    }
+}
+
+// Function to send report via email
+async function emailReport(reportData) {
+    const emailData = {
+        to: currentUser.email,
+        subject: `Your ${reportData.type} Report - ${new Date().toLocaleDateString()}`,
+        htmlBody: `
+            <h2>Your Report is Ready!</h2>
+            <p>Hi ${currentUser.name},</p>
+            <p>Your ${reportData.type} report has been generated successfully.</p>
+            <p><strong>Report Details:</strong></p>
+            <ul>
+                <li>Type: ${reportData.type}</li>
+                <li>Period: ${reportData.period}</li>
+                <li>Generated: ${new Date().toLocaleString()}</li>
+            </ul>
+            <p>The report is attached to this email.</p>
+            <p>Best regards,<br>Realworld Team</p>
+        `
+    };
+    
+    const result = await sendEmail(emailData);
+    
+    if (result.success) {
+        showToast('Report sent to your email!', 'success');
+    } else {
+        showToast('Failed to email report', 'error');
+    }
+}
+
+// Function to send chat widget link via email
+async function emailChatLink(chatSessionData) {
+    const emailData = {
+        to: currentUser.email,
+        subject: `Chat Widget Link - ${chatSessionData.name}`,
+        htmlBody: `
+            <h2>Your Chat Widget Link is Ready!</h2>
+            <p>Hi ${currentUser.name},</p>
+            <p>Your chat widget "${chatSessionData.name}" has been created successfully.</p>
+            <p><strong>Share this link with participants:</strong></p>
+            <p style="background: #f0f9ff; padding: 15px; border-radius: 5px; word-break: break-all;">
+                <a href="${chatSessionData.link}">${chatSessionData.link}</a>
+            </p>
+            <p><strong>Settings:</strong></p>
+            <ul>
+                <li>Expiry: ${chatSessionData.expiry}</li>
+                <li>Anonymous responses: ${chatSessionData.allowAnonymous ? 'Allowed' : 'Not allowed'}</li>
+                <li>Email required: ${chatSessionData.requireEmail ? 'Yes' : 'No'}</li>
+            </ul>
+            <p>Best regards,<br>Realworld Team</p>
+        `
+    };
+    
+    const result = await sendEmail(emailData);
+    
+    if (result.success) {
+        showToast('Chat link sent to your email!', 'success');
+    } else {
+        showToast('Failed to email chat link', 'error');
+    }
+}
+
+// ========================================
+// END EMAIL INTEGRATION FUNCTIONS
+// ========================================
+
 // BRANDING FUNCTIONALITY - NEW FUNCTIONS START HERE
 
 // Function to apply branding changes to the website - FULLY ADAPTABLE VERSION
@@ -1077,15 +1210,48 @@ function showForgotPassword() {
     modal.classList.remove('hidden');
 }
 
-function handleForgotPassword(event) {
+// UPDATED: Forgot password function with email integration
+async function handleForgotPassword(event) {
     event.preventDefault();
     
+    // Get the email from the form
     const email = event.target.querySelector('input[type="email"]').value;
+    const submitButton = event.target.querySelector('button[type="submit"]');
     
-    setTimeout(() => {
-        closeModal('forgot-password-modal');
-        showToast(`Password reset link sent to ${email}!`, 'success');
-    }, 1000);
+    // Show loading state
+    submitButton.disabled = true;
+    submitButton.textContent = 'Sending...';
+    
+    try {
+        console.log('Sending password reset to:', email);
+        
+        // Send the reset email
+        const response = await fetch('/api/send-reset-password', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email }),
+        });
+
+        const result = await response.json();
+        
+        if (response.ok) {
+            // Success!
+            closeModal('forgot-password-modal');
+            showToast(`✅ Password reset link sent to ${email}! Check your inbox.`, 'success');
+        } else {
+            // Failed
+            showToast(`❌ ${result.error || 'Failed to send reset email'}`, 'error');
+        }
+    } catch (error) {
+        console.error('Network error:', error);
+        showToast('❌ Network error. Please try again.', 'error');
+    } finally {
+        // Reset button state
+        submitButton.disabled = false;
+        submitButton.textContent = 'Send Reset Link';
+    }
 }
 
 // Help system functions
@@ -1666,7 +1832,7 @@ function createNewChatWidget() {
     document.body.appendChild(modal);
 }
 
-function generateChatLink(event) {
+async function generateChatLink(event) {
     event.preventDefault();
     
     // Get form values
@@ -1691,6 +1857,17 @@ function generateChatLink(event) {
     
     // Generate the link (assuming the chat page will be at chat.html)
     const chatLink = window.location.origin + '/chat.html?' + params.toString();
+    
+    // Store session data for email
+    const chatSessionData = {
+        id: sessionId,
+        name: sessionName,
+        welcomeMsg: welcomeMsg,
+        expiry: expiry,
+        allowAnonymous: allowAnonymous,
+        requireEmail: requireEmail,
+        link: chatLink
+    };
     
     // Close current modal
     event.target.closest('.modal').remove();
@@ -1730,8 +1907,8 @@ function generateChatLink(event) {
                     <button class="btn btn-secondary" onclick="testChatLink('${chatLink}')">
                         <span>🧪</span> Test Link
                     </button>
-                    <button class="btn btn-success" onclick="shareChatLink('${encodeURIComponent(chatLink)}', '${encodeURIComponent(sessionName)}')">
-                        <span>📧</span> Email Link
+                    <button class="btn btn-success" id="email-chat-link-btn">
+                        <span>📧</span> Email Link to Me
                     </button>
                 </div>
                 
@@ -1749,20 +1926,14 @@ function generateChatLink(event) {
     `;
     document.body.appendChild(linkModal);
     
+    // Add email functionality to the button
+    document.getElementById('email-chat-link-btn').onclick = () => emailChatLink(chatSessionData);
+    
     // Store the session data (in real app, this would go to a database)
     if (!window.chatSessions) {
         window.chatSessions = [];
     }
-    window.chatSessions.push({
-        id: sessionId,
-        name: sessionName,
-        welcomeMsg: welcomeMsg,
-        expiry: expiry,
-        allowAnonymous: allowAnonymous,
-        requireEmail: requireEmail,
-        createdAt: new Date().toISOString(),
-        link: chatLink
-    });
+    window.chatSessions.push(chatSessionData);
     
     showToast('Chat link generated successfully!', 'success');
 }
@@ -2137,8 +2308,32 @@ function showUserDetails(userName) {
     document.body.appendChild(modal);
 }
 
-// Create/Edit functions with working forms
+// UPDATED: Create/Edit functions with working forms and EMAIL INTEGRATION
 function showCreateUserModal() {
+    // Get organizations from localStorage or appState
+    const organizations = JSON.parse(localStorage.getItem('organizations') || '[]');
+    
+    // If no organizations in localStorage, use the default ones
+    const defaultOrgs = ['TechCorp Ltd', 'Global Industries', 'StartupX'];
+    
+    // Build organization options HTML
+    let orgOptionsHTML = '<option value="">Select Organization</option>';
+    
+    // Add stored organizations first
+    if (organizations.length > 0) {
+        organizations.forEach(org => {
+            orgOptionsHTML += `<option value="${org.name}">${org.name}</option>`;
+        });
+    }
+    
+    // Add default organizations if they're not already in the stored list
+    defaultOrgs.forEach(orgName => {
+        const exists = organizations.some(org => org.name === orgName);
+        if (!exists) {
+            orgOptionsHTML += `<option value="${orgName}">${orgName}</option>`;
+        }
+    });
+    
     const modal = document.createElement('div');
     modal.className = 'modal';
     modal.innerHTML = `
@@ -2166,10 +2361,7 @@ function showCreateUserModal() {
                     <div class="form-group">
                         <label class="form-label">Organization</label>
                         <select name="organization" class="form-select" required>
-                            <option value="">Select Organization</option>
-                            <option value="TechCorp Ltd">TechCorp Ltd</option>
-                            <option value="Global Industries">Global Industries</option>
-                            <option value="StartupX">StartupX</option>
+                            ${orgOptionsHTML}
                         </select>
                     </div>
                     <div class="form-group">
@@ -2198,8 +2390,11 @@ function showCreateUserModal() {
     document.body.appendChild(modal);
 }
 
-function createUser(event) {
+// UPDATED: Create User function with email integration
+async function createUser(event) {
     event.preventDefault();
+    
+    // Get the form data
     const formData = new FormData(event.target);
     const userData = {
         name: `${formData.get('firstName')} ${formData.get('lastName')}`,
@@ -2209,7 +2404,7 @@ function createUser(event) {
         sendInvite: formData.get('sendInvite') === 'on'
     };
     
-    // Add to users table
+    // Add to users table (your existing code)
     const table = document.querySelector('#users-table tbody');
     const newRow = document.createElement('tr');
     newRow.innerHTML = `
@@ -2229,8 +2424,39 @@ function createUser(event) {
     newRow.onclick = () => showUserDetails(userData.name);
     table.appendChild(newRow);
     
+    // NEW: Send invitation email if checkbox was checked
+    if (userData.sendInvite) {
+        try {
+            console.log('Sending invitation email to:', userData.email);
+            
+            const emailResponse = await fetch('/api/send-invitation', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    userEmail: userData.email,
+                    userName: userData.name,
+                    organizationName: userData.organization,
+                    temporaryPassword: 'Welcome123!' // In real app, generate random password
+                }),
+            });
+
+            if (emailResponse.ok) {
+                showToast(`✅ User created and invitation email sent to ${userData.email}!`, 'success');
+            } else {
+                showToast(`⚠️ User created but email failed. Use "Resend Invite" button.`, 'warning');
+            }
+        } catch (error) {
+            console.error('Failed to send invitation:', error);
+            showToast(`⚠️ User created but email failed. Use "Resend Invite" button.`, 'warning');
+        }
+    } else {
+        showToast(`✅ User "${userData.name}" created successfully!`, 'success');
+    }
+    
+    // Close the modal
     event.target.closest('.modal').remove();
-    showToast(`User "${userData.name}" created successfully!${userData.sendInvite ? ' Invitation email sent.' : ''}`, 'success');
 }
 
 // Edit/Delete/Suspend functions with real implementations
@@ -2437,9 +2663,58 @@ function handleRemoveUser(userName) {
     }
 }
 
-function handleResendInvite(userName) {
-    if (confirm(`Resend invitation email to "${userName}"?`)) {
-        showToast(`Invitation email sent to ${userName}!`, 'success');
+// UPDATED: Resend invite function with email integration
+async function handleResendInvite(userName) {
+    // Ask for confirmation
+    if (!confirm(`Resend invitation email to "${userName}"?`)) {
+        return;
+    }
+    
+    // Find the user's email from the table
+    const table = document.querySelector('#users-table tbody');
+    const rows = table.querySelectorAll('tr');
+    let userEmail = '';
+    let organization = '';
+    
+    // Loop through table rows to find the user
+    rows.forEach(row => {
+        if (row.cells[1].textContent === userName) {
+            userEmail = row.cells[2].textContent;
+            organization = row.cells[3].textContent;
+        }
+    });
+    
+    // Check if we found the email
+    if (!userEmail) {
+        showToast('❌ User email not found', 'error');
+        return;
+    }
+    
+    try {
+        console.log('Resending invitation to:', userEmail);
+        
+        // Send the invitation
+        const response = await fetch('/api/send-invitation', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                userEmail: userEmail,
+                userName: userName,
+                organizationName: organization,
+                temporaryPassword: 'Welcome123!' // Generate new password
+            }),
+        });
+
+        if (response.ok) {
+            showToast(`✅ Invitation email resent to ${userName}!`, 'success');
+        } else {
+            showToast('❌ Failed to resend invitation', 'error');
+        }
+    } catch (error) {
+        console.error('Network error:', error);
+        showToast('❌ Network error. Please try again.', 'error');
     }
 }
 
@@ -2496,6 +2771,7 @@ function bulkExport(type) {
 
 function bulkDelete(type) {
     const count = document.querySelectorAll(`#${type}-table tbody input[type="checkbox"]:checked`).length;
+    // Continuing from bulkDelete...
     if (confirm(`Permanently delete ${count} selected ${type}? This cannot be undone.`)) {
         document.querySelector('.modal').remove();
         showToast(`${count} ${type} deleted successfully!`, 'success');
@@ -2694,23 +2970,490 @@ function generateNewReport() {
     document.body.appendChild(modal);
 }
 
-function processReport(event) {
+async function processReport(event) {
     event.preventDefault();
     const formData = new FormData(event.target);
     const reportType = formData.get('reportType');
     const format = formData.get('format');
+    const dateRange = formData.get('dateRange');
     
     event.target.closest('.modal').remove();
     showToast(`Generating ${reportType} report in ${format} format... You'll be notified when ready for download.`, 'info');
     
     // Simulate report generation
-    setTimeout(() => {
+    setTimeout(async () => {
         showToast(`Report generated successfully! Download link sent to your email.`, 'success');
+        
+        // NEW: Send email with report
+        if (currentUser && currentUser.email) {
+            await emailReport({
+                type: reportType,
+                period: `Last ${dateRange} days`,
+                format: format
+            });
+        }
     }, 3000);
 }
 
 function handleSocialLogin(provider) {
     showToast(`Redirecting to ${provider} login... (Demo mode - feature not implemented in prototype)`, 'info');
+}
+
+// ENHANCED CHAT FEEDBACK FUNCTIONS
+
+// Switch between different view modes
+function switchFeedbackView(viewType) {
+    // Hide all views
+    document.getElementById('feedback-table-view').style.display = 'none';
+    document.getElementById('feedback-cards-view').style.display = 'none';
+    
+    // Show selected view
+    if (viewType === 'table') {
+        document.getElementById('feedback-table-view').style.display = 'block';
+    } else if (viewType === 'cards') {
+        document.getElementById('feedback-cards-view').style.display = 'block';
+    } else if (viewType === 'timeline') {
+        // Timeline view would be implemented here
+        showToast('Timeline view coming soon!', 'info');
+        document.getElementById('feedback-table-view').style.display = 'block';
+    }
+    
+    // Update button states
+    const buttons = document.querySelectorAll('.view-toggle button');
+    buttons.forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+}
+
+// Filter feedback based on various criteria
+function filterFeedback(filterType, value) {
+    showToast(`Filtering by ${filterType}: ${value}`, 'info');
+    // Implementation would filter the table/cards based on the criteria
+}
+
+// Update sentiment view based on time period
+function updateSentimentView(period) {
+    showToast(`Updating sentiment analysis for: ${period}`, 'info');
+    // Would update the sentiment percentages based on selected period
+}
+
+// Select all feedback items
+function selectAllFeedback() {
+    const checkboxes = document.querySelectorAll('#feedback-table-view tbody input[type="checkbox"]');
+    const selectAllCheckbox = document.getElementById('select-all-feedback');
+    checkboxes.forEach(cb => cb.checked = selectAllCheckbox.checked);
+}
+
+// Bulk actions
+function markAsReviewed() {
+    const selected = document.querySelectorAll('#feedback-table-view tbody input[type="checkbox"]:checked');
+    if (selected.length === 0) {
+        showToast('Please select feedback items first', 'warning');
+        return;
+    }
+    showToast(`Marked ${selected.length} items as reviewed`, 'success');
+}
+
+function markAsResolved() {
+    const selected = document.querySelectorAll('#feedback-table-view tbody input[type="checkbox"]:checked');
+    if (selected.length === 0) {
+        showToast('Please select feedback items first', 'warning');
+        return;
+    }
+    showToast(`Marked ${selected.length} items as resolved`, 'success');
+}
+
+function assignToTeam() {
+    const selected = document.querySelectorAll('#feedback-table-view tbody input[type="checkbox"]:checked');
+    if (selected.length === 0) {
+        showToast('Please select feedback items first', 'warning');
+        return;
+    }
+    showToast(`Opening team assignment for ${selected.length} items...`, 'info');
+}
+
+function addTags() {
+    const selected = document.querySelectorAll('#feedback-table-view tbody input[type="checkbox"]:checked');
+    if (selected.length === 0) {
+        showToast('Please select feedback items first', 'warning');
+        return;
+    }
+    showToast(`Opening tag manager for ${selected.length} items...`, 'info');
+}
+
+function exportSelectedFeedback() {
+    const selected = document.querySelectorAll('#feedback-table-view tbody input[type="checkbox"]:checked');
+    if (selected.length === 0) {
+        showToast('Please select feedback items to export', 'warning');
+        return;
+    }
+    showToast(`Exporting ${selected.length} feedback items...`, 'success');
+}
+
+function archiveSelected() {
+    const selected = document.querySelectorAll('#feedback-table-view tbody input[type="checkbox"]:checked');
+    if (selected.length === 0) {
+        showToast('Please select feedback items first', 'warning');
+        return;
+    }
+    if (confirm(`Archive ${selected.length} selected items?`)) {
+        showToast(`${selected.length} items archived`, 'success');
+    }
+}
+
+// Individual feedback actions
+function viewFeedbackDetails(id) {
+    showToast(`Opening details for feedback #${id}...`, 'info');
+    // Would open a modal with full feedback details
+}
+
+function replyToFeedback(id) {
+    showToast(`Opening reply composer for feedback #${id}...`, 'info');
+    // Would open a reply modal
+}
+
+function assignFeedback(id) {
+    showToast(`Opening assignment options for feedback #${id}...`, 'info');
+    // Would show team member assignment options
+}
+
+function archiveFeedback(id) {
+    if (confirm('Archive this feedback item?')) {
+        showToast(`Feedback #${id} archived`, 'success');
+    }
+}
+
+function escalateFeedback(id) {
+    if (confirm('Escalate this feedback to management?')) {
+        showToast(`Feedback #${id} escalated to management`, 'warning');
+    }
+}
+
+// Settings and report generation
+function showFeedbackSettings() {
+    showToast('Opening feedback settings...', 'info');
+    // Would open a settings modal
+}
+
+function generateFeedbackReport() {
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Generate Feedback Report</h3>
+                <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
+            </div>
+            <form onsubmit="processFeedbackReport(event)">
+                <div class="form-group">
+                    <label class="form-label">Report Type</label>
+                    <select class="form-select" required>
+                        <option value="">Select Report Type</option>
+                        <option value="sentiment">Sentiment Analysis Report</option>
+                        <option value="trends">Feedback Trends Report</option>
+                        <option value="keywords">Keyword Analysis Report</option>
+                        <option value="comprehensive">Comprehensive Report</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Time Period</label>
+                    <select class="form-select">
+                        <option value="week">Last Week</option>
+                        <option value="month" selected>Last Month</option>
+                        <option value="quarter">Last Quarter</option>
+                        <option value="year">Last Year</option>
+                        <option value="custom">Custom Range</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Include Sections</label>
+                    <div style="display: grid; gap: 0.5rem;">
+                        <label class="checkbox-label">
+                            <input type="checkbox" checked> Executive Summary
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" checked> Sentiment Analysis
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" checked> Top Keywords & Topics
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" checked> Response Trends
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox"> Individual Feedback Items
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" checked> Recommendations
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Format</label>
+                    <select class="form-select">
+                        <option value="pdf">PDF Document</option>
+                        <option value="excel">Excel Spreadsheet</option>
+                        <option value="powerpoint">PowerPoint Presentation</option>
+                        <option value="word">Word Document</option>
+                    </select>
+                </div>
+                <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
+                    <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').remove()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Generate Report</button>
+                </div>
+            </form>
+        </div>
+    `;
+    document.body.appendChild(modal);
+}
+
+function processFeedbackReport(event) {
+    event.preventDefault();
+    event.target.closest('.modal').remove();
+    showToast('Generating feedback report... This may take a few moments.', 'info');
+    setTimeout(() => {
+        showToast('Report generated successfully! Download link sent to your email.', 'success');
+    }, 3000);
+}
+
+function viewAllTopics() {
+    showToast('Opening complete topics analysis...', 'info');
+    // Would show a detailed topics/keywords analysis modal
+}
+// UPDATED: Create User function with better error handling
+async function createUser(event) {
+    event.preventDefault();
+    
+    const formData = new FormData(event.target);
+    const userData = {
+        name: `${formData.get('firstName')} ${formData.get('lastName')}`,
+        email: formData.get('email'),
+        organization: formData.get('organization'),
+        access: formData.get('access'),
+        sendInvite: formData.get('sendInvite') === 'on'
+    };
+    
+    // Check if it's a demo/test email
+    const isDemoEmail = userData.email.includes('@techcorp.com') || 
+                        userData.email.includes('@startupx.com') || 
+                        userData.email.includes('@global.com');
+    
+    // Add to users table
+    const table = document.querySelector('#users-table tbody');
+    const newRow = document.createElement('tr');
+    newRow.innerHTML = `
+        <td><input type="checkbox"></td>
+        <td>${userData.name}</td>
+        <td>${userData.email}</td>
+        <td>${userData.organization}</td>
+        <td><span class="tag tag-pending">${userData.access}</span></td>
+        <td><span class="tag tag-pending">Pending</span></td>
+        <td>Never</td>
+        <td>
+            <button class="btn btn-secondary btn-sm" onclick="handleEditUser('${userData.name}')">Edit</button>
+            <button class="btn btn-primary btn-sm" onclick="handleResendInvite('${userData.name}')">Resend Invite</button>
+            <button class="btn btn-danger btn-sm" onclick="handleRemoveUser('${userData.name}')">Remove</button>
+        </td>
+    `;
+    newRow.onclick = () => showUserDetails(userData.name);
+    table.appendChild(newRow);
+    
+    // Send invitation email if checkbox was checked
+    if (userData.sendInvite) {
+        try {
+            // Show loading state
+            const submitBtn = event.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Creating user and sending invite...';
+            
+            const response = await fetch('/api/send-invitation', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    userEmail: userData.email,
+                    userName: userData.name,
+                    organizationName: userData.organization,
+                    temporaryPassword: 'Welcome123!' + Math.random().toString(36).substring(2, 5)
+                }),
+            });
+
+            const result = await response.json();
+            
+            if (response.ok) {
+                if (result.demo) {
+                    showToast(`✅ User created! (Demo mode - no email sent to ${userData.email})`, 'info');
+                } else {
+                    showToast(`✅ User created and invitation sent to ${userData.email}!`, 'success');
+                }
+            } else {
+                // User created but email failed
+                if (isDemoEmail) {
+                    showToast(`✅ User created! (Demo email - no actual email sent)`, 'info');
+                } else {
+                    showToast(`⚠️ User created but email failed: ${result.error || 'Unknown error'}`, 'warning');
+                    console.error('Email error:', result);
+                }
+            }
+            
+            // Reset button
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
+            
+        } catch (error) {
+            console.error('Failed to send invitation:', error);
+            if (isDemoEmail) {
+                showToast(`✅ User created! (Demo mode active)`, 'info');
+            } else {
+                showToast(`⚠️ User created but email service unavailable`, 'warning');
+            }
+        }
+    } else {
+        showToast(`✅ User "${userData.name}" created successfully!`, 'success');
+    }
+    
+    // Close the modal
+    event.target.closest('.modal').remove();
+}
+
+// UPDATED: Test email function with better error handling
+async function testEmailSetup() {
+    // Prompt user for their real email
+    const yourTestEmail = prompt('Enter YOUR email address to receive a test email:', 'your-email@example.com');
+    
+    if (!yourTestEmail || yourTestEmail === 'your-email@example.com') {
+        showToast('Please enter a valid email address', 'warning');
+        return;
+    }
+    
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(yourTestEmail)) {
+        showToast('Invalid email format', 'error');
+        return;
+    }
+    
+    const testData = {
+        userEmail: yourTestEmail,
+        userName: 'Test User',
+        organizationName: 'Test Organization',
+        temporaryPassword: 'TestPassword123!'
+    };
+    
+    try {
+        console.log('Sending test email to:', yourTestEmail);
+        showToast('Sending test email...', 'info');
+        
+        const response = await fetch('/api/send-invitation', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(testData),
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+            if (result.demo) {
+                showToast('Demo mode detected - email not actually sent', 'info');
+            } else {
+                showToast(`✅ Test email sent to ${yourTestEmail}! Check your inbox!`, 'success');
+            }
+        } else {
+            showToast(`❌ Test failed: ${result.error || 'Unknown error'}`, 'error');
+            console.error('Email test failed:', result);
+        }
+    } catch (error) {
+        console.error('Network error:', error);
+        showToast('❌ Network error. Check console for details.', 'error');
+    }
+}
+
+// Export chat data with enhanced options
+function exportChatData() {
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Export Chat Feedback Data</h3>
+                <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
+            </div>
+            <form onsubmit="processExportChatData(event)">
+                <div class="form-group">
+                    <label class="form-label">Export Format</label>
+                    <select class="form-select" required>
+                        <option value="csv">CSV (Comma Separated)</option>
+                        <option value="excel">Excel (XLSX)</option>
+                        <option value="json">JSON</option>
+                        <option value="pdf">PDF Report</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Date Range</label>
+                    <select class="form-select">
+                        <option value="all">All Time</option>
+                        <option value="today">Today</option>
+                        <option value="week">This Week</option>
+                        <option value="month">This Month</option>
+                        <option value="custom">Custom Range</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Include Fields</label>
+                    <div style="display: grid; gap: 0.5rem;">
+                        <label class="checkbox-label">
+                            <input type="checkbox" checked> Date & Time
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" checked> User Information
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" checked> Feedback Message
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" checked> Rating
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" checked> Sentiment Score
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" checked> Category/Tags
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" checked> Status
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox"> Team Responses
+                        </label>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
+                    <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').remove()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Export Data</button>
+                </div>
+            </form>
+        </div>
+    `;
+    document.body.appendChild(modal);
+}
+
+function processExportChatData(event) {
+    event.preventDefault();
+    const formData = new FormData(event.target);
+    event.target.closest('.modal').remove();
+    showToast('Preparing export... Download will start automatically.', 'info');
+    
+    // Simulate download
+    setTimeout(() => {
+        const link = document.createElement('a');
+        link.download = `chat_feedback_export_${new Date().toISOString().split('T')[0]}.csv`;
+        link.href = 'data:text/csv;charset=utf-8,Date,User,Message,Rating,Sentiment,Status%0A2024-12-15,Anonymous,Great%20service,5,Positive,Reviewed';
+        link.click();
+        showToast('Export completed successfully!', 'success');
+    }, 2000);
 }
 
 // Initialize the application
@@ -2731,6 +3474,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     console.log('Realworld Employee Survey Platform loaded successfully!');
+    console.log('Email integration ready. Test with: testEmailSetup()');
 });
 
 // Close dropdowns when clicking outside
@@ -2750,618 +3494,5 @@ window.addEventListener('resize', function() {
         sidebar.classList.add('collapsed');
     }
 });
-// ============================================
-// ENHANCED FEATURES - COMPLETE ADDITION BLOCK
-// Add this entire block to the END of your JavaScript file
-// No removal or changes to existing code needed!
-// ============================================
 
-// ===== 1. PASSWORD STRENGTH CHECKER =====
-function checkPasswordStrength(password) {
-    let strength = 0;
-    const indicators = {
-        length: password.length >= 8,
-        uppercase: /[A-Z]/.test(password),
-        lowercase: /[a-z]/.test(password),
-        numbers: /[0-9]/.test(password),
-        special: /[!@#$%^&*(),.?":{}|<>]/.test(password)
-    };
-    
-    Object.values(indicators).forEach(passed => {
-        if (passed) strength++;
-    });
-    
-    return {
-        score: strength,
-        indicators: indicators,
-        label: strength <= 2 ? 'Weak' : strength === 3 ? 'Medium' : strength === 4 ? 'Good' : 'Strong',
-        color: strength <= 2 ? '#ef4444' : strength === 3 ? '#f59e0b' : strength === 4 ? '#10b981' : '#059669'
-    };
-}
-
-function initializePasswordStrength() {
-    const passwordInput = document.getElementById('password');
-    const newPasswordInput = document.getElementById('new-password');
-    
-    [passwordInput, newPasswordInput].forEach(input => {
-        if (input) {
-            const container = input.parentElement;
-            
-            if (!container.querySelector('#password-strength-indicator')) {
-                const strengthDiv = document.createElement('div');
-                strengthDiv.id = 'password-strength-indicator';
-                strengthDiv.style.cssText = 'margin-top: 0.5rem; display: none;';
-                container.appendChild(strengthDiv);
-                
-                input.addEventListener('input', function() {
-                    const strength = checkPasswordStrength(this.value);
-                    
-                    if (this.value.length > 0) {
-                        strengthDiv.style.display = 'block';
-                        strengthDiv.innerHTML = `
-                            <div style="display: flex; gap: 0.25rem; margin-bottom: 0.25rem;">
-                                ${[1,2,3,4,5].map(i => `
-                                    <div style="flex: 1; height: 4px; background: ${i <= strength.score ? strength.color : '#e5e7eb'}; border-radius: 2px; transition: all 0.3s;"></div>
-                                `).join('')}
-                            </div>
-                            <div style="font-size: 0.75rem; color: ${strength.color}; font-weight: 500;">${strength.label} Password</div>
-                        `;
-                    } else {
-                        strengthDiv.style.display = 'none';
-                    }
-                });
-            }
-        }
-    });
-}
-
-// ===== 2. SECURITY UTILITIES =====
-function sanitizeInput(input) {
-    if (typeof input !== 'string') return input;
-    const div = document.createElement('div');
-    div.textContent = input;
-    return div.innerHTML;
-}
-
-function sanitizeHTML(html) {
-    const allowedTags = ['b', 'i', 'em', 'strong', 'span', 'br'];
-    const temp = document.createElement('div');
-    temp.innerHTML = html;
-    
-    temp.querySelectorAll('script').forEach(el => el.remove());
-    temp.querySelectorAll('*').forEach(el => {
-        Array.from(el.attributes).forEach(attr => {
-            if (attr.name.startsWith('on')) {
-                el.removeAttribute(attr.name);
-            }
-        });
-        
-        if (!allowedTags.includes(el.tagName.toLowerCase())) {
-            el.replaceWith(...el.childNodes);
-        }
-    });
-    
-    return temp.innerHTML;
-}
-
-function secureFormData(formData) {
-    const secured = {};
-    for (let [key, value] of formData.entries()) {
-        secured[key] = sanitizeInput(value);
-    }
-    return secured;
-}
-
-// Enhanced showToast with sanitization
-const originalShowToast = window.showToast;
-if (originalShowToast) {
-    window.showToast = function(message, type = 'info') {
-        originalShowToast(sanitizeHTML(message), type);
-    };
-}
-
-// ===== 3. LOADING OVERLAY UTILITIES =====
-function showLoadingOverlay(message = 'Loading...') {
-    hideLoadingOverlay();
-    
-    const overlay = document.createElement('div');
-    overlay.id = 'loading-overlay';
-    overlay.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0, 0, 0, 0.5);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 9999;
-        backdrop-filter: blur(4px);
-        animation: fadeIn 0.3s ease-out;
-    `;
-    overlay.innerHTML = `
-        <div style="background: white; padding: 2rem; border-radius: 12px; text-align: center; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);">
-            <div style="width: 50px; height: 50px; border: 4px solid #e2e8f0; border-top-color: var(--primary-color); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1rem;"></div>
-            <div style="font-weight: 500; color: var(--text-primary);">${sanitizeHTML(message)}</div>
-        </div>
-    `;
-    document.body.appendChild(overlay);
-}
-
-function hideLoadingOverlay() {
-    const overlay = document.getElementById('loading-overlay');
-    if (overlay) {
-        overlay.style.opacity = '0';
-        overlay.style.transition = 'opacity 0.3s ease';
-        setTimeout(() => overlay.remove(), 300);
-    }
-}
-
-function setButtonLoading(button, loading = true, loadingText = 'Processing...') {
-    if (!button) return;
-    
-    if (loading) {
-        button.dataset.originalText = button.textContent;
-        button.dataset.originalDisabled = button.disabled;
-        button.classList.add('loading');
-        button.disabled = true;
-        button.style.position = 'relative';
-        button.innerHTML = `<span style="opacity: 0;">${button.textContent}</span><span style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">${loadingText}</span>`;
-    } else {
-        button.classList.remove('loading');
-        button.disabled = button.dataset.originalDisabled === 'true';
-        if (button.dataset.originalText) {
-            button.textContent = button.dataset.originalText;
-            delete button.dataset.originalText;
-            delete button.dataset.originalDisabled;
-        }
-    }
-}
-
-// ===== 4. AUTO-SAVE FUNCTIONALITY =====
-const autoSaveConfig = {
-    interval: 30000,
-    forms: new Map()
-};
-
-function initializeAutoSave(formId) {
-    const form = document.getElementById(formId) || document.querySelector(`[data-autosave="${formId}"]`);
-    if (!form) return;
-    
-    const saveKey = `autosave_${formId}_${window.currentUser?.email || 'guest'}`;
-    
-    const savedData = localStorage.getItem(saveKey);
-    if (savedData) {
-        try {
-            const data = JSON.parse(savedData);
-            const shouldRestore = confirm('Found unsaved data. Would you like to restore it?');
-            
-            if (shouldRestore) {
-                Object.entries(data).forEach(([name, value]) => {
-                    const field = form.elements[name];
-                    if (field) {
-                        if (field.type === 'checkbox') {
-                            field.checked = value === 'on';
-                        } else {
-                            field.value = value;
-                        }
-                    }
-                });
-                if (window.showToast) window.showToast('Draft restored from auto-save', 'info');
-            } else {
-                localStorage.removeItem(saveKey);
-            }
-        } catch (e) {
-            console.error('Failed to restore auto-save:', e);
-        }
-    }
-    
-    const saveForm = () => {
-        if (!form.closest('body')) {
-            clearInterval(saveInterval);
-            return;
-        }
-        
-        const formData = new FormData(form);
-        const data = {};
-        for (let [key, value] of formData.entries()) {
-            data[key] = value;
-        }
-        
-        localStorage.setItem(saveKey, JSON.stringify(data));
-        
-        const existingIndicator = document.getElementById('autosave-indicator');
-        if (existingIndicator) existingIndicator.remove();
-        
-        const indicator = document.createElement('div');
-        indicator.id = 'autosave-indicator';
-        indicator.style.cssText = `
-            position: fixed; bottom: 20px; left: 20px;
-            background: var(--success-color); color: white;
-            padding: 0.5rem 1rem; border-radius: 4px;
-            font-size: 0.75rem; opacity: 0; transition: opacity 0.3s;
-            z-index: 1000;
-        `;
-        indicator.textContent = '✓ Draft saved';
-        document.body.appendChild(indicator);
-        setTimeout(() => indicator.style.opacity = '1', 10);
-        setTimeout(() => {
-            indicator.style.opacity = '0';
-            setTimeout(() => indicator.remove(), 300);
-        }, 2000);
-    };
-    
-    let saveTimeout;
-    form.addEventListener('input', () => {
-        clearTimeout(saveTimeout);
-        saveTimeout = setTimeout(saveForm, 5000);
-    });
-    
-    const saveInterval = setInterval(saveForm, autoSaveConfig.interval);
-    autoSaveConfig.forms.set(formId, saveInterval);
-    
-    form.addEventListener('submit', () => {
-        localStorage.removeItem(saveKey);
-        clearInterval(saveInterval);
-        autoSaveConfig.forms.delete(formId);
-    });
-}
-
-function clearAutoSave(formId) {
-    const saveKey = `autosave_${formId}_${window.currentUser?.email || 'guest'}`;
-    localStorage.removeItem(saveKey);
-    const interval = autoSaveConfig.forms.get(formId);
-    if (interval) {
-        clearInterval(interval);
-        autoSaveConfig.forms.delete(formId);
-    }
-}
-
-// ===== 5. KEYBOARD SHORTCUTS =====
-const shortcuts = {
-    'ctrl+s': (e) => { 
-        e.preventDefault();
-        const form = document.querySelector('.modal form');
-        if (form) {
-            const submitBtn = form.querySelector('[type="submit"]');
-            if (submitBtn) submitBtn.click();
-        }
-    },
-    'ctrl+/': (e) => { 
-        e.preventDefault(); 
-        showShortcutsHelp(); 
-    },
-    'ctrl+k': (e) => { 
-        e.preventDefault(); 
-        showQuickSearch(); 
-    },
-    'escape': (e) => { 
-        const modal = document.querySelector('.modal:not(#quick-search-modal)');
-        if (modal && !e.target.closest('input, textarea')) {
-            e.preventDefault();
-            modal.remove();
-        }
-    },
-    'alt+d': (e) => { 
-        e.preventDefault(); 
-        if (window.currentUser && window.showSection) window.showSection('dashboard'); 
-    },
-    'alt+o': (e) => { 
-        e.preventDefault(); 
-        if (window.currentUser && window.showSection) window.showSection('organizations'); 
-    },
-    'alt+u': (e) => { 
-        e.preventDefault(); 
-        if (window.currentUser && window.showSection) window.showSection('users'); 
-    },
-    'alt+h': (e) => { 
-        e.preventDefault(); 
-        if (window.currentUser && window.showHelp) window.showHelp(); 
-    }
-};
-
-function initializeKeyboardShortcuts() {
-    document.addEventListener('keydown', (e) => {
-        const key = `${e.ctrlKey ? 'ctrl+' : ''}${e.altKey ? 'alt+' : ''}${e.shiftKey ? 'shift+' : ''}${e.key.toLowerCase()}`;
-        
-        if (shortcuts[key]) {
-            shortcuts[key](e);
-        }
-    });
-}
-
-function showShortcutsHelp() {
-    const existingModal = document.getElementById('shortcuts-modal');
-    if (existingModal) existingModal.remove();
-    
-    const modal = document.createElement('div');
-    modal.id = 'shortcuts-modal';
-    modal.className = 'modal';
-    modal.innerHTML = `
-        <div class="modal-content" style="max-width: 500px;">
-            <div class="modal-header">
-                <h3>⌨️ Keyboard Shortcuts</h3>
-                <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
-            </div>
-            <div style="display: grid; gap: 1rem;">
-                <div style="display: grid; gap: 0.75rem;">
-                    <h4 style="color: var(--primary-color); margin-bottom: 0.5rem;">Navigation</h4>
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span>Dashboard</span>
-                        <kbd style="background: var(--bg-secondary); padding: 0.25rem 0.5rem; border-radius: 4px; font-family: monospace; border: 1px solid var(--border-color);">Alt + D</kbd>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span>Organizations</span>
-                        <kbd style="background: var(--bg-secondary); padding: 0.25rem 0.5rem; border-radius: 4px; font-family: monospace; border: 1px solid var(--border-color);">Alt + O</kbd>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span>Users</span>
-                        <kbd style="background: var(--bg-secondary); padding: 0.25rem 0.5rem; border-radius: 4px; font-family: monospace; border: 1px solid var(--border-color);">Alt + U</kbd>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span>Help</span>
-                        <kbd style="background: var(--bg-secondary); padding: 0.25rem 0.5rem; border-radius: 4px; font-family: monospace; border: 1px solid var(--border-color);">Alt + H</kbd>
-                    </div>
-                </div>
-                
-                <div style="display: grid; gap: 0.75rem; margin-top: 1rem;">
-                    <h4 style="color: var(--primary-color); margin-bottom: 0.5rem;">Actions</h4>
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span>Save form</span>
-                        <kbd style="background: var(--bg-secondary); padding: 0.25rem 0.5rem; border-radius: 4px; font-family: monospace; border: 1px solid var(--border-color);">Ctrl + S</kbd>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span>Quick search</span>
-                        <kbd style="background: var(--bg-secondary); padding: 0.25rem 0.5rem; border-radius: 4px; font-family: monospace; border: 1px solid var(--border-color);">Ctrl + K</kbd>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span>Close modal</span>
-                        <kbd style="background: var(--bg-secondary); padding: 0.25rem 0.5rem; border-radius: 4px; font-family: monospace; border: 1px solid var(--border-color);">Esc</kbd>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span>Show this help</span>
-                        <kbd style="background: var(--bg-secondary); padding: 0.25rem 0.5rem; border-radius: 4px; font-family: monospace; border: 1px solid var(--border-color);">Ctrl + /</kbd>
-                    </div>
-                </div>
-            </div>
-            <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color); text-align: center; color: var(--text-secondary); font-size: 0.875rem;">
-                💡 Tip: Press <kbd style="background: var(--bg-secondary); padding: 0.125rem 0.25rem; border-radius: 4px; font-family: monospace; border: 1px solid var(--border-color);">?</kbd> key anytime to see available shortcuts
-            </div>
-        </div>
-    `;
-    document.body.appendChild(modal);
-}
-
-function showQuickSearch() {
-    const existingModal = document.getElementById('quick-search-modal');
-    if (existingModal) {
-        existingModal.remove();
-        return;
-    }
-    
-    const modal = document.createElement('div');
-    modal.id = 'quick-search-modal';
-    modal.className = 'modal';
-    modal.innerHTML = `
-        <div class="modal-content" style="max-width: 600px;">
-            <div class="modal-header">
-                <h3>🔍 Quick Search</h3>
-                <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
-            </div>
-            <div>
-                <input type="text" id="quick-search-input" class="form-input" placeholder="Search organizations, users, surveys..." 
-                       style="font-size: 1.1rem; padding: 1rem;" autofocus>
-                <div id="quick-search-results" style="margin-top: 1rem; max-height: 400px; overflow-y: auto;"></div>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(modal);
-    
-    const searchInput = document.getElementById('quick-search-input');
-    searchInput.focus();
-    
-    searchInput.addEventListener('input', (e) => {
-        const query = e.target.value.toLowerCase();
-        const resultsDiv = document.getElementById('quick-search-results');
-        
-        if (query.length < 2) {
-            resultsDiv.innerHTML = '<div style="text-align: center; color: var(--text-secondary); padding: 2rem;">Type at least 2 characters to search...</div>';
-            return;
-        }
-        
-        const results = [
-            { type: 'organization', name: 'TechCorp Ltd', action: 'showOrganizationDetails' },
-            { type: 'user', name: 'Sarah Johnson', action: 'showUserDetails' },
-            { type: 'survey', name: 'Q4 Employee Satisfaction', action: 'showSection' }
-        ].filter(item => item.name.toLowerCase().includes(query));
-        
-        if (results.length > 0) {
-            resultsDiv.innerHTML = results.map(item => `
-                <div onclick="handleQuickSearchClick('${item.action}', '${item.name}')" style="padding: 1rem; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 0.5rem; cursor: pointer; transition: all 0.2s;"
-                     onmouseover="this.style.background='var(--bg-secondary)'" onmouseout="this.style.background='transparent'">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <strong>${item.name}</strong>
-                            <span class="tag tag-active" style="margin-left: 0.5rem; font-size: 0.625rem;">${item.type}</span>
-                        </div>
-                        <span style="color: var(--text-secondary);">→</span>
-                    </div>
-                </div>
-            `).join('');
-        } else {
-            resultsDiv.innerHTML = '<div style="text-align: center; color: var(--text-secondary); padding: 2rem;">No results found</div>';
-        }
-    });
-}
-
-function handleQuickSearchClick(action, param) {
-    document.getElementById('quick-search-modal').remove();
-    if (action === 'showOrganizationDetails' && window.showOrganizationDetails) {
-        window.showOrganizationDetails(param);
-    } else if (action === 'showUserDetails' && window.showUserDetails) {
-        window.showUserDetails(param);
-    } else if (action === 'showSection' && window.showSection) {
-        window.showSection('survey-builder');
-    }
-}
-
-// ===== 6. INITIALIZATION AND ENHANCEMENTS =====
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('🚀 Initializing enhanced features...');
-    
-    // Initialize password strength
-    initializePasswordStrength();
-    
-    // Initialize keyboard shortcuts
-    initializeKeyboardShortcuts();
-    
-    // Add question mark shortcut
-    document.addEventListener('keydown', (e) => {
-        if (e.key === '?' && !e.target.closest('input, textarea')) {
-            e.preventDefault();
-            showShortcutsHelp();
-        }
-    });
-    
-    // Enhanced form submissions with loading states
-    document.querySelectorAll('form').forEach(form => {
-        form.addEventListener('submit', function(e) {
-            const submitBtn = this.querySelector('[type="submit"]');
-            if (submitBtn && !submitBtn.classList.contains('loading')) {
-                setButtonLoading(submitBtn, true, 'Processing...');
-                setTimeout(() => {
-                    setButtonLoading(submitBtn, false);
-                }, 2000);
-            }
-        });
-    });
-    
-    // Auto-save observer for dynamically added forms
-    const observer = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-            mutation.addedNodes.forEach((node) => {
-                if (node.nodeType === 1) {
-                    if (node.querySelector && node.querySelector('form')) {
-                        const form = node.querySelector('form');
-                        if (form.id && (form.id.includes('organization') || form.id.includes('user') || form.id.includes('survey') || form.id.includes('profile'))) {
-                            setTimeout(() => initializeAutoSave(form.id), 100);
-                        }
-                    }
-                    // Reinitialize password strength for new password fields
-                    if (node.querySelector && (node.querySelector('#password') || node.querySelector('#new-password'))) {
-                        setTimeout(() => initializePasswordStrength(), 100);
-                    }
-                }
-            });
-        });
-    });
-    
-    observer.observe(document.body, { childList: true, subtree: true });
-    
-    console.log('✨ Enhanced features loaded successfully!');
-    console.log('📋 Features: Password strength, Security, Loading states, Auto-save, Keyboard shortcuts');
-    console.log('⌨️ Press Ctrl+/ or ? to see keyboard shortcuts');
-});
-
-// Enhance existing functions with loading states (wrapped versions)
-if (window.generateAIReport) {
-    const originalGenerateAIReport = window.generateAIReport;
-    window.generateAIReport = function() {
-        showLoadingOverlay('Generating AI report... This may take a few moments.');
-        setTimeout(() => {
-            hideLoadingOverlay();
-            originalGenerateAIReport();
-        }, 1500);
-    };
-}
-
-if (window.exportChatData) {
-    const originalExportChatData = window.exportChatData;
-    window.exportChatData = function() {
-        showLoadingOverlay('Exporting chat data...');
-        setTimeout(() => {
-            hideLoadingOverlay();
-            originalExportChatData();
-        }, 1000);
-    };
-}
-
-if (window.handleExportData) {
-    const originalHandleExportData = window.handleExportData;
-    window.handleExportData = function(type) {
-        showLoadingOverlay(`Exporting ${type} data...`);
-        setTimeout(() => {
-            hideLoadingOverlay();
-            originalHandleExportData(type);
-        }, 1000);
-    };
-}
-
-if (window.backupData) {
-    const originalBackupData = window.backupData;
-    window.backupData = function() {
-        showLoadingOverlay('Creating backup... This may take several minutes for large datasets.');
-        setTimeout(() => {
-            hideLoadingOverlay();
-            originalBackupData();
-        }, 2000);
-    };
-}
-
-if (window.exportAllData) {
-    const originalExportAllData = window.exportAllData;
-    window.exportAllData = function() {
-        showLoadingOverlay('Preparing complete data export... This may take several minutes.');
-        setTimeout(() => {
-            hideLoadingOverlay();
-            originalExportAllData();
-        }, 3000);
-    };
-}
-
-// Enhanced error handling
-window.addEventListener('error', function(e) {
-    console.error('Application error:', e);
-    hideLoadingOverlay();
-});
-
-// ===== CSS ANIMATIONS INJECTION =====
-// Automatically add required CSS for animations
-const enhancedStyles = document.createElement('style');
-enhancedStyles.innerHTML = `
-    @keyframes fadeIn {
-        from { opacity: 0; transform: scale(0.95); }
-        to { opacity: 1; transform: scale(1); }
-    }
-    
-    @keyframes fadeOut {
-        from { opacity: 1; }
-        to { opacity: 0; }
-    }
-    
-    .modal { animation: fadeIn 0.3s ease-out; }
-    
-    #loading-overlay { animation: fadeIn 0.3s ease-out; }
-    
-    button.loading::after {
-        content: '';
-        position: absolute;
-        width: 16px;
-        height: 16px;
-        border: 2px solid currentColor;
-        border-radius: 50%;
-        border-top-color: transparent;
-        animation: spin 1s linear infinite;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-    }
-`;
-document.head.appendChild(enhancedStyles);
-
-console.log('🎉 All enhanced features have been successfully added!');
-
-// ============================================
-// END OF ENHANCED FEATURES BLOCK
-// ============================================
+// END OF FILE - Realworld Survey Platform v2.0 with Email Integration
