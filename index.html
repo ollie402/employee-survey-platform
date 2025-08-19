@@ -221,6 +221,152 @@
                 transform: translateY(0);
             }
         }
+        
+        /* ENHANCED CHAT FEEDBACK STYLES */
+        .feedback-toolbar {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .view-toggle {
+            display: flex;
+            gap: 0.25rem;
+            background: var(--bg-secondary);
+            padding: 0.25rem;
+            border-radius: 6px;
+        }
+        
+        .view-toggle button {
+            padding: 0.5rem 1rem;
+            background: transparent;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .view-toggle button.active {
+            background: white;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .sentiment-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .sentiment-positive {
+            background: #dcfce7;
+            color: #166534;
+        }
+        
+        .sentiment-neutral {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .sentiment-negative {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .priority-indicator {
+            width: 4px;
+            height: 100%;
+            position: absolute;
+            left: 0;
+            top: 0;
+            border-radius: 4px 0 0 4px;
+        }
+        
+        .priority-high {
+            background: var(--danger-color);
+        }
+        
+        .priority-medium {
+            background: var(--warning-color);
+        }
+        
+        .priority-low {
+            background: var(--success-color);
+        }
+        
+        .feedback-item {
+            position: relative;
+            padding: 1rem 1rem 1rem 1.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        
+        .feedback-item:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transform: translateY(-1px);
+        }
+        
+        .feedback-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 0.5rem;
+        }
+        
+        .feedback-meta {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+        
+        .feedback-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .action-btn {
+            padding: 0.25rem 0.5rem;
+            background: transparent;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.75rem;
+        }
+        
+        .action-btn:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        
+        .response-box {
+            margin-top: 1rem;
+            padding: 0.75rem;
+            background: var(--bg-secondary);
+            border-radius: 6px;
+            border-left: 3px solid var(--primary-color);
+        }
+        
+        .keyword-tag {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 4px;
+            font-size: 0.625rem;
+            margin-right: 0.25rem;
+        }
+        /* END ENHANCED STYLES */
     </style>
 </head>
 <body>
@@ -367,15 +513,11 @@
                     <div class="nav-title" data-translate="start-listening">Start Listening</div>
                     <div class="nav-item" onclick="showSection('chat-feedback')">
                         <div class="nav-icon">💬</div>
-                        <span data-translate="chat-feedback">Chat Feedback</span>
+                        <span data-translate="chat-feedback">Analytics</span>
                     </div>
                     <div class="nav-item" onclick="showSection('chat-management')">
                         <div class="nav-icon">💬</div>
                         <span data-translate="chat-management">Chat Management</span>
-                    </div>
-                    <div class="nav-item" onclick="showSection('chat-analytics')">
-                        <div class="nav-icon">📈</div>
-                        <span data-translate="analytics">Analytics</span>
                     </div>
                     <div class="nav-item" onclick="showSection('chat-reports')">
                         <div class="nav-icon">📋</div>
@@ -915,68 +1057,410 @@
                     </div>
                 </div>
 
-                <!-- Chat Feedback Section -->
+                <!-- Analytics Section (formerly Chat Feedback) -->
                 <div id="chat-feedback-section" class="hidden">
                     <div class="card">
                         <div class="card-header">
-                            <h2 class="card-title">Chat Feedback</h2>
-                            <button class="btn btn-primary" onclick="createNewChatWidget()">Create Chat Widget</button>
+                            <h2 class="card-title">Analytics</h2>
+                            <div>
+                                <button class="btn btn-secondary" onclick="showFeedbackSettings()">⚙️ Settings</button>
+                                <button class="btn btn-primary" onclick="generateFeedbackReport()">📊 Generate Report</button>
+                            </div>
                         </div>
                         
+                        <!-- Enhanced Statistics Dashboard -->
                         <div class="dashboard-grid">
                             <div class="stat-card">
                                 <div class="stat-value">1,847</div>
                                 <div class="stat-label">Total Chat Sessions</div>
+                                <div style="font-size: 0.75rem; color: var(--success-color); margin-top: 0.5rem;">↑ 12% from last week</div>
                             </div>
                             <div class="stat-card">
                                 <div class="stat-value">4.8</div>
                                 <div class="stat-label">Average Rating</div>
+                                <div style="display: flex; gap: 0.25rem; margin-top: 0.5rem;">
+                                    <span>⭐⭐⭐⭐⭐</span>
+                                </div>
                             </div>
                             <div class="stat-card">
                                 <div class="stat-value">92%</div>
                                 <div class="stat-label">Response Rate</div>
+                                <div style="font-size: 0.75rem; color: var(--warning-color); margin-top: 0.5rem;">↓ 3% from last week</div>
                             </div>
                             <div class="stat-card">
                                 <div class="stat-value">156</div>
                                 <div class="stat-label">This Week</div>
+                                <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.5rem;">23 pending review</div>
                             </div>
                         </div>
 
+                        <!-- Performance Metrics from Analytics -->
+                        <div class="dashboard-grid">
+                            <div class="stat-card">
+                                <div class="stat-value">89%</div>
+                                <div class="stat-label">Completion Rate</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">2m 15s</div>
+                                <div class="stat-label">Avg. Session Duration</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">4.6/5</div>
+                                <div class="stat-label">Quality Score</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">+23%</div>
+                                <div class="stat-label">Growth vs Last Month</div>
+                            </div>
+                        </div>
+
+                        <!-- Sentiment Overview -->
+                        <div class="card" style="margin-bottom: 1.5rem;">
+                            <div class="card-header">
+                                <h4>Sentiment Analysis Overview</h4>
+                                <select class="form-select" style="width: 150px;" onchange="updateSentimentView(this.value)">
+                                    <option value="today">Today</option>
+                                    <option value="week" selected>This Week</option>
+                                    <option value="month">This Month</option>
+                                    <option value="quarter">This Quarter</option>
+                                </select>
+                            </div>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;">
+                                <div style="text-align: center; padding: 1rem; background: #dcfce7; border-radius: 8px;">
+                                    <div style="font-size: 2rem;">😊</div>
+                                    <div style="font-size: 1.5rem; font-weight: bold; color: #166534;">68%</div>
+                                    <div style="color: #166534;">Positive</div>
+                                </div>
+                                <div style="text-align: center; padding: 1rem; background: #fef3c7; border-radius: 8px;">
+                                    <div style="font-size: 2rem;">😐</div>
+                                    <div style="font-size: 1.5rem; font-weight: bold; color: #92400e;">24%</div>
+                                    <div style="color: #92400e;">Neutral</div>
+                                </div>
+                                <div style="text-align: center; padding: 1rem; background: #fee2e2; border-radius: 8px;">
+                                    <div style="font-size: 2rem;">😞</div>
+                                    <div style="font-size: 1.5rem; font-weight: bold; color: #991b1b;">8%</div>
+                                    <div style="color: #991b1b;">Negative</div>
+                                </div>
+                                <div style="text-align: center; padding: 1rem; background: #f3f4f6; border-radius: 8px;">
+                                    <div style="font-size: 2rem;">🎯</div>
+                                    <div style="font-size: 1.5rem; font-weight: bold; color: var(--primary-color);">89%</div>
+                                    <div style="color: var(--text-secondary);">Resolution Rate</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Analytics Charts Section -->
+                        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; margin-bottom: 1.5rem;">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h4>Response Trends</h4>
+                                    <select class="form-select" style="width: 150px;">
+                                        <option>Last 30 days</option>
+                                        <option>Last 7 days</option>
+                                        <option>Last 90 days</option>
+                                        <option>Custom range</option>
+                                    </select>
+                                </div>
+                                <div class="chart-placeholder">
+                                    📈 Interactive chart showing response trends over time
+                                </div>
+                            </div>
+
+                            <div class="card">
+                                <div class="card-header">
+                                    <h4>Sentiment Breakdown</h4>
+                                </div>
+                                <div style="display: grid; gap: 1rem;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <span>😊 Positive</span>
+                                        <div style="flex: 1; margin: 0 1rem; height: 8px; background: #e5e7eb; border-radius: 4px; overflow: hidden;">
+                                            <div style="width: 68%; height: 100%; background: #10b981;"></div>
+                                        </div>
+                                        <span><strong>68%</strong></span>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <span>😐 Neutral</span>
+                                        <div style="flex: 1; margin: 0 1rem; height: 8px; background: #e5e7eb; border-radius: 4px; overflow: hidden;">
+                                            <div style="width: 24%; height: 100%; background: #f59e0b;"></div>
+                                        </div>
+                                        <span><strong>24%</strong></span>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <span>😞 Negative</span>
+                                        <div style="flex: 1; margin: 0 1rem; height: 8px; background: #e5e7eb; border-radius: 4px; overflow: hidden;">
+                                            <div style="width: 8%; height: 100%; background: #ef4444;"></div>
+                                        </div>
+                                        <span><strong>8%</strong></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Enhanced Filters and Actions -->
                         <div class="card">
                             <div class="card-header">
-                                <h4>Recent Chat Feedback</h4>
-                                <button class="btn btn-secondary" onclick="exportChatData()">Export Data</button>
+                                <h4>Feedback Management</h4>
+                                <div class="view-toggle">
+                                    <button class="active" onclick="switchFeedbackView('table')">📋 Table</button>
+                                    <button onclick="switchFeedbackView('cards')">🎴 Cards</button>
+                                    <button onclick="switchFeedbackView('timeline')">📅 Timeline</button>
+                                </div>
                             </div>
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th>Date</th>
-                                        <th>User</th>
-                                        <th>Rating</th>
-                                        <th>Category</th>
-                                        <th>Status</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>Dec 15, 2024</td>
-                                        <td>Anonymous User</td>
-                                        <td>⭐⭐⭐⭐⭐</td>
-                                        <td><span class="tag tag-active">General</span></td>
-                                        <td><span class="tag tag-active">Reviewed</span></td>
-                                        <td><button class="btn btn-secondary btn-sm">View Details</button></td>
-                                    </tr>
-                                    <tr>
-                                        <td>Dec 15, 2024</td>
-                                        <td>John D.</td>
-                                        <td>⭐⭐⭐⭐</td>
-                                        <td><span class="tag tag-processing">Support</span></td>
-                                        <td><span class="tag tag-pending">Pending</span></td>
-                                        <td><button class="btn btn-secondary btn-sm">View Details</button></td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                            
+                            <!-- Advanced Filters -->
+                            <div class="filters" style="padding: 1rem; background: var(--bg-secondary); border-radius: 8px; margin-bottom: 1rem;">
+                                <div class="filter-group">
+                                    <label class="filter-label">Search</label>
+                                    <input type="text" class="form-input" placeholder="Search feedback..." 
+                                           style="min-width: 200px;" oninput="filterFeedback('search', this.value)">
+                                </div>
+                                <div class="filter-group">
+                                    <label class="filter-label">Date Range</label>
+                                    <select class="form-select" onchange="filterFeedback('date', this.value)">
+                                        <option value="all">All Time</option>
+                                        <option value="today">Today</option>
+                                        <option value="week" selected>This Week</option>
+                                        <option value="month">This Month</option>
+                                        <option value="custom">Custom Range</option>
+                                    </select>
+                                </div>
+                                <div class="filter-group">
+                                    <label class="filter-label">Sentiment</label>
+                                    <select class="form-select" onchange="filterFeedback('sentiment', this.value)">
+                                        <option value="">All Sentiments</option>
+                                        <option value="positive">😊 Positive</option>
+                                        <option value="neutral">😐 Neutral</option>
+                                        <option value="negative">😞 Negative</option>
+                                    </select>
+                                </div>
+                                <div class="filter-group">
+                                    <label class="filter-label">Priority</label>
+                                    <select class="form-select" onchange="filterFeedback('priority', this.value)">
+                                        <option value="">All Priorities</option>
+                                        <option value="high">🔴 High</option>
+                                        <option value="medium">🟡 Medium</option>
+                                        <option value="low">🟢 Low</option>
+                                    </select>
+                                </div>
+                                <div class="filter-group">
+                                    <label class="filter-label">Status</label>
+                                    <select class="form-select" onchange="filterFeedback('status', this.value)">
+                                        <option value="">All Status</option>
+                                        <option value="new">New</option>
+                                        <option value="pending">Pending Review</option>
+                                        <option value="reviewed">Reviewed</option>
+                                        <option value="resolved">Resolved</option>
+                                        <option value="archived">Archived</option>
+                                    </select>
+                                </div>
+                                <div class="filter-group">
+                                    <label class="filter-label">Tags</label>
+                                    <select class="form-select" onchange="filterFeedback('tags', this.value)">
+                                        <option value="">All Tags</option>
+                                        <option value="product">Product</option>
+                                        <option value="service">Service</option>
+                                        <option value="support">Support</option>
+                                        <option value="pricing">Pricing</option>
+                                        <option value="feature">Feature Request</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Bulk Actions Toolbar -->
+                            <div class="feedback-toolbar">
+                                <button class="btn btn-secondary btn-sm" onclick="selectAllFeedback()">
+                                    <input type="checkbox" id="select-all-feedback" style="margin-right: 0.5rem;">
+                                    Select All
+                                </button>
+                                <button class="btn btn-primary btn-sm" onclick="markAsReviewed()">✓ Mark Reviewed</button>
+                                <button class="btn btn-success btn-sm" onclick="markAsResolved()">✓ Mark Resolved</button>
+                                <button class="btn btn-warning btn-sm" onclick="assignToTeam()">👥 Assign</button>
+                                <button class="btn btn-secondary btn-sm" onclick="addTags()">🏷️ Add Tags</button>
+                                <button class="btn btn-secondary btn-sm" onclick="exportSelectedFeedback()">📥 Export Selected</button>
+                                <button class="btn btn-danger btn-sm" onclick="archiveSelected()">📁 Archive</button>
+                            </div>
+
+                            <!-- Enhanced Table View -->
+                            <div id="feedback-table-view">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th><input type="checkbox" onclick="toggleSelectAll(this, 'feedback')"></th>
+                                            <th onclick="sortTable(this, 1)">Date/Time</th>
+                                            <th onclick="sortTable(this, 2)">User</th>
+                                            <th onclick="sortTable(this, 3)">Message</th>
+                                            <th onclick="sortTable(this, 4)">Rating</th>
+                                            <th onclick="sortTable(this, 5)">Sentiment</th>
+                                            <th onclick="sortTable(this, 6)">Priority</th>
+                                            <th onclick="sortTable(this, 7)">Category</th>
+                                            <th onclick="sortTable(this, 8)">Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><input type="checkbox"></td>
+                                            <td>Dec 15, 2024<br><small>14:32</small></td>
+                                            <td>
+                                                <strong>Anonymous User</strong><br>
+                                                <small style="color: var(--text-secondary);">Widget: Footer</small>
+                                            </td>
+                                            <td style="max-width: 300px;">
+                                                "The new feature is amazing! It saves me so much time in my daily workflow."
+                                                <div style="margin-top: 0.5rem;">
+                                                    <span class="keyword-tag">feature</span>
+                                                    <span class="keyword-tag">workflow</span>
+                                                </div>
+                                            </td>
+                                            <td>⭐⭐⭐⭐⭐</td>
+                                            <td><span class="sentiment-badge sentiment-positive">😊 Positive</span></td>
+                                            <td><span class="tag tag-active">Low</span></td>
+                                            <td><span class="tag tag-active">Product</span></td>
+                                            <td><span class="tag tag-active">Reviewed</span></td>
+                                            <td>
+                                                <div style="display: flex; gap: 0.25rem;">
+                                                    <button class="action-btn" onclick="viewFeedbackDetails(1)" title="View Details">👁️</button>
+                                                    <button class="action-btn" onclick="replyToFeedback(1)" title="Reply">💬</button>
+                                                    <button class="action-btn" onclick="assignFeedback(1)" title="Assign">👤</button>
+                                                    <button class="action-btn" onclick="archiveFeedback(1)" title="Archive">📁</button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><input type="checkbox"></td>
+                                            <td>Dec 15, 2024<br><small>13:15</small></td>
+                                            <td>
+                                                <strong>John D.</strong><br>
+                                                <small style="color: var(--text-secondary);">john.d@email.com</small>
+                                            </td>
+                                            <td style="max-width: 300px;">
+                                                "Support response time could be better. Waited 2 hours for a simple query."
+                                                <div style="margin-top: 0.5rem;">
+                                                    <span class="keyword-tag">support</span>
+                                                    <span class="keyword-tag">response time</span>
+                                                </div>
+                                            </td>
+                                            <td>⭐⭐⭐⭐</td>
+                                            <td><span class="sentiment-badge sentiment-neutral">😐 Neutral</span></td>
+                                            <td><span class="tag tag-warning">Medium</span></td>
+                                            <td><span class="tag tag-processing">Support</span></td>
+                                            <td><span class="tag tag-pending">Pending</span></td>
+                                            <td>
+                                                <div style="display: flex; gap: 0.25rem;">
+                                                    <button class="action-btn" onclick="viewFeedbackDetails(2)" title="View Details">👁️</button>
+                                                    <button class="action-btn" onclick="replyToFeedback(2)" title="Reply">💬</button>
+                                                    <button class="action-btn" onclick="assignFeedback(2)" title="Assign">👤</button>
+                                                    <button class="action-btn" onclick="archiveFeedback(2)" title="Archive">📁</button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><input type="checkbox"></td>
+                                            <td>Dec 15, 2024<br><small>11:45</small></td>
+                                            <td>
+                                                <strong>Emily R.</strong><br>
+                                                <small style="color: var(--text-secondary);">Chat Widget</small>
+                                            </td>
+                                            <td style="max-width: 300px;">
+                                                "Login issues persist. Cannot access my dashboard. This is urgent!"
+                                                <div style="margin-top: 0.5rem;">
+                                                    <span class="keyword-tag">bug</span>
+                                                    <span class="keyword-tag">urgent</span>
+                                                    <span class="keyword-tag">login</span>
+                                                </div>
+                                                <div class="response-box">
+                                                    <small><strong>Team Response:</strong> We're investigating this issue. Ticket #2847 created.</small>
+                                                </div>
+                                            </td>
+                                            <td>⭐⭐</td>
+                                            <td><span class="sentiment-badge sentiment-negative">😞 Negative</span></td>
+                                            <td><span class="tag tag-danger">High</span></td>
+                                            <td><span class="tag tag-danger">Technical</span></td>
+                                            <td><span class="tag tag-processing">In Progress</span></td>
+                                            <td>
+                                                <div style="display: flex; gap: 0.25rem;">
+                                                    <button class="action-btn" onclick="viewFeedbackDetails(3)" title="View Details">👁️</button>
+                                                    <button class="action-btn" onclick="replyToFeedback(3)" title="Reply">💬</button>
+                                                    <button class="action-btn" onclick="assignFeedback(3)" title="Assign">👤</button>
+                                                    <button class="action-btn" onclick="escalateFeedback(3)" title="Escalate">⚠️</button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+
+                                <!-- Pagination -->
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem;">
+                                    <div style="color: var(--text-secondary);">
+                                        Showing 1-10 of 1,847 feedback entries
+                                    </div>
+                                    <div style="display: flex; gap: 0.5rem;">
+                                        <button class="btn btn-secondary btn-sm">← Previous</button>
+                                        <button class="btn btn-secondary btn-sm active">1</button>
+                                        <button class="btn btn-secondary btn-sm">2</button>
+                                        <button class="btn btn-secondary btn-sm">3</button>
+                                        <button class="btn btn-secondary btn-sm">...</button>
+                                        <button class="btn btn-secondary btn-sm">185</button>
+                                        <button class="btn btn-secondary btn-sm">Next →</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Card View (Hidden by default) -->
+                            <div id="feedback-cards-view" style="display: none;">
+                                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1rem;">
+                                    <!-- Sample Feedback Cards -->
+                                    <div class="feedback-item">
+                                        <div class="priority-indicator priority-low"></div>
+                                        <div class="feedback-header">
+                                            <div>
+                                                <strong>Anonymous User</strong><br>
+                                                <small style="color: var(--text-secondary);">Dec 15, 2024 • 14:32</small>
+                                            </div>
+                                            <div>⭐⭐⭐⭐⭐</div>
+                                        </div>
+                                        <p style="margin: 1rem 0;">"The new feature is amazing! It saves me so much time in my daily workflow."</p>
+                                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                                            <span class="sentiment-badge sentiment-positive">😊 Positive</span>
+                                            <span class="tag tag-active">Product</span>
+                                            <span class="tag tag-active">Reviewed</span>
+                                        </div>
+                                        <div class="feedback-actions" style="margin-top: 1rem;">
+                                            <button class="action-btn">View</button>
+                                            <button class="action-btn">Reply</button>
+                                            <button class="action-btn">Archive</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Top Keywords/Topics -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h4>Trending Topics This Week</h4>
+                                <button class="btn btn-secondary btn-sm" onclick="viewAllTopics()">View All</button>
+                            </div>
+                            <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                                <span style="padding: 0.5rem 1rem; background: var(--primary-color); color: white; border-radius: 20px; font-size: 0.875rem;">
+                                    feature request (47)
+                                </span>
+                                <span style="padding: 0.5rem 1rem; background: var(--primary-color); color: white; border-radius: 20px; font-size: 0.875rem; opacity: 0.9;">
+                                    user interface (32)
+                                </span>
+                                <span style="padding: 0.5rem 1rem; background: var(--primary-color); color: white; border-radius: 20px; font-size: 0.875rem; opacity: 0.8;">
+                                    performance (28)
+                                </span>
+                                <span style="padding: 0.5rem 1rem; background: var(--primary-color); color: white; border-radius: 20px; font-size: 0.875rem; opacity: 0.7;">
+                                    support (24)
+                                </span>
+                                <span style="padding: 0.5rem 1rem; background: var(--primary-color); color: white; border-radius: 20px; font-size: 0.875rem; opacity: 0.6;">
+                                    pricing (19)
+                                </span>
+                                <span style="padding: 0.5rem 1rem; background: var(--primary-color); color: white; border-radius: 20px; font-size: 0.875rem; opacity: 0.5;">
+                                    documentation (15)
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -988,6 +1472,7 @@
                             <h2 class="card-title">Chat Management</h2>
                             <div>
                                 <button class="btn btn-secondary" onclick="manageChatSettings()">Settings</button>
+                                <button class="btn btn-primary" onclick="createNewChatWidget()">Create Chat Widget</button>
                                 <button class="btn btn-primary" onclick="createChatTemplate()">Create Template</button>
                             </div>
                         </div>
@@ -1037,74 +1522,6 @@
                                     <div style="padding: 1rem; border: 1px solid var(--border-color); border-radius: 8px;">
                                         <strong>Support Experience</strong><br>
                                         <small style="color: var(--text-secondary);">4 questions • Mixed format</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Chat Analytics Section -->
-                <div id="chat-analytics-section" class="hidden">
-                    <div class="card">
-                        <div class="card-header">
-                            <h2 class="card-title">Chat Analytics</h2>
-                            <div>
-                                <select class="form-select" style="margin-right: 1rem;">
-                                    <option>Last 30 days</option>
-                                    <option>Last 7 days</option>
-                                    <option>Last 90 days</option>
-                                    <option>Custom range</option>
-                                </select>
-                                <button class="btn btn-secondary">Export Report</button>
-                            </div>
-                        </div>
-
-                        <div class="dashboard-grid">
-                            <div class="stat-card">
-                                <div class="stat-value">89%</div>
-                                <div class="stat-label">Completion Rate</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-value">2m 15s</div>
-                                <div class="stat-label">Avg. Session Duration</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-value">4.6/5</div>
-                                <div class="stat-label">Average Rating</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-value">+23%</div>
-                                <div class="stat-label">Growth vs Last Month</div>
-                            </div>
-                        </div>
-
-                        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem;">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h4>Response Trends</h4>
-                                </div>
-                                <div class="chart-placeholder">
-                                    📈 Interactive chart showing response trends over time
-                                </div>
-                            </div>
-
-                            <div class="card">
-                                <div class="card-header">
-                                    <h4>Sentiment Analysis</h4>
-                                </div>
-                                <div style="display: grid; gap: 1rem;">
-                                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                                        <span>😊 Positive</span>
-                                        <span><strong>68%</strong></span>
-                                    </div>
-                                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                                        <span>😐 Neutral</span>
-                                        <span><strong>24%</strong></span>
-                                    </div>
-                                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                                        <span>😞 Negative</span>
-                                        <span><strong>8%</strong></span>
                                     </div>
                                 </div>
                             </div>
