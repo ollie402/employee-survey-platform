@@ -942,6 +942,111 @@ function showSection(sectionName) {
     };
     
     breadcrumb.textContent = sectionTitle[sectionName] || translations[currentLanguage]['dashboard'] || 'Dashboard';
+    
+    // Load real data when sections are shown
+    if (sectionName === 'dashboard') {
+        loadDashboardData();
+    } else if (sectionName === 'users') {
+        loadUsersTable();
+    } else if (sectionName === 'organizations') {
+        loadOrganizationsTable();
+    }
+}
+
+async function loadDashboardData() {
+    try {
+        // Load real organization count
+        const organizations = await loadOrganizations() || [];
+        document.querySelector('.stat-value').textContent = organizations.length;
+        
+        // Load real user count
+        const users = await loadUsers() || [];
+        const userStatElements = document.querySelectorAll('.stat-value');
+        if (userStatElements[1]) {
+            userStatElements[1].textContent = users.length;
+        }
+        
+        // Load real survey count
+        const surveys = await loadSurveys() || [];
+        if (userStatElements[2]) {
+            userStatElements[2].textContent = surveys.length;
+        }
+        
+        // Load real response count
+        const responses = await loadSurveyResponses() || [];
+        if (userStatElements[3]) {
+            userStatElements[3].textContent = responses.length;
+        }
+        
+        console.log('Dashboard data loaded from database');
+    } catch (error) {
+        console.error('Error loading dashboard data:', error);
+    }
+}
+
+async function loadUsersTable() {
+    try {
+        const users = await loadUsers() || [];
+        const tbody = document.querySelector('#users-table tbody');
+        
+        if (users.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #6b7280;">No users found. Create your first user using the "Add User" button.</td></tr>';
+            return;
+        }
+        
+        tbody.innerHTML = users.map(user => `
+            <tr onclick="showUserDetails('${user.id}')">
+                <td><input type="checkbox"></td>
+                <td>${user.name}</td>
+                <td>${user.email}</td>
+                <td>${user.organization || 'No Organization'}</td>
+                <td><span class="tag tag-pending">${user.role}</span></td>
+                <td><span class="tag tag-${user.status === 'active' ? 'success' : 'pending'}">${user.status || 'Active'}</span></td>
+                <td>${user.created_at ? new Date(user.created_at).toLocaleDateString() : 'Never'}</td>
+                <td>
+                    <button class="btn btn-secondary btn-sm" onclick="handleEditUser('${user.id}')">Edit</button>
+                    <button class="btn btn-primary btn-sm" onclick="handleResendInvite('${user.name}')">Resend Invite</button>
+                    <button class="btn btn-danger btn-sm" onclick="handleRemoveUser('${user.id}')">Remove</button>
+                </td>
+            </tr>
+        `).join('');
+        
+        console.log('Users table loaded from database');
+    } catch (error) {
+        console.error('Error loading users table:', error);
+    }
+}
+
+async function loadOrganizationsTable() {
+    try {
+        const organizations = await loadOrganizations() || [];
+        const tbody = document.querySelector('#organizations-table tbody');
+        
+        if (organizations.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #6b7280;">No organizations found. Create your first organization using the "Add Organization" button.</td></tr>';
+            return;
+        }
+        
+        tbody.innerHTML = organizations.map(org => `
+            <tr onclick="showOrganizationDetails('${org.id}')">
+                <td><input type="checkbox"></td>
+                <td>${org.name}</td>
+                <td>${org.plan || 'Not Set'}</td>
+                <td>${org.users || 0}</td>
+                <td><span class="tag tag-${org.status === 'active' ? 'success' : 'warning'}">${org.status || 'Active'}</span></td>
+                <td>${org.created_at ? new Date(org.created_at).toLocaleDateString() : 'Never'}</td>
+                <td>
+                    <button class="btn btn-secondary btn-sm" onclick="handleEditOrganization('${org.name}')">Edit</button>
+                    <button class="btn btn-danger btn-sm" onclick="handleSuspendOrganization('${org.name}')">Suspend</button>
+                    <button class="btn btn-danger btn-sm" onclick="handleDeleteOrganization('${org.id}', '${org.name}')">Delete</button>
+                </td>
+            </tr>
+        `).join('');
+        
+        console.log('Organizations table loaded from database');
+    } catch (error) {
+        console.error('Error loading organizations table:', error);
+    }
 }
 
 function toggleSidebar() {
@@ -1779,8 +1884,204 @@ function clearAIChat() {
 }
 
 // Survey and Chat Functions
+
+// Global chat widget functions (persist between modal open/close)
+function selectChatType(type, element) {
+    // Remove selected class from all cards
+    document.querySelectorAll('.chat-type-card').forEach(card => {
+        card.classList.remove('selected');
+    });
+    
+    // Add selected class to clicked card
+    element.classList.add('selected');
+    
+    // Check the radio button
+    element.querySelector('input[type="radio"]').checked = true;
+    
+    // Show relevant options based on type
+    updateFormForChatType(type);
+}
+
+function updateFormForChatType(type) {
+    // Chat type selected - no additional processing needed since templates are removed
+    console.log('Chat type selected:', type);
+}
+
+
+
+
+function copyLinkToClipboard() {
+    const linkInput = document.getElementById('generated-link');
+    if (linkInput) {
+        linkInput.select();
+        document.execCommand('copy');
+        showToast('Link copied to clipboard!', 'success');
+    }
+}
+
+function testChatLink(link) {
+    window.open(link, '_blank');
+}
+
+function generateAnotherLink() {
+    document.querySelector('.modal').remove();
+    createNewChatWidget();
+}
+
+// Step Navigation for Chat Widget
+let currentStep = 1;
+const totalSteps = 2;
+
+function nextStep() {
+    if (currentStep < totalSteps) {
+        // Validate current step
+        if (currentStep === 1 && !document.querySelector('input[name="chatType"]:checked')) {
+            showToast('Please select a chat type', 'warning');
+            return;
+        }
+        
+        document.getElementById(`step-${currentStep}`).classList.remove('active');
+        currentStep++;
+        document.getElementById(`step-${currentStep}`).classList.add('active');
+        
+        updateNavigationButtons();
+    }
+}
+
+function previousStep() {
+    if (currentStep > 1) {
+        document.getElementById(`step-${currentStep}`).classList.remove('active');
+        currentStep--;
+        document.getElementById(`step-${currentStep}`).classList.add('active');
+        
+        updateNavigationButtons();
+    }
+}
+
+function updateNavigationButtons() {
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+    const generateBtn = document.getElementById('generate-btn');
+    
+    if (prevBtn) prevBtn.style.display = currentStep > 1 ? 'inline-block' : 'none';
+    if (nextBtn) nextBtn.style.display = currentStep < totalSteps ? 'inline-block' : 'none';
+    if (generateBtn) generateBtn.style.display = currentStep === totalSteps ? 'inline-block' : 'none';
+}
+
+function resetChatWidgetState() {
+    currentStep = 1;
+    // Reset all form selections
+    document.querySelectorAll('.chat-type-card').forEach(card => {
+        card.classList.remove('selected');
+    });
+    // Show first step
+    document.querySelectorAll('.form-section').forEach(section => {
+        section.classList.remove('active');
+    });
+    const firstStep = document.getElementById('step-1');
+    if (firstStep) firstStep.classList.add('active');
+    
+    updateNavigationButtons();
+}
+
 function createNewSurvey() {
-    showToast('Opening survey builder...', 'info');
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3>Create New Survey</h3>
+                <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
+            </div>
+            <form onsubmit="handleCreateSurvey(event)">
+                <div class="form-group">
+                    <label class="form-label">Survey Title</label>
+                    <input type="text" name="title" class="form-input" required placeholder="e.g., Q4 Employee Satisfaction">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <textarea name="description" class="form-input" rows="3" placeholder="Brief description of this survey..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Survey Type</label>
+                    <select name="surveyType" class="form-select">
+                        <option value="feedback">Employee Feedback</option>
+                        <option value="satisfaction">Satisfaction Survey</option>
+                        <option value="pulse">Pulse Survey</option>
+                        <option value="custom">Custom Survey</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Organization</label>
+                    <select name="organization" class="form-select" id="survey-org-select">
+                        <option value="">Loading organizations...</option>
+                    </select>
+                </div>
+                <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
+                    <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').remove()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create Survey</button>
+                </div>
+            </form>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    
+    // Populate organizations dropdown
+    populateSurveyOrganizations();
+}
+
+async function populateSurveyOrganizations() {
+    try {
+        const organizations = await loadOrganizations() || [];
+        const select = document.getElementById('survey-org-select');
+        
+        if (organizations.length > 0) {
+            select.innerHTML = '<option value="">Select Organization</option>' +
+                organizations.map(org => `<option value="${org.id}">${org.name}</option>`).join('');
+        } else {
+            select.innerHTML = '<option value="" disabled>No organizations found</option>';
+        }
+    } catch (error) {
+        console.error('Error loading organizations:', error);
+        const select = document.getElementById('survey-org-select');
+        select.innerHTML = '<option value="" disabled>Error loading organizations</option>';
+    }
+}
+
+async function handleCreateSurvey(event) {
+    event.preventDefault();
+    
+    const formData = new FormData(event.target);
+    const surveyData = {
+        title: formData.get('title'),
+        description: formData.get('description'),
+        organization_id: formData.get('organization'),
+        created_by: null, // Will need current user context
+        status: 'draft',
+        questions: JSON.stringify({
+            type: formData.get('surveyType'),
+            questions: [] // Empty initially, to be filled in survey builder
+        }),
+        settings: JSON.stringify({
+            allowAnonymous: true,
+            requireEmail: false
+        })
+    };
+    
+    try {
+        const savedSurvey = await saveSurvey(surveyData);
+        console.log('Survey created successfully:', savedSurvey);
+        
+        showToast(`✅ Survey "${surveyData.title}" created successfully!`, 'success');
+        event.target.closest('.modal').remove();
+        
+        // Optionally open survey builder with this survey
+        // openSurveyBuilder(savedSurvey.id);
+        
+    } catch (error) {
+        console.error('Error creating survey:', error);
+        showToast(`❌ Failed to create survey: ${error.message}`, 'error');
+    }
 }
 
 function createNewChatWidget() {
@@ -1858,7 +2159,7 @@ async function generateChatLink(event) {
     // Generate the link (assuming the chat page will be at chat.html)
     const chatLink = window.location.origin + '/chat.html?' + params.toString();
     
-    // Store session data for email
+    // Store session data for email and database
     const chatSessionData = {
         id: sessionId,
         name: sessionName,
@@ -1868,6 +2169,33 @@ async function generateChatLink(event) {
         requireEmail: requireEmail,
         link: chatLink
     };
+
+    // Save survey to database
+    try {
+        const surveyData = {
+            title: sessionName,
+            description: welcomeMsg,
+            organization_id: null, // Will need to get current org ID
+            created_by: null, // Will need to get current user ID
+            status: 'active',
+            questions: JSON.stringify({
+                type: 'chat',
+                allowAnonymous: allowAnonymous,
+                requireEmail: requireEmail,
+                expiry: expiry
+            }),
+            settings: JSON.stringify({
+                sessionId: sessionId,
+                link: chatLink
+            })
+        };
+        
+        const savedSurvey = await saveSurvey(surveyData);
+        console.log('Chat survey saved to database:', savedSurvey);
+    } catch (error) {
+        console.error('Error saving chat survey to database:', error);
+        showToast('⚠️ Survey link created but not saved to database', 'warning');
+    }
     
     // Close current modal
     event.target.closest('.modal').remove();
@@ -1991,9 +2319,6 @@ function manageChatSettings() {
     showToast('Opening chat settings...', 'info');
 }
 
-function createChatTemplate() {
-    showToast('Opening chat template builder...', 'info');
-}
 
 function importParticipants() {
     showToast('Opening participant import wizard...', 'info');
@@ -2309,30 +2634,22 @@ function showUserDetails(userName) {
 }
 
 // UPDATED: Create/Edit functions with working forms and EMAIL INTEGRATION
-function showCreateUserModal() {
-    // Get organizations from localStorage or appState
-    const organizations = JSON.parse(localStorage.getItem('organizations') || '[]');
-    
-    // If no organizations in localStorage, use the default ones
-    const defaultOrgs = ['TechCorp Ltd', 'Global Industries', 'StartupX'];
+async function showCreateUserModal() {
+    // Load organizations from database instead of localStorage
+    const organizations = await loadOrganizations() || [];
     
     // Build organization options HTML
     let orgOptionsHTML = '<option value="">Select Organization</option>';
     
-    // Add stored organizations first
+    // Add real organizations from database
     if (organizations.length > 0) {
         organizations.forEach(org => {
             orgOptionsHTML += `<option value="${org.name}">${org.name}</option>`;
         });
+    } else {
+        // If no organizations exist, show helpful message
+        orgOptionsHTML += '<option value="" disabled>No organizations created yet</option>';
     }
-    
-    // Add default organizations if they're not already in the stored list
-    defaultOrgs.forEach(orgName => {
-        const exists = organizations.some(org => org.name === orgName);
-        if (!exists) {
-            orgOptionsHTML += `<option value="${orgName}">${orgName}</option>`;
-        }
-    });
     
     const modal = document.createElement('div');
     modal.className = 'modal';
@@ -2397,32 +2714,45 @@ async function createUser(event) {
     // Get the form data
     const formData = new FormData(event.target);
     const userData = {
+        firstName: formData.get('firstName'),
+        lastName: formData.get('lastName'),
         name: `${formData.get('firstName')} ${formData.get('lastName')}`,
         email: formData.get('email'),
         organization: formData.get('organization'),
         access: formData.get('access'),
         sendInvite: formData.get('sendInvite') === 'on'
     };
-    
-    // Add to users table (your existing code)
-    const table = document.querySelector('#users-table tbody');
-    const newRow = document.createElement('tr');
-    newRow.innerHTML = `
-        <td><input type="checkbox"></td>
-        <td>${userData.name}</td>
-        <td>${userData.email}</td>
-        <td>${userData.organization}</td>
-        <td><span class="tag tag-pending">${userData.access}</span></td>
-        <td><span class="tag tag-pending">Pending</span></td>
-        <td>Never</td>
-        <td>
-            <button class="btn btn-secondary btn-sm" onclick="handleEditUser('${userData.name}')">Edit</button>
-            <button class="btn btn-primary btn-sm" onclick="handleResendInvite('${userData.name}')">Resend Invite</button>
-            <button class="btn btn-danger btn-sm" onclick="handleRemoveUser('${userData.name}')">Remove</button>
-        </td>
-    `;
-    newRow.onclick = () => showUserDetails(userData.name);
-    table.appendChild(newRow);
+
+    try {
+        // Save user to database
+        const savedUser = await saveUser(userData);
+        console.log('User saved to database:', savedUser);
+        
+        // Add to users table (UI update)
+        const table = document.querySelector('#users-table tbody');
+        const newRow = document.createElement('tr');
+        newRow.innerHTML = `
+            <td><input type="checkbox"></td>
+            <td>${userData.name}</td>
+            <td>${userData.email}</td>
+            <td>${userData.organization}</td>
+            <td><span class="tag tag-pending">${userData.access}</span></td>
+            <td><span class="tag tag-pending">Pending</span></td>
+            <td>Never</td>
+            <td>
+                <button class="btn btn-secondary btn-sm" onclick="handleEditUser('${savedUser?.id || userData.name}')">Edit</button>
+                <button class="btn btn-primary btn-sm" onclick="handleResendInvite('${userData.name}')">Resend Invite</button>
+                <button class="btn btn-danger btn-sm" onclick="handleRemoveUser('${savedUser?.id || userData.name}')">Remove</button>
+            </td>
+        `;
+        newRow.onclick = () => showUserDetails(savedUser?.id || userData.name);
+        table.appendChild(newRow);
+    } catch (error) {
+        console.error('Error saving user to database:', error);
+        showToast(`❌ Failed to create user: ${error.message}`, 'error');
+        event.target.closest('.modal').remove();
+        return;
+    }
     
     // NEW: Send invitation email if checkbox was checked
     if (userData.sendInvite) {
@@ -3218,103 +3548,6 @@ function processFeedbackReport(event) {
 function viewAllTopics() {
     showToast('Opening complete topics analysis...', 'info');
     // Would show a detailed topics/keywords analysis modal
-}
-// UPDATED: Create User function with better error handling
-async function createUser(event) {
-    event.preventDefault();
-    
-    const formData = new FormData(event.target);
-    const userData = {
-        name: `${formData.get('firstName')} ${formData.get('lastName')}`,
-        email: formData.get('email'),
-        organization: formData.get('organization'),
-        access: formData.get('access'),
-        sendInvite: formData.get('sendInvite') === 'on'
-    };
-    
-    // Check if it's a demo/test email
-    const isDemoEmail = userData.email.includes('@techcorp.com') || 
-                        userData.email.includes('@startupx.com') || 
-                        userData.email.includes('@global.com');
-    
-    // Add to users table
-    const table = document.querySelector('#users-table tbody');
-    const newRow = document.createElement('tr');
-    newRow.innerHTML = `
-        <td><input type="checkbox"></td>
-        <td>${userData.name}</td>
-        <td>${userData.email}</td>
-        <td>${userData.organization}</td>
-        <td><span class="tag tag-pending">${userData.access}</span></td>
-        <td><span class="tag tag-pending">Pending</span></td>
-        <td>Never</td>
-        <td>
-            <button class="btn btn-secondary btn-sm" onclick="handleEditUser('${userData.name}')">Edit</button>
-            <button class="btn btn-primary btn-sm" onclick="handleResendInvite('${userData.name}')">Resend Invite</button>
-            <button class="btn btn-danger btn-sm" onclick="handleRemoveUser('${userData.name}')">Remove</button>
-        </td>
-    `;
-    newRow.onclick = () => showUserDetails(userData.name);
-    table.appendChild(newRow);
-    
-    // Send invitation email if checkbox was checked
-    if (userData.sendInvite) {
-        try {
-            // Show loading state
-            const submitBtn = event.target.querySelector('button[type="submit"]');
-            const originalText = submitBtn.textContent;
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Creating user and sending invite...';
-            
-            const response = await fetch('/api/send-invitation', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    userEmail: userData.email,
-                    userName: userData.name,
-                    organizationName: userData.organization,
-                    temporaryPassword: 'Welcome123!' + Math.random().toString(36).substring(2, 5)
-                }),
-            });
-
-            const result = await response.json();
-            
-            if (response.ok) {
-                if (result.demo) {
-                    showToast(`✅ User created! (Demo mode - no email sent to ${userData.email})`, 'info');
-                } else {
-                    showToast(`✅ User created and invitation sent to ${userData.email}!`, 'success');
-                }
-            } else {
-                // User created but email failed
-                if (isDemoEmail) {
-                    showToast(`✅ User created! (Demo email - no actual email sent)`, 'info');
-                } else {
-                    showToast(`⚠️ User created but email failed: ${result.error || 'Unknown error'}`, 'warning');
-                    console.error('Email error:', result);
-                }
-            }
-            
-            // Reset button
-            submitBtn.disabled = false;
-            submitBtn.textContent = originalText;
-            
-        } catch (error) {
-            console.error('Failed to send invitation:', error);
-            if (isDemoEmail) {
-                showToast(`✅ User created! (Demo mode active)`, 'info');
-            } else {
-                showToast(`⚠️ User created but email service unavailable`, 'warning');
-            }
-        }
-    } else {
-        showToast(`✅ User "${userData.name}" created successfully!`, 'success');
-    }
-    
-    // Close the modal
-    event.target.closest('.modal').remove();
 }
 
 // UPDATED: Test email function with better error handling

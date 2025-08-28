@@ -1370,24 +1370,10 @@
                                     <th onclick="sortTable(this, 3)" data-translate="time">Time</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                <tr onclick="showActivityDetails('TechCorp Ltd', 'New survey created')">
-                                    <td>TechCorp Ltd</td>
-                                    <td>New survey created: "Q4 Feedback"</td>
-                                    <td>Sarah Johnson</td>
-                                    <td>2 hours ago</td>
-                                </tr>
-                                <tr onclick="showActivityDetails('Global Industries', 'Chat feedback submitted')">
-                                    <td>Global Industries</td>
-                                    <td>Chat feedback submitted</td>
-                                    <td>Anonymous</td>
-                                    <td>4 hours ago</td>
-                                </tr>
-                                <tr onclick="showActivityDetails('StartupX', 'Survey completed')">
-                                    <td>StartupX</td>
-                                    <td>Survey completed: 127 responses</td>
-                                    <td>Mike Chen</td>
-                                    <td>1 day ago</td>
+                            <tbody id="activity-table-body">
+                                <!-- Recent activity will be loaded from database -->
+                                <tr style="text-align: center; color: var(--text-secondary);">
+                                    <td colspan="4">No recent activity. Activity will appear here as users interact with your surveys.</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -1469,42 +1455,10 @@
                                     <th data-translate="actions">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                <tr onclick="showOrganizationDetails('TechCorp Ltd')">
-                                    <td>TechCorp Ltd</td>
-                                    <td><span class="tag tag-active">Start + Keep Listening</span></td>
-                                    <td>15</td>
-                                    <td><span class="tag tag-active">Active</span></td>
-                                    <td>2 hours ago</td>
-                                    <td onclick="event.stopPropagation()">
-                                        <button class="btn btn-secondary btn-sm" onclick="handleEditOrganization('TechCorp Ltd')" data-translate="edit">Edit</button>
-                                        <button class="btn btn-warning btn-sm" onclick="handleSuspendOrganization('TechCorp Ltd')" data-translate="suspend">Suspend</button>
-                                        <button class="btn btn-danger btn-sm" onclick="handleDeleteOrganization('TechCorp Ltd')">Delete</button>
-                                    </td>
-                                </tr>
-                                <tr onclick="showOrganizationDetails('Global Industries')">
-                                    <td>Global Industries</td>
-                                    <td><span class="tag tag-pending">Start Listening</span></td>
-                                    <td>8</td>
-                                    <td><span class="tag tag-active">Active</span></td>
-                                    <td>4 hours ago</td>
-                                    <td onclick="event.stopPropagation()">
-                                        <button class="btn btn-secondary btn-sm" onclick="handleEditOrganization('Global Industries')" data-translate="edit">Edit</button>
-                                        <button class="btn btn-warning btn-sm" onclick="handleSuspendOrganization('Global Industries')" data-translate="suspend">Suspend</button>
-                                        <button class="btn btn-danger btn-sm" onclick="handleDeleteOrganization('Global Industries')">Delete</button>
-                                    </td>
-                                </tr>
-                                <tr onclick="showOrganizationDetails('StartupX')">
-                                    <td>StartupX</td>
-                                    <td><span class="tag tag-processing">Keep Listening</span></td>
-                                    <td>3</td>
-                                    <td><span class="tag tag-active">Active</span></td>
-                                    <td>1 day ago</td>
-                                    <td onclick="event.stopPropagation()">
-                                        <button class="btn btn-secondary btn-sm" onclick="handleEditOrganization('StartupX')" data-translate="edit">Edit</button>
-                                        <button class="btn btn-warning btn-sm" onclick="handleSuspendOrganization('StartupX')" data-translate="suspend">Suspend</button>
-                                        <button class="btn btn-danger btn-sm" onclick="handleDeleteOrganization('StartupX')">Delete</button>
-                                    </td>
+                            <tbody id="organizations-table-body">
+                                <!-- Organizations will be loaded from database -->
+                                <tr style="text-align: center; color: var(--text-secondary);">
+                                    <td colspan="6">No organizations found. Click 'Add Organization' to create your first organization.</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -1533,11 +1487,9 @@
                             </div>
                             <div class="filter-group">
                                 <label class="filter-label" data-translate="organization">Organization</label>
-                                <select class="form-select" style="min-width: 150px;" onchange="filterUsers('organization', this.value)">
+                                <select class="form-select" style="min-width: 150px;" onchange="filterUsers('organization', this.value)" id="organization-filter">
                                     <option value="">All Organizations</option>
-                                    <option value="techcorp">TechCorp Ltd</option>
-                                    <option value="global">Global Industries</option>
-                                    <option value="startupx">StartupX</option>
+                                    <!-- Organization options will be populated from database -->
                                 </select>
                             </div>
                             <div class="filter-group">
@@ -1573,48 +1525,10 @@
                                     <th data-translate="actions">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                <tr onclick="showUserDetails('Sarah Johnson')">
-                                    <td onclick="event.stopPropagation()"><input type="checkbox"></td>
-                                    <td>Sarah Johnson</td>
-                                    <td>sarah@techcorp.com</td>
-                                    <td>TechCorp Ltd</td>
-                                    <td><span class="tag tag-active">Start + Keep Listening</span></td>
-                                    <td><span class="tag tag-active">Active</span></td>
-                                    <td>2 hours ago</td>
-                                    <td onclick="event.stopPropagation()">
-                                        <button class="btn btn-secondary btn-sm" onclick="handleEditUser('Sarah Johnson')" data-translate="edit">Edit</button>
-                                        <button class="btn btn-warning btn-sm" onclick="handleSuspendUser('Sarah Johnson')" data-translate="suspend">Suspend</button>
-                                        <button class="btn btn-danger btn-sm" onclick="handleRemoveUser('Sarah Johnson')">Remove</button>
-                                    </td>
-                                </tr>
-                                <tr onclick="showUserDetails('Mike Chen')">
-                                    <td onclick="event.stopPropagation()"><input type="checkbox"></td>
-                                    <td>Mike Chen</td>
-                                    <td>mike@startupx.com</td>
-                                    <td>StartupX</td>
-                                    <td><span class="tag tag-processing">Keep Listening</span></td>
-                                    <td><span class="tag tag-active">Active</span></td>
-                                    <td>1 day ago</td>
-                                    <td onclick="event.stopPropagation()">
-                                        <button class="btn btn-secondary btn-sm" onclick="handleEditUser('Mike Chen')" data-translate="edit">Edit</button>
-                                        <button class="btn btn-warning btn-sm" onclick="handleSuspendUser('Mike Chen')" data-translate="suspend">Suspend</button>
-                                        <button class="btn btn-danger btn-sm" onclick="handleRemoveUser('Mike Chen')">Remove</button>
-                                    </td>
-                                </tr>
-                                <tr onclick="showUserDetails('Lisa Wang')">
-                                    <td onclick="event.stopPropagation()"><input type="checkbox"></td>
-                                    <td>Lisa Wang</td>
-                                    <td>lisa@global.com</td>
-                                    <td>Global Industries</td>
-                                    <td><span class="tag tag-pending">Start Listening</span></td>
-                                    <td><span class="tag tag-pending">Pending</span></td>
-                                    <td>Never</td>
-                                    <td onclick="event.stopPropagation()">
-                                        <button class="btn btn-secondary btn-sm" onclick="handleEditUser('Lisa Wang')" data-translate="edit">Edit</button>
-                                        <button class="btn btn-primary btn-sm" onclick="handleResendInvite('Lisa Wang')">Resend Invite</button>
-                                        <button class="btn btn-danger btn-sm" onclick="handleRemoveUser('Lisa Wang')">Remove</button>
-                                    </td>
+                            <tbody id="users-table-body">
+                                <!-- Users will be loaded from database -->
+                                <tr style="text-align: center; color: var(--text-secondary);">
+                                    <td colspan="8">No users found. Click 'Add User' to invite your first user.</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -3031,6 +2945,7 @@
     </div>
 
 <script src="assets/js/config.js"></script>
+<script src="assets/js/database.js"></script>
 <script src="assets/js/app.js"></script>
 <script>
 // NEW CHAT WIDGET FUNCTIONS
@@ -3093,7 +3008,7 @@ function createNewChatWidget() {
                     <label class="form-label" style="font-weight: bold; margin-bottom: 1rem; display: block;">
                         Choose Chat Type
                     </label>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
                         <label class="chat-type-option" style="
                             display: flex;
                             flex-direction: column;
@@ -3104,15 +3019,15 @@ function createNewChatWidget() {
                             transition: all 0.3s;
                             background: white;
                         " onmouseover="this.style.borderColor='var(--primary-color)'" 
-                           onmouseout="this.style.borderColor=document.getElementById('chat-type-continuous').checked ? 'var(--primary-color)' : 'var(--border-color)'">
-                            <input type="radio" name="chatType" id="chat-type-continuous" value="continuous" checked 
+                           onmouseout="this.style.borderColor=document.getElementById('chat-type-listening').checked ? 'var(--primary-color)' : 'var(--border-color)'">
+                            <input type="radio" name="chatType" id="chat-type-listening" value="listening" checked 
                                    onchange="toggleChatTypeFields()" style="margin-bottom: 0.5rem;">
-                            <div style="font-weight: 600; margin-bottom: 0.5rem;">🔄 Continuous Chat</div>
+                            <div style="font-weight: 600; margin-bottom: 0.5rem;">👂 Listening</div>
                             <div style="font-size: 0.875rem; color: var(--text-secondary);">
-                                • Single shared link for everyone<br>
-                                • No personal info required<br>
-                                • Anonymous feedback allowed<br>
-                                • Perfect for public surveys
+                                • Continuous listening mode<br>
+                                • Open-ended conversations<br>
+                                • Real-time insights<br>
+                                • Perfect for ongoing feedback
                             </div>
                         </label>
                         
@@ -3126,15 +3041,37 @@ function createNewChatWidget() {
                             transition: all 0.3s;
                             background: white;
                         " onmouseover="this.style.borderColor='var(--primary-color)'" 
-                           onmouseout="this.style.borderColor=document.getElementById('chat-type-personal').checked ? 'var(--primary-color)' : 'var(--border-color)'">
-                            <input type="radio" name="chatType" id="chat-type-personal" value="personal" 
+                           onmouseout="this.style.borderColor=document.getElementById('chat-type-chat-survey').checked ? 'var(--primary-color)' : 'var(--border-color)'">
+                            <input type="radio" name="chatType" id="chat-type-chat-survey" value="chat-survey" 
                                    onchange="toggleChatTypeFields()" style="margin-bottom: 0.5rem;">
-                            <div style="font-weight: 600; margin-bottom: 0.5rem;">👤 Personal Chat</div>
+                            <div style="font-weight: 600; margin-bottom: 0.5rem;">💬 Chat Survey</div>
                             <div style="font-size: 0.875rem; color: var(--text-secondary);">
-                                • Unique link per participant<br>
-                                • Requires email & name<br>
-                                • Tracked responses<br>
-                                • Perfect for targeted feedback
+                                • Structured conversation flow<br>
+                                • Guided question sequence<br>
+                                • Interactive survey format<br>
+                                • Perfect for detailed feedback
+                            </div>
+                        </label>
+                        
+                        <label class="chat-type-option" style="
+                            display: flex;
+                            flex-direction: column;
+                            padding: 1rem;
+                            border: 2px solid var(--border-color);
+                            border-radius: 8px;
+                            cursor: pointer;
+                            transition: all 0.3s;
+                            background: white;
+                        " onmouseover="this.style.borderColor='var(--primary-color)'" 
+                           onmouseout="this.style.borderColor=document.getElementById('chat-type-pulse-survey').checked ? 'var(--primary-color)' : 'var(--border-color)'">
+                            <input type="radio" name="chatType" id="chat-type-pulse-survey" value="pulse-survey" 
+                                   onchange="toggleChatTypeFields()" style="margin-bottom: 0.5rem;">
+                            <div style="font-weight: 600; margin-bottom: 0.5rem;">📊 Pulse Survey</div>
+                            <div style="font-size: 0.875rem; color: var(--text-secondary);">
+                                • Quick pulse check format<br>
+                                • Short focused questions<br>
+                                • Regular interval surveys<br>
+                                • Perfect for team temperature
                             </div>
                         </label>
                     </div>
@@ -4666,9 +4603,145 @@ function refreshManageTemplates() {
         '<div style="text-align: center; padding: 3rem; color: var(--text-secondary);">No templates created yet</div>';
 }
 
+// DATABASE FORM HANDLERS
+
+// Handle organization form submission
+async function handleOrganizationUpdate(event) {
+    event.preventDefault();
+    
+    const formData = {
+        name: document.getElementById('org-name').value,
+        industry: document.getElementById('org-industry').value,
+        size: document.getElementById('org-size').value,
+        country: document.getElementById('org-country').value,
+        website: document.getElementById('org-website').value,
+        description: document.getElementById('org-description').value,
+        plan: document.getElementById('org-plan').value
+    };
+    
+    try {
+        const result = await saveOrganization(formData);
+        showToast('Organization saved successfully!', 'success');
+        closeModal('organization-settings-modal');
+        loadOrganizationsData(); // Refresh the organizations table
+    } catch (error) {
+        console.error('Error saving organization:', error);
+        showToast('Failed to save organization', 'error');
+    }
+}
+
+// Handle user form submission (for adding users)
+async function handleUserSubmit(event) {
+    event.preventDefault();
+    
+    const formData = {
+        name: document.getElementById('user-name').value,
+        email: document.getElementById('user-email').value,
+        organization: document.getElementById('user-org').value,
+        role: document.getElementById('user-role').value || 'user'
+    };
+    
+    try {
+        const result = await saveUser(formData);
+        showToast('User saved successfully!', 'success');
+        closeModal('add-user-modal');
+        loadUsersData(); // Refresh the users table
+    } catch (error) {
+        console.error('Error saving user:', error);
+        showToast('Failed to save user', 'error');
+    }
+}
+
+// Load organizations data from database
+async function loadOrganizationsData() {
+    try {
+        const organizations = await loadOrganizations();
+        const tbody = document.getElementById('organizations-table-body');
+        
+        if (organizations.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6" style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+                        No organizations found. Add your first organization to get started.
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+        
+        tbody.innerHTML = organizations.map(org => `
+            <tr onclick="showOrganizationDetails('${org.id}')">
+                <td>${org.name}</td>
+                <td><span class="tag tag-active">${org.plan || 'Basic'}</span></td>
+                <td>0</td>
+                <td><span class="tag tag-active">Active</span></td>
+                <td>${new Date(org.created_at).toLocaleDateString()}</td>
+                <td onclick="event.stopPropagation()">
+                    <button class="btn btn-secondary btn-sm" onclick="handleEditOrganization('${org.id}')" data-translate="edit">Edit</button>
+                    <button class="btn btn-warning btn-sm" onclick="handleSuspendOrganization('${org.id}')" data-translate="suspend">Suspend</button>
+                    <button class="btn btn-danger btn-sm" onclick="handleDeleteOrganization('${org.id}')">Delete</button>
+                </td>
+            </tr>
+        `).join('');
+        
+        // Update organization filter
+        const filter = document.getElementById('organization-filter');
+        if (filter) {
+            filter.innerHTML = '<option value="">All Organizations</option>' + 
+                organizations.map(org => `<option value="${org.id}">${org.name}</option>`).join('');
+        }
+        
+    } catch (error) {
+        console.error('Error loading organizations:', error);
+        showToast('Failed to load organizations', 'error');
+    }
+}
+
+// Load users data from database
+async function loadUsersData() {
+    try {
+        const users = await loadUsers();
+        const tbody = document.getElementById('users-table-body');
+        
+        if (users.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="8" style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+                        No users found. Add your first user to get started.
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+        
+        tbody.innerHTML = users.map(user => `
+            <tr onclick="showUserDetails('${user.id}')">
+                <td onclick="event.stopPropagation()"><input type="checkbox"></td>
+                <td>${user.name}</td>
+                <td>${user.email}</td>
+                <td>${user.organization || 'N/A'}</td>
+                <td><span class="tag tag-active">${user.role || 'User'}</span></td>
+                <td><span class="tag tag-${user.status === 'active' ? 'active' : 'pending'}">${user.status || 'Active'}</span></td>
+                <td>${user.last_login || 'Never'}</td>
+                <td onclick="event.stopPropagation()">
+                    <button class="btn btn-secondary btn-sm" onclick="handleEditUser('${user.id}')" data-translate="edit">Edit</button>
+                    <button class="btn btn-warning btn-sm" onclick="handleSuspendUser('${user.id}')" data-translate="suspend">Suspend</button>
+                    <button class="btn btn-danger btn-sm" onclick="handleRemoveUser('${user.id}')">Remove</button>
+                </td>
+            </tr>
+        `).join('');
+        
+    } catch (error) {
+        console.error('Error loading users:', error);
+        showToast('Failed to load users', 'error');
+    }
+}
+
 // Initialize templates on page load
 document.addEventListener('DOMContentLoaded', function() {
     loadTemplates();
+    loadOrganizationsData();
+    loadUsersData();
 });
 </script>
 </body>

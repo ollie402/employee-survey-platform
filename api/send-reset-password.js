@@ -121,7 +121,7 @@ export default async function handler(req, res) {
   `;
 
   try {
-    // Send the email using SMTP2GO
+    // Send the email using SMTP2GO - FIXED: Removed api_key from body
     const response = await fetch('https://api.smtp2go.com/v3/email/send', {
       method: 'POST',
       headers: {
@@ -129,7 +129,6 @@ export default async function handler(req, res) {
         'X-Smtp2go-Api-Key': SMTP2GO_API_KEY,
       },
       body: JSON.stringify({
-        api_key: SMTP2GO_API_KEY,
         to: [email],
         sender: `${SMTP2GO_SENDER_NAME} <${SMTP2GO_SENDER_EMAIL}>`,
         subject: subject,

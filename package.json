@@ -2,9 +2,11 @@
   "name": "employee-survey-platform",
   "version": "1.0.0",
   "description": "Employee Survey Platform - A feedback management system",
+  "type": "module",
   "main": "index.html",
   "scripts": {
-    "start": "live-server --port=3000 --open=/index.html",
+    "start": "node dev-server.js",
+    "start:live-server": "live-server --port=3001 --open=/index.html",
     "dev": "concurrently \"npm run start\" \"npm run watch\"",
     "build": "echo 'Building project...' && npm run copy-files",
     "copy-files": "node build-script.js",
@@ -51,6 +53,7 @@
     "domain": "employee-survey-platform.surge.sh"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.56.0",
     "dotenv": "^17.2.1",
     "express": "^5.1.0"
   }

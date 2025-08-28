@@ -48,6 +48,71 @@ if (config.DEBUG) {
 // Make these settings available to the rest of the app
 window.APP_CONFIG = config;
 
+// Initialize Supabase client
+// Note: In a real application, you would get these from environment variables
+// For development, you can add your Supabase credentials here
+const SUPABASE_CONFIG = {
+    development: {
+        url: 'YOUR_SUPABASE_URL',
+        key: 'YOUR_SUPABASE_ANON_KEY'
+    },
+    test: {
+        url: 'YOUR_TEST_SUPABASE_URL',
+        key: 'YOUR_TEST_SUPABASE_ANON_KEY'
+    },
+    production: {
+        url: 'YOUR_PROD_SUPABASE_URL',
+        key: 'YOUR_PROD_SUPABASE_ANON_KEY'
+    }
+};
+
+// Initialize Supabase client if credentials are provided
+if (typeof supabase !== 'undefined') {
+    const supabaseConfig = SUPABASE_CONFIG[currentEnv];
+    
+    // Only initialize if we have real credentials (not placeholder text)
+    if (supabaseConfig.url && supabaseConfig.url !== 'YOUR_SUPABASE_URL') {
+        window.supabaseClient = supabase.createClient(supabaseConfig.url, supabaseConfig.key);
+        if (config.DEBUG) {
+            console.log('🗄️ Supabase client initialized for', currentEnv);
+        }
+    } else {
+        if (config.DEBUG) {
+            console.warn('⚠️ Supabase credentials not configured. Database features will be disabled.');
+            console.warn('💡 To enable database features, update SUPABASE_CONFIG in config.js with your Supabase project credentials.');
+        }
+        // Create a mock client that returns empty arrays to prevent errors
+        window.supabaseClient = {
+            from: () => ({
+                select: () => Promise.resolve({ data: [], error: null }),
+                insert: () => Promise.resolve({ data: [], error: null }),
+                update: () => Promise.resolve({ data: [], error: null }),
+                delete: () => Promise.resolve({ data: [], error: null }),
+                order: () => ({
+                    select: () => Promise.resolve({ data: [], error: null })
+                })
+            })
+        };
+    }
+} else {
+    if (config.DEBUG) {
+        console.warn('⚠️ Supabase library not loaded. Database features will be disabled.');
+        console.warn('💡 To enable database features, include the Supabase JavaScript library.');
+    }
+    // Create a mock client that returns empty arrays to prevent errors
+    window.supabaseClient = {
+        from: () => ({
+            select: () => Promise.resolve({ data: [], error: null }),
+            insert: () => Promise.resolve({ data: [], error: null }),
+            update: () => Promise.resolve({ data: [], error: null }),
+            delete: () => Promise.resolve({ data: [], error: null }),
+            order: () => ({
+                select: () => Promise.resolve({ data: [], error: null })
+            })
+        })
+    };
+}
+
 // Add colored indicators to show what environment you're in
 if (currentEnv === 'development') {
     // Add a red "DEV" badge to the corner

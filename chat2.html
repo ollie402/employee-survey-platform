@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Listening Survey - Workplace Feedback</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .chat-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 500px;
+            height: 600px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .chat-header h2 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .chat-header p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .session-timer {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.2);
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.85rem;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.bot {
+            justify-content: flex-start;
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .message-bubble {
+            max-width: 80%;
+            padding: 12px 18px;
+            border-radius: 18px;
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+
+        .bot .message-bubble {
+            background: white;
+            color: #333;
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .user .message-bubble {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .typing-indicator {
+            display: none;
+            padding: 15px;
+            background: white;
+            border-radius: 18px;
+            border-bottom-left-radius: 4px;
+            width: 60px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .typing-indicator.show {
+            display: block;
+        }
+
+        .typing-indicator span {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #667eea;
+            margin: 0 2px;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+
+        .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+        .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+
+        .input-area {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: 10px;
+        }
+
+        #user-input {
+            flex: 1;
+            padding: 12px 18px;
+            border: 2px solid #e9ecef;
+            border-radius: 25px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        #user-input:focus {
+            border-color: #667eea;
+        }
+
+        #send-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s;
+        }
+
+        #send-btn:hover {
+            transform: scale(1.1);
+        }
+
+        #send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .completion-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .completion-screen.show {
+            display: flex;
+        }
+
+        .completion-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 400px;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .completion-content h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .completion-stats {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            font-size: 0.95rem;
+        }
+
+        .stat-label {
+            color: #666;
+        }
+
+        .stat-value {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .completion-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: transform 0.2s;
+        }
+
+        .completion-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .encouragement-prompt {
+            background: #f0f8ff;
+            padding: 8px 12px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            color: #667eea;
+            margin: 10px 0;
+            display: inline-block;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .encouragement-prompt:hover {
+            background: #e1f0ff;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <h2>We're Listening</h2>
+            <p>Share your thoughts about your workplace</p>
+            <div class="session-timer" id="timer">00:00</div>
+        </div>
+
+        <div class="chat-messages" id="listening-messages">
+            <!-- Messages will appear here -->
+        </div>
+
+        <div class="typing-indicator" id="typing">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+
+        <div class="input-area" id="listening-input-area">
+            <div class="input-wrapper">
+                <input 
+                    type="text" 
+                    id="user-input" 
+                    placeholder="Type your thoughts here..."
+                    autocomplete="off"
+                >
+                <button id="send-btn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="completion-screen" id="completion-screen">
+        <div class="completion-content">
+            <h2>Thank You for Sharing</h2>
+            <p>Your feedback is valuable and will help improve your workplace.</p>
+            <div class="completion-stats">
+                <div class="stat-item">
+                    <span class="stat-label">Session Duration:</span>
+                    <span class="stat-value" id="final-duration">0:00</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Thoughts Shared:</span>
+                    <span class="stat-value" id="final-messages">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Key Themes:</span>
+                    <span class="stat-value" id="final-themes">-</span>
+                </div>
+            </div>
+            <button class="completion-btn" onclick="startNewSession()">Start New Session</button>
+        </div>
+    </div>
+
+    <script>
+        // Configuration for Listening Survey
+        const config = {
+            sessionId: 'listening_' + Date.now(),
+            minSessionTime: 60, // Minimum 1 minute
+            maxSilenceTime: 120, // 2 minutes of silence before gentle nudge
+            saveInterval: 30000, // Auto-save every 30 seconds
+        };
+
+        // State management
+        let conversationState = {
+            messages: [],
+            sessionStartTime: Date.now(),
+            isComplete: false,
+            silenceCount: 0,
+            totalWords: 0,
+            emotions: [],
+            themes: [],
+            sessionDuration: 0
+        };
+
+        // Listening prompts - gentle nudges
+        const listeningPrompts = {
+            opening: [
+                "Hi there! I'm here to listen. What's on your mind about your workplace?",
+                "Hello! This is a safe space to share your thoughts about work. What would you like to talk about?",
+                "Welcome! I'm here to hear your perspective. How are things going at work?"
+            ],
+            
+            encouragement: [
+                "I'm listening. Please, tell me more about that.",
+                "That's interesting. What else comes to mind?",
+                "I understand. Is there anything else about this you'd like to share?",
+                "Thank you for sharing that. How does that affect you?",
+                "I hear you. What other thoughts do you have?",
+                "Please continue, I'm here to listen.",
+                "That sounds important. Can you elaborate?",
+                "I see. What else would you like to talk about?",
+                "Your perspective matters. Please go on.",
+                "I'm following along. What happened next?"
+            ],
+            
+            empathy: [
+                "That sounds challenging.",
+                "I can understand why that would be concerning.",
+                "Thank you for trusting me with this.",
+                "Your feelings about this are valid.",
+                "That must be difficult to deal with.",
+                "I appreciate you sharing this with me.",
+                "It sounds like this has been on your mind.",
+                "That's an important point you're raising."
+            ],
+            
+            silence_nudges: [
+                "Take your time. I'm here whenever you're ready to share more.",
+                "Is there anything else you'd like to discuss about your workplace?",
+                "Sometimes it helps to share what's on your mind. I'm listening.",
+                "If you'd like to continue, I'm here. Or we can wrap up if you prefer.",
+                "Feel free to share any other thoughts or concerns you might have."
+            ],
+            
+            deepening: [
+                "How long has this been going on?",
+                "How does this impact your day-to-day work?",
+                "What would you like to see change?",
+                "How do your colleagues feel about this?",
+                "What would make the situation better?",
+                "Have you been able to discuss this with anyone at work?",
+                "What's the most challenging part of this for you?"
+            ],
+            
+            closing: [
+                "Thank you so much for sharing your thoughts today.",
+                "I really appreciate you taking the time to share your perspective.",
+                "Your feedback is valuable and will help make things better.",
+                "Thank you for your openness and honesty today."
+            ]
+        };
+
+        // Timer functionality
+        let seconds = 0;
+        let timerInterval;
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                seconds++;
+                const mins = Math.floor(seconds / 60);
+                const secs = seconds % 60;
+                document.getElementById('timer').textContent = 
+                    `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            }, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+            conversationState.sessionDuration = seconds;
+        }
+
+        // Initialize the listening session
+        function initializeListeningSession() {
+            const opening = listeningPrompts.opening[Math.floor(Math.random() * listeningPrompts.opening.length)];
+            setTimeout(() => {
+                addMessage(opening, 'bot');
+            }, 500);
+            
+            startTimer();
+            setupEventListeners();
+            startSilenceMonitor();
+        }
+
+        // Add message to chat
+        function addMessage(text, sender) {
+            const messagesContainer = document.getElementById('listening-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            
+            const bubbleDiv = document.createElement('div');
+            bubbleDiv.className = 'message-bubble';
+            bubbleDiv.textContent = text;
+            
+            messageDiv.appendChild(bubbleDiv);
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            
+            // Store message
+            conversationState.messages.push({
+                text: text,
+                sender: sender,
+                timestamp: Date.now()
+            });
+            
+            // Update word count for user messages
+            if (sender === 'user') {
+                conversationState.totalWords += text.split(' ').length;
+                detectThemes(text);
+            }
+        }
+
+        // Show typing indicator
+        function showTyping() {
+            const typing = document.getElementById('typing');
+            typing.classList.add('show');
+            document.getElementById('listening-messages').appendChild(typing);
+        }
+
+        function hideTyping() {
+            const typing = document.getElementById('typing');
+            typing.classList.remove('show');
+        }
+
+        // Generate appropriate response
+        function generateListeningResponse(userMessage) {
+            const messageCount = conversationState.messages.filter(m => m.sender === 'user').length;
+            const wordCount = userMessage.split(' ').length;
+            
+            // Decide response type based on context
+            let response;
+            
+            if (messageCount === 1) {
+                // First response - show empathy and encourage more
+                response = listeningPrompts.empathy[Math.floor(Math.random() * listeningPrompts.empathy.length)] + 
+                          " " + 
+                          listeningPrompts.encouragement[Math.floor(Math.random() * listeningPrompts.encouragement.length)];
+            } else if (wordCount < 5) {
+                // Short response - ask for elaboration
+                response = listeningPrompts.encouragement[Math.floor(Math.random() * listeningPrompts.encouragement.length)];
+            } else if (messageCount % 4 === 0) {
+                // Every 4th message - ask a deepening question
+                response = listeningPrompts.deepening[Math.floor(Math.random() * listeningPrompts.deepening.length)];
+            } else if (Math.random() < 0.3) {
+                // 30% chance of empathy statement
+                response = listeningPrompts.empathy[Math.floor(Math.random() * listeningPrompts.empathy.length)];
+            } else {
+                // Default encouragement
+                response = listeningPrompts.encouragement[Math.floor(Math.random() * listeningPrompts.encouragement.length)];
+            }
+            
+            return response;
+        }
+
+        // Detect themes in user messages
+        function detectThemes(text) {
+            const themeKeywords = {
+                'management': ['manager', 'boss', 'leadership', 'supervisor', 'management'],
+                'workload': ['busy', 'overwhelmed', 'workload', 'hours', 'overtime', 'stress'],
+                'culture': ['culture', 'environment', 'atmosphere', 'team', 'people'],
+                'growth': ['growth', 'career', 'promotion', 'development', 'learning'],
+                'communication': ['communication', 'feedback', 'listen', 'heard', 'meetings'],
+                'recognition': ['recognition', 'appreciated', 'valued', 'acknowledged', 'reward'],
+                'work-life balance': ['balance', 'flexibility', 'remote', 'home', 'family'],
+                'compensation': ['pay', 'salary', 'benefits', 'compensation', 'raise']
+            };
+            
+            const textLower = text.toLowerCase();
+            for (const [theme, keywords] of Object.entries(themeKeywords)) {
+                if (keywords.some(keyword => textLower.includes(keyword))) {
+                    if (!conversationState.themes.includes(theme)) {
+                        conversationState.themes.push(theme);
+                    }
+                }
+            }
+        }
+
+        // Monitor for silence and provide nudges
+        let lastMessageTime = Date.now();
+        let silenceCheckInterval;
+
+        function startSilenceMonitor() {
+            silenceCheckInterval = setInterval(() => {
+                const timeSinceLastMessage = (Date.now() - lastMessageTime) / 1000;
+                
+                if (timeSinceLastMessage > config.maxSilenceTime && !conversationState.isComplete) {
+                    conversationState.silenceCount++;
+                    
+                    if (conversationState.silenceCount >= 3) {
+                        // After 3 silence nudges, offer to end
+                        showTyping();
+                        setTimeout(() => {
+                            hideTyping();
+                            addMessage("It seems like you might be done sharing for now. Would you like to end this session? Just type 'done' or continue sharing if you have more to say.", 'bot');
+                        }, 1500);
+                    } else {
+                        // Provide gentle nudge
+                        const nudge = listeningPrompts.silence_nudges[Math.floor(Math.random() * listeningPrompts.silence_nudges.length)];
+                        showTyping();
+                        setTimeout(() => {
+                            hideTyping();
+                            addMessage(nudge, 'bot');
+                        }, 1500);
+                    }
+                    
+                    lastMessageTime = Date.now(); // Reset timer after nudge
+                }
+            }, 10000); // Check every 10 seconds
+        }
+
+        // Handle user input
+        function handleUserInput() {
+            const input = document.getElementById('user-input');
+            const message = input.value.trim();
+            
+            if (message) {
+                // Reset silence counter
+                conversationState.silenceCount = 0;
+                lastMessageTime = Date.now();
+                
+                // Add user message
+                addMessage(message, 'user');
+                input.value = '';
+                
+                // Check for session end triggers
+                if (message.toLowerCase().includes('done') || 
+                    message.toLowerCase().includes('finish') || 
+                    message.toLowerCase().includes('that\'s all')) {
+                    endSession();
+                    return;
+                }
+                
+                // Generate and send bot response
+                showTyping();
+                const responseDelay = Math.random() * 2000 + 1000; // 1-3 seconds
+                
+                setTimeout(() => {
+                    hideTyping();
+                    const response = generateListeningResponse(message);
+                    addMessage(response, 'bot');
+                }, responseDelay);
+            }
+        }
+
+        // End session
+        function endSession() {
+            conversationState.isComplete = true;
+            stopTimer();
+            clearInterval(silenceCheckInterval);
+            
+            // Send closing message
+            const closing = listeningPrompts.closing[Math.floor(Math.random() * listeningPrompts.closing.length)];
+            showTyping();
+            setTimeout(() => {
+                hideTyping();
+                addMessage(closing, 'bot');
+                
+                // Show completion screen after a delay
+                setTimeout(() => {
+                    showCompletionScreen();
+                }, 2000);
+            }, 1500);
+        }
+
+        // Show completion screen
+        function showCompletionScreen() {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            document.getElementById('final-duration').textContent = 
+                `${mins}:${secs.toString().padStart(2, '0')}`;
+            
+            const userMessages = conversationState.messages.filter(m => m.sender === 'user').length;
+            document.getElementById('final-messages').textContent = userMessages;
+            
+            const themes = conversationState.themes.length > 0 ? 
+                conversationState.themes.slice(0, 3).join(', ') : 'General feedback';
+            document.getElementById('final-themes').textContent = themes;
+            
+            document.getElementById('completion-screen').classList.add('show');
+            
+            // Save session data
+            saveSessionData();
+        }
+
+        // Save session data
+        function saveSessionData() {
+            const sessionData = {
+                ...conversationState,
+                sessionId: config.sessionId,
+                completedAt: Date.now()
+            };
+            
+            // In production, send to server
+            console.log('Session data:', sessionData);
+            localStorage.setItem(`listening_session_${config.sessionId}`, JSON.stringify(sessionData));
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            const input = document.getElementById('user-input');
+            const sendBtn = document.getElementById('send-btn');
+            
+            sendBtn.addEventListener('click', handleUserInput);
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    handleUserInput();
+                }
+            });
+            
+            // Provide encouragement prompts occasionally
+            input.addEventListener('input', (e) => {
+                if (e.target.value.length > 0) {
+                    lastMessageTime = Date.now(); // Reset silence timer when typing
+                }
+            });
+        }
+
+        // Start new session
+        function startNewSession() {
+            // Reset everything
+            conversationState = {
+                messages: [],
+                sessionStartTime: Date.now(),
+                isComplete: false,
+                silenceCount: 0,
+                totalWords: 0,
+                emotions: [],
+                themes: [],
+                sessionDuration: 0
+            };
+            
+            seconds = 0;
+            config.sessionId = 'listening_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            
+            // Reset UI
+            document.getElementById('listening-messages').innerHTML = '';
+            document.getElementById('listening-messages').style.display = 'block';
+            document.getElementById('listening-input-area').style.display = 'block';
+            document.getElementById('completion-screen').classList.remove('show');
+            document.getElementById('timer').textContent = '00:00';
+            
+            // Restart
+            initializeListeningSession();
+            startTimer();
+        }
+
+        // Auto-save functionality
+        setInterval(() => {
+            if (conversationState.messages.length > 0 && !conversationState.isComplete) {
+                localStorage.setItem(`listening_session_${config.sessionId}`, 
+                    JSON.stringify(conversationState));
+            }
+        }, 30000); // Every 30 seconds
+
+        // Handle page unload
+        window.addEventListener('beforeunload', function(e) {
+            if (conversationState.messages.length > 0 && !conversationState.isComplete) {
+                e.preventDefault();
+                e.returnValue = 'You have an active listening session. Are you sure you want to leave?';
+            }
+        });
+
+        // Initialize on load
+        window.addEventListener('load', () => {
+            initializeListeningSession();
+        });
+    </script>
+</body>
+</html>
