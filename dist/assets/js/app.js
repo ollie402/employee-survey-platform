@@ -1740,7 +1740,7 @@ function showCreateOrganizationModal() {
     initializeOrgPreview();
 }
 
-function createOrganization(event) {
+async function createOrganization(event) {
     event.preventDefault();
     const formData = new FormData(event.target);
     
@@ -1755,7 +1755,6 @@ function createOrganization(event) {
         adminEmail: formData.get('adminEmail'),
         description: formData.get('description'),
         status: 'Active',
-        created: new Date().toLocaleDateString(),
         // Branding data
         branding: {
             primaryColor: document.getElementById('org-primary-color').value,
@@ -1766,36 +1765,47 @@ function createOrganization(event) {
             welcomeMessage: formData.get('welcomeMessage')
         }
     };
-    
-    // Store organization with branding
-    if (!appState.organizations) {
-        appState.organizations = [];
+
+    try {
+        // Save organization to database
+        const savedOrg = await saveOrganization(orgData);
+        console.log('Organization saved to database:', savedOrg);
+        
+        // Store organization locally in appState
+        if (!appState.organizations) {
+            appState.organizations = [];
+        }
+        appState.organizations.push(savedOrg || orgData);
+        
+        // Save to localStorage as backup
+        localStorage.setItem('organizations', JSON.stringify(appState.organizations));
+        
+        // Add to organizations table
+        const table = document.querySelector('#organizations-table tbody');
+        const newRow = document.createElement('tr');
+        newRow.innerHTML = `
+            <td>${orgData.name}</td>
+            <td><span class="tag tag-active">${orgData.plan}</span></td>
+            <td>${orgData.users}</td>
+            <td><span class="tag tag-active">${orgData.status}</span></td>
+            <td>Just created</td>
+            <td>
+                <button class="btn btn-secondary btn-sm" onclick="handleEditOrganization('${savedOrg?.id || orgData.name}')">Edit</button>
+                <button class="btn btn-warning btn-sm" onclick="handleSuspendOrganization('${savedOrg?.id || orgData.name}')">Suspend</button>
+                <button class="btn btn-danger btn-sm" onclick="handleDeleteOrganization('${savedOrg?.id || orgData.name}')">Delete</button>
+            </td>
+        `;
+        newRow.onclick = () => showOrganizationDetails(savedOrg?.id || orgData.name);
+        table.appendChild(newRow);
+        
+        event.target.closest('.modal').remove();
+        showToast(`Organization "${orgData.name}" created successfully with custom branding!`, 'success');
+    } catch (error) {
+        console.error('Error saving organization to database:', error);
+        showToast(`❌ Failed to create organization: ${error.message}`, 'error');
+        event.target.closest('.modal').remove();
+        return;
     }
-    appState.organizations.push(orgData);
-    
-    // Save to localStorage
-    localStorage.setItem('organizations', JSON.stringify(appState.organizations));
-    
-    // Add to organizations table
-    const table = document.querySelector('#organizations-table tbody');
-    const newRow = document.createElement('tr');
-    newRow.innerHTML = `
-        <td>${orgData.name}</td>
-        <td><span class="tag tag-active">${orgData.plan}</span></td>
-        <td>${orgData.users}</td>
-        <td><span class="tag tag-active">${orgData.status}</span></td>
-        <td>Just created</td>
-        <td>
-            <button class="btn btn-secondary btn-sm" onclick="handleEditOrganization('${orgData.name}')">Edit</button>
-            <button class="btn btn-warning btn-sm" onclick="handleSuspendOrganization('${orgData.name}')">Suspend</button>
-            <button class="btn btn-danger btn-sm" onclick="handleDeleteOrganization('${orgData.name}')">Delete</button>
-        </td>
-    `;
-    newRow.onclick = () => showOrganizationDetails(orgData.name);
-    table.appendChild(newRow);
-    
-    event.target.closest('.modal').remove();
-    showToast(`Organization "${orgData.name}" created successfully with custom branding!`, 'success');
 }
 
 // AI Chat Functions
@@ -2821,17 +2831,40 @@ function handleSuspendOrganization(orgName) {
     }
 }
 
-function handleDeleteOrganization(orgName) {
-    if (confirm(`Are you sure you want to delete "${orgName}"? This action cannot be undone and will remove all associated data.`)) {
-        // Find and remove the row
-        const table = document.querySelector('#organizations-table tbody');
-        const rows = table.querySelectorAll('tr');
-        rows.forEach(row => {
-            if (row.cells[0].textContent === orgName) {
-                row.remove();
+async function handleDeleteOrganization(orgId, orgName) {
+    const displayName = orgName || orgId;
+    if (confirm(`Are you sure you want to delete "${displayName}"? This action cannot be undone and will remove all associated data.`)) {
+        try {
+            // Delete from database
+            const deleted = await deleteOrganization(orgId);
+            
+            if (deleted) {
+                // Remove from local state
+                if (appState.organizations) {
+                    appState.organizations = appState.organizations.filter(org => 
+                        org.id !== orgId && org.name !== orgId
+                    );
+                    localStorage.setItem('organizations', JSON.stringify(appState.organizations));
+                }
+                
+                // Find and remove the row from UI
+                const table = document.querySelector('#organizations-table tbody');
+                const rows = table.querySelectorAll('tr');
+                rows.forEach(row => {
+                    if (row.cells[0].textContent === displayName || 
+                        row.onclick?.toString().includes(orgId)) {
+                        row.remove();
+                    }
+                });
+                
+                showToast(`Organization "${displayName}" has been deleted.`, 'success');
+            } else {
+                showToast(`Failed to delete organization "${displayName}". It may not exist.`, 'error');
             }
-        });
-        showToast(`Organization "${orgName}" has been deleted.`, 'success');
+        } catch (error) {
+            console.error('Error deleting organization:', error);
+            showToast(`❌ Failed to delete organization: ${error.message}`, 'error');
+        }
     }
 }
 
@@ -2929,16 +2962,40 @@ function handleSuspendUser(userName) {
     }
 }
 
-function handleRemoveUser(userName) {
-    if (confirm(`Are you sure you want to remove "${userName}"? This will permanently delete their account and cannot be undone.`)) {
-        const table = document.querySelector('#users-table tbody');
-        const rows = table.querySelectorAll('tr');
-        rows.forEach(row => {
-            if (row.cells[1].textContent === userName) {
-                row.remove();
+async function handleRemoveUser(userId, userName) {
+    const displayName = userName || userId;
+    if (confirm(`Are you sure you want to remove "${displayName}"? This will permanently delete their account and cannot be undone.`)) {
+        try {
+            // Delete from database
+            const deleted = await deleteUser(userId);
+            
+            if (deleted) {
+                // Remove from local state if exists
+                if (appState.users) {
+                    appState.users = appState.users.filter(user => 
+                        user.id !== userId && user.name !== userId
+                    );
+                    localStorage.setItem('users', JSON.stringify(appState.users));
+                }
+                
+                // Find and remove the row from UI
+                const table = document.querySelector('#users-table tbody');
+                const rows = table.querySelectorAll('tr');
+                rows.forEach(row => {
+                    if (row.cells[1].textContent === displayName ||
+                        row.onclick?.toString().includes(userId)) {
+                        row.remove();
+                    }
+                });
+                
+                showToast(`User "${displayName}" has been removed.`, 'success');
+            } else {
+                showToast(`Failed to remove user "${displayName}". User may not exist.`, 'error');
             }
-        });
-        showToast(`User "${userName}" has been removed.`, 'success');
+        } catch (error) {
+            console.error('Error removing user:', error);
+            showToast(`❌ Failed to remove user: ${error.message}`, 'error');
+        }
     }
 }
 
@@ -3638,12 +3695,106 @@ function processExportChatData(event) {
     }, 2000);
 }
 
+// Load organizations from database and populate table
+async function loadOrganizationsData() {
+    try {
+        const organizations = await loadOrganizations();
+        const tbody = document.querySelector('#organizations-table tbody');
+        
+        if (!tbody) return; // Table doesn't exist on this page
+        
+        if (organizations.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6" style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+                        No organizations found. Add your first organization to get started.
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+        
+        // Store organizations in appState
+        appState.organizations = organizations;
+        localStorage.setItem('organizations', JSON.stringify(organizations));
+        
+        tbody.innerHTML = organizations.map(org => `
+            <tr onclick="showOrganizationDetails('${org.id}')">
+                <td>${org.name}</td>
+                <td><span class="tag tag-active">${org.plan || 'Basic'}</span></td>
+                <td>0</td>
+                <td><span class="tag tag-active">Active</span></td>
+                <td>${new Date(org.created_at).toLocaleDateString()}</td>
+                <td onclick="event.stopPropagation()">
+                    <button class="btn btn-secondary btn-sm" onclick="handleEditOrganization('${org.id}')">Edit</button>
+                    <button class="btn btn-warning btn-sm" onclick="handleSuspendOrganization('${org.id}')">Suspend</button>
+                    <button class="btn btn-danger btn-sm" onclick="handleDeleteOrganization('${org.id}', '${org.name}')">Delete</button>
+                </td>
+            </tr>
+        `).join('');
+        
+    } catch (error) {
+        console.error('Error loading organizations:', error);
+        showToast('Failed to load organizations from database', 'warning');
+    }
+}
+
+// Load users from database and populate table  
+async function loadUsersData() {
+    try {
+        const users = await loadUsers();
+        const tbody = document.querySelector('#users-table tbody');
+        
+        if (!tbody) return; // Table doesn't exist on this page
+        
+        if (users.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="8" style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+                        No users found. Add your first user to get started.
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+        
+        // Store users in appState
+        appState.users = users;
+        localStorage.setItem('users', JSON.stringify(users));
+        
+        tbody.innerHTML = users.map(user => `
+            <tr onclick="showUserDetails('${user.id}')">
+                <td onclick="event.stopPropagation()"><input type="checkbox"></td>
+                <td>${user.name}</td>
+                <td>${user.email}</td>
+                <td>${user.organization || 'N/A'}</td>
+                <td><span class="tag tag-active">${user.role || 'User'}</span></td>
+                <td><span class="tag tag-${user.status === 'active' ? 'active' : 'pending'}">${user.status || 'Active'}</span></td>
+                <td>${user.last_login || 'Never'}</td>
+                <td onclick="event.stopPropagation()">
+                    <button class="btn btn-secondary btn-sm" onclick="handleEditUser('${user.id}')">Edit</button>
+                    <button class="btn btn-primary btn-sm" onclick="handleResendInvite('${user.name}')">Resend Invite</button>
+                    <button class="btn btn-danger btn-sm" onclick="handleRemoveUser('${user.id}', '${user.name}')">Remove</button>
+                </td>
+            </tr>
+        `).join('');
+        
+    } catch (error) {
+        console.error('Error loading users:', error);
+        showToast('Failed to load users from database', 'warning');
+    }
+}
+
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
     showSection('dashboard');
     initializeBrandingListeners();
     loadBrandingFromStorage();  // Load saved branding on page load
     initializeColorSync();       // Initialize color input synchronization
+    
+    // Load data from database on page load
+    loadOrganizationsData();
+    loadUsersData();
     
     const demoAccounts = document.querySelectorAll('.demo-account');
     demoAccounts.forEach(account => {
@@ -3657,6 +3808,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     console.log('Realworld Employee Survey Platform loaded successfully!');
     console.log('Email integration ready. Test with: testEmailSetup()');
+    console.log('Database integration ready. Data will be saved to Supabase.');
 });
 
 // Close dropdowns when clicking outside

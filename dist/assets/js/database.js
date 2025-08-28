@@ -21,11 +21,21 @@ async function loadOrganizations() {
 
 async function saveOrganization(orgData) {
     try {
-        // Let Supabase handle created_at automatically
+        // First try with just the absolutely essential field - name
+        const minimalOrgData = {
+            name: orgData.name
+        };
+        
+        // Try to add description if provided
+        if (orgData.description) {
+            minimalOrgData.description = orgData.description;
+        }
+        
+        console.log('Trying to save organization with minimal data:', minimalOrgData);
         
         const { data, error } = await window.supabaseClient
             .from('organizations')
-            .insert([orgData])
+            .insert([minimalOrgData])
             .select();
         
         if (error) {
@@ -33,51 +43,35 @@ async function saveOrganization(orgData) {
             
             // If table doesn't exist, provide helpful message
             if (error.code === '42P01') {
-                console.error('Organizations table does not exist. Please create it in your Supabase dashboard with the following SQL:');
-                console.error(`
-CREATE TABLE organizations (
-    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    name TEXT NOT NULL,
-    industry TEXT,
-    size TEXT,
-    country TEXT,
-    website TEXT,
-    description TEXT,
-    plan TEXT,
-    branding JSONB,
-    notifications JSONB,
-    status TEXT DEFAULT 'active',
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);`);
+                console.error('Organizations table does not exist. Please create it in your Supabase dashboard.');
                 throw new Error('Organizations table not found. Please create the table in Supabase dashboard.');
             }
             
-            // If column doesn't exist, try saving without the problematic columns
-            if (error.message.includes("could not find") && error.message.includes("column")) {
-                console.warn('Some columns missing, trying with basic fields only...');
-                const basicOrgData = {
-                    name: orgData.name,
-                    description: orgData.description,
-                    status: orgData.status,
-                    created_at: new Date().toISOString()
+            // If description column doesn't exist, try with just name
+            if (error.message && error.message.includes("could not find") && error.message.includes("description")) {
+                console.warn('Description column missing, trying with just name...');
+                const nameOnlyData = {
+                    name: orgData.name
                 };
                 
-                const { data: basicData, error: basicError } = await window.supabaseClient
+                const { data: nameData, error: nameError } = await window.supabaseClient
                     .from('organizations')
-                    .insert([basicOrgData])
+                    .insert([nameOnlyData])
                     .select();
                 
-                if (basicError) {
-                    throw basicError;
+                if (nameError) {
+                    console.error('Even basic save failed:', nameError);
+                    throw nameError;
                 }
                 
-                console.log('Saved with basic fields only. Please add missing columns to database.');
-                return basicData ? basicData[0] : null;
+                console.log('✅ Organization saved with name only. Consider adding a description column to your database.');
+                return nameData ? nameData[0] : null;
             }
             
             throw error;
         }
         
+        console.log('✅ Organization saved successfully:', data[0]);
         return data ? data[0] : null;
     } catch (error) {
         console.error('Save error:', error);
