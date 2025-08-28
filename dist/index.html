@@ -5,6 +5,1014 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Realworld Employee Survey Platform</title>
     <link rel="stylesheet" href="assets/css/styles.css">
+    <style>
+        /* Adaptable Logo Styles - NEW ADDITION */
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            margin-right: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .logo-icon.has-default {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .logo-icon.has-custom {
+            background: transparent !important;
+            width: auto;
+            max-width: 150px;
+            height: 45px;
+        }
+
+        .login-header .logo-icon.has-custom {
+            width: auto;
+            max-width: 200px;
+            height: 60px;
+            margin-bottom: 1rem;
+        }
+
+        .sidebar .logo {
+            display: flex;
+            align-items: center;
+            padding: 1.5rem;
+            font-weight: bold;
+            font-size: 1.25rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar .logo-icon.has-custom {
+            max-width: 120px;
+            height: 40px;
+        }
+
+        /* Ensure images scale properly */
+        .logo-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+        /* END Adaptable Logo Styles */
+
+        .chat-container {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        
+        .chat-window {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 500px;
+            height: 600px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .chat-header {
+            background: var(--primary-color);
+            color: white;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        
+        .chat-header h2 {
+            margin: 0;
+            font-size: 1.25rem;
+        }
+        
+        .chat-header p {
+            margin: 0.5rem 0 0 0;
+            opacity: 0.9;
+            font-size: 0.875rem;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem;
+            background: #f8f9fa;
+        }
+        
+        .chat-input-area {
+            padding: 1rem;
+            border-top: 1px solid #e0e0e0;
+            background: white;
+        }
+        
+        .chat-input-group {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .chat-input {
+            flex: 1;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 24px;
+            outline: none;
+            font-size: 0.875rem;
+        }
+        
+        .chat-send-btn {
+            padding: 0.75rem 1.5rem;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 24px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .chat-send-btn:hover {
+            background: #1d4ed8;
+            transform: translateY(-1px);
+        }
+        
+        .message {
+            margin-bottom: 1rem;
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        .message.user {
+            text-align: right;
+        }
+        
+        .message-bubble {
+            display: inline-block;
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+        
+        .message.bot .message-bubble {
+            background: white;
+            color: #333;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+        
+        .message.user .message-bubble {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .typing-indicator {
+            display: none;
+            padding: 0.75rem 1rem;
+            background: white;
+            border-radius: 12px;
+            display: inline-block;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+        
+        .typing-indicator.show {
+            display: inline-block;
+        }
+        
+        .typing-indicator span {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #999;
+            margin: 0 2px;
+            animation: typing 1.4s infinite;
+        }
+        
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+            }
+            30% {
+                transform: translateY(-10px);
+            }
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* ENHANCED CHAT FEEDBACK STYLES */
+        .feedback-toolbar {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .view-toggle {
+            display: flex;
+            gap: 0.25rem;
+            background: var(--bg-secondary);
+            padding: 0.25rem;
+            border-radius: 6px;
+        }
+        
+        .view-toggle button {
+            padding: 0.5rem 1rem;
+            background: transparent;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .view-toggle button.active {
+            background: white;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .sentiment-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .sentiment-positive {
+            background: #dcfce7;
+            color: #166534;
+        }
+        
+        .sentiment-neutral {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .sentiment-negative {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .priority-indicator {
+            width: 4px;
+            height: 100%;
+            position: absolute;
+            left: 0;
+            top: 0;
+            border-radius: 4px 0 0 4px;
+        }
+        
+        .priority-high {
+            background: var(--danger-color);
+        }
+        
+        .priority-medium {
+            background: var(--warning-color);
+        }
+        
+        .priority-low {
+            background: var(--success-color);
+        }
+        
+        .feedback-item {
+            position: relative;
+            padding: 1rem 1rem 1rem 1.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        
+        .feedback-item:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transform: translateY(-1px);
+        }
+        
+        .feedback-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 0.5rem;
+        }
+        
+        .feedback-meta {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+        
+        .feedback-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .action-btn {
+            padding: 0.25rem 0.5rem;
+            background: transparent;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.75rem;
+        }
+        
+        .action-btn:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        
+        .response-box {
+            margin-top: 1rem;
+            padding: 0.75rem;
+            background: var(--bg-secondary);
+            border-radius: 6px;
+            border-left: 3px solid var(--primary-color);
+        }
+        
+        .keyword-tag {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 4px;
+            font-size: 0.625rem;
+            margin-right: 0.25rem;
+        }
+        /* END ENHANCED STYLES */
+
+        /* NEW CHAT TYPE SELECTION STYLES */
+        .chat-type-option {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .chat-type-option:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .chat-type-option input[type="radio"] {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            transform: scale(1.2);
+        }
+
+        .chat-type-option.selected {
+            border-color: var(--primary-color) !important;
+            background: #f0f9ff !important;
+        }
+
+        /* Participant Management Styles */
+        .participants-list {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.5rem;
+        }
+
+        .participant-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem;
+            margin-bottom: 0.5rem;
+            background: var(--bg-secondary);
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .participant-item:hover {
+            background: #e0e7ff;
+        }
+
+        .participant-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        /* Response Tracking Styles */
+        .response-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .response-indicator.responded {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .response-indicator.pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .response-indicator.expired {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        /* Link Display Styles */
+        .link-display {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+        }
+
+        .link-display input {
+            flex: 1;
+            padding: 0.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.875rem;
+            background: white;
+        }
+
+        .link-display button {
+            padding: 0.5rem 1rem;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .link-display button:hover {
+            background: #1d4ed8;
+            transform: translateY(-1px);
+        }
+
+        /* Info Cards */
+        .info-card {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .info-card.success {
+            background: #dcfce7;
+            border-left: 4px solid #10b981;
+        }
+
+        .info-card.warning {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+        }
+
+        .info-card.info {
+            background: #dbeafe;
+            border-left: 4px solid #3b82f6;
+        }
+
+        /* Chat Session Cards */
+        .chat-session-card {
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .chat-session-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .chat-session-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+        }
+
+        .chat-session-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .chat-session-type {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .chat-session-type.continuous {
+            background: #e0f2fe;
+            color: #0369a1;
+        }
+
+        .chat-session-type.personal {
+            background: #fce7f3;
+            color: #a21caf;
+        }
+
+        .chat-session-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .chat-stat {
+            text-align: center;
+        }
+
+        .chat-stat-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .chat-stat-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        /* Progress Bars */
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--bg-secondary);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 0.5rem 0;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--primary-color);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        /* Action Buttons Grid */
+        .action-buttons-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .action-btn-small {
+            padding: 0.5rem;
+            font-size: 0.875rem;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .action-btn-small:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+            transform: translateY(-1px);
+        }
+
+        /* Modal Overlay Enhancement */
+        .modal {
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        .modal-content {
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive Design for Chat Widgets */
+        @media (max-width: 768px) {
+            .chat-type-option {
+                grid-column: span 2;
+            }
+            
+            .action-buttons-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .chat-session-stats {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        /* END NEW CHAT TYPE SELECTION STYLES */
+
+        /* TEMPLATE BUILDER STYLES */
+        .template-question-item {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .template-question-item:hover {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .question-number {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .question-content {
+            padding: 1rem;
+        }
+
+        .question-options {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+
+        /* Template Card Styles */
+        .template-card {
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            transition: all 0.2s ease;
+            background: white;
+        }
+
+        .template-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .template-category-badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 4px;
+            font-size: 0.625rem;
+            margin-left: 0.5rem;
+        }
+
+        /* Chat Preview Styles */
+        .chat-preview-message {
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            border-radius: 8px;
+        }
+
+        .chat-preview-message.bot {
+            background: white;
+            border: 1px solid #e5e7eb;
+            margin-right: 2rem;
+        }
+
+        .chat-preview-message.user {
+            background: #f0f9ff;
+            border: 1px solid #bfdbfe;
+            margin-left: 2rem;
+            text-align: right;
+        }
+
+        /* Question Type Indicator */
+        .question-type-badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            background: #e0e7ff;
+            color: #4338ca;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        /* Template Selection Styles */
+        .template-select-card {
+            padding: 1rem;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 0.5rem;
+        }
+
+        .template-select-card:hover {
+            border-color: var(--primary-color);
+            background: #f0f9ff;
+        }
+
+        .template-select-card.selected {
+            border-color: var(--primary-color);
+            background: #e0f2fe;
+        }
+
+        /* AI Personality Badges */
+        .ai-personality-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .ai-personality-professional {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .ai-personality-friendly {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .ai-personality-casual {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .ai-personality-formal {
+            background: #f3e8ff;
+            color: #6b21a8;
+        }
+
+        .ai-personality-empathetic {
+            background: #fce7f3;
+            color: #a21caf;
+        }
+
+        /* Template Stats Grid */
+        .template-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+            padding: 1rem;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+        }
+
+        .template-stat {
+            text-align: center;
+        }
+
+        .template-stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .template-stat-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        /* Template Quick Actions */
+        .template-quick-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .template-quick-action {
+            padding: 0.25rem 0.5rem;
+            background: transparent;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            transition: all 0.2s;
+        }
+
+        .template-quick-action:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        /* Question Builder Animations */
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .template-question-item {
+            animation: slideDown 0.3s ease-out;
+        }
+
+        /* Drag and Drop Styles (for future implementation) */
+        .question-dragging {
+            opacity: 0.5;
+        }
+
+        .question-drag-over {
+            border-top: 3px solid var(--primary-color);
+        }
+
+        /* Template Info Box */
+        .template-info-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .template-info-box h3 {
+            margin: 0 0 0.5rem 0;
+        }
+
+        .template-info-box p {
+            margin: 0;
+            opacity: 0.95;
+        }
+
+        /* Question Type Icons */
+        .question-type-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            color: white;
+            font-size: 0.75rem;
+            margin-right: 0.5rem;
+        }
+
+        /* Template Category Colors */
+        .template-category-general {
+            background: #6b7280;
+        }
+
+        .template-category-satisfaction {
+            background: #10b981;
+        }
+
+        .template-category-employee {
+            background: #3b82f6;
+        }
+
+        .template-category-product {
+            background: #8b5cf6;
+        }
+
+        .template-category-service {
+            background: #f59e0b;
+        }
+
+        .template-category-event {
+            background: #ec4899;
+        }
+
+        .template-category-custom {
+            background: #14b8a6;
+        }
+
+        /* Template List View */
+        .template-list-view {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .template-grid-view {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+
+        /* Template Search Bar */
+        .template-search {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .template-search input {
+            flex: 1;
+            padding: 0.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+        }
+
+        .template-search button {
+            padding: 0.5rem 1rem;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        /* Responsive Design for Templates */
+        @media (max-width: 768px) {
+            .template-stats {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .template-grid-view {
+                grid-template-columns: 1fr;
+            }
+            
+            .chat-preview-message.bot {
+                margin-right: 0;
+            }
+            
+            .chat-preview-message.user {
+                margin-left: 0;
+            }
+        }
+        /* END TEMPLATE BUILDER STYLES */
+    </style>
 </head>
 <body>
     <!-- Login Screen -->
@@ -12,7 +1020,7 @@
         <div class="login-card">
             <div class="login-header">
                 <div class="logo">
-                    <div class="logo-icon">R</div>
+                    <div class="logo-icon has-default">R</div>
                     <span>Realworld</span>
                 </div>
                 <h2 data-translate="sign-in-title">Sign In to Your Account</h2>
@@ -121,7 +1129,7 @@
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
             <div class="logo">
-                <div class="logo-icon">R</div>
+                <div class="logo-icon has-default">R</div>
                 Realworld
             </div>
 
@@ -150,15 +1158,11 @@
                     <div class="nav-title" data-translate="start-listening">Start Listening</div>
                     <div class="nav-item" onclick="showSection('chat-feedback')">
                         <div class="nav-icon">💬</div>
-                        <span data-translate="chat-feedback">Chat Feedback</span>
+                        <span data-translate="chat-feedback">Analytics</span>
                     </div>
                     <div class="nav-item" onclick="showSection('chat-management')">
                         <div class="nav-icon">💬</div>
                         <span data-translate="chat-management">Chat Management</span>
-                    </div>
-                    <div class="nav-item" onclick="showSection('chat-analytics')">
-                        <div class="nav-icon">📈</div>
-                        <span data-translate="analytics">Analytics</span>
                     </div>
                     <div class="nav-item" onclick="showSection('chat-reports')">
                         <div class="nav-icon">📋</div>
@@ -366,24 +1370,10 @@
                                     <th onclick="sortTable(this, 3)" data-translate="time">Time</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                <tr onclick="showActivityDetails('TechCorp Ltd', 'New survey created')">
-                                    <td>TechCorp Ltd</td>
-                                    <td>New survey created: "Q4 Feedback"</td>
-                                    <td>Sarah Johnson</td>
-                                    <td>2 hours ago</td>
-                                </tr>
-                                <tr onclick="showActivityDetails('Global Industries', 'Chat feedback submitted')">
-                                    <td>Global Industries</td>
-                                    <td>Chat feedback submitted</td>
-                                    <td>Anonymous</td>
-                                    <td>4 hours ago</td>
-                                </tr>
-                                <tr onclick="showActivityDetails('StartupX', 'Survey completed')">
-                                    <td>StartupX</td>
-                                    <td>Survey completed: 127 responses</td>
-                                    <td>Mike Chen</td>
-                                    <td>1 day ago</td>
+                            <tbody id="activity-table-body">
+                                <!-- Recent activity will be loaded from database -->
+                                <tr style="text-align: center; color: var(--text-secondary);">
+                                    <td colspan="4">No recent activity. Activity will appear here as users interact with your surveys.</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -465,42 +1455,10 @@
                                     <th data-translate="actions">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                <tr onclick="showOrganizationDetails('TechCorp Ltd')">
-                                    <td>TechCorp Ltd</td>
-                                    <td><span class="tag tag-active">Start + Keep Listening</span></td>
-                                    <td>15</td>
-                                    <td><span class="tag tag-active">Active</span></td>
-                                    <td>2 hours ago</td>
-                                    <td onclick="event.stopPropagation()">
-                                        <button class="btn btn-secondary btn-sm" onclick="handleEditOrganization('TechCorp Ltd')" data-translate="edit">Edit</button>
-                                        <button class="btn btn-warning btn-sm" onclick="handleSuspendOrganization('TechCorp Ltd')" data-translate="suspend">Suspend</button>
-                                        <button class="btn btn-danger btn-sm" onclick="handleDeleteOrganization('TechCorp Ltd')">Delete</button>
-                                    </td>
-                                </tr>
-                                <tr onclick="showOrganizationDetails('Global Industries')">
-                                    <td>Global Industries</td>
-                                    <td><span class="tag tag-pending">Start Listening</span></td>
-                                    <td>8</td>
-                                    <td><span class="tag tag-active">Active</span></td>
-                                    <td>4 hours ago</td>
-                                    <td onclick="event.stopPropagation()">
-                                        <button class="btn btn-secondary btn-sm" onclick="handleEditOrganization('Global Industries')" data-translate="edit">Edit</button>
-                                        <button class="btn btn-warning btn-sm" onclick="handleSuspendOrganization('Global Industries')" data-translate="suspend">Suspend</button>
-                                        <button class="btn btn-danger btn-sm" onclick="handleDeleteOrganization('Global Industries')">Delete</button>
-                                    </td>
-                                </tr>
-                                <tr onclick="showOrganizationDetails('StartupX')">
-                                    <td>StartupX</td>
-                                    <td><span class="tag tag-processing">Keep Listening</span></td>
-                                    <td>3</td>
-                                    <td><span class="tag tag-active">Active</span></td>
-                                    <td>1 day ago</td>
-                                    <td onclick="event.stopPropagation()">
-                                        <button class="btn btn-secondary btn-sm" onclick="handleEditOrganization('StartupX')" data-translate="edit">Edit</button>
-                                        <button class="btn btn-warning btn-sm" onclick="handleSuspendOrganization('StartupX')" data-translate="suspend">Suspend</button>
-                                        <button class="btn btn-danger btn-sm" onclick="handleDeleteOrganization('StartupX')">Delete</button>
-                                    </td>
+                            <tbody id="organizations-table-body">
+                                <!-- Organizations will be loaded from database -->
+                                <tr style="text-align: center; color: var(--text-secondary);">
+                                    <td colspan="6">No organizations found. Click 'Add Organization' to create your first organization.</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -529,11 +1487,9 @@
                             </div>
                             <div class="filter-group">
                                 <label class="filter-label" data-translate="organization">Organization</label>
-                                <select class="form-select" style="min-width: 150px;" onchange="filterUsers('organization', this.value)">
+                                <select class="form-select" style="min-width: 150px;" onchange="filterUsers('organization', this.value)" id="organization-filter">
                                     <option value="">All Organizations</option>
-                                    <option value="techcorp">TechCorp Ltd</option>
-                                    <option value="global">Global Industries</option>
-                                    <option value="startupx">StartupX</option>
+                                    <!-- Organization options will be populated from database -->
                                 </select>
                             </div>
                             <div class="filter-group">
@@ -569,48 +1525,10 @@
                                     <th data-translate="actions">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                <tr onclick="showUserDetails('Sarah Johnson')">
-                                    <td onclick="event.stopPropagation()"><input type="checkbox"></td>
-                                    <td>Sarah Johnson</td>
-                                    <td>sarah@techcorp.com</td>
-                                    <td>TechCorp Ltd</td>
-                                    <td><span class="tag tag-active">Start + Keep Listening</span></td>
-                                    <td><span class="tag tag-active">Active</span></td>
-                                    <td>2 hours ago</td>
-                                    <td onclick="event.stopPropagation()">
-                                        <button class="btn btn-secondary btn-sm" onclick="handleEditUser('Sarah Johnson')" data-translate="edit">Edit</button>
-                                        <button class="btn btn-warning btn-sm" onclick="handleSuspendUser('Sarah Johnson')" data-translate="suspend">Suspend</button>
-                                        <button class="btn btn-danger btn-sm" onclick="handleRemoveUser('Sarah Johnson')">Remove</button>
-                                    </td>
-                                </tr>
-                                <tr onclick="showUserDetails('Mike Chen')">
-                                    <td onclick="event.stopPropagation()"><input type="checkbox"></td>
-                                    <td>Mike Chen</td>
-                                    <td>mike@startupx.com</td>
-                                    <td>StartupX</td>
-                                    <td><span class="tag tag-processing">Keep Listening</span></td>
-                                    <td><span class="tag tag-active">Active</span></td>
-                                    <td>1 day ago</td>
-                                    <td onclick="event.stopPropagation()">
-                                        <button class="btn btn-secondary btn-sm" onclick="handleEditUser('Mike Chen')" data-translate="edit">Edit</button>
-                                        <button class="btn btn-warning btn-sm" onclick="handleSuspendUser('Mike Chen')" data-translate="suspend">Suspend</button>
-                                        <button class="btn btn-danger btn-sm" onclick="handleRemoveUser('Mike Chen')">Remove</button>
-                                    </td>
-                                </tr>
-                                <tr onclick="showUserDetails('Lisa Wang')">
-                                    <td onclick="event.stopPropagation()"><input type="checkbox"></td>
-                                    <td>Lisa Wang</td>
-                                    <td>lisa@global.com</td>
-                                    <td>Global Industries</td>
-                                    <td><span class="tag tag-pending">Start Listening</span></td>
-                                    <td><span class="tag tag-pending">Pending</span></td>
-                                    <td>Never</td>
-                                    <td onclick="event.stopPropagation()">
-                                        <button class="btn btn-secondary btn-sm" onclick="handleEditUser('Lisa Wang')" data-translate="edit">Edit</button>
-                                        <button class="btn btn-primary btn-sm" onclick="handleResendInvite('Lisa Wang')">Resend Invite</button>
-                                        <button class="btn btn-danger btn-sm" onclick="handleRemoveUser('Lisa Wang')">Remove</button>
-                                    </td>
+                            <tbody id="users-table-body">
+                                <!-- Users will be loaded from database -->
+                                <tr style="text-align: center; color: var(--text-secondary);">
+                                    <td colspan="8">No users found. Click 'Add User' to invite your first user.</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -621,9 +1539,12 @@
                 <div id="branding-section" class="hidden">
                     <div class="card">
                         <div class="card-header">
-                            <h2 class="card-title">Branding & Customization</h2>
-                            <button class="btn btn-primary" onclick="saveBranding()">Save Changes</button>
-                        </div>
+                           <h2 class="card-title">Branding & Customization</h2>
+                        <div>
+                      <button class="btn btn-secondary" onclick="resetBranding()" style="margin-right: 0.5rem;">Reset to Defaults</button>
+                          <button class="btn btn-primary" onclick="saveBranding()">Save Changes</button>
+                               </div>
+                            </div>
                         
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
                             <div>
@@ -669,6 +1590,9 @@
                                             <div style="font-size: 3rem; margin-bottom: 1rem;">📎</div>
                                             <div><strong>Click to upload logo</strong></div>
                                             <div style="color: var(--text-secondary); margin-top: 0.5rem;">PNG, JPG up to 2MB</div>
+                                            <div style="color: var(--text-secondary); font-size: 0.75rem; margin-top: 0.5rem;">
+                                                💡 Tip: Use a transparent PNG for best results
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -692,68 +1616,410 @@
                     </div>
                 </div>
 
-                <!-- Chat Feedback Section -->
+                <!-- Analytics Section (formerly Chat Feedback) -->
                 <div id="chat-feedback-section" class="hidden">
                     <div class="card">
                         <div class="card-header">
-                            <h2 class="card-title">Chat Feedback</h2>
-                            <button class="btn btn-primary" onclick="createNewChatWidget()">Create Chat Widget</button>
+                            <h2 class="card-title">Analytics</h2>
+                            <div>
+                                <button class="btn btn-secondary" onclick="showFeedbackSettings()">⚙️ Settings</button>
+                                <button class="btn btn-primary" onclick="generateFeedbackReport()">📊 Generate Report</button>
+                            </div>
                         </div>
                         
+                        <!-- Enhanced Statistics Dashboard -->
                         <div class="dashboard-grid">
                             <div class="stat-card">
                                 <div class="stat-value">1,847</div>
                                 <div class="stat-label">Total Chat Sessions</div>
+                                <div style="font-size: 0.75rem; color: var(--success-color); margin-top: 0.5rem;">↑ 12% from last week</div>
                             </div>
                             <div class="stat-card">
                                 <div class="stat-value">4.8</div>
                                 <div class="stat-label">Average Rating</div>
+                                <div style="display: flex; gap: 0.25rem; margin-top: 0.5rem;">
+                                    <span>⭐⭐⭐⭐⭐</span>
+                                </div>
                             </div>
                             <div class="stat-card">
                                 <div class="stat-value">92%</div>
                                 <div class="stat-label">Response Rate</div>
+                                <div style="font-size: 0.75rem; color: var(--warning-color); margin-top: 0.5rem;">↓ 3% from last week</div>
                             </div>
                             <div class="stat-card">
                                 <div class="stat-value">156</div>
                                 <div class="stat-label">This Week</div>
+                                <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.5rem;">23 pending review</div>
                             </div>
                         </div>
 
+                        <!-- Performance Metrics from Analytics -->
+                        <div class="dashboard-grid">
+                            <div class="stat-card">
+                                <div class="stat-value">89%</div>
+                                <div class="stat-label">Completion Rate</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">2m 15s</div>
+                                <div class="stat-label">Avg. Session Duration</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">4.6/5</div>
+                                <div class="stat-label">Quality Score</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">+23%</div>
+                                <div class="stat-label">Growth vs Last Month</div>
+                            </div>
+                        </div>
+
+                        <!-- Sentiment Overview -->
+                        <div class="card" style="margin-bottom: 1.5rem;">
+                            <div class="card-header">
+                                <h4>Sentiment Analysis Overview</h4>
+                                <select class="form-select" style="width: 150px;" onchange="updateSentimentView(this.value)">
+                                    <option value="today">Today</option>
+                                    <option value="week" selected>This Week</option>
+                                    <option value="month">This Month</option>
+                                    <option value="quarter">This Quarter</option>
+                                </select>
+                            </div>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;">
+                                <div style="text-align: center; padding: 1rem; background: #dcfce7; border-radius: 8px;">
+                                    <div style="font-size: 2rem;">😊</div>
+                                    <div style="font-size: 1.5rem; font-weight: bold; color: #166534;">68%</div>
+                                    <div style="color: #166534;">Positive</div>
+                                </div>
+                                <div style="text-align: center; padding: 1rem; background: #fef3c7; border-radius: 8px;">
+                                    <div style="font-size: 2rem;">😐</div>
+                                    <div style="font-size: 1.5rem; font-weight: bold; color: #92400e;">24%</div>
+                                    <div style="color: #92400e;">Neutral</div>
+                                </div>
+                                <div style="text-align: center; padding: 1rem; background: #fee2e2; border-radius: 8px;">
+                                    <div style="font-size: 2rem;">😞</div>
+                                    <div style="font-size: 1.5rem; font-weight: bold; color: #991b1b;">8%</div>
+                                    <div style="color: #991b1b;">Negative</div>
+                                </div>
+                                <div style="text-align: center; padding: 1rem; background: #f3f4f6; border-radius: 8px;">
+                                    <div style="font-size: 2rem;">🎯</div>
+                                    <div style="font-size: 1.5rem; font-weight: bold; color: var(--primary-color);">89%</div>
+                                    <div style="color: var(--text-secondary);">Resolution Rate</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Analytics Charts Section -->
+                        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; margin-bottom: 1.5rem;">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h4>Response Trends</h4>
+                                    <select class="form-select" style="width: 150px;">
+                                        <option>Last 30 days</option>
+                                        <option>Last 7 days</option>
+                                        <option>Last 90 days</option>
+                                        <option>Custom range</option>
+                                    </select>
+                                </div>
+                                <div class="chart-placeholder">
+                                    📈 Interactive chart showing response trends over time
+                                </div>
+                            </div>
+
+                            <div class="card">
+                                <div class="card-header">
+                                    <h4>Sentiment Breakdown</h4>
+                                </div>
+                                <div style="display: grid; gap: 1rem;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <span>😊 Positive</span>
+                                        <div style="flex: 1; margin: 0 1rem; height: 8px; background: #e5e7eb; border-radius: 4px; overflow: hidden;">
+                                            <div style="width: 68%; height: 100%; background: #10b981;"></div>
+                                        </div>
+                                        <span><strong>68%</strong></span>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <span>😐 Neutral</span>
+                                        <div style="flex: 1; margin: 0 1rem; height: 8px; background: #e5e7eb; border-radius: 4px; overflow: hidden;">
+                                            <div style="width: 24%; height: 100%; background: #f59e0b;"></div>
+                                        </div>
+                                        <span><strong>24%</strong></span>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <span>😞 Negative</span>
+                                        <div style="flex: 1; margin: 0 1rem; height: 8px; background: #e5e7eb; border-radius: 4px; overflow: hidden;">
+                                            <div style="width: 8%; height: 100%; background: #ef4444;"></div>
+                                        </div>
+                                        <span><strong>8%</strong></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Enhanced Filters and Actions -->
                         <div class="card">
                             <div class="card-header">
-                                <h4>Recent Chat Feedback</h4>
-                                <button class="btn btn-secondary" onclick="exportChatData()">Export Data</button>
+                                <h4>Feedback Management</h4>
+                                <div class="view-toggle">
+                                    <button class="active" onclick="switchFeedbackView('table')">📋 Table</button>
+                                    <button onclick="switchFeedbackView('cards')">🎴 Cards</button>
+                                    <button onclick="switchFeedbackView('timeline')">📅 Timeline</button>
+                                </div>
                             </div>
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th>Date</th>
-                                        <th>User</th>
-                                        <th>Rating</th>
-                                        <th>Category</th>
-                                        <th>Status</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>Dec 15, 2024</td>
-                                        <td>Anonymous User</td>
-                                        <td>⭐⭐⭐⭐⭐</td>
-                                        <td><span class="tag tag-active">General</span></td>
-                                        <td><span class="tag tag-active">Reviewed</span></td>
-                                        <td><button class="btn btn-secondary btn-sm">View Details</button></td>
-                                    </tr>
-                                    <tr>
-                                        <td>Dec 15, 2024</td>
-                                        <td>John D.</td>
-                                        <td>⭐⭐⭐⭐</td>
-                                        <td><span class="tag tag-processing">Support</span></td>
-                                        <td><span class="tag tag-pending">Pending</span></td>
-                                        <td><button class="btn btn-secondary btn-sm">View Details</button></td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                            
+                            <!-- Advanced Filters -->
+                            <div class="filters" style="padding: 1rem; background: var(--bg-secondary); border-radius: 8px; margin-bottom: 1rem;">
+                                <div class="filter-group">
+                                    <label class="filter-label">Search</label>
+                                    <input type="text" class="form-input" placeholder="Search feedback..." 
+                                           style="min-width: 200px;" oninput="filterFeedback('search', this.value)">
+                                </div>
+                                <div class="filter-group">
+                                    <label class="filter-label">Date Range</label>
+                                    <select class="form-select" onchange="filterFeedback('date', this.value)">
+                                        <option value="all">All Time</option>
+                                        <option value="today">Today</option>
+                                        <option value="week" selected>This Week</option>
+                                        <option value="month">This Month</option>
+                                        <option value="custom">Custom Range</option>
+                                    </select>
+                                </div>
+                                <div class="filter-group">
+                                    <label class="filter-label">Sentiment</label>
+                                    <select class="form-select" onchange="filterFeedback('sentiment', this.value)">
+                                        <option value="">All Sentiments</option>
+                                        <option value="positive">😊 Positive</option>
+                                        <option value="neutral">😐 Neutral</option>
+                                        <option value="negative">😞 Negative</option>
+                                    </select>
+                                </div>
+                                <div class="filter-group">
+                                    <label class="filter-label">Priority</label>
+                                    <select class="form-select" onchange="filterFeedback('priority', this.value)">
+                                        <option value="">All Priorities</option>
+                                        <option value="high">🔴 High</option>
+                                        <option value="medium">🟡 Medium</option>
+                                        <option value="low">🟢 Low</option>
+                                    </select>
+                                </div>
+                                <div class="filter-group">
+                                    <label class="filter-label">Status</label>
+                                    <select class="form-select" onchange="filterFeedback('status', this.value)">
+                                        <option value="">All Status</option>
+                                        <option value="new">New</option>
+                                        <option value="pending">Pending Review</option>
+                                        <option value="reviewed">Reviewed</option>
+                                        <option value="resolved">Resolved</option>
+                                        <option value="archived">Archived</option>
+                                    </select>
+                                </div>
+                                <div class="filter-group">
+                                    <label class="filter-label">Tags</label>
+                                    <select class="form-select" onchange="filterFeedback('tags', this.value)">
+                                        <option value="">All Tags</option>
+                                        <option value="product">Product</option>
+                                        <option value="service">Service</option>
+                                        <option value="support">Support</option>
+                                        <option value="pricing">Pricing</option>
+                                        <option value="feature">Feature Request</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Bulk Actions Toolbar -->
+                            <div class="feedback-toolbar">
+                                <button class="btn btn-secondary btn-sm" onclick="selectAllFeedback()">
+                                    <input type="checkbox" id="select-all-feedback" style="margin-right: 0.5rem;">
+                                    Select All
+                                </button>
+                                <button class="btn btn-primary btn-sm" onclick="markAsReviewed()">✓ Mark Reviewed</button>
+                                <button class="btn btn-success btn-sm" onclick="markAsResolved()">✓ Mark Resolved</button>
+                                <button class="btn btn-warning btn-sm" onclick="assignToTeam()">👥 Assign</button>
+                                <button class="btn btn-secondary btn-sm" onclick="addTags()">🏷️ Add Tags</button>
+                                <button class="btn btn-secondary btn-sm" onclick="exportSelectedFeedback()">📥 Export Selected</button>
+                                <button class="btn btn-danger btn-sm" onclick="archiveSelected()">📁 Archive</button>
+                            </div>
+
+                            <!-- Enhanced Table View -->
+                            <div id="feedback-table-view">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th><input type="checkbox" onclick="toggleSelectAll(this, 'feedback')"></th>
+                                            <th onclick="sortTable(this, 1)">Date/Time</th>
+                                            <th onclick="sortTable(this, 2)">User</th>
+                                            <th onclick="sortTable(this, 3)">Message</th>
+                                            <th onclick="sortTable(this, 4)">Rating</th>
+                                            <th onclick="sortTable(this, 5)">Sentiment</th>
+                                            <th onclick="sortTable(this, 6)">Priority</th>
+                                            <th onclick="sortTable(this, 7)">Category</th>
+                                            <th onclick="sortTable(this, 8)">Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><input type="checkbox"></td>
+                                            <td>Dec 15, 2024<br><small>14:32</small></td>
+                                            <td>
+                                                <strong>Anonymous User</strong><br>
+                                                <small style="color: var(--text-secondary);">Widget: Footer</small>
+                                            </td>
+                                            <td style="max-width: 300px;">
+                                                "The new feature is amazing! It saves me so much time in my daily workflow."
+                                                <div style="margin-top: 0.5rem;">
+                                                    <span class="keyword-tag">feature</span>
+                                                    <span class="keyword-tag">workflow</span>
+                                                </div>
+                                            </td>
+                                            <td>⭐⭐⭐⭐⭐</td>
+                                            <td><span class="sentiment-badge sentiment-positive">😊 Positive</span></td>
+                                            <td><span class="tag tag-active">Low</span></td>
+                                            <td><span class="tag tag-active">Product</span></td>
+                                            <td><span class="tag tag-active">Reviewed</span></td>
+                                            <td>
+                                                <div style="display: flex; gap: 0.25rem;">
+                                                    <button class="action-btn" onclick="viewFeedbackDetails(1)" title="View Details">👁️</button>
+                                                    <button class="action-btn" onclick="replyToFeedback(1)" title="Reply">💬</button>
+                                                    <button class="action-btn" onclick="assignFeedback(1)" title="Assign">👤</button>
+                                                    <button class="action-btn" onclick="archiveFeedback(1)" title="Archive">📁</button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><input type="checkbox"></td>
+                                            <td>Dec 15, 2024<br><small>13:15</small></td>
+                                            <td>
+                                                <strong>John D.</strong><br>
+                                                <small style="color: var(--text-secondary);">john.d@email.com</small>
+                                            </td>
+                                            <td style="max-width: 300px;">
+                                                "Support response time could be better. Waited 2 hours for a simple query."
+                                                <div style="margin-top: 0.5rem;">
+                                                    <span class="keyword-tag">support</span>
+                                                    <span class="keyword-tag">response time</span>
+                                                </div>
+                                            </td>
+                                            <td>⭐⭐⭐⭐</td>
+                                            <td><span class="sentiment-badge sentiment-neutral">😐 Neutral</span></td>
+                                            <td><span class="tag tag-warning">Medium</span></td>
+                                            <td><span class="tag tag-processing">Support</span></td>
+                                            <td><span class="tag tag-pending">Pending</span></td>
+                                            <td>
+                                                <div style="display: flex; gap: 0.25rem;">
+                                                    <button class="action-btn" onclick="viewFeedbackDetails(2)" title="View Details">👁️</button>
+                                                    <button class="action-btn" onclick="replyToFeedback(2)" title="Reply">💬</button>
+                                                    <button class="action-btn" onclick="assignFeedback(2)" title="Assign">👤</button>
+                                                    <button class="action-btn" onclick="archiveFeedback(2)" title="Archive">📁</button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><input type="checkbox"></td>
+                                            <td>Dec 15, 2024<br><small>11:45</small></td>
+                                            <td>
+                                                <strong>Emily R.</strong><br>
+                                                <small style="color: var(--text-secondary);">Chat Widget</small>
+                                            </td>
+                                            <td style="max-width: 300px;">
+                                                "Login issues persist. Cannot access my dashboard. This is urgent!"
+                                                <div style="margin-top: 0.5rem;">
+                                                    <span class="keyword-tag">bug</span>
+                                                    <span class="keyword-tag">urgent</span>
+                                                    <span class="keyword-tag">login</span>
+                                                </div>
+                                                <div class="response-box">
+                                                    <small><strong>Team Response:</strong> We're investigating this issue. Ticket #2847 created.</small>
+                                                </div>
+                                            </td>
+                                            <td>⭐⭐</td>
+                                            <td><span class="sentiment-badge sentiment-negative">😞 Negative</span></td>
+                                            <td><span class="tag tag-danger">High</span></td>
+                                            <td><span class="tag tag-danger">Technical</span></td>
+                                            <td><span class="tag tag-processing">In Progress</span></td>
+                                            <td>
+                                                <div style="display: flex; gap: 0.25rem;">
+                                                    <button class="action-btn" onclick="viewFeedbackDetails(3)" title="View Details">👁️</button>
+                                                    <button class="action-btn" onclick="replyToFeedback(3)" title="Reply">💬</button>
+                                                    <button class="action-btn" onclick="assignFeedback(3)" title="Assign">👤</button>
+                                                    <button class="action-btn" onclick="escalateFeedback(3)" title="Escalate">⚠️</button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+
+                                <!-- Pagination -->
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem;">
+                                    <div style="color: var(--text-secondary);">
+                                        Showing 1-10 of 1,847 feedback entries
+                                    </div>
+                                    <div style="display: flex; gap: 0.5rem;">
+                                        <button class="btn btn-secondary btn-sm">← Previous</button>
+                                        <button class="btn btn-secondary btn-sm active">1</button>
+                                        <button class="btn btn-secondary btn-sm">2</button>
+                                        <button class="btn btn-secondary btn-sm">3</button>
+                                        <button class="btn btn-secondary btn-sm">...</button>
+                                        <button class="btn btn-secondary btn-sm">185</button>
+                                        <button class="btn btn-secondary btn-sm">Next →</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Card View (Hidden by default) -->
+                            <div id="feedback-cards-view" style="display: none;">
+                                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1rem;">
+                                    <!-- Sample Feedback Cards -->
+                                    <div class="feedback-item">
+                                        <div class="priority-indicator priority-low"></div>
+                                        <div class="feedback-header">
+                                            <div>
+                                                <strong>Anonymous User</strong><br>
+                                                <small style="color: var(--text-secondary);">Dec 15, 2024 • 14:32</small>
+                                            </div>
+                                            <div>⭐⭐⭐⭐⭐</div>
+                                        </div>
+                                        <p style="margin: 1rem 0;">"The new feature is amazing! It saves me so much time in my daily workflow."</p>
+                                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                                            <span class="sentiment-badge sentiment-positive">😊 Positive</span>
+                                            <span class="tag tag-active">Product</span>
+                                            <span class="tag tag-active">Reviewed</span>
+                                        </div>
+                                        <div class="feedback-actions" style="margin-top: 1rem;">
+                                            <button class="action-btn">View</button>
+                                            <button class="action-btn">Reply</button>
+                                            <button class="action-btn">Archive</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Top Keywords/Topics -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h4>Trending Topics This Week</h4>
+                                <button class="btn btn-secondary btn-sm" onclick="viewAllTopics()">View All</button>
+                            </div>
+                            <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                                <span style="padding: 0.5rem 1rem; background: var(--primary-color); color: white; border-radius: 20px; font-size: 0.875rem;">
+                                    feature request (47)
+                                </span>
+                                <span style="padding: 0.5rem 1rem; background: var(--primary-color); color: white; border-radius: 20px; font-size: 0.875rem; opacity: 0.9;">
+                                    user interface (32)
+                                </span>
+                                <span style="padding: 0.5rem 1rem; background: var(--primary-color); color: white; border-radius: 20px; font-size: 0.875rem; opacity: 0.8;">
+                                    performance (28)
+                                </span>
+                                <span style="padding: 0.5rem 1rem; background: var(--primary-color); color: white; border-radius: 20px; font-size: 0.875rem; opacity: 0.7;">
+                                    support (24)
+                                </span>
+                                <span style="padding: 0.5rem 1rem; background: var(--primary-color); color: white; border-radius: 20px; font-size: 0.875rem; opacity: 0.6;">
+                                    pricing (19)
+                                </span>
+                                <span style="padding: 0.5rem 1rem; background: var(--primary-color); color: white; border-radius: 20px; font-size: 0.875rem; opacity: 0.5;">
+                                    documentation (15)
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -765,6 +2031,7 @@
                             <h2 class="card-title">Chat Management</h2>
                             <div>
                                 <button class="btn btn-secondary" onclick="manageChatSettings()">Settings</button>
+                                <button class="btn btn-primary" onclick="createNewChatWidget()">Create Chat Widget</button>
                                 <button class="btn btn-primary" onclick="createChatTemplate()">Create Template</button>
                             </div>
                         </div>
@@ -814,74 +2081,6 @@
                                     <div style="padding: 1rem; border: 1px solid var(--border-color); border-radius: 8px;">
                                         <strong>Support Experience</strong><br>
                                         <small style="color: var(--text-secondary);">4 questions • Mixed format</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Chat Analytics Section -->
-                <div id="chat-analytics-section" class="hidden">
-                    <div class="card">
-                        <div class="card-header">
-                            <h2 class="card-title">Chat Analytics</h2>
-                            <div>
-                                <select class="form-select" style="margin-right: 1rem;">
-                                    <option>Last 30 days</option>
-                                    <option>Last 7 days</option>
-                                    <option>Last 90 days</option>
-                                    <option>Custom range</option>
-                                </select>
-                                <button class="btn btn-secondary">Export Report</button>
-                            </div>
-                        </div>
-
-                        <div class="dashboard-grid">
-                            <div class="stat-card">
-                                <div class="stat-value">89%</div>
-                                <div class="stat-label">Completion Rate</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-value">2m 15s</div>
-                                <div class="stat-label">Avg. Session Duration</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-value">4.6/5</div>
-                                <div class="stat-label">Average Rating</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-value">+23%</div>
-                                <div class="stat-label">Growth vs Last Month</div>
-                            </div>
-                        </div>
-
-                        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem;">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h4>Response Trends</h4>
-                                </div>
-                                <div class="chart-placeholder">
-                                    📈 Interactive chart showing response trends over time
-                                </div>
-                            </div>
-
-                            <div class="card">
-                                <div class="card-header">
-                                    <h4>Sentiment Analysis</h4>
-                                </div>
-                                <div style="display: grid; gap: 1rem;">
-                                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                                        <span>😊 Positive</span>
-                                        <span><strong>68%</strong></span>
-                                    </div>
-                                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                                        <span>😐 Neutral</span>
-                                        <span><strong>24%</strong></span>
-                                    </div>
-                                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                                        <span>😞 Negative</span>
-                                        <span><strong>8%</strong></span>
                                     </div>
                                 </div>
                             </div>
@@ -1745,7 +2944,1809 @@
         </div>
     </div>
 
+<!-- Supabase JavaScript library -->
+<script src="https://unpkg.com/@supabase/supabase-js@2.39.7/dist/umd/supabase.js"></script>
+<!-- Supabase client configuration -->
+<script src="lib/supabase.js"></script>
 <script src="assets/js/config.js"></script>
+<script src="assets/js/database.js"></script>
 <script src="assets/js/app.js"></script>
+<script>
+// NEW CHAT WIDGET FUNCTIONS
+
+// Global storage for templates
+if (!window.chatTemplates) {
+    window.chatTemplates = [];
+}
+
+// UPDATE createNewChatWidget() function to include template selection
+function createNewChatWidget() {
+    // Load available templates
+    const templates = window.chatTemplates?.filter(t => t.status === 'active') || [];
+    
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h3>Create Chat Widget</h3>
+                <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
+            </div>
+            <form onsubmit="generateChatLink(event)">
+                <!-- Template Selection - NEW SECTION -->
+                <div style="background: #e6fffa; padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem; border: 2px solid #5eead4;">
+                    <h4 style="margin-bottom: 1rem; color: #0f766e;">🎯 Template Selection (Optional)</h4>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Use a Question Template</label>
+                        <select id="chat-template-select" class="form-select" onchange="loadSelectedTemplate(this.value)">
+                            <option value="">No template - Free conversation</option>
+                            ${templates.length > 0 ? `
+                                <optgroup label="Available Templates">
+                                    ${templates.map(t => `
+                                        <option value="${t.id}" data-questions="${t.questions.length}" data-time="${t.estimatedTime}">
+                                            ${t.name} (${t.questions.length} questions, ~${t.estimatedTime} min)
+                                        </option>
+                                    `).join('')}
+                                </optgroup>
+                            ` : ''}
+                        </select>
+                    </div>
+                    
+                    <div id="template-info" style="display: none; margin-top: 1rem; padding: 1rem; background: white; border-radius: 6px;">
+                        <!-- Template details will appear here when selected -->
+                    </div>
+                    
+                    <div style="margin-top: 1rem; display: flex; gap: 0.5rem;">
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="createChatTemplate()">
+                            📝 Create New Template
+                        </button>
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="manageTemplates()">
+                            ⚙️ Manage Templates
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Chat Type Selection -->
+                <div class="form-group" style="background: var(--bg-secondary); padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem;">
+                    <label class="form-label" style="font-weight: bold; margin-bottom: 1rem; display: block;">
+                        Choose Chat Type
+                    </label>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+                        <label class="chat-type-option" style="
+                            display: flex;
+                            flex-direction: column;
+                            padding: 1rem;
+                            border: 2px solid var(--border-color);
+                            border-radius: 8px;
+                            cursor: pointer;
+                            transition: all 0.3s;
+                            background: white;
+                        " onmouseover="this.style.borderColor='var(--primary-color)'" 
+                           onmouseout="this.style.borderColor=document.getElementById('chat-type-listening').checked ? 'var(--primary-color)' : 'var(--border-color)'">
+                            <input type="radio" name="chatType" id="chat-type-listening" value="listening" checked 
+                                   onchange="toggleChatTypeFields()" style="margin-bottom: 0.5rem;">
+                            <div style="font-weight: 600; margin-bottom: 0.5rem;">👂 Listening</div>
+                            <div style="font-size: 0.875rem; color: var(--text-secondary);">
+                                • Continuous listening mode<br>
+                                • Open-ended conversations<br>
+                                • Real-time insights<br>
+                                • Perfect for ongoing feedback
+                            </div>
+                        </label>
+                        
+                        <label class="chat-type-option" style="
+                            display: flex;
+                            flex-direction: column;
+                            padding: 1rem;
+                            border: 2px solid var(--border-color);
+                            border-radius: 8px;
+                            cursor: pointer;
+                            transition: all 0.3s;
+                            background: white;
+                        " onmouseover="this.style.borderColor='var(--primary-color)'" 
+                           onmouseout="this.style.borderColor=document.getElementById('chat-type-chat-survey').checked ? 'var(--primary-color)' : 'var(--border-color)'">
+                            <input type="radio" name="chatType" id="chat-type-chat-survey" value="chat-survey" 
+                                   onchange="toggleChatTypeFields()" style="margin-bottom: 0.5rem;">
+                            <div style="font-weight: 600; margin-bottom: 0.5rem;">💬 Chat Survey</div>
+                            <div style="font-size: 0.875rem; color: var(--text-secondary);">
+                                • Structured conversation flow<br>
+                                • Guided question sequence<br>
+                                • Interactive survey format<br>
+                                • Perfect for detailed feedback
+                            </div>
+                        </label>
+                        
+                        <label class="chat-type-option" style="
+                            display: flex;
+                            flex-direction: column;
+                            padding: 1rem;
+                            border: 2px solid var(--border-color);
+                            border-radius: 8px;
+                            cursor: pointer;
+                            transition: all 0.3s;
+                            background: white;
+                        " onmouseover="this.style.borderColor='var(--primary-color)'" 
+                           onmouseout="this.style.borderColor=document.getElementById('chat-type-pulse-survey').checked ? 'var(--primary-color)' : 'var(--border-color)'">
+                            <input type="radio" name="chatType" id="chat-type-pulse-survey" value="pulse-survey" 
+                                   onchange="toggleChatTypeFields()" style="margin-bottom: 0.5rem;">
+                            <div style="font-weight: 600; margin-bottom: 0.5rem;">📊 Pulse Survey</div>
+                            <div style="font-size: 0.875rem; color: var(--text-secondary);">
+                                • Quick pulse check format<br>
+                                • Short focused questions<br>
+                                • Regular interval surveys<br>
+                                • Perfect for team temperature
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Basic Information -->
+                <div class="form-group">
+                    <label class="form-label">Chat Session Name</label>
+                    <input type="text" id="chat-session-name" class="form-input" required 
+                           placeholder="e.g., Q4 Employee Feedback">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Welcome Message</label>
+                    <textarea id="chat-welcome-msg" class="form-input" rows="3" 
+                              placeholder="Welcome! Please share your feedback with us...">Welcome to our feedback chat! Your insights help us improve.</textarea>
+                </div>
+
+                <!-- Continuous Chat Options (shown by default) -->
+                <div id="continuous-chat-options">
+                    <div style="background: #f0f9ff; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                        <div style="font-weight: 600; color: var(--primary-color); margin-bottom: 0.5rem;">
+                            ℹ️ Continuous Chat Settings
+                        </div>
+                        <div style="font-size: 0.875rem; color: var(--text-secondary);">
+                            This will create a single link that can be shared with unlimited participants.
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Chat Expiry</label>
+                        <select id="chat-expiry" class="form-select">
+                            <option value="never">Never Expire</option>
+                            <option value="24h">24 Hours</option>
+                            <option value="7d" selected>7 Days</option>
+                            <option value="30d">30 Days</option>
+                            <option value="90d">90 Days</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="chat-anonymous" checked>
+                            Allow completely anonymous responses (no tracking)
+                        </label>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="chat-optional-email">
+                            Make email optional (for follow-up purposes)
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Personal Chat Options (hidden by default) -->
+                <div id="personal-chat-options" style="display: none;">
+                    <div style="background: #fef3c7; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                        <div style="font-weight: 600; color: #92400e; margin-bottom: 0.5rem;">
+                            ⚠️ Personal Chat Settings
+                        </div>
+                        <div style="font-size: 0.875rem; color: #92400e;">
+                            You'll need to provide participant details to generate individual links.
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Participant Management</label>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <button type="button" class="btn btn-secondary" onclick="showAddParticipantsModal()">
+                                📋 Add Participants List
+                            </button>
+                            <button type="button" class="btn btn-secondary" onclick="importParticipantsCSV()">
+                                📥 Import from CSV
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Participants Added</label>
+                        <div id="participants-count" style="padding: 1rem; background: var(--bg-secondary); border-radius: 8px;">
+                            <span id="participant-count-text">No participants added yet</span>
+                            <div id="participants-preview" style="margin-top: 0.5rem; display: none;">
+                                <small style="color: var(--text-secondary);">Preview: <span id="preview-list"></span></small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Link Expiry (per participant)</label>
+                        <select id="personal-chat-expiry" class="form-select">
+                            <option value="7d">7 Days</option>
+                            <option value="14d" selected>14 Days</option>
+                            <option value="30d">30 Days</option>
+                            <option value="90d">90 Days</option>
+                            <option value="never">Never Expire</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="send-email-invites" checked>
+                            Send email invitations to all participants
+                        </label>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="track-responses" checked>
+                            Track who has responded
+                        </label>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="allow-multiple-responses">
+                            Allow participants to submit multiple responses
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Common Settings -->
+                <div style="border-top: 1px solid var(--border-color); margin-top: 1.5rem; padding-top: 1.5rem;">
+                    <h4 style="margin-bottom: 1rem;">Additional Settings</h4>
+                    
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="show-progress" checked>
+                            Show progress indicator in chat
+                        </label>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="enable-notifications" checked>
+                            Send me notifications for new responses
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Hidden field to store selected template data -->
+                <input type="hidden" id="selected-template-data" value="">
+
+                <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
+                    <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').remove()">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="generate-chat-btn">
+                        <span id="btn-text">Generate Link</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    
+    // Update the radio button styling when selected
+    updateChatTypeSelection();
+}
+
+// New function to toggle fields based on chat type selection
+function toggleChatTypeFields() {
+    const chatType = document.querySelector('input[name="chatType"]:checked').value;
+    const continuousOptions = document.getElementById('continuous-chat-options');
+    const personalOptions = document.getElementById('personal-chat-options');
+    const generateBtn = document.getElementById('generate-chat-btn');
+    const btnText = document.getElementById('btn-text');
+    
+    if (chatType === 'continuous') {
+        continuousOptions.style.display = 'block';
+        personalOptions.style.display = 'none';
+        btnText.textContent = 'Generate Link';
+    } else {
+        continuousOptions.style.display = 'none';
+        personalOptions.style.display = 'block';
+        btnText.textContent = 'Generate Personal Links';
+    }
+    
+    updateChatTypeSelection();
+}
+
+// Update visual selection of chat type
+function updateChatTypeSelection() {
+    const options = document.querySelectorAll('.chat-type-option');
+    options.forEach(option => {
+        const radio = option.querySelector('input[type="radio"]');
+        if (radio.checked) {
+            option.style.borderColor = 'var(--primary-color)';
+            option.style.background = '#f0f9ff';
+        } else {
+            option.style.borderColor = 'var(--border-color)';
+            option.style.background = 'white';
+        }
+    });
+}
+
+// Function to show modal for adding participants
+function showAddParticipantsModal() {
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.style.zIndex = '10001'; // Higher than parent modal
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3>Add Participants</h3>
+                <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
+            </div>
+            <div>
+                <div class="form-group">
+                    <label class="form-label">Enter participant details (one per line)</label>
+                    <textarea id="participants-list" class="form-input" rows="10" 
+                              placeholder="Format: Name, Email&#10;Example:&#10;John Doe, john@example.com&#10;Jane Smith, jane@example.com"></textarea>
+                </div>
+                <div style="margin: 1rem 0; padding: 1rem; background: var(--bg-secondary); border-radius: 8px;">
+                    <strong>Tips:</strong>
+                    <ul style="margin: 0.5rem 0 0 1rem; font-size: 0.875rem;">
+                        <li>Use format: Name, Email</li>
+                        <li>One participant per line</li>
+                        <li>You can paste from Excel/CSV</li>
+                    </ul>
+                </div>
+                <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                    <button class="btn btn-secondary" onclick="this.closest('.modal').remove()">Cancel</button>
+                    <button class="btn btn-primary" onclick="addParticipants()">Add Participants</button>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+}
+
+// Function to import participants from CSV
+function importParticipantsCSV() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.csv,.txt';
+    input.onchange = function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                processParticipantsCSV(event.target.result);
+            };
+            reader.readAsText(file);
+        }
+    };
+    input.click();
+}
+
+// Process CSV content
+function processParticipantsCSV(content) {
+    const lines = content.split('\n').filter(line => line.trim());
+    const participants = [];
+    
+    lines.forEach(line => {
+        const parts = line.split(',').map(part => part.trim());
+        if (parts.length >= 2) {
+            participants.push({
+                name: parts[0],
+                email: parts[1]
+            });
+        }
+    });
+    
+    updateParticipantsDisplay(participants);
+    showToast(`Imported ${participants.length} participants from CSV`, 'success');
+}
+
+// Function to add participants from manual entry
+function addParticipants() {
+    const textarea = document.getElementById('participants-list');
+    const lines = textarea.value.split('\n').filter(line => line.trim());
+    const participants = [];
+    
+    lines.forEach(line => {
+        const parts = line.split(',').map(part => part.trim());
+        if (parts.length >= 2) {
+            participants.push({
+                name: parts[0],
+                email: parts[1]
+            });
+        }
+    });
+    
+    if (participants.length > 0) {
+        updateParticipantsDisplay(participants);
+        document.querySelector('.modal[style*="z-index: 10001"]').remove();
+        showToast(`Added ${participants.length} participants`, 'success');
+    } else {
+        showToast('Please enter valid participant details', 'warning');
+    }
+}
+
+// Update the participants display
+function updateParticipantsDisplay(participants) {
+    // Store participants data (you'll need to implement proper storage)
+    window.tempParticipants = participants;
+    
+    const countText = document.getElementById('participant-count-text');
+    const preview = document.getElementById('participants-preview');
+    const previewList = document.getElementById('preview-list');
+    
+    countText.textContent = `${participants.length} participant(s) added`;
+    
+    if (participants.length > 0) {
+        preview.style.display = 'block';
+        const previewNames = participants.slice(0, 3).map(p => p.name).join(', ');
+        const moreText = participants.length > 3 ? `, and ${participants.length - 3} more...` : '';
+        previewList.textContent = previewNames + moreText;
+    } else {
+        preview.style.display = 'none';
+    }
+}
+
+// UPDATE generateChatLink to include template data
+async function generateChatLink(event) {
+    event.preventDefault();
+    
+    // Get chat type
+    const chatType = document.querySelector('input[name="chatType"]:checked').value;
+    
+    // Get common form values
+    const sessionName = document.getElementById('chat-session-name').value;
+    const welcomeMsg = document.getElementById('chat-welcome-msg').value;
+    
+    // Get selected template data
+    const templateData = document.getElementById('selected-template-data').value;
+    const template = templateData ? JSON.parse(templateData) : null;
+    
+    if (chatType === 'continuous') {
+        // Handle continuous chat with template
+        generateContinuousChatLink(sessionName, welcomeMsg, template);
+    } else {
+        // Handle personal chat with template
+        generatePersonalChatLinks(sessionName, welcomeMsg, template);
+    }
+}
+
+// UPDATE generateContinuousChatLink to include template
+function generateContinuousChatLink(sessionName, welcomeMsg, template = null) {
+    const expiry = document.getElementById('chat-expiry').value;
+    const allowAnonymous = document.getElementById('chat-anonymous').checked;
+    const optionalEmail = document.getElementById('chat-optional-email').checked;
+    
+    // Generate unique session ID for continuous chat
+    const sessionId = 'continuous_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    
+    // Create URL parameters
+    const params = new URLSearchParams({
+        id: sessionId,
+        type: 'continuous',
+        name: sessionName,
+        welcome: welcomeMsg,
+        expiry: expiry,
+        anonymous: allowAnonymous,
+        optionalEmail: optionalEmail
+    });
+    
+    // Add template ID if selected
+    if (template) {
+        params.append('templateId', template.id);
+    }
+    
+    // Generate the link
+    const chatLink = window.location.origin + '/chat.html?' + params.toString();
+    
+    // Store session data with template
+    const chatSessionData = {
+        id: sessionId,
+        type: 'continuous',
+        name: sessionName,
+        welcomeMsg: welcomeMsg,
+        expiry: expiry,
+        allowAnonymous: allowAnonymous,
+        optionalEmail: optionalEmail,
+        link: chatLink,
+        template: template,  // Include template data
+        created: new Date().toISOString()
+    };
+    
+    // Store the session (in real app, this would go to database)
+    if (!window.chatSessions) {
+        window.chatSessions = [];
+    }
+    window.chatSessions.push(chatSessionData);
+    
+    // Close current modal
+    document.querySelector('.modal').remove();
+    
+    // Show success modal with link
+    showContinuousChatLinkModal(chatSessionData);
+}
+
+// Function to generate personal chat links
+async function generatePersonalChatLinks(sessionName, welcomeMsg, template = null) {
+    const participants = window.tempParticipants || [];
+    
+    if (participants.length === 0) {
+        showToast('Please add participants first', 'warning');
+        return;
+    }
+    
+    const expiry = document.getElementById('personal-chat-expiry').value;
+    const sendInvites = document.getElementById('send-email-invites').checked;
+    const trackResponses = document.getElementById('track-responses').checked;
+    const allowMultiple = document.getElementById('allow-multiple-responses').checked;
+    
+    // Generate unique links for each participant
+    const personalLinks = [];
+    const baseSessionId = 'personal_' + Date.now();
+    
+    participants.forEach((participant, index) => {
+        const personalId = baseSessionId + '_' + index + '_' + Math.random().toString(36).substr(2, 9);
+        
+        const params = new URLSearchParams({
+            id: personalId,
+            type: 'personal',
+            name: sessionName,
+            welcome: welcomeMsg,
+            expiry: expiry,
+            participantName: participant.name,
+            participantEmail: participant.email,
+            trackResponses: trackResponses,
+            allowMultiple: allowMultiple
+        });
+        
+        // Add template ID if selected
+        if (template) {
+            params.append('templateId', template.id);
+        }
+        
+        const link = window.location.origin + '/chat.html?' + params.toString();
+        
+        personalLinks.push({
+            participant: participant,
+            link: link,
+            id: personalId,
+            responded: false,
+            responseCount: 0
+        });
+    });
+    
+    // Store session data
+    const chatSessionData = {
+        id: baseSessionId,
+        type: 'personal',
+        name: sessionName,
+        welcomeMsg: welcomeMsg,
+        expiry: expiry,
+        trackResponses: trackResponses,
+        allowMultiple: allowMultiple,
+        personalLinks: personalLinks,
+        template: template,  // Include template data
+        created: new Date().toISOString()
+    };
+    
+    // Store the session
+    if (!window.chatSessions) {
+        window.chatSessions = [];
+    }
+    window.chatSessions.push(chatSessionData);
+    
+    // Send email invites if selected
+    if (sendInvites) {
+        await sendPersonalInvites(personalLinks, sessionName);
+    }
+    
+    // Close current modal
+    document.querySelector('.modal').remove();
+    
+    // Show success modal with links
+    showPersonalChatLinksModal(chatSessionData);
+}
+
+// Show success modal for continuous chat
+function showContinuousChatLinkModal(sessionData) {
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h3>✅ Continuous Chat Link Generated!</h3>
+                <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
+            </div>
+            <div>
+                <div class="alert alert-success" style="margin-bottom: 1.5rem;">
+                    <strong>Success!</strong> Your continuous chat link for "${sessionData.name}" is ready.
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Share this link with all participants:</label>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <input type="text" id="generated-link" class="form-input" value="${sessionData.link}" 
+                               readonly style="font-family: monospace; font-size: 0.875rem;">
+                        <button class="btn btn-primary" onclick="copyLinkToClipboard()">Copy</button>
+                    </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1.5rem;">
+                    <div style="padding: 1rem; background: var(--bg-secondary); border-radius: 8px;">
+                        <strong>📊 Link Settings:</strong>
+                        <ul style="margin: 0.5rem 0 0 1rem; font-size: 0.875rem;">
+                            <li>Type: Continuous (Shared)</li>
+                            <li>Expiry: ${sessionData.expiry === 'never' ? 'Never' : sessionData.expiry}</li>
+                            <li>Anonymous: ${sessionData.allowAnonymous ? 'Yes' : 'No'}</li>
+                        </ul>
+                    </div>
+                    <div style="padding: 1rem; background: var(--bg-secondary); border-radius: 8px;">
+                        <strong>📈 Usage:</strong>
+                        <ul style="margin: 0.5rem 0 0 1rem; font-size: 0.875rem;">
+                            <li>Share via email, social media, or website</li>
+                            <li>Unlimited participants</li>
+                            <li>Real-time response tracking</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 1.5rem;">
+                    <label class="form-label">QR Code (for easy mobile access):</label>
+                    <div style="background: white; padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color); text-align: center;">
+                        <div style="width: 200px; height: 200px; margin: 0 auto; background: var(--bg-secondary); 
+                                    display: flex; align-items: center; justify-content: center; border-radius: 8px;">
+                            <span style="color: var(--text-secondary);">QR Code Here</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-top: 1.5rem;">
+                    <button class="btn btn-secondary" onclick="testChatLink('${sessionData.link}')">
+                        🧪 Test Link
+                    </button>
+                    <button class="btn btn-success" onclick="emailChatLink(${JSON.stringify(sessionData).replace(/"/g, '&quot;')})">
+                        📧 Email to Me
+                    </button>
+                    <button class="btn btn-primary" onclick="downloadQRCode()">
+                        📥 Download QR
+                    </button>
+                </div>
+                
+                <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
+                    <button class="btn btn-secondary" onclick="generateAnotherLink()">Create Another</button>
+                    <button class="btn btn-primary" onclick="this.closest('.modal').remove()">Done</button>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    
+    showToast('Continuous chat link generated successfully!', 'success');
+}
+
+// Show success modal for personal chat links
+function showPersonalChatLinksModal(sessionData) {
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 900px; max-height: 80vh; overflow-y: auto;">
+            <div class="modal-header">
+                <h3>✅ Personal Chat Links Generated!</h3>
+                <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
+            </div>
+            <div>
+                <div class="alert alert-success" style="margin-bottom: 1.5rem;">
+                    <strong>Success!</strong> Generated ${sessionData.personalLinks.length} unique personal links for "${sessionData.name}"
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+                    <div style="padding: 1rem; background: var(--bg-secondary); border-radius: 8px;">
+                        <strong>📊 Session Settings:</strong>
+                        <ul style="margin: 0.5rem 0 0 1rem; font-size: 0.875rem;">
+                            <li>Type: Personal (Individual Links)</li>
+                            <li>Participants: ${sessionData.personalLinks.length}</li>
+                            <li>Expiry: ${sessionData.expiry}</li>
+                            <li>Response Tracking: ${sessionData.trackResponses ? 'Enabled' : 'Disabled'}</li>
+                        </ul>
+                    </div>
+                    <div style="padding: 1rem; background: #dcfce7; border-radius: 8px;">
+                        <strong>✉️ Email Status:</strong>
+                        <div style="margin-top: 0.5rem; font-size: 0.875rem;">
+                            <div id="email-status">Preparing to send invitations...</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Participant Links:</label>
+                    <div style="max-height: 300px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 8px;">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Personal Link</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${sessionData.personalLinks.map(item => `
+                                    <tr>
+                                        <td>${item.participant.name}</td>
+                                        <td>${item.participant.email}</td>
+                                        <td>
+                                            <input type="text" value="${item.link}" readonly 
+                                                   style="width: 100%; font-size: 0.75rem; font-family: monospace;">
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-sm btn-secondary" 
+                                                    onclick="copyPersonalLink('${item.link}')">Copy</button>
+                                            <button class="btn btn-sm btn-primary" 
+                                                    onclick="testChatLink('${item.link}')">Test</button>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-top: 1.5rem;">
+                    <button class="btn btn-secondary" onclick="exportPersonalLinks(${JSON.stringify(sessionData).replace(/"/g, '&quot;')})">
+                        📥 Export to CSV
+                    </button>
+                    <button class="btn btn-success" onclick="resendAllInvites(${JSON.stringify(sessionData).replace(/"/g, '&quot;')})">
+                        📧 Resend All Invites
+                    </button>
+                    <button class="btn btn-primary" onclick="viewResponseTracking('${sessionData.id}')">
+                        📊 Track Responses
+                    </button>
+                </div>
+                
+                <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
+                    <button class="btn btn-secondary" onclick="generateAnotherLink()">Create Another</button>
+                    <button class="btn btn-primary" onclick="this.closest('.modal').remove()">Done</button>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    
+    showToast(`Generated ${sessionData.personalLinks.length} personal chat links!`, 'success');
+}
+
+// Send personal invites via email
+async function sendPersonalInvites(personalLinks, sessionName) {
+    const emailStatus = document.getElementById('email-status');
+    let successCount = 0;
+    let failCount = 0;
+    
+    for (const linkData of personalLinks) {
+        try {
+            // Simulated API call - replace with actual endpoint
+            const response = await fetch('/api/send-chat-invite', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email: linkData.participant.email,
+                    name: linkData.participant.name,
+                    sessionName: sessionName,
+                    personalLink: linkData.link
+                }),
+            });
+            
+            if (response.ok) {
+                successCount++;
+            } else {
+                failCount++;
+            }
+        } catch (error) {
+            failCount++;
+            console.error('Failed to send invite to', linkData.participant.email, error);
+        }
+        
+        // Update status
+        if (emailStatus) {
+            emailStatus.textContent = `Sent ${successCount} of ${personalLinks.length} invitations...`;
+        }
+    }
+    
+    // Final status
+    if (emailStatus) {
+        if (failCount === 0) {
+            emailStatus.innerHTML = `<span style="color: var(--success-color);">✅ All ${successCount} invitations sent successfully!</span>`;
+        } else {
+            emailStatus.innerHTML = `<span style="color: var(--warning-color);">⚠️ Sent ${successCount} invitations, ${failCount} failed.</span>`;
+        }
+    }
+}
+
+// Helper functions
+function copyPersonalLink(link) {
+    const tempInput = document.createElement('input');
+    tempInput.value = link;
+    document.body.appendChild(tempInput);
+    tempInput.select();
+    document.execCommand('copy');
+    document.body.removeChild(tempInput);
+    showToast('Link copied to clipboard!', 'success');
+}
+
+function exportPersonalLinks(sessionData) {
+    let csvContent = 'Name,Email,Personal Link\n';
+    sessionData.personalLinks.forEach(item => {
+        csvContent += `"${item.participant.name}","${item.participant.email}","${item.link}"\n`;
+    });
+    
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `personal_links_${sessionData.name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+    
+    showToast('Personal links exported to CSV', 'success');
+}
+
+function resendAllInvites(sessionData) {
+    if (confirm(`Resend invitations to all ${sessionData.personalLinks.length} participants?`)) {
+        sendPersonalInvites(sessionData.personalLinks, sessionData.name);
+        showToast('Resending all invitations...', 'info');
+    }
+}
+
+function viewResponseTracking(sessionId) {
+    showToast('Opening response tracking dashboard...', 'info');
+    // This would open a dashboard showing who has responded
+}
+
+function downloadQRCode() {
+    showToast('Downloading QR code...', 'info');
+    // This would generate and download the QR code
+}
+
+function copyLinkToClipboard() {
+    const linkInput = document.getElementById('generated-link');
+    linkInput.select();
+    document.execCommand('copy');
+    showToast('Link copied to clipboard!', 'success');
+}
+
+function testChatLink(link) {
+    window.open(link, '_blank');
+}
+
+function emailChatLink(sessionData) {
+    showToast('Opening email client...', 'info');
+    // This would open email client with pre-filled content
+}
+
+function generateAnotherLink() {
+    document.querySelector('.modal').remove();
+    createNewChatWidget();
+}
+
+function showToast(message, type = 'info') {
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        padding: 12px 20px;
+        background: ${type === 'success' ? '#10b981' : type === 'warning' ? '#f59e0b' : '#3b82f6'};
+        color: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        z-index: 10000;
+        animation: slideIn 0.3s ease-out;
+    `;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.style.animation = 'slideOut 0.3s ease-out';
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
+// TEMPLATE MANAGEMENT FUNCTIONS
+
+// Function to create a new chat template
+function createChatTemplate() {
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 800px; max-height: 90vh; overflow-y: auto;">
+            <div class="modal-header">
+                <h3>🎯 Create Chat Template</h3>
+                <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
+            </div>
+            <form onsubmit="saveChatTemplate(event)">
+                <!-- Template Basic Info -->
+                <div style="background: var(--bg-secondary); padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem;">
+                    <h4 style="margin-bottom: 1rem; color: var(--primary-color);">📋 Template Information</h4>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Template Name <span style="color: red;">*</span></label>
+                        <input type="text" id="template-name" class="form-input" required 
+                               placeholder="e.g., Customer Satisfaction Survey">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Description</label>
+                        <textarea id="template-description" class="form-input" rows="2" 
+                                  placeholder="Brief description of what this template is for..."></textarea>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label class="form-label">Category</label>
+                            <select id="template-category" class="form-select">
+                                <option value="general">General Feedback</option>
+                                <option value="satisfaction">Customer Satisfaction</option>
+                                <option value="employee">Employee Feedback</option>
+                                <option value="product">Product Feedback</option>
+                                <option value="service">Service Evaluation</option>
+                                <option value="event">Event Feedback</option>
+                                <option value="custom">Custom</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Estimated Time</label>
+                            <select id="template-time" class="form-select">
+                                <option value="2">2 minutes</option>
+                                <option value="5" selected>5 minutes</option>
+                                <option value="10">10 minutes</option>
+                                <option value="15">15 minutes</option>
+                                <option value="20">20+ minutes</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat Flow Settings -->
+                <div style="background: #f0f9ff; padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem;">
+                    <h4 style="margin-bottom: 1rem; color: var(--primary-color);">💬 Chat Flow Settings</h4>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Introduction Message</label>
+                        <textarea id="template-intro" class="form-input" rows="2" 
+                                  placeholder="Hi! Thanks for taking the time to provide feedback. I'll ask you a few quick questions...">Hi! Thanks for taking the time to provide feedback. I'll ask you a few quick questions to understand your experience better.</textarea>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="template-allow-skip" checked>
+                                Allow users to skip questions
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="template-show-progress" checked>
+                                Show progress indicator
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Closing Message</label>
+                        <textarea id="template-closing" class="form-input" rows="2" 
+                                  placeholder="Thank you for your valuable feedback! We appreciate your time.">Thank you for your valuable feedback! Your responses will help us improve our services.</textarea>
+                    </div>
+                </div>
+
+                <!-- Questions Builder -->
+                <div style="border: 2px solid var(--border-color); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem;">
+                    <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 1rem;">
+                        <h4 style="margin: 0; color: var(--primary-color);">📝 Questions</h4>
+                        <button type="button" class="btn btn-primary btn-sm" onclick="addTemplateQuestion()" 
+                                style="margin-left: auto;">
+                            + Add Question
+                        </button>
+                    </div>
+                    
+                    <div id="template-questions-container">
+                        <!-- Questions will be added here dynamically -->
+                        <div class="template-question-item" data-question-id="1">
+                            <div class="question-header">
+                                <span class="question-number">Question 1</span>
+                                <button type="button" class="btn btn-danger btn-sm" onclick="removeTemplateQuestion(this)">Remove</button>
+                            </div>
+                            <div class="question-content">
+                                <div class="form-group">
+                                    <label class="form-label">Question Text <span style="color: red;">*</span></label>
+                                    <input type="text" class="form-input question-text" required 
+                                           placeholder="Enter your question here...">
+                                </div>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                    <div class="form-group">
+                                        <label class="form-label">Question Type</label>
+                                        <select class="form-select question-type" onchange="updateQuestionOptions(this)">
+                                            <option value="text">Text Response</option>
+                                            <option value="rating">Rating (1-5)</option>
+                                            <option value="yes-no">Yes/No</option>
+                                            <option value="multiple-choice">Multiple Choice</option>
+                                            <option value="scale">Scale (1-10)</option>
+                                            <option value="emoji">Emoji Rating</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Required?</label>
+                                        <select class="form-select question-required">
+                                            <option value="yes">Yes</option>
+                                            <option value="no">No</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="question-options" style="display: none;">
+                                    <!-- Options for multiple choice questions will appear here -->
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Follow-up Prompt (Optional)</label>
+                                    <input type="text" class="form-input question-followup" 
+                                           placeholder="e.g., 'Can you tell me more about that?'">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 1rem; padding: 1rem; background: var(--bg-secondary); border-radius: 8px;">
+                        <small style="color: var(--text-secondary);">
+                            💡 <strong>Tips:</strong> Keep questions clear and concise. Start with easy questions to build rapport. 
+                            Use a mix of question types for better engagement.
+                        </small>
+                    </div>
+                </div>
+
+                <!-- AI Behavior Settings -->
+                <div style="background: #fef3c7; padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem;">
+                    <h4 style="margin-bottom: 1rem; color: #92400e;">🤖 AI Behavior Settings</h4>
+                    
+                    <div class="form-group">
+                        <label class="form-label">AI Personality</label>
+                        <select id="template-ai-personality" class="form-select">
+                            <option value="professional">Professional</option>
+                            <option value="friendly" selected>Friendly</option>
+                            <option value="casual">Casual</option>
+                            <option value="formal">Formal</option>
+                            <option value="empathetic">Empathetic</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Response Style</label>
+                        <div style="display: grid; gap: 0.5rem;">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="ai-acknowledge" checked>
+                                Acknowledge user responses before moving to next question
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="ai-clarify" checked>
+                                Ask for clarification if response is unclear
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="ai-empathy">
+                                Show empathy for negative feedback
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="ai-dynamic">
+                                Dynamically adjust questions based on responses
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Template Preview -->
+                <div style="margin-bottom: 1.5rem;">
+                    <button type="button" class="btn btn-secondary" onclick="previewTemplate()" style="width: 100%;">
+                        👁️ Preview Template Chat Flow
+                    </button>
+                </div>
+
+                <!-- Form Actions -->
+                <div style="display: flex; gap: 1rem; justify-content: flex-end; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+                    <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').remove()">Cancel</button>
+                    <button type="button" class="btn btn-secondary" onclick="saveTemplateAsDraft()">Save as Draft</button>
+                    <button type="submit" class="btn btn-primary">Save Template</button>
+                </div>
+            </form>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    
+    // Initialize question numbers
+    updateQuestionNumbers();
+}
+
+// Add a new question to the template
+function addTemplateQuestion() {
+    const container = document.getElementById('template-questions-container');
+    const questionCount = container.querySelectorAll('.template-question-item').length + 1;
+    
+    const questionHTML = `
+        <div class="template-question-item" data-question-id="${questionCount}">
+            <div class="question-header">
+                <span class="question-number">Question ${questionCount}</span>
+                <button type="button" class="btn btn-danger btn-sm" onclick="removeTemplateQuestion(this)">Remove</button>
+            </div>
+            <div class="question-content">
+                <div class="form-group">
+                    <label class="form-label">Question Text <span style="color: red;">*</span></label>
+                    <input type="text" class="form-input question-text" required 
+                           placeholder="Enter your question here...">
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label class="form-label">Question Type</label>
+                        <select class="form-select question-type" onchange="updateQuestionOptions(this)">
+                            <option value="text">Text Response</option>
+                            <option value="rating">Rating (1-5)</option>
+                            <option value="yes-no">Yes/No</option>
+                            <option value="multiple-choice">Multiple Choice</option>
+                            <option value="scale">Scale (1-10)</option>
+                            <option value="emoji">Emoji Rating</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Required?</label>
+                        <select class="form-select question-required">
+                            <option value="yes">Yes</option>
+                            <option value="no">No</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="question-options" style="display: none;">
+                    <!-- Options for multiple choice questions will appear here -->
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Follow-up Prompt (Optional)</label>
+                    <input type="text" class="form-input question-followup" 
+                           placeholder="e.g., 'Can you tell me more about that?'">
+                </div>
+            </div>
+        </div>
+    `;
+    
+    container.insertAdjacentHTML('beforeend', questionHTML);
+    updateQuestionNumbers();
+    showToast('Question added!', 'success');
+}
+
+// Remove a question from the template
+function removeTemplateQuestion(button) {
+    const questionItem = button.closest('.template-question-item');
+    questionItem.remove();
+    updateQuestionNumbers();
+    showToast('Question removed', 'info');
+}
+
+// Update question numbers after add/remove
+function updateQuestionNumbers() {
+    const questions = document.querySelectorAll('.template-question-item');
+    questions.forEach((question, index) => {
+        question.querySelector('.question-number').textContent = `Question ${index + 1}`;
+        question.setAttribute('data-question-id', index + 1);
+    });
+}
+
+// Update question options based on type
+function updateQuestionOptions(select) {
+    const questionItem = select.closest('.template-question-item');
+    const optionsDiv = questionItem.querySelector('.question-options');
+    const questionType = select.value;
+    
+    if (questionType === 'multiple-choice') {
+        optionsDiv.style.display = 'block';
+        optionsDiv.innerHTML = `
+            <div class="form-group">
+                <label class="form-label">Options (one per line)</label>
+                <textarea class="form-input question-mc-options" rows="4" 
+                          placeholder="Option 1&#10;Option 2&#10;Option 3&#10;Option 4"></textarea>
+            </div>
+        `;
+    } else {
+        optionsDiv.style.display = 'none';
+        optionsDiv.innerHTML = '';
+    }
+}
+
+// Save the template
+function saveChatTemplate(event) {
+    event.preventDefault();
+    
+    // Gather all the template data
+    const templateData = {
+        id: 'template_' + Date.now(),
+        name: document.getElementById('template-name').value,
+        description: document.getElementById('template-description').value,
+        category: document.getElementById('template-category').value,
+        estimatedTime: document.getElementById('template-time').value,
+        intro: document.getElementById('template-intro').value,
+        closing: document.getElementById('template-closing').value,
+        allowSkip: document.getElementById('template-allow-skip').checked,
+        showProgress: document.getElementById('template-show-progress').checked,
+        aiPersonality: document.getElementById('template-ai-personality').value,
+        aiSettings: {
+            acknowledge: document.getElementById('ai-acknowledge').checked,
+            clarify: document.getElementById('ai-clarify').checked,
+            empathy: document.getElementById('ai-empathy').checked,
+            dynamic: document.getElementById('ai-dynamic').checked
+        },
+        questions: [],
+        createdAt: new Date().toISOString(),
+        status: 'active'
+    };
+    
+    // Gather all questions
+    const questionItems = document.querySelectorAll('.template-question-item');
+    questionItems.forEach((item, index) => {
+        const question = {
+            id: index + 1,
+            text: item.querySelector('.question-text').value,
+            type: item.querySelector('.question-type').value,
+            required: item.querySelector('.question-required').value === 'yes',
+            followup: item.querySelector('.question-followup').value
+        };
+        
+        // Add options for multiple choice
+        if (question.type === 'multiple-choice') {
+            const optionsText = item.querySelector('.question-mc-options')?.value || '';
+            question.options = optionsText.split('\n').filter(opt => opt.trim());
+        }
+        
+        templateData.questions.push(question);
+    });
+    
+    // Validate at least one question
+    if (templateData.questions.length === 0) {
+        showToast('Please add at least one question to the template', 'warning');
+        return;
+    }
+    
+    // Save to storage
+    window.chatTemplates.push(templateData);
+    localStorage.setItem('chatTemplates', JSON.stringify(window.chatTemplates));
+    
+    // Close modal
+    event.target.closest('.modal').remove();
+    
+    // Show success message
+    showToast(`Template "${templateData.name}" saved successfully!`, 'success');
+    
+    // Refresh template list if on chat management page
+    if (document.getElementById('chat-management-section') && !document.getElementById('chat-management-section').classList.contains('hidden')) {
+        refreshTemplatesList();
+    }
+}
+
+// Save template as draft
+function saveTemplateAsDraft() {
+    const templateName = document.getElementById('template-name').value || 'Untitled Template';
+    
+    // Similar to saveChatTemplate but with draft status
+    const templateData = {
+        id: 'template_draft_' + Date.now(),
+        name: templateName + ' (Draft)',
+        status: 'draft',
+        // ... gather other data same as saveChatTemplate
+    };
+    
+    window.chatTemplates.push(templateData);
+    localStorage.setItem('chatTemplates', JSON.stringify(window.chatTemplates));
+    
+    document.querySelector('.modal').remove();
+    showToast(`Draft template saved!`, 'info');
+}
+
+// Preview template
+function previewTemplate() {
+    const questions = [];
+    document.querySelectorAll('.template-question-item').forEach(item => {
+        questions.push({
+            text: item.querySelector('.question-text').value || 'Question text',
+            type: item.querySelector('.question-type').value
+        });
+    });
+    
+    if (questions.length === 0) {
+        showToast('Add questions to preview the template', 'warning');
+        return;
+    }
+    
+    // Create preview modal
+    const previewModal = document.createElement('div');
+    previewModal.className = 'modal';
+    previewModal.style.zIndex = '10001';
+    previewModal.innerHTML = `
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3>Template Preview</h3>
+                <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
+            </div>
+            <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; max-height: 400px; overflow-y: auto;">
+                <div class="chat-preview-message bot">
+                    <strong>AI:</strong> ${document.getElementById('template-intro').value || 'Welcome!'}
+                </div>
+                ${questions.map((q, i) => `
+                    <div class="chat-preview-message bot">
+                        <strong>AI:</strong> ${q.text}
+                        ${getQuestionTypePreview(q.type)}
+                    </div>
+                    <div class="chat-preview-message user">
+                        <strong>User:</strong> <em>[User response]</em>
+                    </div>
+                `).join('')}
+                <div class="chat-preview-message bot">
+                    <strong>AI:</strong> ${document.getElementById('template-closing').value || 'Thank you!'}
+                </div>
+            </div>
+            <div style="margin-top: 1rem; text-align: right;">
+                <button class="btn btn-primary" onclick="this.closest('.modal').remove()">Close Preview</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(previewModal);
+}
+
+// Get question type preview HTML
+function getQuestionTypePreview(type) {
+    const previews = {
+        'text': '<div style="margin-top: 0.5rem;"><input type="text" class="form-input" placeholder="Type your answer..." disabled></div>',
+        'rating': '<div style="margin-top: 0.5rem;">⭐⭐⭐⭐⭐</div>',
+        'yes-no': '<div style="margin-top: 0.5rem;"><button class="btn btn-sm">Yes</button> <button class="btn btn-sm">No</button></div>',
+        'multiple-choice': '<div style="margin-top: 0.5rem;">○ Option A<br>○ Option B<br>○ Option C</div>',
+        'scale': '<div style="margin-top: 0.5rem;">1 ——————— 10</div>',
+        'emoji': '<div style="margin-top: 0.5rem;">😞 😐 😊 😃 😍</div>'
+    };
+    return previews[type] || '';
+}
+
+// Load templates from storage on page load
+function loadTemplates() {
+    const saved = localStorage.getItem('chatTemplates');
+    if (saved) {
+        window.chatTemplates = JSON.parse(saved);
+    }
+}
+
+// Refresh templates list in the UI
+function refreshTemplatesList() {
+    const container = document.querySelector('#chat-management-section .card:nth-child(2) div');
+    if (!container) return;
+    
+    const templates = window.chatTemplates.filter(t => t.status === 'active');
+    
+    if (templates.length === 0) {
+        container.innerHTML = `
+            <div style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+                No templates created yet. Click "Create Template" to get started.
+            </div>
+        `;
+        return;
+    }
+    
+    container.innerHTML = templates.map(template => `
+        <div style="padding: 1rem; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 0.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: start;">
+                <div>
+                    <strong>${template.name}</strong><br>
+                    <small style="color: var(--text-secondary);">
+                        ${template.questions.length} questions • ${template.estimatedTime} min • ${template.category}
+                    </small>
+                </div>
+                <div style="display: flex; gap: 0.5rem;">
+                    <button class="btn btn-secondary btn-sm" onclick="editTemplate('${template.id}')">Edit</button>
+                    <button class="btn btn-primary btn-sm" onclick="duplicateTemplate('${template.id}')">Duplicate</button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteTemplate('${template.id}')">Delete</button>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+// Edit existing template
+function editTemplate(templateId) {
+    const template = window.chatTemplates.find(t => t.id === templateId);
+    if (!template) {
+        showToast('Template not found', 'error');
+        return;
+    }
+    
+    // Create edit modal (similar to create but pre-filled)
+    createChatTemplate();
+    
+    // Pre-fill the form after a short delay to ensure modal is rendered
+    setTimeout(() => {
+        document.getElementById('template-name').value = template.name;
+        document.getElementById('template-description').value = template.description || '';
+        document.getElementById('template-category').value = template.category;
+        document.getElementById('template-time').value = template.estimatedTime;
+        document.getElementById('template-intro').value = template.intro;
+        document.getElementById('template-closing').value = template.closing;
+        // ... fill other fields
+        
+        showToast('Editing template: ' + template.name, 'info');
+    }, 100);
+}
+
+// Duplicate template
+function duplicateTemplate(templateId) {
+    const template = window.chatTemplates.find(t => t.id === templateId);
+    if (!template) return;
+    
+    const duplicate = {
+        ...template,
+        id: 'template_' + Date.now(),
+        name: template.name + ' (Copy)',
+        createdAt: new Date().toISOString()
+    };
+    
+    window.chatTemplates.push(duplicate);
+    localStorage.setItem('chatTemplates', JSON.stringify(window.chatTemplates));
+    
+    refreshTemplatesList();
+    showToast(`Template duplicated: ${duplicate.name}`, 'success');
+}
+
+// Delete template
+function deleteTemplate(templateId) {
+    if (!confirm('Are you sure you want to delete this template?')) return;
+    
+    const index = window.chatTemplates.findIndex(t => t.id === templateId);
+    if (index > -1) {
+        const name = window.chatTemplates[index].name;
+        window.chatTemplates.splice(index, 1);
+        localStorage.setItem('chatTemplates', JSON.stringify(window.chatTemplates));
+        
+        refreshTemplatesList();
+        showToast(`Template deleted: ${name}`, 'success');
+    }
+}
+
+// Function to load selected template details
+function loadSelectedTemplate(templateId) {
+    const infoDiv = document.getElementById('template-info');
+    const hiddenField = document.getElementById('selected-template-data');
+    
+    if (!templateId) {
+        infoDiv.style.display = 'none';
+        hiddenField.value = '';
+        document.getElementById('chat-welcome-msg').value = 'Welcome to our feedback chat! Your insights help us improve.';
+        return;
+    }
+    
+    const template = window.chatTemplates.find(t => t.id === templateId);
+    if (!template) return;
+    
+    // Store template data
+    hiddenField.value = JSON.stringify(template);
+    
+    // Update welcome message with template intro
+    document.getElementById('chat-welcome-msg').value = template.intro;
+    
+    // Show template info
+    infoDiv.style.display = 'block';
+    infoDiv.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: start;">
+            <div>
+                <strong style="color: #0f766e;">${template.name}</strong>
+                <div style="margin-top: 0.5rem; font-size: 0.875rem; color: var(--text-secondary);">
+                    ${template.description || 'No description provided'}
+                </div>
+            </div>
+            <button type="button" class="btn btn-sm" onclick="previewSelectedTemplate('${templateId}')">
+                👁️ Preview
+            </button>
+        </div>
+        <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e6fffa;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;">
+                <div>
+                    <strong style="font-size: 0.75rem; color: #0f766e;">Questions:</strong>
+                    <div style="font-size: 1.25rem; font-weight: bold;">${template.questions.length}</div>
+                </div>
+                <div>
+                    <strong style="font-size: 0.75rem; color: #0f766e;">Est. Time:</strong>
+                    <div style="font-size: 1.25rem; font-weight: bold;">${template.estimatedTime} min</div>
+                </div>
+                <div>
+                    <strong style="font-size: 0.75rem; color: #0f766e;">Category:</strong>
+                    <div style="font-size: 1.25rem; font-weight: bold;">${template.category}</div>
+                </div>
+                <div>
+                    <strong style="font-size: 0.75rem; color: #0f766e;">AI Style:</strong>
+                    <div style="font-size: 1.25rem; font-weight: bold;">${template.aiPersonality}</div>
+                </div>
+            </div>
+        </div>
+        <div style="margin-top: 1rem;">
+            <strong style="font-size: 0.75rem; color: #0f766e;">Questions Preview:</strong>
+            <ol style="margin: 0.5rem 0 0 1.5rem; font-size: 0.875rem;">
+                ${template.questions.slice(0, 3).map(q => `
+                    <li>${q.text} <span style="color: var(--text-secondary);">(${q.type})</span></li>
+                `).join('')}
+                ${template.questions.length > 3 ? `<li style="color: var(--text-secondary);">... and ${template.questions.length - 3} more</li>` : ''}
+            </ol>
+        </div>
+    `;
+    
+    showToast(`Template loaded: ${template.name}`, 'success');
+}
+
+// Preview selected template
+function previewSelectedTemplate(templateId) {
+    const template = window.chatTemplates.find(t => t.id === templateId);
+    if (!template) return;
+    
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.style.zIndex = '10001';
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3>Template Preview: ${template.name}</h3>
+                <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
+            </div>
+            <div style="max-height: 500px; overflow-y: auto;">
+                <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px;">
+                    <div class="chat-preview-message bot">
+                        <strong>🤖 AI:</strong> ${template.intro}
+                    </div>
+                    ${template.questions.map((q, i) => `
+                        <div class="chat-preview-message bot" style="margin-top: 1rem;">
+                            <strong>🤖 AI (Question ${i + 1}/${template.questions.length}):</strong> ${q.text}
+                            ${getQuestionTypePreview(q.type)}
+                        </div>
+                        <div class="chat-preview-message user" style="margin-top: 0.5rem;">
+                            <strong>👤 User:</strong> <em style="color: var(--text-secondary);">[User would respond here]</em>
+                        </div>
+                        ${q.followup ? `
+                            <div class="chat-preview-message bot" style="margin-top: 0.5rem;">
+                                <strong>🤖 AI (Follow-up):</strong> ${q.followup}
+                            </div>
+                        ` : ''}
+                    `).join('')}
+                    <div class="chat-preview-message bot" style="margin-top: 1rem;">
+                        <strong>🤖 AI:</strong> ${template.closing}
+                    </div>
+                </div>
+                <div style="margin-top: 1rem; padding: 1rem; background: #e6fffa; border-radius: 8px;">
+                    <strong>Template Settings:</strong>
+                    <ul style="margin: 0.5rem 0 0 1rem; font-size: 0.875rem;">
+                        <li>AI Personality: ${template.aiPersonality}</li>
+                        <li>Allow Skip: ${template.allowSkip ? 'Yes' : 'No'}</li>
+                        <li>Show Progress: ${template.showProgress ? 'Yes' : 'No'}</li>
+                        <li>Total Questions: ${template.questions.length}</li>
+                    </ul>
+                </div>
+            </div>
+            <div style="margin-top: 1rem; text-align: right;">
+                <button class="btn btn-primary" onclick="this.closest('.modal').remove()">Close Preview</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+}
+
+// Function to manage templates
+function manageTemplates() {
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.style.zIndex = '10001';
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 800px; max-height: 80vh; overflow-y: auto;">
+            <div class="modal-header">
+                <h3>Manage Templates</h3>
+                <button class="close-btn" onclick="this.closest('.modal').remove()">×</button>
+            </div>
+            <div>
+                <div style="margin-bottom: 1rem;">
+                    <button class="btn btn-primary" onclick="createChatTemplate(); this.closest('.modal').remove();">
+                        + Create New Template
+                    </button>
+                </div>
+                <div id="templates-list">
+                    ${window.chatTemplates && window.chatTemplates.length > 0 ? 
+                        window.chatTemplates.map(t => `
+                            <div class="template-card">
+                                <div style="display: flex; justify-content: space-between; align-items: start;">
+                                    <div>
+                                        <strong>${t.name}</strong>
+                                        ${t.status === 'draft' ? '<span class="tag tag-pending">Draft</span>' : ''}
+                                        <div style="font-size: 0.875rem; color: var(--text-secondary); margin-top: 0.5rem;">
+                                            ${t.questions.length} questions • ${t.estimatedTime} min • ${t.category}
+                                        </div>
+                                    </div>
+                                    <div style="display: flex; gap: 0.5rem;">
+                                        <button class="btn btn-secondary btn-sm" onclick="editTemplate('${t.id}')">Edit</button>
+                                        <button class="btn btn-primary btn-sm" onclick="duplicateTemplate('${t.id}')">Duplicate</button>
+                                        <button class="btn btn-danger btn-sm" onclick="deleteTemplate('${t.id}'); refreshManageTemplates();">Delete</button>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('') : 
+                        '<div style="text-align: center; padding: 3rem; color: var(--text-secondary);">No templates created yet</div>'
+                    }
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+}
+
+// Refresh the manage templates modal
+function refreshManageTemplates() {
+    const templatesList = document.getElementById('templates-list');
+    if (!templatesList) return;
+    
+    templatesList.innerHTML = window.chatTemplates && window.chatTemplates.length > 0 ? 
+        window.chatTemplates.map(t => `
+            <div class="template-card">
+                <div style="display: flex; justify-content: space-between; align-items: start;">
+                    <div>
+                        <strong>${t.name}</strong>
+                        ${t.status === 'draft' ? '<span class="tag tag-pending">Draft</span>' : ''}
+                        <div style="font-size: 0.875rem; color: var(--text-secondary); margin-top: 0.5rem;">
+                            ${t.questions.length} questions • ${t.estimatedTime} min • ${t.category}
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button class="btn btn-secondary btn-sm" onclick="editTemplate('${t.id}')">Edit</button>
+                        <button class="btn btn-primary btn-sm" onclick="duplicateTemplate('${t.id}')">Duplicate</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteTemplate('${t.id}'); refreshManageTemplates();">Delete</button>
+                    </div>
+                </div>
+            </div>
+        `).join('') : 
+        '<div style="text-align: center; padding: 3rem; color: var(--text-secondary);">No templates created yet</div>';
+}
+
+// DATABASE FORM HANDLERS
+
+// Handle organization form submission
+async function handleOrganizationUpdate(event) {
+    event.preventDefault();
+    
+    const formData = {
+        name: document.getElementById('org-name').value,
+        industry: document.getElementById('org-industry').value,
+        size: document.getElementById('org-size').value,
+        country: document.getElementById('org-country').value,
+        website: document.getElementById('org-website').value,
+        description: document.getElementById('org-description').value,
+        plan: document.getElementById('org-plan').value
+    };
+    
+    try {
+        const result = await saveOrganization(formData);
+        showToast('Organization saved successfully!', 'success');
+        closeModal('organization-settings-modal');
+        loadOrganizationsData(); // Refresh the organizations table
+    } catch (error) {
+        console.error('Error saving organization:', error);
+        showToast('Failed to save organization', 'error');
+    }
+}
+
+// Handle user form submission (for adding users)
+async function handleUserSubmit(event) {
+    event.preventDefault();
+    
+    const formData = {
+        name: document.getElementById('user-name').value,
+        email: document.getElementById('user-email').value,
+        organization: document.getElementById('user-org').value,
+        role: document.getElementById('user-role').value || 'user'
+    };
+    
+    try {
+        const result = await saveUser(formData);
+        showToast('User saved successfully!', 'success');
+        closeModal('add-user-modal');
+        loadUsersData(); // Refresh the users table
+    } catch (error) {
+        console.error('Error saving user:', error);
+        showToast('Failed to save user', 'error');
+    }
+}
+
+// Load organizations data from database
+async function loadOrganizationsData() {
+    try {
+        const organizations = await loadOrganizations();
+        const tbody = document.getElementById('organizations-table-body');
+        
+        if (organizations.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6" style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+                        No organizations found. Add your first organization to get started.
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+        
+        tbody.innerHTML = organizations.map(org => `
+            <tr onclick="showOrganizationDetails('${org.id}')">
+                <td>${org.name}</td>
+                <td><span class="tag tag-active">${org.plan || 'Basic'}</span></td>
+                <td>0</td>
+                <td><span class="tag tag-active">Active</span></td>
+                <td>${new Date(org.created_at).toLocaleDateString()}</td>
+                <td onclick="event.stopPropagation()">
+                    <button class="btn btn-secondary btn-sm" onclick="handleEditOrganization('${org.id}')" data-translate="edit">Edit</button>
+                    <button class="btn btn-warning btn-sm" onclick="handleSuspendOrganization('${org.id}')" data-translate="suspend">Suspend</button>
+                    <button class="btn btn-danger btn-sm" onclick="handleDeleteOrganization('${org.id}')">Delete</button>
+                </td>
+            </tr>
+        `).join('');
+        
+        // Update organization filter
+        const filter = document.getElementById('organization-filter');
+        if (filter) {
+            filter.innerHTML = '<option value="">All Organizations</option>' + 
+                organizations.map(org => `<option value="${org.id}">${org.name}</option>`).join('');
+        }
+        
+    } catch (error) {
+        console.error('Error loading organizations:', error);
+        showToast('Failed to load organizations', 'error');
+    }
+}
+
+// Load users data from database
+async function loadUsersData() {
+    try {
+        const users = await loadUsers();
+        const tbody = document.getElementById('users-table-body');
+        
+        if (users.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="8" style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+                        No users found. Add your first user to get started.
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+        
+        tbody.innerHTML = users.map(user => `
+            <tr onclick="showUserDetails('${user.id}')">
+                <td onclick="event.stopPropagation()"><input type="checkbox"></td>
+                <td>${user.name}</td>
+                <td>${user.email}</td>
+                <td>${user.organization || 'N/A'}</td>
+                <td><span class="tag tag-active">${user.role || 'User'}</span></td>
+                <td><span class="tag tag-${user.status === 'active' ? 'active' : 'pending'}">${user.status || 'Active'}</span></td>
+                <td>${user.last_login || 'Never'}</td>
+                <td onclick="event.stopPropagation()">
+                    <button class="btn btn-secondary btn-sm" onclick="handleEditUser('${user.id}')" data-translate="edit">Edit</button>
+                    <button class="btn btn-warning btn-sm" onclick="handleSuspendUser('${user.id}')" data-translate="suspend">Suspend</button>
+                    <button class="btn btn-danger btn-sm" onclick="handleRemoveUser('${user.id}')">Remove</button>
+                </td>
+            </tr>
+        `).join('');
+        
+    } catch (error) {
+        console.error('Error loading users:', error);
+        showToast('Failed to load users', 'error');
+    }
+}
+
+// Initialize templates on page load
+document.addEventListener('DOMContentLoaded', function() {
+    loadTemplates();
+    loadOrganizationsData();
+    loadUsersData();
+});
+</script>
 </body>
 </html>

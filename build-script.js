@@ -1,6 +1,6 @@
 // Simple script to copy files for deployment
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 
 // Function to copy a file
 function copyFile(src, dest) {
@@ -45,6 +45,14 @@ if (fs.existsSync('assets/images')) {
     const imageFiles = fs.readdirSync('assets/images');
     imageFiles.forEach(file => {
         copyFile(`assets/images/${file}`, `dist/assets/images/${file}`);
+    });
+}
+
+// Copy lib files
+if (fs.existsSync('lib')) {
+    const libFiles = fs.readdirSync('lib');
+    libFiles.forEach(file => {
+        copyFile(`lib/${file}`, `dist/lib/${file}`);
     });
 }
 

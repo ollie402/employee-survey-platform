@@ -48,6 +48,45 @@ if (config.DEBUG) {
 // Make these settings available to the rest of the app
 window.APP_CONFIG = config;
 
+// Check if Supabase client was properly initialized
+// Note: Supabase client is initialized in lib/supabase.js
+if (!window.supabaseClient) {
+    if (config.DEBUG) {
+        console.warn('⚠️ Supabase client not initialized. Database features will be disabled.');
+        console.warn('💡 Check lib/supabase.js for configuration issues.');
+    }
+    
+    // Create a mock client with proper method chaining
+    const createMockQuery = () => ({
+        select: () => createMockQuery(),
+        insert: () => createMockQuery(),
+        update: () => createMockQuery(),
+        delete: () => createMockQuery(),
+        order: () => createMockQuery(),
+        eq: () => createMockQuery(),
+        neq: () => createMockQuery(),
+        gt: () => createMockQuery(),
+        gte: () => createMockQuery(),
+        lt: () => createMockQuery(),
+        lte: () => createMockQuery(),
+        like: () => createMockQuery(),
+        ilike: () => createMockQuery(),
+        in: () => createMockQuery(),
+        limit: () => createMockQuery(),
+        single: () => createMockQuery(),
+        then: (callback) => {
+            // Always resolve with empty data
+            const result = { data: [], error: null };
+            return callback ? Promise.resolve(callback(result)) : Promise.resolve(result);
+        },
+        catch: (callback) => Promise.resolve({ data: [], error: null })
+    });
+    
+    window.supabaseClient = {
+        from: () => createMockQuery()
+    };
+}
+
 // Add colored indicators to show what environment you're in
 if (currentEnv === 'development') {
     // Add a red "DEV" badge to the corner

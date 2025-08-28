@@ -48,68 +48,42 @@ if (config.DEBUG) {
 // Make these settings available to the rest of the app
 window.APP_CONFIG = config;
 
-// Initialize Supabase client
-// Note: In a real application, you would get these from environment variables
-// For development, you can add your Supabase credentials here
-const SUPABASE_CONFIG = {
-    development: {
-        url: 'YOUR_SUPABASE_URL',
-        key: 'YOUR_SUPABASE_ANON_KEY'
-    },
-    test: {
-        url: 'YOUR_TEST_SUPABASE_URL',
-        key: 'YOUR_TEST_SUPABASE_ANON_KEY'
-    },
-    production: {
-        url: 'YOUR_PROD_SUPABASE_URL',
-        key: 'YOUR_PROD_SUPABASE_ANON_KEY'
-    }
-};
-
-// Initialize Supabase client if credentials are provided
-if (typeof supabase !== 'undefined') {
-    const supabaseConfig = SUPABASE_CONFIG[currentEnv];
-    
-    // Only initialize if we have real credentials (not placeholder text)
-    if (supabaseConfig.url && supabaseConfig.url !== 'YOUR_SUPABASE_URL') {
-        window.supabaseClient = supabase.createClient(supabaseConfig.url, supabaseConfig.key);
-        if (config.DEBUG) {
-            console.log('🗄️ Supabase client initialized for', currentEnv);
-        }
-    } else {
-        if (config.DEBUG) {
-            console.warn('⚠️ Supabase credentials not configured. Database features will be disabled.');
-            console.warn('💡 To enable database features, update SUPABASE_CONFIG in config.js with your Supabase project credentials.');
-        }
-        // Create a mock client that returns empty arrays to prevent errors
-        window.supabaseClient = {
-            from: () => ({
-                select: () => Promise.resolve({ data: [], error: null }),
-                insert: () => Promise.resolve({ data: [], error: null }),
-                update: () => Promise.resolve({ data: [], error: null }),
-                delete: () => Promise.resolve({ data: [], error: null }),
-                order: () => ({
-                    select: () => Promise.resolve({ data: [], error: null })
-                })
-            })
-        };
-    }
-} else {
+// Check if Supabase client was properly initialized
+// Note: Supabase client is initialized in lib/supabase.js
+if (!window.supabaseClient) {
     if (config.DEBUG) {
-        console.warn('⚠️ Supabase library not loaded. Database features will be disabled.');
-        console.warn('💡 To enable database features, include the Supabase JavaScript library.');
+        console.warn('⚠️ Supabase client not initialized. Database features will be disabled.');
+        console.warn('💡 Check lib/supabase.js for configuration issues.');
     }
-    // Create a mock client that returns empty arrays to prevent errors
+    
+    // Create a mock client with proper method chaining
+    const createMockQuery = () => ({
+        select: () => createMockQuery(),
+        insert: () => createMockQuery(),
+        update: () => createMockQuery(),
+        delete: () => createMockQuery(),
+        order: () => createMockQuery(),
+        eq: () => createMockQuery(),
+        neq: () => createMockQuery(),
+        gt: () => createMockQuery(),
+        gte: () => createMockQuery(),
+        lt: () => createMockQuery(),
+        lte: () => createMockQuery(),
+        like: () => createMockQuery(),
+        ilike: () => createMockQuery(),
+        in: () => createMockQuery(),
+        limit: () => createMockQuery(),
+        single: () => createMockQuery(),
+        then: (callback) => {
+            // Always resolve with empty data
+            const result = { data: [], error: null };
+            return callback ? Promise.resolve(callback(result)) : Promise.resolve(result);
+        },
+        catch: (callback) => Promise.resolve({ data: [], error: null })
+    });
+    
     window.supabaseClient = {
-        from: () => ({
-            select: () => Promise.resolve({ data: [], error: null }),
-            insert: () => Promise.resolve({ data: [], error: null }),
-            update: () => Promise.resolve({ data: [], error: null }),
-            delete: () => Promise.resolve({ data: [], error: null }),
-            order: () => ({
-                select: () => Promise.resolve({ data: [], error: null })
-            })
-        })
+        from: () => createMockQuery()
     };
 }
 

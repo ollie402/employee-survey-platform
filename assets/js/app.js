@@ -440,37 +440,6 @@ async function sendEmail(emailData) {
     }
 }
 
-// Function to test if email is working
-async function testEmailSetup() {
-    // IMPORTANT: Replace this with your actual email address for testing!
-    const yourTestEmail = 'your-email@example.com'; // <-- CHANGE THIS TO YOUR EMAIL!
-    
-    const testData = {
-        to: yourTestEmail,
-        subject: 'Test Email from Realworld Platform',
-        htmlBody: `
-            <h2>🎉 Success! Your email system is working!</h2>
-            <p>This is a test email from your Realworld Survey Platform.</p>
-            <p>If you received this, your SMTP2GO integration is working correctly!</p>
-            <p>Timestamp: ${new Date().toLocaleString()}</p>
-            <hr>
-            <p style="color: #666; font-size: 12px;">
-                You can now send emails from your application!
-            </p>
-        `
-    };
-    
-    console.log('Sending test email to:', yourTestEmail);
-    const result = await sendEmail(testData);
-    
-    if (result.success) {
-        showToast('Test email sent! Check your inbox!', 'success');
-        console.log('✅ Email test successful!');
-    } else {
-        showToast('Test failed: ' + result.error, 'error');
-        console.error('❌ Email test failed:', result);
-    }
-}
 
 // Function to send report via email
 async function emailReport(reportData) {
@@ -1910,23 +1879,6 @@ function updateFormForChatType(type) {
 
 
 
-function copyLinkToClipboard() {
-    const linkInput = document.getElementById('generated-link');
-    if (linkInput) {
-        linkInput.select();
-        document.execCommand('copy');
-        showToast('Link copied to clipboard!', 'success');
-    }
-}
-
-function testChatLink(link) {
-    window.open(link, '_blank');
-}
-
-function generateAnotherLink() {
-    document.querySelector('.modal').remove();
-    createNewChatWidget();
-}
 
 // Step Navigation for Chat Widget
 let currentStep = 1;
@@ -2311,9 +2263,6 @@ function generateAIReport() {
     showToast('Generating AI report... This may take a few moments.', 'info');
 }
 
-function exportChatData() {
-    showToast('Exporting chat data to CSV...', 'success');
-}
 
 function manageChatSettings() {
     showToast('Opening chat settings...', 'info');
