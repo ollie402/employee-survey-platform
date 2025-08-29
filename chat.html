@@ -694,37 +694,6 @@
             }
         };
 
-        // Initialize chat
-        window.addEventListener('DOMContentLoaded', function() {
-            initializeChat();
-        });
-
-        function initializeChat() {
-            // Start with a warm, engaging welcome
-            const welcomeMessages = [
-                {
-                    text: "Hi there! 👋 I'm here to learn about your workplace experience. This is a safe, confidential space where your honest feedback helps create positive change.",
-                    delay: 0
-                },
-                {
-                    text: "I'll ask you about different aspects of your work life - things like your team, your manager, and your overall environment. There are no right or wrong answers, just your genuine experiences.",
-                    delay: 1500
-                },
-                {
-                    text: "Let's start with something broad: **How would you describe your overall experience at work lately?**",
-                    delay: 3000
-                }
-            ];
-
-            welcomeMessages.forEach(msg => {
-                setTimeout(() => {
-                    addMessage('bot', msg.text);
-                }, msg.delay);
-            });
-
-            // Initialize sentiment monitoring
-            initializeSentimentAnalysis();
-        }
 
         function addMessage(sender, text, options = {}) {
             const messagesContainer = document.getElementById('chat-messages');
@@ -2006,23 +1975,28 @@
         const urlParams = new URLSearchParams(window.location.search);
         const sessionId = urlParams.get('session');
         const typeParam = urlParams.get('type');
-        const participantId = urlParams.get('pid');
+        const chatName = urlParams.get('name');
+        const welcomeMsg = urlParams.get('welcome');
+        const topics = urlParams.get('topics');
+        const questionsParam = urlParams.get('questions');
 
         if (!sessionId) {
             showError('Invalid session. Please check your link.');
             return;
         }
 
-        // Load session configuration from localStorage
-        const storedSession = localStorage.getItem('session_' + sessionId);
-        if (!storedSession) {
-            showError('Session not found. The link may have expired.');
-            return;
-        }
-
-        sessionConfig = JSON.parse(storedSession);
-        chatType = typeParam || sessionConfig.type || 'listening';
-        chatState.participantId = participantId ? atob(participantId) : null;
+        // Create session configuration from URL parameters
+        sessionConfig = {
+            id: sessionId,
+            type: typeParam || 'listening',
+            name: chatName || 'Feedback Session',
+            welcomeMessage: welcomeMsg || 'Welcome to this feedback session!',
+            topics: topics ? topics.split(',').map(t => t.trim()) : null,
+            questions: questionsParam ? JSON.parse(decodeURIComponent(questionsParam)) : null
+        };
+        
+        chatType = sessionConfig.type;
+        chatState.participantId = sessionId;
 
         // Apply organization branding if available
         applyBranding();
@@ -2123,30 +2097,164 @@
     }
 
     function startChat() {
-        // Show welcome message
+        // Clear any existing messages first
+        const messagesContainer = document.getElementById('chat-messages');
+        messagesContainer.innerHTML = '';
+        
+        // Show welcome message based on chat type
         setTimeout(() => {
-            if (chatType === 'pulse') {
-                // For pulse surveys, show the first question immediately
-                if (sessionConfig.template && sessionConfig.template.questions) {
-                    showPulseQuestion(0);
-                } else {
-                    addBotMessage("Welcome! Let's begin with a few questions.");
-                    showPulseQuestion(0);
-                }
+            const welcomeMsg = sessionConfig.welcomeMessage || "Welcome to this feedback session!";
+            addBotMessage(welcomeMsg);
+            
+            // Handle different chat types
+            if (chatType === 'pulse' && sessionConfig.questions) {
+                // For pulse surveys with specific questions
+                setTimeout(() => {
+                    startPulseSurvey();
+                }, 1500);
+            } else if (chatType === 'chat' && sessionConfig.topics) {
+                // For guided chat with topics
+                setTimeout(() => {
+                    addBotMessage(`I'd like to explore some areas with you: ${sessionConfig.topics.join(', ')}. What would you like to talk about first?`);
+                }, 1500);
             } else {
-                // For listening and chat surveys
-                const welcomeMsg = sessionConfig.welcomeMessage || 
-                    "Hi! Thanks for joining this feedback session. Feel free to share your thoughts.";
-                addBotMessage(welcomeMsg);
-
-                if (chatType === 'chat' && sessionConfig.template) {
-                    // Start guided conversation with first question
-                    setTimeout(() => {
-                        askNextChatQuestion();
-                    }, 1500);
-                }
+                // For listening chat - just wait for user input
+                setTimeout(() => {
+                    addBotMessage("Feel free to share whatever is on your mind about your work experience.");
+                }, 1500);
             }
         }, 1000);
+    }
+
+    function startPulseSurvey() {
+        if (!sessionConfig.questions || sessionConfig.questions.length === 0) {
+            addBotMessage("No questions configured for this survey.");
+            return;
+        }
+        
+        // Start with first question
+        askPulseQuestion(0);
+    }
+    
+    function askPulseQuestion(questionIndex) {
+        if (questionIndex >= sessionConfig.questions.length) {
+            addBotMessage("Thank you for completing the survey! Your responses have been recorded.");
+            return;
+        }
+        
+        const question = sessionConfig.questions[questionIndex];
+        addBotMessage(`${questionIndex + 1}. ${question.text}`);
+        
+        // Add response options based on question type
+        setTimeout(() => {
+            createQuestionInput(question, questionIndex);
+        }, 1000);
+    }
+    
+    function createQuestionInput(question, questionIndex) {
+        const messagesContainer = document.getElementById('chat-messages');
+        const inputDiv = document.createElement('div');
+        inputDiv.className = 'question-input';
+        inputDiv.style.cssText = 'margin: 1rem 0; padding: 1rem; background: #f8f9fa; border-radius: 8px;';
+        
+        if (question.type === 'rating') {
+            // Rating scale 1-5
+            inputDiv.innerHTML = `
+                <div style="display: flex; gap: 1rem; justify-content: center;">
+                    ${[1,2,3,4,5].map(num => `
+                        <button class="rating-btn" data-value="${num}" style="
+                            padding: 0.5rem 1rem; 
+                            border: 1px solid #ccc; 
+                            border-radius: 6px; 
+                            background: white; 
+                            cursor: pointer;
+                        " onclick="submitAnswer(${questionIndex}, ${num})">${num}</button>
+                    `).join('')}
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: #666; margin-top: 0.5rem;">
+                    <span>Poor</span><span>Excellent</span>
+                </div>
+            `;
+        } else if (question.type === 'yes-no') {
+            inputDiv.innerHTML = `
+                <div style="display: flex; gap: 1rem; justify-content: center;">
+                    <button onclick="submitAnswer(${questionIndex}, 'Yes')" style="padding: 0.75rem 1.5rem; border: 1px solid #ccc; border-radius: 6px; background: white; cursor: pointer;">Yes</button>
+                    <button onclick="submitAnswer(${questionIndex}, 'No')" style="padding: 0.75rem 1.5rem; border: 1px solid #ccc; border-radius: 6px; background: white; cursor: pointer;">No</button>
+                </div>
+            `;
+        } else if (question.type === 'multiple-choice' && question.options) {
+            inputDiv.innerHTML = `
+                <div style="display: grid; gap: 0.5rem;">
+                    ${question.options.map((option, i) => `
+                        <button onclick="submitAnswer(${questionIndex}, '${option}')" style="
+                            padding: 0.75rem; 
+                            border: 1px solid #ccc; 
+                            border-radius: 6px; 
+                            background: white; 
+                            cursor: pointer; 
+                            text-align: left;
+                        ">${option}</button>
+                    `).join('')}
+                </div>
+            `;
+        } else {
+            // Text input
+            inputDiv.innerHTML = `
+                <div style="display: flex; gap: 1rem;">
+                    <input type="text" id="text-answer-${questionIndex}" placeholder="Type your answer..." style="
+                        flex: 1; 
+                        padding: 0.75rem; 
+                        border: 1px solid #ccc; 
+                        border-radius: 6px;
+                    ">
+                    <button onclick="submitTextAnswer(${questionIndex})" style="
+                        padding: 0.75rem 1.5rem; 
+                        background: var(--primary-color); 
+                        color: white; 
+                        border: none; 
+                        border-radius: 6px; 
+                        cursor: pointer;
+                    ">Submit</button>
+                </div>
+            `;
+        }
+        
+        messagesContainer.appendChild(inputDiv);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+    
+    function submitAnswer(questionIndex, answer) {
+        // Add user's answer as a message
+        addUserMessage(answer);
+        
+        // Remove the input interface
+        const questionInput = document.querySelector('.question-input');
+        if (questionInput) {
+            questionInput.remove();
+        }
+        
+        // Move to next question
+        setTimeout(() => {
+            askPulseQuestion(questionIndex + 1);
+        }, 1000);
+    }
+    
+    function submitTextAnswer(questionIndex) {
+        const input = document.getElementById(`text-answer-${questionIndex}`);
+        const answer = input.value.trim();
+        
+        if (answer) {
+            submitAnswer(questionIndex, answer);
+        }
+    }
+    
+    function addUserMessage(text) {
+        const messagesContainer = document.getElementById('chat-messages');
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'message user';
+        messageDiv.innerHTML = `<div class="message-content">${text}</div>`;
+        messagesContainer.appendChild(messageDiv);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
     }
 
     function addBotMessage(text) {
