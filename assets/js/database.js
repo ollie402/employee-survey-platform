@@ -447,3 +447,255 @@ async function saveSurveyResponse(responseData) {
         throw error;
     }
 }
+
+// =====================================================
+// CHAT SESSION DATABASE FUNCTIONS
+// =====================================================
+
+async function loadChatSessions() {
+    try {
+        const { data, error } = await window.supabaseClient
+            .from('chat_sessions')
+            .select('*')
+            .order('created_at', { ascending: false });
+        
+        if (error) {
+            console.error('Error loading chat sessions:', error);
+            // If table doesn't exist, return empty array
+            return [];
+        }
+        
+        return data || [];
+    } catch (error) {
+        console.error('Chat sessions database error:', error);
+        return [];
+    }
+}
+
+async function saveChatSession(chatData) {
+    try {
+        // Prepare chat session data
+        const chatToSave = {
+            session_id: chatData.id,
+            name: chatData.name,
+            type: chatData.type,
+            welcome_message: chatData.welcome || chatData.welcomeMessage,
+            link: chatData.link,
+            status: 'active'
+        };
+        
+        // Add type-specific data
+        if (chatData.type === 'chat' && chatData.topics) {
+            chatToSave.topics = Array.isArray(chatData.topics) ? chatData.topics : chatData.topics.split(',').map(t => t.trim());
+        }
+        
+        if (chatData.type === 'pulse' && chatData.questions) {
+            chatToSave.questions = chatData.questions;
+        }
+        
+        console.log('Saving chat session:', chatToSave);
+        
+        const { data, error } = await window.supabaseClient
+            .from('chat_sessions')
+            .insert([chatToSave])
+            .select();
+        
+        if (error) {
+            console.error('Error saving chat session:', error);
+            
+            // Handle table doesn't exist error
+            if (error.code === '42P01') {
+                console.warn('Chat sessions table does not exist. Using local storage as fallback.');
+                // Save to localStorage as fallback
+                saveChatSessionToLocalStorage(chatData);
+                return chatData;
+            }
+            
+            // Handle column errors - try with minimal data
+            if (error.message && (error.message.includes('column') || error.message.includes('violates'))) {
+                console.warn('Some columns missing or invalid, trying with basic fields only...');
+                const basicChatData = {
+                    session_id: chatData.id,
+                    name: chatData.name,
+                    type: chatData.type,
+                    status: 'active'
+                };
+                
+                const { data: basicData, error: basicError } = await window.supabaseClient
+                    .from('chat_sessions')
+                    .insert([basicChatData])
+                    .select();
+                
+                if (basicError) {
+                    console.error('Error saving basic chat data:', basicError);
+                    // Fallback to localStorage
+                    saveChatSessionToLocalStorage(chatData);
+                    return chatData;
+                }
+                
+                return basicData ? basicData[0] : chatData;
+            }
+            
+            // Fallback to localStorage for any other error
+            saveChatSessionToLocalStorage(chatData);
+            return chatData;
+        }
+        
+        return data ? data[0] : chatData;
+    } catch (error) {
+        console.error('Chat session save error:', error);
+        // Fallback to localStorage
+        saveChatSessionToLocalStorage(chatData);
+        return chatData;
+    }
+}
+
+function saveChatSessionToLocalStorage(chatData) {
+    try {
+        const existingSessions = JSON.parse(localStorage.getItem('chatSessions') || '[]');
+        existingSessions.unshift(chatData); // Add to beginning of array
+        localStorage.setItem('chatSessions', JSON.stringify(existingSessions));
+        console.log('Chat session saved to localStorage');
+    } catch (error) {
+        console.error('Error saving to localStorage:', error);
+    }
+}
+
+function loadChatSessionsFromLocalStorage() {
+    try {
+        return JSON.parse(localStorage.getItem('chatSessions') || '[]');
+    } catch (error) {
+        console.error('Error loading from localStorage:', error);
+        return [];
+    }
+}
+
+async function updateChatSessionStatus(sessionId, status) {
+    try {
+        const { data, error } = await window.supabaseClient
+            .from('chat_sessions')
+            .update({ status: status })
+            .eq('session_id', sessionId)
+            .select();
+        
+        if (error) {
+            console.error('Error updating chat session status:', error);
+            // Update in localStorage as fallback
+            const sessions = loadChatSessionsFromLocalStorage();
+            const updatedSessions = sessions.map(session => 
+                session.id === sessionId ? { ...session, status } : session
+            );
+            localStorage.setItem('chatSessions', JSON.stringify(updatedSessions));
+            return null;
+        }
+        
+        return data ? data[0] : null;
+    } catch (error) {
+        console.error('Chat session update error:', error);
+        return null;
+    }
+}
+
+// =====================================================
+// URL SHORTENING SYSTEM
+// =====================================================
+
+function generateSlug(name) {
+    return name
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-+|-+$/g, '');
+}
+
+async function saveUrlMapping(slug, originalUrl, chatData) {
+    try {
+        const mappingData = {
+            slug: slug,
+            original_url: originalUrl,
+            chat_name: chatData.name,
+            chat_type: chatData.type,
+            created_at: new Date().toISOString()
+        };
+        
+        const { data, error } = await window.supabaseClient
+            .from('url_mappings')
+            .insert([mappingData])
+            .select();
+        
+        if (error) {
+            console.warn('Could not save URL mapping to database:', error);
+            // Fallback to localStorage
+            const mappings = JSON.parse(localStorage.getItem('urlMappings') || '[]');
+            mappings.push(mappingData);
+            localStorage.setItem('urlMappings', JSON.stringify(mappings));
+            return mappingData;
+        }
+        
+        return data ? data[0] : mappingData;
+    } catch (error) {
+        console.error('URL mapping save error:', error);
+        // Fallback to localStorage
+        const mappings = JSON.parse(localStorage.getItem('urlMappings') || '[]');
+        const mappingData = {
+            slug: slug,
+            original_url: originalUrl,
+            chat_name: chatData.name,
+            chat_type: chatData.type,
+            created_at: new Date().toISOString()
+        };
+        mappings.push(mappingData);
+        localStorage.setItem('urlMappings', JSON.stringify(mappings));
+        return mappingData;
+    }
+}
+
+async function loadUrlMapping(slug) {
+    try {
+        const { data, error } = await window.supabaseClient
+            .from('url_mappings')
+            .select('*')
+            .eq('slug', slug)
+            .single();
+        
+        if (error || !data) {
+            // Fallback to localStorage
+            const mappings = JSON.parse(localStorage.getItem('urlMappings') || '[]');
+            return mappings.find(mapping => mapping.slug === slug);
+        }
+        
+        return data;
+    } catch (error) {
+        console.error('URL mapping load error:', error);
+        // Fallback to localStorage
+        const mappings = JSON.parse(localStorage.getItem('urlMappings') || '[]');
+        return mappings.find(mapping => mapping.slug === slug);
+    }
+}
+
+function generateShortUrl(chatName, originalUrl, chatData) {
+    const slug = generateSlug(chatName);
+    // Use HTTP for development, HTTPS for production domains
+    let origin = window.location.origin;
+    
+    // Check if this is a development environment
+    const isDevelopment = origin.includes('localhost') || 
+                         origin.includes('127.0.0.1') || 
+                         origin.includes(':3000') || 
+                         origin.includes(':5500') ||
+                         origin.includes(':8080');
+    
+    // Only use HTTPS if not in development
+    if (!isDevelopment && origin.startsWith('http://')) {
+        origin = origin.replace('http://', 'https://');
+    }
+    
+    const shortUrl = `${origin}/?chat=${slug}`;
+    
+    // Save the mapping
+    saveUrlMapping(slug, originalUrl, chatData);
+    
+    return shortUrl;
+}
