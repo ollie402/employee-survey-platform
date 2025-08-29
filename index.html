@@ -3173,20 +3173,37 @@ function generateListeningChatLink(event) {
         welcome: welcomeMsg
     });
     
-    // Generate the link
-    const chatLink = window.location.origin + '/chat.html?' + params.toString();
+    // Generate the original link
+    const originalLink = window.location.origin + '/chat.html?' + params.toString();
+    
+    // Prepare chat data
+    const chatData = {
+        id: sessionId,
+        name: chatName,
+        type: 'listening',
+        welcome: welcomeMsg,
+        link: originalLink,
+        created: new Date().toISOString()
+    };
+    
+    // Generate short URL
+    const shortUrl = generateShortUrl(chatName, originalLink, chatData);
+    chatData.shortUrl = shortUrl;
+    
+    // Save to database
+    saveChatSession(chatData).then(() => {
+        console.log('Listening chat saved to database');
+        // Refresh the active chats display
+        loadActiveChatsList();
+    }).catch(error => {
+        console.error('Error saving listening chat:', error);
+    });
     
     // Close current modal
     document.querySelector('.modal').remove();
     
     // Show success modal with link
-    showListeningLinkModal({
-        id: sessionId,
-        name: chatName,
-        welcome: welcomeMsg,
-        link: chatLink,
-        created: new Date().toISOString()
-    });
+    showListeningLinkModal(chatData);
 }
 
 // Show modal with generated listening chat link
@@ -3209,7 +3226,7 @@ function showListeningLinkModal(chatData) {
                 <div class="form-group">
                     <label class="form-label">Your Chat Link</label>
                     <div style="display: flex; gap: 0.5rem; align-items: center;">
-                        <input type="text" class="form-input" value="${chatData.link}" readonly id="generated-link" style="flex: 1;">
+                        <input type="text" class="form-input" value="${chatData.shortUrl || chatData.link}" readonly id="generated-link" style="flex: 1;">
                         <button class="btn btn-secondary" onclick="copyToClipboard('generated-link')" style="white-space: nowrap;">Copy Link</button>
                     </div>
                     <small class="form-help">Share this link with your audience to start collecting feedback</small>
@@ -3264,7 +3281,7 @@ function showChatSetup() {
                 <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
             </div>
             
-            <form onsubmit="generateChatLink(event)">
+            <form onsubmit="generateGuidedChatLink(event)">
                 <div style="padding: 1.5rem;">
                     <div class="form-group">
                         <label class="form-label">Chat Name</label>
@@ -3302,8 +3319,8 @@ function showChatSetup() {
     }, 100);
 }
 
-// Generate chat link with topics
-function generateChatLink(event) {
+// Generate guided chat link with topics
+function generateGuidedChatLink(event) {
     event.preventDefault();
     
     const chatName = document.getElementById('chat-name').value;
@@ -3322,21 +3339,38 @@ function generateChatLink(event) {
         topics: topics
     });
     
-    // Generate the link
-    const chatLink = window.location.origin + '/chat.html?' + params.toString();
+    // Generate the original link
+    const originalLink = window.location.origin + '/chat.html?' + params.toString();
+    
+    // Prepare chat data
+    const chatData = {
+        id: sessionId,
+        name: chatName,
+        type: 'chat',
+        welcome: welcomeMsg,
+        topics: topics,
+        link: originalLink,
+        created: new Date().toISOString()
+    };
+    
+    // Generate short URL
+    const shortUrl = generateShortUrl(chatName, originalLink, chatData);
+    chatData.shortUrl = shortUrl;
+    
+    // Save to database
+    saveChatSession(chatData).then(() => {
+        console.log('Guided chat saved to database');
+        // Refresh the active chats display
+        loadActiveChatsList();
+    }).catch(error => {
+        console.error('Error saving guided chat:', error);
+    });
     
     // Close current modal
     document.querySelector('.modal').remove();
     
     // Show success modal with link
-    showChatLinkModal({
-        id: sessionId,
-        name: chatName,
-        welcome: welcomeMsg,
-        topics: topics,
-        link: chatLink,
-        created: new Date().toISOString()
-    });
+    showChatLinkModal(chatData);
 }
 
 // Show modal with generated chat link
@@ -3359,7 +3393,7 @@ function showChatLinkModal(chatData) {
                 <div class="form-group">
                     <label class="form-label">Your Chat Link</label>
                     <div style="display: flex; gap: 0.5rem; align-items: center;">
-                        <input type="text" class="form-input" value="${chatData.link}" readonly id="generated-chat-link" style="flex: 1;">
+                        <input type="text" class="form-input" value="${chatData.shortUrl || chatData.link}" readonly id="generated-chat-link" style="flex: 1;">
                         <button class="btn btn-secondary" onclick="copyToClipboard('generated-chat-link')" style="white-space: nowrap;">Copy Link</button>
                     </div>
                     <small class="form-help">Share this link with your audience to start guided conversations</small>
@@ -3549,21 +3583,38 @@ function generatePulseLink(event) {
         questions: JSON.stringify(questions)
     });
     
-    // Generate the link
-    const pulseLink = window.location.origin + '/chat.html?' + params.toString();
+    // Generate the original link
+    const originalLink = window.location.origin + '/chat.html?' + params.toString();
+    
+    // Prepare chat data
+    const chatData = {
+        id: sessionId,
+        name: surveyName,
+        type: 'pulse',
+        welcome: welcomeMsg,
+        questions: questions,
+        link: originalLink,
+        created: new Date().toISOString()
+    };
+    
+    // Generate short URL
+    const shortUrl = generateShortUrl(surveyName, originalLink, chatData);
+    chatData.shortUrl = shortUrl;
+    
+    // Save to database
+    saveChatSession(chatData).then(() => {
+        console.log('Pulse survey saved to database');
+        // Refresh the active chats display
+        loadActiveChatsList();
+    }).catch(error => {
+        console.error('Error saving pulse survey:', error);
+    });
     
     // Close current modal
     document.querySelector('.modal').remove();
     
     // Show success modal with link
-    showPulseLinkModal({
-        id: sessionId,
-        name: surveyName,
-        welcome: welcomeMsg,
-        questions: questions,
-        link: pulseLink,
-        created: new Date().toISOString()
-    });
+    showPulseLinkModal(chatData);
 }
 
 // Show modal with generated pulse survey link
@@ -3586,7 +3637,7 @@ function showPulseLinkModal(pulseData) {
                 <div class="form-group">
                     <label class="form-label">Your Survey Link</label>
                     <div style="display: flex; gap: 0.5rem; align-items: center;">
-                        <input type="text" class="form-input" value="${pulseData.link}" readonly id="generated-pulse-link" style="flex: 1;">
+                        <input type="text" class="form-input" value="${pulseData.shortUrl || pulseData.link}" readonly id="generated-pulse-link" style="flex: 1;">
                         <button class="btn btn-secondary" onclick="copyToClipboard('generated-pulse-link')" style="white-space: nowrap;">Copy Link</button>
                     </div>
                     <small class="form-help">Share this link to collect structured feedback through chat</small>
@@ -5151,15 +5202,195 @@ function generateWeeklyReport() {
 
 // Initialize templates on page load
 document.addEventListener('DOMContentLoaded', function() {
+    // Check for short URL redirect first
+    handleShortUrlRedirect();
+    
     loadTemplates();
     loadOrganizationsData();
     loadUsersData();
+    
+    // Load active chats
+    loadActiveChatsList();
     
     // Initialize enhanced chat management features
     if (window.location.hash === '#chat-management') {
         showSection('chat-management');
     }
 });
+
+// Handle short URL redirects
+async function handleShortUrlRedirect() {
+    const urlParams = new URLSearchParams(window.location.search);
+    
+    // Check for ?chat=slug parameter
+    const chatSlug = urlParams.get('chat');
+    
+    if (chatSlug) {
+        try {
+            const mapping = await loadUrlMapping(chatSlug);
+            
+            if (mapping && mapping.original_url) {
+                // Redirect to the original chat URL
+                window.location.href = mapping.original_url;
+                return;
+            }
+        } catch (error) {
+            console.error('Error handling chat slug redirect:', error);
+        }
+    }
+    
+    // Also check other URL parameters for slug-based routing
+    const slugParam = urlParams.get('s') || urlParams.get('slug');
+    
+    if (slugParam) {
+        try {
+            const mapping = await loadUrlMapping(slugParam);
+            
+            if (mapping && mapping.original_url) {
+                // Redirect to the original chat URL
+                window.location.href = mapping.original_url;
+                return;
+            }
+        } catch (error) {
+            console.error('Error handling slug parameter redirect:', error);
+        }
+    }
+}
+
+// Load and display active chats
+async function loadActiveChatsList() {
+    try {
+        // Try to load from database first
+        let chatSessions = await loadChatSessions();
+        
+        // If database is empty, try localStorage as fallback
+        if (chatSessions.length === 0) {
+            chatSessions = loadChatSessionsFromLocalStorage();
+        }
+        
+        // Filter out deleted chats
+        chatSessions = chatSessions.filter(chat => chat.status !== 'deleted');
+        
+        const activeChatsContainer = document.getElementById('active-chats-list');
+        const emptyState = activeChatsContainer.previousElementSibling;
+        
+        if (chatSessions.length === 0) {
+            // Show empty state
+            activeChatsContainer.style.display = 'none';
+            emptyState.style.display = 'block';
+        } else {
+            // Show chat list
+            emptyState.style.display = 'none';
+            activeChatsContainer.style.display = 'block';
+            
+            // Generate chat items HTML
+            activeChatsContainer.innerHTML = chatSessions.map(chat => `
+                <div class="chat-item" style="
+                    padding: 1rem; 
+                    border: 1px solid var(--border-color); 
+                    border-radius: 8px; 
+                    margin-bottom: 1rem;
+                    background: white;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                ">
+                    <div style="flex: 1;">
+                        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+                            <span style="font-size: 1.25rem;">
+                                ${chat.type === 'listening' ? '👂' : chat.type === 'chat' ? '💬' : '📊'}
+                            </span>
+                            <strong>${chat.name}</strong>
+                            <span class="tag ${chat.status === 'active' ? 'tag-success' : 'tag-secondary'}" style="font-size: 0.75rem;">
+                                ${chat.status?.toUpperCase() || 'ACTIVE'}
+                            </span>
+                        </div>
+                        <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.5rem;">
+                            Type: ${chat.type === 'listening' ? 'Listening Chat' : chat.type === 'chat' ? 'Guided Chat' : 'Pulse Survey'}
+                        </div>
+                        ${chat.topics ? `
+                            <div style="font-size: 0.8rem; color: var(--text-secondary);">
+                                Topics: ${Array.isArray(chat.topics) ? chat.topics.join(', ') : chat.topics}
+                            </div>
+                        ` : ''}
+                        ${chat.questions ? `
+                            <div style="font-size: 0.8rem; color: var(--text-secondary);">
+                                Questions: ${Array.isArray(chat.questions) ? chat.questions.length : 'N/A'} questions
+                            </div>
+                        ` : ''}
+                        <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.5rem;">
+                            Created: ${new Date(chat.created || chat.created_at).toLocaleDateString()}
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <button class="btn btn-secondary btn-sm" onclick="copyToClipboard('chat-link-${chat.id}', '${chat.link}')" title="Copy Link">📋</button>
+                        <button class="btn btn-secondary btn-sm" onclick="editChatSession('${chat.session_id || chat.id}')" title="Edit">✏️</button>
+                        <button class="btn btn-secondary btn-sm" onclick="testChatLink('${chat.link}')" title="Test">🔗</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteChatSession('${chat.session_id || chat.id}')" title="Delete">🗑️</button>
+                    </div>
+                    <input type="hidden" id="chat-link-${chat.id}" value="${chat.link}">
+                </div>
+            `).join('');
+        }
+        
+        console.log(`Loaded ${chatSessions.length} active chats`);
+    } catch (error) {
+        console.error('Error loading active chats:', error);
+        showToast('Error loading active chats', 'error');
+    }
+}
+
+// Copy link function for active chats
+function copyToClipboard(elementId, link) {
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(link).then(() => {
+            showToast('Link copied to clipboard!', 'success');
+        }).catch(err => {
+            console.error('Failed to copy link:', err);
+            fallbackCopyTextToClipboard(link);
+        });
+    } else {
+        fallbackCopyTextToClipboard(link);
+    }
+}
+
+function fallbackCopyTextToClipboard(text) {
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.top = '0';
+    textArea.style.left = '0';
+    textArea.style.position = 'fixed';
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    try {
+        document.execCommand('copy');
+        showToast('Link copied to clipboard!', 'success');
+    } catch (err) {
+        showToast('Failed to copy link', 'error');
+    }
+    document.body.removeChild(textArea);
+}
+
+// Edit chat session (placeholder)
+function editChatSession(sessionId) {
+    showToast('Edit functionality coming soon!', 'info');
+    // TODO: Implement edit functionality
+}
+
+// Delete chat session
+async function deleteChatSession(sessionId) {
+    if (confirm('Are you sure you want to delete this chat session? This action cannot be undone.')) {
+        try {
+            await updateChatSessionStatus(sessionId, 'deleted');
+            showToast('Chat session deleted successfully', 'success');
+            loadActiveChatsList(); // Refresh the list
+        } catch (error) {
+            console.error('Error deleting chat session:', error);
+            showToast('Error deleting chat session', 'error');
+        }
+    }
+}
 </script>
 </body>
 </html>

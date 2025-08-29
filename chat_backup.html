@@ -1,0 +1,2672 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workplace Insights Chat - Realworld</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --secondary-color: #764ba2;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f3f4f6;
+            --border-color: #e5e7eb;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .chat-container {
+            background: var(--bg-primary);
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+            width: 100%;
+            max-width: 600px;
+            height: 85vh;
+            max-height: 700px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .chat-header h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .chat-header p {
+            opacity: 0.9;
+            font-size: 0.875rem;
+        }
+
+        .progress-bar {
+            height: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: white;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem;
+            background: var(--bg-secondary);
+            scroll-behavior: smooth;
+        }
+
+        .message {
+            margin-bottom: 1rem;
+            animation: messageSlide 0.3s ease-out;
+        }
+
+        @keyframes messageSlide {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message-wrapper {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .message.user .message-wrapper {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.875rem;
+            flex-shrink: 0;
+        }
+
+        .message.bot .message-avatar {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+        }
+
+        .message.user .message-avatar {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .message-content {
+            max-width: 70%;
+        }
+
+        .message-bubble {
+            padding: 0.75rem 1rem;
+            border-radius: 16px;
+            word-wrap: break-word;
+            line-height: 1.5;
+        }
+
+        .message.bot .message-bubble {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            border-bottom-left-radius: 4px;
+        }
+
+        .message.user .message-bubble {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .typing-indicator {
+            padding: 0.75rem 1rem;
+            background: var(--bg-primary);
+            border-radius: 16px;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+        }
+
+        .typing-dots span {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--text-secondary);
+            animation: typingBounce 1.4s infinite;
+        }
+
+        .typing-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typingBounce {
+            0%, 60%, 100% {
+                transform: translateY(0);
+                opacity: 0.5;
+            }
+            30% {
+                transform: translateY(-10px);
+                opacity: 1;
+            }
+        }
+
+        .quick-actions {
+            padding: 0.75rem 1rem;
+            background: var(--bg-primary);
+            border-top: 1px solid var(--border-color);
+            display: none;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .quick-actions.show {
+            display: flex;
+        }
+
+        .quick-action-btn {
+            padding: 0.5rem 1rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .quick-action-btn:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .chat-input-area {
+            padding: 1rem;
+            background: var(--bg-primary);
+            border-top: 1px solid var(--border-color);
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: 0.75rem;
+            align-items: flex-end;
+        }
+
+        .input-container {
+            flex: 1;
+            position: relative;
+        }
+
+        .chat-input {
+            width: 100%;
+            min-height: 45px;
+            max-height: 120px;
+            padding: 0.75rem 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 24px;
+            outline: none;
+            font-size: 0.95rem;
+            resize: none;
+            transition: all 0.2s;
+            font-family: inherit;
+            line-height: 1.5;
+        }
+
+        .chat-input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .send-btn {
+            padding: 0.75rem 1.25rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+            color: white;
+            border: none;
+            border-radius: 24px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .send-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .sentiment-indicator {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            display: none;
+        }
+
+        .sentiment-indicator.show {
+            display: block;
+        }
+
+        .sentiment-positive {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .sentiment-neutral {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .sentiment-negative {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .scale-options {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+
+        .scale-btn {
+            padding: 0.75rem;
+            background: white;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 600;
+        }
+
+        .scale-btn:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        .scale-btn.selected {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .insight-card {
+            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+            border-left: 4px solid var(--primary-color);
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+
+        .insight-card h4 {
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .completion-screen {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .completion-screen.show {
+            display: block;
+        }
+
+        .completion-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .chat-container {
+                height: 100vh;
+                max-height: none;
+                border-radius: 0;
+            }
+
+            .message-content {
+                max-width: 85%;
+            }
+        }
+    </style>
+    
+    <!-- Database Integration -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="lib/supabase.js"></script>
+    <script src="assets/js/database.js"></script>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <h2 id="chat-title">Workplace Insights Check-in</h2>
+            <p id="chat-subtitle">Your confidential space to share workplace experiences</p>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+        </div>
+        
+        <div class="sentiment-indicator" id="sentiment-indicator">
+            Current Sentiment: <span id="sentiment-value">Analyzing...</span>
+        </div>
+        
+        <div class="chat-messages" id="chat-messages">
+            <!-- Messages will be added here dynamically -->
+        </div>
+
+        <div class="quick-actions" id="quick-actions">
+            <!-- Quick action buttons will be added here dynamically -->
+        </div>
+        
+        <div class="chat-input-area" id="chat-input-area">
+            <div class="input-wrapper">
+                <div class="input-container">
+                    <textarea 
+                        id="user-input" 
+                        class="chat-input" 
+                        placeholder="Type your response here..."
+                        onkeydown="handleKeyPress(event)"
+                        oninput="adjustTextarea(this)"
+                    ></textarea>
+                </div>
+                <button class="send-btn" id="send-btn" onclick="sendMessage()">
+                    <span>Send</span>
+                </button>
+            </div>
+        </div>
+        
+        <div class="completion-screen" id="completion-screen">
+            <div class="completion-icon">🎉</div>
+            <h2>Thank You!</h2>
+            <p>Your insights are invaluable in creating a better workplace.</p>
+            <button class="send-btn" onclick="startNewSession()">Start New Session</button>
+        </div>
+    </div>
+
+    <script>
+        // =====================================================
+        // WORKPLACE FEEDBACK INTELLIGENCE ENGINE
+        // =====================================================
+        
+        // Configuration
+        const config = {
+            platformEndpoint: window.location.origin + '/api/workplace-feedback',
+            sessionId: 'workplace_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+            participantId: new URLSearchParams(window.location.search).get('id') || 'anonymous',
+            organizationId: new URLSearchParams(window.location.search).get('org') || 'default'
+        };
+
+        // Core workplace topics and intelligent follow-up mapping
+        const workplaceTopics = {
+            manager: {
+                keywords: ['manager', 'boss', 'supervisor', 'leader', 'management', 'superior'],
+                followUps: {
+                    positive: [
+                        "That's wonderful to hear! What specific things does your manager do that you appreciate?",
+                        "It sounds like you have a supportive manager. Can you share an example of when they really helped you?",
+                        "Great managers make such a difference! How does your manager support your professional growth?"
+                    ],
+                    negative: [
+                        "I understand that can be challenging. Could you tell me more about what specific behaviors concern you?",
+                        "That sounds difficult. How long has this been affecting your work experience?",
+                        "I appreciate you sharing this. What changes would make the biggest difference in your relationship with your manager?"
+                    ],
+                    neutral: [
+                        "Can you tell me more about your day-to-day interactions with your manager?",
+                        "How would you describe your manager's communication style?",
+                        "What's one thing your manager could do differently to better support you?"
+                    ]
+                },
+                probes: [
+                    "How often do you have one-on-one meetings with your manager?",
+                    "Do you feel comfortable giving feedback to your manager?",
+                    "How well does your manager recognize your contributions?"
+                ]
+            },
+            
+            workEnvironment: {
+                keywords: ['office', 'workspace', 'environment', 'culture', 'atmosphere', 'workplace', 'remote', 'hybrid'],
+                followUps: {
+                    positive: [
+                        "That's great! What aspects of your work environment do you value most?",
+                        "A positive environment is so important. What makes your workplace special?",
+                        "Wonderful! How does your work environment support your productivity?"
+                    ],
+                    negative: [
+                        "I'm sorry to hear that. What specific aspects of the environment are most challenging?",
+                        "That must be frustrating. Have these issues been addressed with leadership?",
+                        "Thank you for sharing. What changes would improve your work environment most?"
+                    ],
+                    neutral: [
+                        "Can you describe what a typical day looks like in your work environment?",
+                        "How would you compare your current environment to your ideal workspace?",
+                        "What's one thing that could be improved about your work environment?"
+                    ]
+                },
+                probes: [
+                    "Do you have the tools and resources you need to do your job effectively?",
+                    "How would you rate the collaboration in your workplace?",
+                    "Do you feel psychologically safe to express your opinions at work?"
+                ]
+            },
+            
+            teamDynamics: {
+                keywords: ['team', 'colleagues', 'coworkers', 'collaboration', 'teamwork', 'peers'],
+                followUps: {
+                    positive: [
+                        "It's wonderful you have a great team! What makes your team work so well together?",
+                        "Strong teams are invaluable. Can you share an example of great teamwork you've experienced?",
+                        "That's fantastic! How does your team celebrate successes?"
+                    ],
+                    negative: [
+                        "Team challenges can be really draining. What's the main source of friction?",
+                        "I understand that's difficult. How is this affecting your daily work?",
+                        "Thank you for being open. What support would help improve team dynamics?"
+                    ],
+                    neutral: [
+                        "How would you describe the communication within your team?",
+                        "What role do you typically play in team projects?",
+                        "How does your team handle conflicts or disagreements?"
+                    ]
+                },
+                probes: [
+                    "Do you feel valued by your team members?",
+                    "How well does your team handle diverse perspectives?",
+                    "Is there healthy knowledge sharing within your team?"
+                ]
+            },
+            
+            workload: {
+                keywords: ['workload', 'busy', 'stress', 'pressure', 'deadline', 'overtime', 'balance', 'burnout'],
+                followUps: {
+                    positive: [
+                        "It's great you feel your workload is manageable! How do you maintain that balance?",
+                        "That's wonderful! What helps you stay on top of your responsibilities?",
+                        "Excellent! Does your organization support work-life balance well?"
+                    ],
+                    negative: [
+                        "I hear you - overwhelming workload is exhausting. How long have you been experiencing this?",
+                        "That sounds very stressful. Are there specific tasks or projects causing the most pressure?",
+                        "I appreciate you sharing this. Have you been able to discuss this with your manager?"
+                    ],
+                    neutral: [
+                        "How would you describe your typical workload throughout the week?",
+                        "What strategies do you use to manage your workload?",
+                        "How does your workload compare to your colleagues'?"
+                    ]
+                },
+                probes: [
+                    "Do you often work outside of regular hours?",
+                    "Do you feel you have enough time to complete tasks properly?",
+                    "How often do you feel overwhelmed by your workload?"
+                ]
+            },
+            
+            growth: {
+                keywords: ['growth', 'development', 'career', 'promotion', 'learning', 'training', 'advancement', 'future'],
+                followUps: {
+                    positive: [
+                        "That's encouraging! What growth opportunities are you most excited about?",
+                        "Wonderful! How does your organization support your development?",
+                        "Great to hear! What skills are you developing currently?"
+                    ],
+                    negative: [
+                        "Limited growth opportunities can be frustrating. What kind of development are you seeking?",
+                        "I understand that's disappointing. Have you discussed career paths with your manager?",
+                        "Thank you for sharing. What would ideal career development look like for you?"
+                    ],
+                    neutral: [
+                        "How clear is your career path within the organization?",
+                        "What professional development would be most valuable to you?",
+                        "How often do you have career development discussions?"
+                    ]
+                },
+                probes: [
+                    "Do you have access to training and development resources?",
+                    "Is there a clear path for advancement in your role?",
+                    "Do you feel your skills are being fully utilized?"
+                ]
+            },
+            
+            compensation: {
+                keywords: ['pay', 'salary', 'compensation', 'benefits', 'bonus', 'raise', 'money', 'package'],
+                followUps: {
+                    positive: [
+                        "It's great you're satisfied with your compensation! Do you feel it reflects your contributions?",
+                        "That's positive! How does your total package compare to your expectations?",
+                        "Good to hear! Are there other benefits you particularly value?"
+                    ],
+                    negative: [
+                        "Compensation concerns are important. Do you feel your pay reflects your experience and contributions?",
+                        "I understand that's frustrating. How does this impact your motivation?",
+                        "Thank you for sharing. Have you had opportunities to discuss compensation recently?"
+                    ],
+                    neutral: [
+                        "How transparent is your organization about compensation structures?",
+                        "Beyond salary, what benefits are most important to you?",
+                        "How often are compensation reviews conducted?"
+                    ]
+                },
+                probes: [
+                    "Do you understand how compensation decisions are made?",
+                    "Are you satisfied with non-monetary benefits?",
+                    "Do you feel compensation is fair across the organization?"
+                ]
+            },
+            
+            communication: {
+                keywords: ['communication', 'feedback', 'transparency', 'information', 'updates', 'meetings'],
+                followUps: {
+                    positive: [
+                        "Great communication is so valuable! What communication practices work best in your organization?",
+                        "That's excellent! How does good communication impact your work?",
+                        "Wonderful! Can you share an example of effective communication you've experienced?"
+                    ],
+                    negative: [
+                        "Poor communication can be really frustrating. Where do you see the biggest gaps?",
+                        "I understand that's challenging. How does this affect your ability to do your job?",
+                        "Thank you for sharing. What communication improvements would help most?"
+                    ],
+                    neutral: [
+                        "How would you rate the flow of information in your organization?",
+                        "What communication channels does your team use most?",
+                        "How timely and relevant is the information you receive?"
+                    ]
+                },
+                probes: [
+                    "Do you receive regular updates about organizational changes?",
+                    "Is feedback given constructively and regularly?",
+                    "Do you feel heard when you share ideas or concerns?"
+                ]
+            },
+            
+            wellbeing: {
+                keywords: ['wellbeing', 'wellness', 'mental health', 'stress', 'support', 'balance', 'health'],
+                followUps: {
+                    positive: [
+                        "I'm glad your wellbeing is supported! What initiatives make the biggest difference?",
+                        "That's wonderful! How does your workplace promote wellbeing?",
+                        "Great to hear! What aspects of workplace wellbeing are most important to you?"
+                    ],
+                    negative: [
+                        "Your wellbeing is crucial. What support would be most helpful?",
+                        "I'm sorry you're experiencing this. Are there specific stressors we should address?",
+                        "Thank you for trusting me with this. What changes would improve your wellbeing?"
+                    ],
+                    neutral: [
+                        "How well does your workplace support mental and physical health?",
+                        "What wellbeing resources are available to you?",
+                        "How do you maintain work-life balance?"
+                    ]
+                },
+                probes: [
+                    "Do you feel comfortable taking time off when needed?",
+                    "Are mental health resources readily available?",
+                    "Does your workload allow for proper breaks and rest?"
+                ]
+            }
+        };
+
+        // Conversation state
+        let conversationState = {
+            messages: [],
+            currentTopic: null,
+            topicsDiscussed: [],
+            sentimentHistory: [],
+            currentSentiment: 'neutral',
+            questionCount: 0,
+            maxQuestions: 15,
+            depth: 0,
+            insights: [],
+            sessionStartTime: Date.now(),
+            isComplete: false,
+            lastResponseTime: null,
+            responsePatterns: {
+                shortResponses: 0,
+                longResponses: 0,
+                avgResponseLength: 0
+            }
+        };
+
+
+        function addMessage(sender, text, options = {}) {
+            const messagesContainer = document.getElementById('chat-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            
+            const messageHTML = `
+                <div class="message-wrapper">
+                    <div class="message-avatar">${sender === 'bot' ? 'AI' : 'You'}</div>
+                    <div class="message-content">
+                        <div class="message-bubble">${formatMessage(text)}</div>
+                    </div>
+                </div>
+            `;
+            
+            messageDiv.innerHTML = messageHTML;
+            messagesContainer.appendChild(messageDiv);
+            
+            // Handle special message types
+            if (options.type === 'scale') {
+                addScaleOptions(options.callback);
+            } else if (options.quickActions) {
+                showQuickActions(options.quickActions);
+            }
+            
+            // Scroll to bottom
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            
+            // Store message
+            conversationState.messages.push({
+                sender: sender,
+                text: text,
+                timestamp: Date.now(),
+                sentiment: options.sentiment || null,
+                topic: options.topic || conversationState.currentTopic
+            });
+            
+            // Update progress
+            updateProgress();
+        }
+
+        function formatMessage(text) {
+            return text
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                .replace(/\n/g, '<br>');
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('user-input');
+            const message = input.value.trim();
+            
+            if (!message || conversationState.isComplete) return;
+            
+            // Disable input while processing
+            input.disabled = true;
+            document.getElementById('send-btn').disabled = true;
+            
+            // Add user message
+            addMessage('user', message);
+            input.value = '';
+            adjustTextarea(input);
+            
+            // Analyze and respond
+            analyzeAndRespond(message);
+        }
+
+        async function analyzeAndRespond(message) {
+            // Show typing indicator
+            showTypingIndicator();
+            
+            // Analyze message
+            const analysis = analyzeMessage(message);
+            
+            // Update conversation state
+            conversationState.currentSentiment = analysis.sentiment;
+            conversationState.sentimentHistory.push(analysis.sentiment);
+            conversationState.questionCount++;
+            
+            // Update response patterns
+            updateResponsePatterns(message);
+            
+            // Store data for platform
+            storeResponseData(message, analysis);
+            
+            // Simulate thinking time
+            const thinkingTime = Math.min(800 + (message.length * 10), 2000);
+            await new Promise(resolve => setTimeout(resolve, thinkingTime));
+            
+            hideTypingIndicator();
+            
+            // Generate intelligent response
+            const response = generateIntelligentResponse(message, analysis);
+            
+            // Add bot response
+            addMessage('bot', response.text, {
+                sentiment: analysis.sentiment,
+                topic: analysis.topic,
+                quickActions: response.quickActions
+            });
+            
+            // Check if conversation should end
+            if (conversationState.questionCount >= conversationState.maxQuestions) {
+                setTimeout(() => concludeConversation(), 2000);
+            }
+            
+            // Re-enable input
+            document.getElementById('user-input').disabled = false;
+            document.getElementById('send-btn').disabled = false;
+            document.getElementById('user-input').focus();
+        }
+
+        function analyzeMessage(message) {
+            const lower = message.toLowerCase();
+            const words = lower.split(/\s+/);
+            
+            // Detect topic
+            let detectedTopic = null;
+            let topicScore = 0;
+            
+            for (const [topic, config] of Object.entries(workplaceTopics)) {
+                const score = config.keywords.filter(keyword => 
+                    lower.includes(keyword)
+                ).length;
+                
+                if (score > topicScore) {
+                    topicScore = score;
+                    detectedTopic = topic;
+                }
+            }
+            
+            // Sentiment analysis
+            const sentiment = analyzeSentiment(message);
+            
+            // Depth analysis (how detailed is the response)
+            const depth = message.length > 100 ? 'deep' : 
+                         message.length > 50 ? 'moderate' : 'shallow';
+            
+            // Emotion detection
+            const emotions = detectEmotions(message);
+            
+            return {
+                topic: detectedTopic,
+                sentiment: sentiment,
+                depth: depth,
+                emotions: emotions,
+                wordCount: words.length,
+                hasQuestion: message.includes('?'),
+                isVague: words.length < 5 && !detectedTopic
+            };
+        }
+
+        function analyzeSentiment(message) {
+            const lower = message.toLowerCase();
+            
+            // Strong positive indicators
+            const strongPositive = ['love', 'excellent', 'amazing', 'fantastic', 'wonderful', 'outstanding', 'perfect'];
+            const positive = ['good', 'great', 'happy', 'satisfied', 'enjoy', 'appreciate', 'like', 'helpful', 'supportive'];
+            
+            // Strong negative indicators  
+            const strongNegative = ['hate', 'terrible', 'awful', 'horrible', 'worst', 'disgusting', 'unbearable'];
+            const negative = ['bad', 'poor', 'unhappy', 'dissatisfied', 'frustrating', 'difficult', 'stressful', 'problem'];
+            
+            // Count occurrences
+            const strongPosCount = strongPositive.filter(word => lower.includes(word)).length;
+            const posCount = positive.filter(word => lower.includes(word)).length;
+            const strongNegCount = strongNegative.filter(word => lower.includes(word)).length;
+            const negCount = negative.filter(word => lower.includes(word)).length;
+            
+            // Calculate sentiment score
+            const score = (strongPosCount * 2 + posCount) - (strongNegCount * 2 + negCount);
+            
+            // Update sentiment indicator
+            updateSentimentIndicator(score > 0 ? 'positive' : score < 0 ? 'negative' : 'neutral');
+            
+            if (score >= 2) return 'very_positive';
+            if (score >= 1) return 'positive';
+            if (score <= -2) return 'very_negative';
+            if (score <= -1) return 'negative';
+            return 'neutral';
+        }
+
+        function detectEmotions(message) {
+            const emotions = {
+                frustration: /frustrat|annoying|irritat|fed up/i.test(message),
+                anxiety: /worried|anxious|nervous|stress|overwhelm/i.test(message),
+                happiness: /happy|joy|excit|thrill|delighted/i.test(message),
+                anger: /angry|mad|furious|rage|pissed/i.test(message),
+                sadness: /sad|depress|down|unhappy|miserable/i.test(message),
+                fear: /afraid|scar|fear|terrif/i.test(message),
+                gratitude: /grateful|thankful|appreciat/i.test(message)
+            };
+            
+            return Object.keys(emotions).filter(emotion => emotions[emotion]);
+        }
+
+        function generateIntelligentResponse(userMessage, analysis) {
+            let responseText = '';
+            let quickActions = [];
+            
+            // Handle vague responses
+            if (analysis.isVague) {
+                responseText = getProbeForVagueResponse();
+                quickActions = ['Can you give an example?', 'Not sure', 'Skip this'];
+                return { text: responseText, quickActions };
+            }
+            
+            // If continuing on same topic, go deeper
+            if (analysis.topic && analysis.topic === conversationState.currentTopic) {
+                responseText = getDeepDiveResponse(analysis.topic, analysis.sentiment, conversationState.depth);
+                conversationState.depth++;
+            }
+            // New topic detected
+            else if (analysis.topic && analysis.topic !== conversationState.currentTopic) {
+                conversationState.currentTopic = analysis.topic;
+                conversationState.depth = 1;
+                responseText = getTopicFollowUp(analysis.topic, analysis.sentiment);
+                conversationState.topicsDiscussed.push(analysis.topic);
+            }
+            // No specific topic, but strong sentiment
+            else if (analysis.sentiment.includes('very')) {
+                responseText = getSentimentProbe(analysis.sentiment);
+            }
+            // Move to new topic
+            else {
+                const nextTopic = getNextTopic();
+                if (nextTopic) {
+                    responseText = transitionToNewTopic(nextTopic);
+                    conversationState.currentTopic = nextTopic;
+                } else {
+                    responseText = getGeneralProbe();
+                }
+            }
+            
+            // Add empathy for negative emotions
+            if (analysis.emotions.length > 0 && 
+                (analysis.emotions.includes('frustration') || 
+                 analysis.emotions.includes('anxiety') || 
+                 analysis.emotions.includes('anger'))) {
+                responseText = getEmpathyStatement(analysis.emotions[0]) + ' ' + responseText;
+            }
+            
+            // Generate smart quick actions based on context
+            if (quickActions.length === 0) {
+                quickActions = generateQuickActions(analysis);
+            }
+            
+            return { text: responseText, quickActions };
+        }
+
+        function getProbeForVagueResponse() {
+            const probes = [
+                "I'd love to understand more. Could you elaborate on that?",
+                "That's interesting. Can you tell me more about what you mean?",
+                "Thanks for sharing. Could you give me a specific example?",
+                "I want to make sure I understand. What aspects are you thinking about?"
+            ];
+            return probes[Math.floor(Math.random() * probes.length)];
+        }
+
+        function getTopicFollowUp(topic, sentiment) {
+            const config = workplaceTopics[topic];
+            if (!config) return getGeneralProbe();
+            
+            const sentimentKey = sentiment.includes('positive') ? 'positive' : 
+                               sentiment.includes('negative') ? 'negative' : 'neutral';
+            
+            const followUps = config.followUps[sentimentKey];
+            return followUps[Math.floor(Math.random() * followUps.length)];
+        }
+
+        function getDeepDiveResponse(topic, sentiment, depth) {
+            const config = workplaceTopics[topic];
+            if (!config) return getGeneralProbe();
+            
+            // Use probing questions for deeper exploration
+            if (depth < config.probes.length) {
+                return config.probes[depth];
+            }
+            
+            // Generic deep dive
+            const deepDives = [
+                "You've shared some valuable insights about this. Is there anything else about this topic you think is important?",
+                "Thank you for being so open. How does this compare to your past experiences?",
+                "I really appreciate your perspective. What would you most like to see change?"
+            ];
+            
+            return deepDives[Math.floor(Math.random() * deepDives.length)];
+        }
+
+        function getSentimentProbe(sentiment) {
+            if (sentiment === 'very_positive') {
+                return "Your enthusiasm is wonderful! What do you think contributes most to this positive experience?";
+            } else if (sentiment === 'very_negative') {
+                return "I can sense this is really affecting you. What support or changes would make the biggest difference?";
+            }
+            return getGeneralProbe();
+        }
+
+        function getEmpathyStatement(emotion) {
+            const statements = {
+                frustration: "I can hear the frustration in your response, and that's completely understandable.",
+                anxiety: "It sounds like this is causing you some anxiety.",
+                anger: "I understand why this would make you angry.",
+                sadness: "I'm sorry you're going through this difficult situation.",
+                fear: "It's natural to feel concerned about these things."
+            };
+            return statements[emotion] || "Thank you for being so honest about your feelings.";
+        }
+
+        function transitionToNewTopic(topic) {
+            const transitions = [
+                `Let's shift gears a bit. I'd like to hear about your ${topic.replace(/([A-Z])/g, ' $1').toLowerCase()}.`,
+                `Thanks for sharing that. Now, can we talk about ${topic.replace(/([A-Z])/g, ' $1').toLowerCase()}?`,
+                `I appreciate your insights. Moving on, how do you feel about ${topic.replace(/([A-Z])/g, ' $1').toLowerCase()}?`
+            ];
+            
+            const transition = transitions[Math.floor(Math.random() * transitions.length)];
+            const config = workplaceTopics[topic];
+            
+            return transition + ' ' + config.probes[0];
+        }
+
+        function getNextTopic() {
+            const allTopics = Object.keys(workplaceTopics);
+            const undiscussed = allTopics.filter(topic => 
+                !conversationState.topicsDiscussed.includes(topic)
+            );
+            
+            if (undiscussed.length === 0) return null;
+            
+            // Prioritize certain topics based on conversation flow
+            const priorities = {
+                manager: 3,
+                workEnvironment: 2,
+                teamDynamics: 2,
+                workload: 2,
+                growth: 1,
+                compensation: 1,
+                communication: 1,
+                wellbeing: 2
+            };
+            
+            // Weight selection by priority
+            const weighted = undiscussed.flatMap(topic => 
+                Array(priorities[topic] || 1).fill(topic)
+            );
+            
+            return weighted[Math.floor(Math.random() * weighted.length)];
+        }
+
+        function getGeneralProbe() {
+            const probes = [
+                "What else would you like to share about your workplace experience?",
+                "Is there anything we haven't touched on that's important to you?",
+                "What other aspects of work are on your mind?",
+                "What would you most like your leadership to know?"
+            ];
+            return probes[Math.floor(Math.random() * probes.length)];
+        }
+
+        function generateQuickActions(analysis) {
+            const actions = [];
+            
+            // Context-specific actions
+            if (analysis.sentiment.includes('negative')) {
+                actions.push("It's getting better", "No change", "Getting worse");
+            } else if (analysis.sentiment.includes('positive')) {
+                actions.push("Very satisfied", "Room for improvement", "It varies");
+            } else {
+                actions.push("Generally good", "Could be better", "Depends on the day");
+            }
+            
+            return actions;
+        }
+
+        function updateResponsePatterns(message) {
+            const length = message.length;
+            const patterns = conversationState.responsePatterns;
+            
+            if (length < 50) patterns.shortResponses++;
+            else if (length > 150) patterns.longResponses++;
+            
+            // Calculate average
+            const allLengths = conversationState.messages
+                .filter(m => m.sender === 'user')
+                .map(m => m.text.length);
+            
+            patterns.avgResponseLength = allLengths.reduce((a, b) => a + b, 0) / allLengths.length;
+        }
+
+        function storeResponseData(message, analysis) {
+            const data = {
+                sessionId: config.sessionId,
+                participantId: config.participantId,
+                organizationId: config.organizationId,
+                timestamp: Date.now(),
+                message: message,
+                analysis: analysis,
+                conversationContext: {
+                    questionNumber: conversationState.questionCount,
+                    currentTopic: conversationState.currentTopic,
+                    depth: conversationState.depth,
+                    overallSentiment: calculateOverallSentiment()
+                }
+            };
+            
+            // Send to platform (in production)
+            sendToPlatform(data);
+            
+            // Store locally for session
+            conversationState.insights.push(data);
+        }
+
+        function calculateOverallSentiment() {
+            const sentiments = conversationState.sentimentHistory;
+            if (sentiments.length === 0) return 'neutral';
+            
+            const scores = sentiments.map(s => {
+                if (s === 'very_positive') return 2;
+                if (s === 'positive') return 1;
+                if (s === 'very_negative') return -2;
+                if (s === 'negative') return -1;
+                return 0;
+            });
+            
+            const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
+            
+            if (avg >= 1.5) return 'very_positive';
+            if (avg >= 0.5) return 'positive';
+            if (avg <= -1.5) return 'very_negative';
+            if (avg <= -0.5) return 'negative';
+            return 'neutral';
+        }
+
+        async function sendToPlatform(data) {
+            try {
+                // In production, this would send to your actual endpoint
+                const response = await fetch(config.platformEndpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                if (!response.ok) {
+                    console.error('Failed to send data to platform');
+                }
+            } catch (error) {
+                console.error('Error sending data:', error);
+                // Store locally for later sync
+                localStorage.setItem(`workplace_feedback_${Date.now()}`, JSON.stringify(data));
+            }
+        }
+
+        function concludeConversation() {
+            conversationState.isComplete = true;
+            
+            // Generate insights summary
+            const insights = generateInsightsSummary();
+            
+            // Thank you message
+            const conclusionMessages = [
+                "We've covered a lot of ground today, and I really appreciate your openness and honesty.",
+                `Based on our conversation, I can see that ${insights.primaryInsight}.`,
+                insights.recommendation,
+                "Your feedback is invaluable and will be handled with complete confidentiality. Thank you for taking the time to share your experiences!"
+            ];
+            
+            conclusionMessages.forEach((msg, index) => {
+                setTimeout(() => {
+                    addMessage('bot', msg);
+                }, index * 1500);
+            });
+            
+            // Show completion screen after messages
+            setTimeout(() => {
+                document.getElementById('chat-messages').style.display = 'none';
+                document.getElementById('chat-input-area').style.display = 'none';
+                document.getElementById('completion-screen').classList.add('show');
+            }, conclusionMessages.length * 1500);
+            
+            // Send final summary to platform
+            sendFinalSummary(insights);
+        }
+
+        function generateInsightsSummary() {
+            const sentiment = calculateOverallSentiment();
+            const topicsWithSentiment = conversationState.messages
+                .filter(m => m.topic && m.sentiment)
+                .reduce((acc, m) => {
+                    if (!acc[m.topic]) acc[m.topic] = [];
+                    acc[m.topic].push(m.sentiment);
+                    return acc;
+                }, {});
+            
+            // Find most positive and negative topics
+            let mostPositive = null;
+            let mostNegative = null;
+            let maxPosScore = -10;
+            let maxNegScore = 10;
+            
+            for (const [topic, sentiments] of Object.entries(topicsWithSentiment)) {
+                const score = sentiments.reduce((sum, s) => {
+                    if (s.includes('positive')) return sum + 1;
+                    if (s.includes('negative')) return sum - 1;
+                    return sum;
+                }, 0);
+                
+                if (score > maxPosScore) {
+                    maxPosScore = score;
+                    mostPositive = topic;
+                }
+                if (score < maxNegScore) {
+                    maxNegScore = score;
+                    mostNegative = topic;
+                }
+            }
+            
+            // Generate primary insight
+            let primaryInsight = '';
+            if (sentiment.includes('positive')) {
+                primaryInsight = `you're generally satisfied with your workplace, especially regarding ${mostPositive || 'several areas'}`;
+            } else if (sentiment.includes('negative')) {
+                primaryInsight = `there are some significant challenges you're facing, particularly with ${mostNegative || 'multiple aspects'}`;
+            } else {
+                primaryInsight = `you have mixed feelings about your workplace, with both positives and areas for improvement`;
+            }
+            
+            // Generate recommendation
+            let recommendation = '';
+            if (mostNegative) {
+                recommendation = `Your feedback suggests that addressing ${mostNegative.replace(/([A-Z])/g, ' $1').toLowerCase()} could have the most positive impact on your work experience.`;
+            } else if (sentiment.includes('positive')) {
+                recommendation = "It's wonderful that you're having a positive experience. Your feedback helps us understand what's working well.";
+            } else {
+                recommendation = "Your balanced perspective is valuable in helping us understand the full picture of the workplace experience.";
+            }
+            
+            return {
+                overallSentiment: sentiment,
+                primaryInsight: primaryInsight,
+                recommendation: recommendation,
+                topicsDiscussed: conversationState.topicsDiscussed,
+                mostPositiveArea: mostPositive,
+                mostNegativeArea: mostNegative,
+                responsePatterns: conversationState.responsePatterns
+            };
+        }
+
+        async function sendFinalSummary(insights) {
+            const summary = {
+                sessionId: config.sessionId,
+                participantId: config.participantId,
+                organizationId: config.organizationId,
+                completedAt: Date.now(),
+                duration: Date.now() - conversationState.sessionStartTime,
+                insights: insights,
+                messages: conversationState.messages,
+                metrics: {
+                    questionsAsked: conversationState.questionCount,
+                    topicsDiscussed: conversationState.topicsDiscussed.length,
+                    avgResponseLength: conversationState.responsePatterns.avgResponseLength,
+                    overallSentiment: insights.overallSentiment
+                }
+            };
+            
+            try {
+                await fetch(config.platformEndpoint + '/complete', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(summary)
+                });
+            } catch (error) {
+                console.error('Error sending summary:', error);
+                localStorage.setItem(`workplace_summary_${config.sessionId}`, JSON.stringify(summary));
+            }
+        }
+
+        function showQuickActions(actions) {
+            const quickActionsDiv = document.getElementById('quick-actions');
+            quickActionsDiv.innerHTML = '';
+            
+            actions.forEach(action => {
+                const btn = document.createElement('button');
+                btn.className = 'quick-action-btn';
+                btn.textContent = action;
+                btn.onclick = () => {
+                    document.getElementById('user-input').value = action;
+                    quickActionsDiv.classList.remove('show');
+                    sendMessage();
+                };
+                quickActionsDiv.appendChild(btn);
+            });
+            
+            quickActionsDiv.classList.add('show');
+        }
+
+        function addScaleOptions(callback) {
+            const messagesContainer = document.getElementById('chat-messages');
+            const scaleDiv = document.createElement('div');
+            scaleDiv.className = 'scale-options';
+            
+            for (let i = 1; i <= 5; i++) {
+                const btn = document.createElement('button');
+                btn.className = 'scale-btn';
+                btn.textContent = i;
+                btn.onclick = () => {
+                    document.querySelectorAll('.scale-btn').forEach(b => b.classList.remove('selected'));
+                    btn.classList.add('selected');
+                    if (callback) callback(i);
+                };
+                scaleDiv.appendChild(btn);
+            }
+            
+            messagesContainer.appendChild(scaleDiv);
+        }
+
+        function showTypingIndicator() {
+            const messagesContainer = document.getElementById('chat-messages');
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'message bot';
+            typingDiv.id = 'typing-indicator';
+            typingDiv.innerHTML = `
+                <div class="message-wrapper">
+                    <div class="message-avatar">AI</div>
+                    <div class="message-content">
+                        <div class="typing-indicator">
+                            <span>AI is thinking</span>
+                            <div class="typing-dots">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            messagesContainer.appendChild(typingDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function hideTypingIndicator() {
+            const indicator = document.getElementById('typing-indicator');
+            if (indicator) {
+                indicator.remove();
+            }
+        }
+
+        function updateProgress() {
+            const progress = (conversationState.questionCount / conversationState.maxQuestions) * 100;
+            document.getElementById('progress-fill').style.width = progress + '%';
+        }
+
+        function updateSentimentIndicator(sentiment) {
+            const indicator = document.getElementById('sentiment-indicator');
+            const value = document.getElementById('sentiment-value');
+            
+            indicator.className = 'sentiment-indicator show';
+            value.textContent = sentiment.charAt(0).toUpperCase() + sentiment.slice(1);
+            
+            if (sentiment === 'positive') {
+                indicator.classList.add('sentiment-positive');
+            } else if (sentiment === 'negative') {
+                indicator.classList.add('sentiment-negative');
+            } else {
+                indicator.classList.add('sentiment-neutral');
+            }
+            
+            // Hide after 3 seconds
+            setTimeout(() => {
+                indicator.classList.remove('show');
+            }, 3000);
+        }
+
+        function initializeSentimentAnalysis() {
+            // Monitor sentiment trends and adapt questions accordingly
+            setInterval(() => {
+                if (conversationState.sentimentHistory.length > 3) {
+                    const recent = conversationState.sentimentHistory.slice(-3);
+                    const negativeCount = recent.filter(s => s.includes('negative')).length;
+                    
+                    // If consistently negative, show support
+                    if (negativeCount >= 2 && !conversationState.supportOffered) {
+                        conversationState.supportOffered = true;
+                        setTimeout(() => {
+                            addMessage('bot', "I notice you're facing several challenges. Please know that your feedback is being taken seriously, and there are resources available if you need support. Would you like information about employee assistance programs?", {
+                                quickActions: ["Yes, please", "No, I'm okay", "Maybe later"]
+                            });
+                        }, 2000);
+                    }
+                }
+            }, 10000);
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+
+        function adjustTextarea(textarea) {
+            textarea.style.height = 'auto';
+            textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
+        }
+
+        function startNewSession() {
+            // Reset conversation state
+            conversationState = {
+                messages: [],
+                currentTopic: null,
+                topicsDiscussed: [],
+                sentimentHistory: [],
+                currentSentiment: 'neutral',
+                questionCount: 0,
+                maxQuestions: 15,
+                depth: 0,
+                insights: [],
+                sessionStartTime: Date.now(),
+                isComplete: false,
+                lastResponseTime: null,
+                responsePatterns: {
+                    shortResponses: 0,
+                    longResponses: 0,
+                    avgResponseLength: 0
+                }
+            };
+            
+            // Update session ID
+            config.sessionId = 'workplace_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            
+            // Reset UI
+            document.getElementById('chat-messages').innerHTML = '';
+            document.getElementById('chat-messages').style.display = 'block';
+            document.getElementById('chat-input-area').style.display = 'block';
+            document.getElementById('completion-screen').classList.remove('show');
+            document.getElementById('progress-fill').style.width = '0%';
+            
+            // Restart chat flow (not full initialization)
+            startChat();
+        }
+
+        // Auto-save functionality
+        setInterval(() => {
+            if (conversationState.messages.length > 0 && !conversationState.isComplete) {
+                localStorage.setItem(`workplace_session_${config.sessionId}`, 
+                    JSON.stringify(conversationState));
+            }
+        }, 30000);
+
+        // Handle page unload
+        window.addEventListener('beforeunload', function(e) {
+            if (conversationState.messages.length > 0 && !conversationState.isComplete) {
+                e.preventDefault();
+                e.returnValue = 'You have an ongoing feedback session. Are you sure you want to leave?';
+            }
+        });
+    </script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workplace Insights - Realworld</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --secondary-color: #764ba2;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f3f4f6;
+            --border-color: #e5e7eb;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .chat-container {
+            background: var(--bg-primary);
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+            width: 100%;
+            max-width: 600px;
+            height: 85vh;
+            max-height: 700px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 1.5rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .chat-header h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .chat-header p {
+            opacity: 0.9;
+            font-size: 0.875rem;
+        }
+
+        .progress-bar {
+            height: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+            margin-top: 1rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: white;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        .session-info {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.75rem;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem;
+            background: #f8f9fa;
+        }
+
+        .message {
+            margin-bottom: 1rem;
+            display: flex;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.bot {
+            justify-content: flex-start;
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .message-bubble {
+            max-width: 70%;
+            padding: 0.75rem 1rem;
+            border-radius: 16px;
+            word-wrap: break-word;
+        }
+
+        .message.bot .message-bubble {
+            background: white;
+            color: var(--text-primary);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .message.user .message-bubble {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .typing-indicator {
+            display: none;
+            padding: 0.75rem 1rem;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            width: fit-content;
+        }
+
+        .typing-indicator.show {
+            display: inline-block;
+        }
+
+        .typing-indicator span {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--text-secondary);
+            margin: 0 2px;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+                opacity: 0.7;
+            }
+            30% {
+                transform: translateY(-10px);
+                opacity: 1;
+            }
+        }
+
+        .input-area {
+            padding: 1rem;
+            background: white;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .input-container {
+            display: flex;
+            gap: 0.5rem;
+            align-items: flex-end;
+        }
+
+        .input-container textarea {
+            flex: 1;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            resize: none;
+            font-family: inherit;
+            font-size: 0.875rem;
+            max-height: 120px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .input-container textarea:focus {
+            border-color: var(--primary-color);
+        }
+
+        .send-button {
+            padding: 0.75rem 1.5rem;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .send-button:hover {
+            background: var(--primary-hover);
+        }
+
+        .send-button:disabled {
+            background: var(--text-secondary);
+            cursor: not-allowed;
+        }
+
+        /* Pulse Survey Specific Styles */
+        .question-container {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .question-text {
+            font-size: 1.125rem;
+            font-weight: 500;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .options-container {
+            display: grid;
+            gap: 0.5rem;
+        }
+
+        .option-button {
+            padding: 0.75rem;
+            background: white;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option-button:hover {
+            border-color: var(--primary-color);
+            background: #f0f9ff;
+        }
+
+        .option-button.selected {
+            border-color: var(--primary-color);
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .scale-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 0.5rem;
+        }
+
+        .scale-button {
+            flex: 1;
+            padding: 0.75rem;
+            background: white;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .scale-button:hover {
+            border-color: var(--primary-color);
+            background: #f0f9ff;
+        }
+
+        .scale-button.selected {
+            border-color: var(--primary-color);
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .navigation-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1.5rem;
+        }
+
+        .nav-button {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .nav-button.prev {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        .nav-button.next {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .nav-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Sentiment Indicator */
+        .sentiment-indicator {
+            padding: 0.5rem 1rem;
+            background: white;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            display: none;
+        }
+
+        .sentiment-indicator.show {
+            display: block;
+        }
+
+        .sentiment-value {
+            font-weight: 600;
+            margin-left: 0.5rem;
+        }
+
+        .sentiment-positive { color: var(--success-color); }
+        .sentiment-neutral { color: var(--warning-color); }
+        .sentiment-negative { color: var(--danger-color); }
+
+        /* Completion Screen */
+        .completion-screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .completion-screen.show {
+            display: flex;
+            flex: 1;
+        }
+
+        .completion-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .completion-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .completion-message {
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+
+        .completion-button {
+            padding: 0.75rem 2rem;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .completion-button:hover {
+            background: var(--primary-hover);
+        }
+
+        /* Loading State */
+        .loading-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .loader {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: white;
+            margin-top: 1rem;
+            font-size: 1.125rem;
+        }
+
+        @media (max-width: 768px) {
+            .chat-container {
+                height: 100vh;
+                max-height: none;
+                border-radius: 0;
+            }
+
+            .message-bubble {
+                max-width: 85%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loader"></div>
+        <div class="loading-text">Loading your session...</div>
+    </div>
+
+    <!-- Main Chat Container -->
+    <div id="chat-container" class="chat-container" style="display: none;">
+        <div class="chat-header">
+            <div class="session-info" id="session-info"></div>
+            <h2 id="chat-title">Loading...</h2>
+            <p id="chat-subtitle">Please wait...</p>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+        </div>
+
+        <div class="sentiment-indicator" id="sentiment-indicator">
+            Sentiment: <span id="sentiment-value" class="sentiment-value">Analyzing...</span>
+        </div>
+
+        <div class="chat-messages" id="chat-messages">
+            <div class="typing-indicator" id="typing-indicator">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+
+        <!-- Completion Screen -->
+        <div class="completion-screen" id="completion-screen">
+            <div class="completion-icon">✅</div>
+            <div class="completion-title">Thank You!</div>
+            <div class="completion-message" id="completion-message">Your feedback has been submitted successfully.</div>
+            <button class="completion-button" onclick="window.close()">Close</button>
+        </div>
+
+        <!-- Input Area (for Listening and Chat modes) -->
+        <div class="input-area" id="input-area" style="display: none;">
+            <div class="input-container">
+                <textarea id="user-input" placeholder="Type your message..." rows="1"></textarea>
+                <button class="send-button" id="send-button" onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+
+        <!-- Navigation Area (for Pulse Survey mode) -->
+        <div class="input-area" id="navigation-area" style="display: none;">
+            <div class="navigation-buttons">
+                <button class="nav-button prev" id="prev-button" onclick="previousQuestion()" disabled>Previous</button>
+                <button class="nav-button next" id="next-button" onclick="nextQuestion()">Next</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // Global Variables
+    let sessionConfig = null;
+    let chatType = 'listening';
+    let chatState = {
+        messages: [],
+        responses: {},
+        currentQuestionIndex: 0,
+        startTime: Date.now(),
+        isComplete: false,
+        sentiment: 'neutral',
+        participantId: null
+    };
+
+    // Prevent double initialization
+    let isInitialized = false;
+    
+    // Initialize on page load
+    window.addEventListener('DOMContentLoaded', initializeChat);
+
+    function initializeChat() {
+        // Prevent double initialization
+        if (isInitialized) {
+            console.log('Chat already initialized, skipping...');
+            return;
+        }
+        
+        // Parse URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const sessionId = urlParams.get('session');
+        const typeParam = urlParams.get('type');
+        const chatName = urlParams.get('name');
+        const welcomeMsg = urlParams.get('welcome');
+        const topics = urlParams.get('topics');
+        const questionsParam = urlParams.get('questions');
+
+        if (!sessionId) {
+            showError('Invalid session. Please check your link.');
+            return;
+        }
+
+        // Create session configuration from URL parameters
+        sessionConfig = {
+            id: sessionId,
+            type: typeParam || 'listening',
+            name: chatName || 'Feedback Session',
+            welcomeMessage: welcomeMsg || 'Welcome to this feedback session!',
+            topics: topics ? topics.split(',').map(t => t.trim()) : null,
+            questions: questionsParam ? JSON.parse(decodeURIComponent(questionsParam)) : null
+        };
+        
+        chatType = sessionConfig.type;
+        chatState.participantId = sessionId;
+
+        // Apply organization branding if available
+        applyBranding();
+
+        // Initialize based on chat type
+        setupChatInterface();
+
+        // Hide loading screen and show chat
+        document.getElementById('loading-screen').style.display = 'none';
+        document.getElementById('chat-container').style.display = 'flex';
+
+        // Start the appropriate chat flow
+        startChat();
+        
+        // Mark as initialized to prevent duplicates
+        isInitialized = true;
+    }
+
+    function applyBranding() {
+        // Apply custom colors if configured
+        const orgBranding = localStorage.getItem('orgBranding');
+        if (orgBranding) {
+            const branding = JSON.parse(orgBranding);
+            if (branding.primaryColor) {
+                document.documentElement.style.setProperty('--primary-color', branding.primaryColor);
+            }
+            if (branding.secondaryColor) {
+                document.documentElement.style.setProperty('--secondary-color', branding.secondaryColor);
+            }
+        }
+    }
+
+    function setupChatInterface() {
+        // Set header content
+        document.getElementById('chat-title').textContent = sessionConfig.name || 'Feedback Session';
+        document.getElementById('chat-subtitle').textContent = sessionConfig.welcomeMessage || 'Welcome!';
+
+        // Configure interface based on chat type
+        switch (chatType) {
+            case 'listening':
+                setupListeningInterface();
+                break;
+            case 'chat':
+                setupChatSurveyInterface();
+                break;
+            case 'pulse':
+                setupPulseSurveyInterface();
+                break;
+        }
+
+        // Show session info
+        if (sessionConfig.enableSentiment) {
+            document.getElementById('sentiment-indicator').classList.add('show');
+        }
+
+        // Set session info display
+        const sessionInfo = document.getElementById('session-info');
+        sessionInfo.textContent = chatType.charAt(0).toUpperCase() + chatType.slice(1);
+    }
+
+    function setupListeningInterface() {
+        document.getElementById('input-area').style.display = 'block';
+        
+        // Setup textarea auto-resize
+        const textarea = document.getElementById('user-input');
+        textarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+        });
+
+        // Enter key handling
+        textarea.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+    }
+
+    function setupChatSurveyInterface() {
+        document.getElementById('input-area').style.display = 'block';
+        
+        // Similar to listening but with structured questions
+        const textarea = document.getElementById('user-input');
+        textarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+        });
+
+        textarea.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+    }
+
+    function setupPulseSurveyInterface() {
+        document.getElementById('navigation-area').style.display = 'block';
+        document.getElementById('input-area').style.display = 'none';
+    }
+
+    function startChat() {
+        // Clear any existing messages first
+        const messagesContainer = document.getElementById('chat-messages');
+        messagesContainer.innerHTML = '';
+        
+        // Show welcome message based on chat type
+        setTimeout(() => {
+            const welcomeMsg = sessionConfig.welcomeMessage || "Welcome to this feedback session!";
+            addBotMessage(welcomeMsg);
+            
+            // Handle different chat types
+            if (chatType === 'pulse' && sessionConfig.questions) {
+                // For pulse surveys with specific questions
+                setTimeout(() => {
+                    startPulseSurvey();
+                }, 1500);
+            } else if (chatType === 'chat' && sessionConfig.topics) {
+                // For guided chat with topics
+                setTimeout(() => {
+                    addBotMessage(`I'd like to explore some areas with you: ${sessionConfig.topics.join(', ')}. What would you like to talk about first?`);
+                }, 1500);
+            } else {
+                // For listening chat - just wait for user input
+                setTimeout(() => {
+                    addBotMessage("Feel free to share whatever is on your mind about your work experience.");
+                }, 1500);
+            }
+        }, 1000);
+    }
+
+    function startPulseSurvey() {
+        if (!sessionConfig.questions || sessionConfig.questions.length === 0) {
+            addBotMessage("No questions configured for this survey.");
+            return;
+        }
+        
+        // Start with first question
+        askPulseQuestion(0);
+    }
+    
+    function askPulseQuestion(questionIndex) {
+        if (questionIndex >= sessionConfig.questions.length) {
+            addBotMessage("Thank you for completing the survey! Your responses have been recorded.");
+            return;
+        }
+        
+        const question = sessionConfig.questions[questionIndex];
+        addBotMessage(`${questionIndex + 1}. ${question.text}`);
+        
+        // Add response options based on question type
+        setTimeout(() => {
+            createQuestionInput(question, questionIndex);
+        }, 1000);
+    }
+    
+    function createQuestionInput(question, questionIndex) {
+        const messagesContainer = document.getElementById('chat-messages');
+        const inputDiv = document.createElement('div');
+        inputDiv.className = 'question-input';
+        inputDiv.style.cssText = 'margin: 1rem 0; padding: 1rem; background: #f8f9fa; border-radius: 8px;';
+        
+        if (question.type === 'rating') {
+            // Rating scale 1-5
+            inputDiv.innerHTML = `
+                <div style="display: flex; gap: 1rem; justify-content: center;">
+                    ${[1,2,3,4,5].map(num => `
+                        <button class="rating-btn" data-value="${num}" style="
+                            padding: 0.5rem 1rem; 
+                            border: 1px solid #ccc; 
+                            border-radius: 6px; 
+                            background: white; 
+                            cursor: pointer;
+                        " onclick="submitAnswer(${questionIndex}, ${num})">${num}</button>
+                    `).join('')}
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: #666; margin-top: 0.5rem;">
+                    <span>Poor</span><span>Excellent</span>
+                </div>
+            `;
+        } else if (question.type === 'yes-no') {
+            inputDiv.innerHTML = `
+                <div style="display: flex; gap: 1rem; justify-content: center;">
+                    <button onclick="submitAnswer(${questionIndex}, 'Yes')" style="padding: 0.75rem 1.5rem; border: 1px solid #ccc; border-radius: 6px; background: white; cursor: pointer;">Yes</button>
+                    <button onclick="submitAnswer(${questionIndex}, 'No')" style="padding: 0.75rem 1.5rem; border: 1px solid #ccc; border-radius: 6px; background: white; cursor: pointer;">No</button>
+                </div>
+            `;
+        } else if (question.type === 'multiple-choice' && question.options) {
+            inputDiv.innerHTML = `
+                <div style="display: grid; gap: 0.5rem;">
+                    ${question.options.map((option, i) => `
+                        <button onclick="submitAnswer(${questionIndex}, '${option}')" style="
+                            padding: 0.75rem; 
+                            border: 1px solid #ccc; 
+                            border-radius: 6px; 
+                            background: white; 
+                            cursor: pointer; 
+                            text-align: left;
+                        ">${option}</button>
+                    `).join('')}
+                </div>
+            `;
+        } else {
+            // Text input
+            inputDiv.innerHTML = `
+                <div style="display: flex; gap: 1rem;">
+                    <input type="text" id="text-answer-${questionIndex}" placeholder="Type your answer..." style="
+                        flex: 1; 
+                        padding: 0.75rem; 
+                        border: 1px solid #ccc; 
+                        border-radius: 6px;
+                    ">
+                    <button onclick="submitTextAnswer(${questionIndex})" style="
+                        padding: 0.75rem 1.5rem; 
+                        background: var(--primary-color); 
+                        color: white; 
+                        border: none; 
+                        border-radius: 6px; 
+                        cursor: pointer;
+                    ">Submit</button>
+                </div>
+            `;
+        }
+        
+        messagesContainer.appendChild(inputDiv);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+    
+    function submitAnswer(questionIndex, answer) {
+        // Add user's answer as a message
+        addUserMessage(answer);
+        
+        // Remove the input interface
+        const questionInput = document.querySelector('.question-input');
+        if (questionInput) {
+            questionInput.remove();
+        }
+        
+        // Move to next question
+        setTimeout(() => {
+            askPulseQuestion(questionIndex + 1);
+        }, 1000);
+    }
+    
+    function submitTextAnswer(questionIndex) {
+        const input = document.getElementById(`text-answer-${questionIndex}`);
+        const answer = input.value.trim();
+        
+        if (answer) {
+            submitAnswer(questionIndex, answer);
+        }
+    }
+    
+    function addUserMessage(text) {
+        const messagesContainer = document.getElementById('chat-messages');
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'message user';
+        messageDiv.innerHTML = `<div class="message-content">${text}</div>`;
+        messagesContainer.appendChild(messageDiv);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    function addBotMessage(text) {
+        const messagesContainer = document.getElementById('chat-messages');
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'message bot';
+        messageDiv.innerHTML = `<div class="message-bubble">${text}</div>`;
+        messagesContainer.appendChild(messageDiv);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+        // Add to state
+        chatState.messages.push({ sender: 'bot', text: text, timestamp: Date.now() });
+    }
+
+    function addUserMessage(text) {
+        const messagesContainer = document.getElementById('chat-messages');
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'message user';
+        messageDiv.innerHTML = `<div class="message-bubble">${text}</div>`;
+        messagesContainer.appendChild(messageDiv);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+        // Add to state
+        chatState.messages.push({ sender: 'user', text: text, timestamp: Date.now() });
+
+        // Update sentiment if enabled
+        if (sessionConfig.enableSentiment) {
+            updateSentiment(text);
+        }
+    }
+
+    function sendMessage() {
+        const input = document.getElementById('user-input');
+        const message = input.value.trim();
+
+        if (!message) return;
+
+        // Add user message
+        addUserMessage(message);
+
+        // Clear input
+        input.value = '';
+        input.style.height = 'auto';
+
+        // Show typing indicator
+        showTypingIndicator();
+
+        // Process based on chat type
+        if (chatType === 'listening') {
+            handleListeningResponse(message);
+        } else if (chatType === 'chat') {
+            handleChatSurveyResponse(message);
+        }
+    }
+
+    function handleListeningResponse(message) {
+        // Store response
+        chatState.responses[`response_${Date.now()}`] = message;
+
+        // Simulate AI response
+        setTimeout(() => {
+            hideTypingIndicator();
+            
+            // Generate contextual response
+            const responses = [
+                "Thank you for sharing that. Can you tell me more?",
+                "I understand. What else would you like to add?",
+                "That's valuable feedback. Is there anything else on your mind?",
+                "I appreciate your input. How does that impact your work?",
+                "Interesting point. Could you elaborate on that?"
+            ];
+            
+            const response = responses[Math.floor(Math.random() * responses.length)];
+            addBotMessage(response);
+
+            // Check if conversation should end
+            if (Object.keys(chatState.responses).length >= 5) {
+                setTimeout(() => {
+                    endConversation();
+                }, 2000);
+            }
+        }, 1500);
+    }
+
+    function handleChatSurveyResponse(message) {
+        // Store response for current question
+        if (sessionConfig.template && chatState.currentQuestionIndex < sessionConfig.template.questions.length) {
+            const question = sessionConfig.template.questions[chatState.currentQuestionIndex];
+            chatState.responses[question.id] = message;
+            chatState.currentQuestionIndex++;
+        }
+
+        // Show typing and ask next question
+        setTimeout(() => {
+            hideTypingIndicator();
+            askNextChatQuestion();
+        }, 1500);
+    }
+
+    function askNextChatQuestion() {
+        if (!sessionConfig.template || chatState.currentQuestionIndex >= sessionConfig.template.questions.length) {
+            endConversation();
+            return;
+        }
+
+        const question = sessionConfig.template.questions[chatState.currentQuestionIndex];
+        addBotMessage(question.text);
+        updateProgress();
+    }
+
+    function showPulseQuestion(index) {
+        const messagesContainer = document.getElementById('chat-messages');
+        
+        // Default questions if no template
+        const defaultQuestions = [
+            {
+                id: 'q1',
+                type: 'scale',
+                text: 'How satisfied are you with your current work environment?',
+                scale: 5
+            },
+            {
+                id: 'q2',
+                type: 'multiple-choice',
+                text: 'What best describes your team dynamics?',
+                options: ['Excellent', 'Good', 'Neutral', 'Needs Improvement', 'Poor']
+            },
+            {
+                id: 'q3',
+                type: 'text',
+                text: 'What would you like to see improved?'
+            }
+        ];
+
+        const questions = sessionConfig.template?.questions || defaultQuestions;
+        
+        if (index >= questions.length) {
+            endConversation();
+            return;
+        }
+
+        const question = questions[index];
+        chatState.currentQuestionIndex = index;
+
+        // Clear previous question
+        messagesContainer.innerHTML = '';
+
+        // Create question container
+        const questionDiv = document.createElement('div');
+        questionDiv.className = 'question-container';
+        
+        const questionText = document.createElement('div');
+        questionText.className = 'question-text';
+        questionText.textContent = question.text;
+        questionDiv.appendChild(questionText);
+
+        // Add appropriate input based on question type
+        if (question.type === 'scale') {
+            const scaleContainer = document.createElement('div');
+            scaleContainer.className = 'scale-container';
+            
+            for (let i = 1; i <= (question.scale || 5); i++) {
+                const button = document.createElement('button');
+                button.className = 'scale-button';
+                button.textContent = i;
+                button.onclick = () => selectScale(question.id, i, button);
+                scaleContainer.appendChild(button);
+            }
+            
+            questionDiv.appendChild(scaleContainer);
+        } else if (question.type === 'multiple-choice') {
+            const optionsContainer = document.createElement('div');
+            optionsContainer.className = 'options-container';
+            
+            question.options.forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'option-button';
+                button.textContent = option;
+                button.onclick = () => selectOption(question.id, option, button);
+                optionsContainer.appendChild(button);
+            });
+            
+            questionDiv.appendChild(optionsContainer);
+        } else if (question.type === 'text') {
+            const textarea = document.createElement('textarea');
+            textarea.className = 'form-input';
+            textarea.placeholder = 'Type your answer here...';
+            textarea.rows = 4;
+            textarea.style.width = '100%';
+            textarea.style.marginTop = '1rem';
+            textarea.id = `response_${question.id}`;
+            questionDiv.appendChild(textarea);
+        }
+
+        messagesContainer.appendChild(questionDiv);
+        updateProgress();
+        updateNavigationButtons();
+    }
+
+    function selectScale(questionId, value, button) {
+        // Clear previous selection
+        button.parentElement.querySelectorAll('.scale-button').forEach(btn => {
+            btn.classList.remove('selected');
+        });
+        
+        // Select this button
+        button.classList.add('selected');
+        
+        // Store response
+        chatState.responses[questionId] = value;
+        
+        // Enable next button
+        document.getElementById('next-button').disabled = false;
+    }
+
+    function selectOption(questionId, option, button) {
+        // Clear previous selection
+        button.parentElement.querySelectorAll('.option-button').forEach(btn => {
+            btn.classList.remove('selected');
+        });
+        
+        // Select this button
+        button.classList.add('selected');
+        
+        // Store response
+        chatState.responses[questionId] = option;
+        
+        // Enable next button
+        document.getElementById('next-button').disabled = false;
+    }
+
+    function nextQuestion() {
+        // Save text response if current question is text type
+        const questions = sessionConfig.template?.questions || getDefaultQuestions();
+        const currentQuestion = questions[chatState.currentQuestionIndex];
+        
+        if (currentQuestion.type === 'text') {
+            const textarea = document.getElementById(`response_${currentQuestion.id}`);
+            if (textarea && textarea.value.trim()) {
+                chatState.responses[currentQuestion.id] = textarea.value.trim();
+            }
+        }
+
+        // Move to next question
+        showPulseQuestion(chatState.currentQuestionIndex + 1);
+    }
+
+    function previousQuestion() {
+        if (chatState.currentQuestionIndex > 0) {
+            showPulseQuestion(chatState.currentQuestionIndex - 1);
+        }
+    }
+
+    function updateNavigationButtons() {
+        const prevButton = document.getElementById('prev-button');
+        const nextButton = document.getElementById('next-button');
+        const questions = sessionConfig.template?.questions || getDefaultQuestions();
+        
+        prevButton.disabled = chatState.currentQuestionIndex === 0;
+        
+        // Check if current question has been answered
+        const currentQuestion = questions[chatState.currentQuestionIndex];
+        const hasResponse = chatState.responses[currentQuestion.id] !== undefined;
+        
+        if (chatState.currentQuestionIndex === questions.length - 1) {
+            nextButton.textContent = 'Submit';
+        } else {
+            nextButton.textContent = 'Next';
+        }
+        
+        // Disable next if no response for required questions
+        if (currentQuestion.type !== 'text') {
+            nextButton.disabled = !hasResponse;
+        }
+    }
+
+    function getDefaultQuestions() {
+        return [
+            {
+                id: 'q1',
+                type: 'scale',
+                text: 'How satisfied are you with your current work environment?',
+                scale: 5
+            },
+            {
+                id: 'q2',
+                type: 'multiple-choice',
+                text: 'What best describes your team dynamics?',
+                options: ['Excellent', 'Good', 'Neutral', 'Needs Improvement', 'Poor']
+            },
+            {
+                id: 'q3',
+                type: 'text',
+                text: 'What would you like to see improved?'
+            }
+        ];
+    }
+
+    function updateProgress() {
+        const progressFill = document.getElementById('progress-fill');
+        const questions = sessionConfig.template?.questions || getDefaultQuestions();
+        const progress = ((chatState.currentQuestionIndex + 1) / questions.length) * 100;
+        progressFill.style.width = progress + '%';
+    }
+
+    function updateSentiment(text) {
+        // Simple sentiment analysis (in real app, would use AI)
+        const positiveWords = ['good', 'great', 'excellent', 'happy', 'satisfied', 'love', 'awesome'];
+        const negativeWords = ['bad', 'poor', 'terrible', 'unhappy', 'dissatisfied', 'hate', 'awful'];
+        
+        const textLower = text.toLowerCase();
+        let sentiment = 'neutral';
+        
+        if (positiveWords.some(word => textLower.includes(word))) {
+            sentiment = 'positive';
+        } else if (negativeWords.some(word => textLower.includes(word))) {
+            sentiment = 'negative';
+        }
+        
+        chatState.sentiment = sentiment;
+        
+        const sentimentValue = document.getElementById('sentiment-value');
+        sentimentValue.textContent = sentiment.charAt(0).toUpperCase() + sentiment.slice(1);
+        sentimentValue.className = `sentiment-value sentiment-${sentiment}`;
+    }
+
+    function showTypingIndicator() {
+        document.getElementById('typing-indicator').classList.add('show');
+        const container = document.getElementById('chat-messages');
+        container.scrollTop = container.scrollHeight;
+    }
+
+    function hideTypingIndicator() {
+        document.getElementById('typing-indicator').classList.remove('show');
+    }
+
+    async function endConversation() {
+        // Save session data
+        const sessionData = {
+            sessionId: sessionConfig.id,
+            chatType: chatType,
+            responses: chatState.responses,
+            messages: chatState.messages,
+            sentiment: chatState.sentiment,
+            duration: Date.now() - chatState.startTime,
+            completedAt: new Date().toISOString(),
+            participantId: chatState.participantId
+        };
+
+        // Save to database
+        try {
+            const responseData = {
+                survey_id: sessionConfig.id, // Using sessionId as survey identifier
+                respondent_email: chatState.participantId || 'anonymous',
+                responses: chatState.responses
+            };
+            
+            // Save survey response to database
+            const savedResponse = await saveSurveyResponse(responseData);
+            console.log('Chat response saved to database:', savedResponse);
+        } catch (error) {
+            console.error('Error saving chat response to database:', error);
+            // Continue with local storage as fallback
+        }
+
+        // Store completed session (local fallback)
+        const completedSessions = JSON.parse(localStorage.getItem('completedSessions') || '[]');
+        completedSessions.push(sessionData);
+        localStorage.setItem('completedSessions', JSON.stringify(completedSessions));
+
+        // Update widget response count
+        const widgets = JSON.parse(localStorage.getItem('activeWidgets') || '[]');
+        const widget = widgets.find(w => w.id === sessionConfig.id);
+        if (widget) {
+            widget.responses = (widget.responses || 0) + 1;
+            widget.lastActivity = 'Just now';
+            localStorage.setItem('activeWidgets', JSON.stringify(widgets));
+        }
+
+        // Show completion screen
+        document.getElementById('chat-messages').style.display = 'none';
+        document.getElementById('input-area').style.display = 'none';
+        document.getElementById('navigation-area').style.display = 'none';
+        document.getElementById('sentiment-indicator').style.display = 'none';
+        
+        const completionMessage = sessionConfig.closingMessage || 
+            'Thank you for your valuable feedback! Your responses have been recorded.';
+        document.getElementById('completion-message').textContent = completionMessage;
+        document.getElementById('completion-screen').classList.add('show');
+    }
+
+    function showError(message) {
+        document.getElementById('loading-screen').innerHTML = `
+            <div style="text-align: center; color: white;">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">⚠️</div>
+                <div style="font-size: 1.25rem; margin-bottom: 1rem;">Error</div>
+                <div>${message}</div>
+            </div>
+        `;
+    }
+    </script>
+</body>
+</html>
