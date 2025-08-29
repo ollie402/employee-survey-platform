@@ -748,97 +748,6 @@
             margin-right: 2rem;
         }
 
-        /* Enhanced Chat Management Styles */
-        .stat-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.25rem;
-            margin-right: 1rem;
-            flex-shrink: 0;
-        }
-
-        .stat-change {
-            font-size: 0.75rem;
-            margin-top: 0.25rem;
-        }
-
-        .stat-change.positive {
-            color: #10b981;
-        }
-
-        .stat-change.negative {
-            color: #dc2626;
-        }
-
-        .chat-widget-card {
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .chat-widget-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-        }
-
-        .chat-widget-card.active::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: linear-gradient(90deg, #10b981, #059669);
-        }
-
-        .dropdown-menu {
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.2s ease;
-            transform: translateY(-5px);
-        }
-
-        .dropdown-menu.show {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
-        }
-
-        .dropdown-menu a:hover {
-            background-color: #f3f4f6;
-        }
-
-        @keyframes pulse {
-            0%, 100% {
-                opacity: 1;
-            }
-            50% {
-                opacity: 0.6;
-            }
-        }
-
-        .template-card {
-            transition: all 0.2s ease;
-        }
-
-        .template-card:hover {
-            transform: translateY(-1px);
-            border-color: var(--primary-color);
-        }
-
-        /* Activity feed styles */
-        .activity-item {
-            transition: all 0.2s ease;
-        }
-
-        .activity-item:hover {
-            background-color: rgba(59, 130, 246, 0.05);
-        }
-
         .chat-preview-message.user {
             background: #f0f9ff;
             border: 1px solid #bfdbfe;
@@ -2123,26 +2032,57 @@
                             <div>
                                 <button class="btn btn-secondary" onclick="manageChatSettings()">Settings</button>
                                 <button class="btn btn-primary" onclick="createNewChatWidget()">Create Chat Widget</button>
+                                <button class="btn btn-primary" onclick="createChatTemplate()">Create Template</button>
                             </div>
                         </div>
 
-                        <div class="card">
-                            <div class="card-header">
-                                <h4>Active Chats</h4>
-                                <small style="color: var(--text-secondary);">Currently active chat sessions</small>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h4>Active Chat Widgets</h4>
+                                </div>
+                                <div style="display: grid; gap: 1rem;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; border: 1px solid var(--border-color); border-radius: 8px;">
+                                        <div>
+                                            <strong>General Feedback</strong><br>
+                                            <small style="color: var(--text-secondary);">Website footer widget</small>
+                                        </div>
+                                        <div style="display: flex; gap: 0.5rem;">
+                                            <button class="btn btn-secondary btn-sm">Edit</button>
+                                            <button class="btn btn-danger btn-sm">Delete</button>
+                                        </div>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; border: 1px solid var(--border-color); border-radius: 8px;">
+                                        <div>
+                                            <strong>Support Chat</strong><br>
+                                            <small style="color: var(--text-secondary);">Help page widget</small>
+                                        </div>
+                                        <div style="display: flex; gap: 0.5rem;">
+                                            <button class="btn btn-secondary btn-sm">Edit</button>
+                                            <button class="btn btn-danger btn-sm">Delete</button>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            
-                            <!-- Empty state for now -->
-                            <div style="text-align: center; padding: 3rem; color: var(--text-secondary);">
-                                <div style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;">💬</div>
-                                <h3 style="margin-bottom: 0.5rem;">No Active Chats</h3>
-                                <p style="margin-bottom: 2rem;">Active chat sessions will appear here when users start conversations.</p>
-                                <button class="btn btn-primary" onclick="createNewChatWidget()">Create Your First Chat Widget</button>
-                            </div>
-                            
-                            <!-- This is where active chats will be listed when they exist -->
-                            <div id="active-chats-list" style="display: none;">
-                                <!-- Chat items will be dynamically added here -->
+
+                            <div class="card">
+                                <div class="card-header">
+                                    <h4>Chat Templates</h4>
+                                </div>
+                                <div style="display: grid; gap: 1rem;">
+                                    <div style="padding: 1rem; border: 1px solid var(--border-color); border-radius: 8px;">
+                                        <strong>Customer Satisfaction</strong><br>
+                                        <small style="color: var(--text-secondary);">5 questions • Rating scale</small>
+                                    </div>
+                                    <div style="padding: 1rem; border: 1px solid var(--border-color); border-radius: 8px;">
+                                        <strong>Product Feedback</strong><br>
+                                        <small style="color: var(--text-secondary);">3 questions • Open text</small>
+                                    </div>
+                                    <div style="padding: 1rem; border: 1px solid var(--border-color); border-radius: 8px;">
+                                        <strong>Support Experience</strong><br>
+                                        <small style="color: var(--text-secondary);">4 questions • Mixed format</small>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -3021,609 +2961,431 @@ if (!window.chatTemplates) {
 
 // UPDATE createNewChatWidget() function to include template selection
 function createNewChatWidget() {
+    // Load available templates
+    const templates = window.chatTemplates?.filter(t => t.status === 'active') || [];
+    
     const modal = document.createElement('div');
     modal.className = 'modal';
     modal.innerHTML = `
-        <div class="modal-content" style="max-width: 500px;">
+        <div class="modal-content" style="max-width: 700px;">
             <div class="modal-header">
                 <h3>Create Chat Widget</h3>
                 <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
             </div>
-            
-            <div style="padding: 1.5rem;">
-                <h4 style="margin-bottom: 1.5rem; text-align: center; color: var(--text-primary);">Choose Chat Type</h4>
-                
-                <div class="chat-type-options" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-bottom: 2rem;">
-                    <div class="chat-type-option" onclick="selectChatType(this, 'listening')" style="padding: 1.5rem; border: 2px solid var(--border-color); border-radius: 12px; cursor: pointer; transition: all 0.2s; text-align: center;">
-                        <input type="radio" name="chatType" value="listening" style="display: none;">
-                        <div style="font-size: 2rem; margin-bottom: 0.5rem;">👂</div>
-                        <h5 style="margin: 0;">Listening</h5>
-                    </div>
-                    
-                    <div class="chat-type-option" onclick="selectChatType(this, 'chat')" style="padding: 1.5rem; border: 2px solid var(--border-color); border-radius: 12px; cursor: pointer; transition: all 0.2s; text-align: center;">
-                        <input type="radio" name="chatType" value="chat" style="display: none;">
-                        <div style="font-size: 2rem; margin-bottom: 0.5rem;">💬</div>
-                        <h5 style="margin: 0;">Chat</h5>
-                    </div>
-                    
-                    <div class="chat-type-option" onclick="selectChatType(this, 'pulse')" style="padding: 1.5rem; border: 2px solid var(--border-color); border-radius: 12px; cursor: pointer; transition: all 0.2s; text-align: center;">
-                        <input type="radio" name="chatType" value="pulse" style="display: none;">
-                        <div style="font-size: 2rem; margin-bottom: 0.5rem;">📊</div>
-                        <h5 style="margin: 0;">Pulse</h5>
-                    </div>
-                </div>
-                
-                <div style="display: flex; gap: 1rem; justify-content: flex-end;">
-                    <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').remove()">Cancel</button>
-                    <button type="button" class="btn btn-primary" id="next-btn" onclick="proceedToChatSetup()" disabled>Next</button>
-                </div>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(modal);
-}
-
-// Select chat type function
-function selectChatType(element, type) {
-    // Remove selection from all options
-    document.querySelectorAll('.chat-type-option').forEach(option => {
-        option.style.borderColor = 'var(--border-color)';
-        option.style.backgroundColor = 'transparent';
-    });
-    
-    // Select the clicked option
-    element.style.borderColor = 'var(--primary-color)';
-    element.style.backgroundColor = '#f0f9ff';
-    
-    // Check the radio button
-    const radio = element.querySelector('input[type="radio"]');
-    radio.checked = true;
-    
-    // Enable the Next button
-    document.getElementById('next-btn').disabled = false;
-}
-
-// Proceed to chat setup based on selected type
-function proceedToChatSetup() {
-    const selectedType = document.querySelector('input[name="chatType"]:checked');
-    
-    if (!selectedType) {
-        showToast('Please select a chat type', 'warning');
-        return;
-    }
-    
-    const chatType = selectedType.value;
-    
-    // Close current modal
-    document.querySelector('.modal').remove();
-    
-    // Show the appropriate setup page based on chat type
-    switch(chatType) {
-        case 'listening':
-            showListeningSetup();
-            break;
-        case 'chat':
-            showChatSetup();
-            break;
-        case 'pulse':
-            showPulseSetup();
-            break;
-        default:
-            showToast('Invalid chat type selected', 'error');
-    }
-}
-
-// Setup functions for each chat type
-function showListeningSetup() {
-    const modal = document.createElement('div');
-    modal.className = 'modal';
-    modal.innerHTML = `
-        <div class="modal-content" style="max-width: 600px;">
-            <div class="modal-header">
-                <h3>👂 Listening Chat Setup</h3>
-                <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
-            </div>
-            
-            <form onsubmit="generateListeningChatLink(event)">
-                <div style="padding: 1.5rem;">
-                    <div class="form-group">
-                        <label class="form-label">Chat Name</label>
-                        <input type="text" id="listening-chat-name" class="form-input" required 
-                               placeholder="e.g., General Feedback, Customer Insights">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">Welcome Messages</label>
-                        <textarea id="listening-welcome-msg" class="form-input" rows="4" 
-                                  placeholder="Enter welcome messages that users will see when they start the chat...">Hi! Thanks for taking the time to share your feedback with us. Please feel free to tell us about your experience or any suggestions you might have.</textarea>
-                        <small class="form-help">This message will appear when users first open the chat</small>
-                    </div>
-                    
-                    <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
-                        <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').remove()">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Generate Link</button>
-                    </div>
-                </div>
-            </form>
-        </div>
-    `;
-    document.body.appendChild(modal);
-    
-    // Focus on the chat name input
-    setTimeout(() => {
-        document.getElementById('listening-chat-name').focus();
-    }, 100);
-}
-
-// Generate listening chat link
-function generateListeningChatLink(event) {
-    event.preventDefault();
-    
-    const chatName = document.getElementById('listening-chat-name').value;
-    const welcomeMsg = document.getElementById('listening-welcome-msg').value;
-    
-    // Generate unique session ID for listening chat
-    const sessionId = 'listening_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-    
-    // Create URL parameters
-    const params = new URLSearchParams({
-        session: sessionId,
-        type: 'listening',
-        name: chatName,
-        welcome: welcomeMsg
-    });
-    
-    // Generate the link
-    const chatLink = window.location.origin + '/chat.html?' + params.toString();
-    
-    // Close current modal
-    document.querySelector('.modal').remove();
-    
-    // Show success modal with link
-    showListeningLinkModal({
-        id: sessionId,
-        name: chatName,
-        welcome: welcomeMsg,
-        link: chatLink,
-        created: new Date().toISOString()
-    });
-}
-
-// Show modal with generated listening chat link
-function showListeningLinkModal(chatData) {
-    const modal = document.createElement('div');
-    modal.className = 'modal';
-    modal.innerHTML = `
-        <div class="modal-content" style="max-width: 700px;">
-            <div class="modal-header">
-                <h3>🎉 Listening Chat Created!</h3>
-                <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
-            </div>
-            
-            <div style="padding: 1.5rem;">
-                <div style="background: #dcfce7; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; border-left: 4px solid #10b981;">
-                    <h4 style="margin-bottom: 0.5rem; color: #166534;">✅ "${chatData.name}" is ready!</h4>
-                    <p style="color: #166534; margin: 0; font-size: 0.9rem;">Your listening chat has been created and is ready to collect feedback.</p>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Your Chat Link</label>
-                    <div style="display: flex; gap: 0.5rem; align-items: center;">
-                        <input type="text" class="form-input" value="${chatData.link}" readonly id="generated-link" style="flex: 1;">
-                        <button class="btn btn-secondary" onclick="copyToClipboard('generated-link')" style="white-space: nowrap;">Copy Link</button>
-                    </div>
-                    <small class="form-help">Share this link with your audience to start collecting feedback</small>
-                </div>
-                
-                <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin: 1rem 0;">
-                    <h5 style="margin-bottom: 0.75rem;">💡 Next Steps:</h5>
-                    <ul style="margin: 0; padding-left: 1.5rem; font-size: 0.9rem;">
-                        <li>Copy and share the link with your audience</li>
-                        <li>Monitor responses in the Active Chats section</li>
-                        <li>View analytics and insights as feedback comes in</li>
-                    </ul>
-                </div>
-                
-                <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem;">
-                    <button class="btn btn-secondary" onclick="this.closest('.modal').remove()">Close</button>
-                    <button class="btn btn-primary" onclick="testChatLink('${chatData.link}')">Test Chat</button>
-                </div>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(modal);
-    
-    // Auto-select the link text for easy copying
-    setTimeout(() => {
-        document.getElementById('generated-link').select();
-    }, 100);
-}
-
-// Copy to clipboard function
-function copyToClipboard(elementId) {
-    const element = document.getElementById(elementId);
-    element.select();
-    element.setSelectionRange(0, 99999);
-    navigator.clipboard.writeText(element.value).then(() => {
-        showToast('Link copied to clipboard!', 'success');
-    });
-}
-
-// Test chat link function
-function testChatLink(link) {
-    window.open(link, '_blank');
-}
-
-function showChatSetup() {
-    const modal = document.createElement('div');
-    modal.className = 'modal';
-    modal.innerHTML = `
-        <div class="modal-content" style="max-width: 600px;">
-            <div class="modal-header">
-                <h3>💬 Chat Setup</h3>
-                <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
-            </div>
-            
             <form onsubmit="generateChatLink(event)">
-                <div style="padding: 1.5rem;">
-                    <div class="form-group">
-                        <label class="form-label">Chat Name</label>
-                        <input type="text" id="chat-name" class="form-input" required 
-                               placeholder="e.g., Employee Wellbeing Check, Team Feedback">
-                    </div>
+                <!-- Template Selection - NEW SECTION -->
+                <div style="background: #e6fffa; padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem; border: 2px solid #5eead4;">
+                    <h4 style="margin-bottom: 1rem; color: #0f766e;">🎯 Template Selection (Optional)</h4>
                     
                     <div class="form-group">
-                        <label class="form-label">Welcome Messages</label>
-                        <textarea id="chat-welcome-msg" class="form-input" rows="4" 
-                                  placeholder="Enter welcome messages that users will see when they start the chat...">Hi! I'm here to have a conversation with you about your work experience. Please feel free to share your thoughts and experiences with me.</textarea>
-                        <small class="form-help">This message will appear when users first open the chat</small>
+                        <label class="form-label">Use a Question Template</label>
+                        <select id="chat-template-select" class="form-select" onchange="loadSelectedTemplate(this.value)">
+                            <option value="">No template - Free conversation</option>
+                            ${templates.length > 0 ? `
+                                <optgroup label="Available Templates">
+                                    ${templates.map(t => `
+                                        <option value="${t.id}" data-questions="${t.questions.length}" data-time="${t.estimatedTime}">
+                                            ${t.name} (${t.questions.length} questions, ~${t.estimatedTime} min)
+                                        </option>
+                                    `).join('')}
+                                </optgroup>
+                            ` : ''}
+                        </select>
                     </div>
                     
-                    <div class="form-group">
-                        <label class="form-label">Work-Life Topics</label>
-                        <textarea id="chat-topics" class="form-input" rows="3" 
-                                  placeholder="Enter topics the AI should naturally work into conversations (e.g., finance, mental health, work-life balance, career development...)">finance, mental health, work-life balance</textarea>
-                        <small class="form-help">The AI will naturally weave these topics into conversations, not as direct questions but as discussion areas</small>
+                    <div id="template-info" style="display: none; margin-top: 1rem; padding: 1rem; background: white; border-radius: 6px;">
+                        <!-- Template details will appear here when selected -->
                     </div>
                     
-                    <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
-                        <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').remove()">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Generate Link</button>
+                    <div style="margin-top: 1rem; display: flex; gap: 0.5rem;">
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="createChatTemplate()">
+                            📝 Create New Template
+                        </button>
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="manageTemplates()">
+                            ⚙️ Manage Templates
+                        </button>
                     </div>
                 </div>
-            </form>
-        </div>
-    `;
-    document.body.appendChild(modal);
-    
-    // Focus on the chat name input
-    setTimeout(() => {
-        document.getElementById('chat-name').focus();
-    }, 100);
-}
 
-// Generate chat link with topics
-function generateChatLink(event) {
-    event.preventDefault();
-    
-    const chatName = document.getElementById('chat-name').value;
-    const welcomeMsg = document.getElementById('chat-welcome-msg').value;
-    const topics = document.getElementById('chat-topics').value;
-    
-    // Generate unique session ID for chat
-    const sessionId = 'chat_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-    
-    // Create URL parameters
-    const params = new URLSearchParams({
-        session: sessionId,
-        type: 'chat',
-        name: chatName,
-        welcome: welcomeMsg,
-        topics: topics
-    });
-    
-    // Generate the link
-    const chatLink = window.location.origin + '/chat.html?' + params.toString();
-    
-    // Close current modal
-    document.querySelector('.modal').remove();
-    
-    // Show success modal with link
-    showChatLinkModal({
-        id: sessionId,
-        name: chatName,
-        welcome: welcomeMsg,
-        topics: topics,
-        link: chatLink,
-        created: new Date().toISOString()
-    });
-}
+                <!-- Chat Type Selection -->
+                <div class="form-group" style="background: var(--bg-secondary); padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem;">
+                    <label class="form-label" style="font-weight: bold; margin-bottom: 1rem; display: block;">
+                        Choose Chat Type
+                    </label>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+                        <label class="chat-type-option" style="
+                            display: flex;
+                            flex-direction: column;
+                            padding: 1rem;
+                            border: 2px solid var(--border-color);
+                            border-radius: 8px;
+                            cursor: pointer;
+                            transition: all 0.3s;
+                            background: white;
+                        " onmouseover="this.style.borderColor='var(--primary-color)'" 
+                           onmouseout="this.style.borderColor=document.getElementById('chat-type-listening').checked ? 'var(--primary-color)' : 'var(--border-color)'">
+                            <input type="radio" name="chatType" id="chat-type-listening" value="listening" checked 
+                                   onchange="toggleChatTypeFields()" style="margin-bottom: 0.5rem;">
+                            <div style="font-weight: 600; margin-bottom: 0.5rem;">👂 Listening</div>
+                            <div style="font-size: 0.875rem; color: var(--text-secondary);">
+                                • Continuous listening mode<br>
+                                • Open-ended conversations<br>
+                                • Real-time insights<br>
+                                • Perfect for ongoing feedback
+                            </div>
+                        </label>
+                        
+                        <label class="chat-type-option" style="
+                            display: flex;
+                            flex-direction: column;
+                            padding: 1rem;
+                            border: 2px solid var(--border-color);
+                            border-radius: 8px;
+                            cursor: pointer;
+                            transition: all 0.3s;
+                            background: white;
+                        " onmouseover="this.style.borderColor='var(--primary-color)'" 
+                           onmouseout="this.style.borderColor=document.getElementById('chat-type-chat-survey').checked ? 'var(--primary-color)' : 'var(--border-color)'">
+                            <input type="radio" name="chatType" id="chat-type-chat-survey" value="chat-survey" 
+                                   onchange="toggleChatTypeFields()" style="margin-bottom: 0.5rem;">
+                            <div style="font-weight: 600; margin-bottom: 0.5rem;">💬 Chat Survey</div>
+                            <div style="font-size: 0.875rem; color: var(--text-secondary);">
+                                • Structured conversation flow<br>
+                                • Guided question sequence<br>
+                                • Interactive survey format<br>
+                                • Perfect for detailed feedback
+                            </div>
+                        </label>
+                        
+                        <label class="chat-type-option" style="
+                            display: flex;
+                            flex-direction: column;
+                            padding: 1rem;
+                            border: 2px solid var(--border-color);
+                            border-radius: 8px;
+                            cursor: pointer;
+                            transition: all 0.3s;
+                            background: white;
+                        " onmouseover="this.style.borderColor='var(--primary-color)'" 
+                           onmouseout="this.style.borderColor=document.getElementById('chat-type-pulse-survey').checked ? 'var(--primary-color)' : 'var(--border-color)'">
+                            <input type="radio" name="chatType" id="chat-type-pulse-survey" value="pulse-survey" 
+                                   onchange="toggleChatTypeFields()" style="margin-bottom: 0.5rem;">
+                            <div style="font-weight: 600; margin-bottom: 0.5rem;">📊 Pulse Survey</div>
+                            <div style="font-size: 0.875rem; color: var(--text-secondary);">
+                                • Quick pulse check format<br>
+                                • Short focused questions<br>
+                                • Regular interval surveys<br>
+                                • Perfect for team temperature
+                            </div>
+                        </label>
+                    </div>
+                </div>
 
-// Show modal with generated chat link
-function showChatLinkModal(chatData) {
-    const modal = document.createElement('div');
-    modal.className = 'modal';
-    modal.innerHTML = `
-        <div class="modal-content" style="max-width: 700px;">
-            <div class="modal-header">
-                <h3>🎉 Chat Created!</h3>
-                <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
-            </div>
-            
-            <div style="padding: 1.5rem;">
-                <div style="background: #dcfce7; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; border-left: 4px solid #10b981;">
-                    <h4 style="margin-bottom: 0.5rem; color: #166534;">✅ "${chatData.name}" is ready!</h4>
-                    <p style="color: #166534; margin: 0; font-size: 0.9rem;">Your chat is ready with AI guidance on: <strong>${chatData.topics}</strong></p>
+                <!-- Basic Information -->
+                <div class="form-group">
+                    <label class="form-label">Chat Session Name</label>
+                    <input type="text" id="chat-session-name" class="form-input" required 
+                           placeholder="e.g., Q4 Employee Feedback">
                 </div>
                 
                 <div class="form-group">
-                    <label class="form-label">Your Chat Link</label>
-                    <div style="display: flex; gap: 0.5rem; align-items: center;">
-                        <input type="text" class="form-input" value="${chatData.link}" readonly id="generated-chat-link" style="flex: 1;">
-                        <button class="btn btn-secondary" onclick="copyToClipboard('generated-chat-link')" style="white-space: nowrap;">Copy Link</button>
-                    </div>
-                    <small class="form-help">Share this link with your audience to start guided conversations</small>
+                    <label class="form-label">Welcome Message</label>
+                    <textarea id="chat-welcome-msg" class="form-input" rows="3" 
+                              placeholder="Welcome! Please share your feedback with us...">Welcome to our feedback chat! Your insights help us improve.</textarea>
                 </div>
-                
-                <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin: 1rem 0;">
-                    <h5 style="margin-bottom: 0.75rem;">🤖 AI Conversation Topics:</h5>
-                    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem;">
-                        ${chatData.topics.split(',').map(topic => `
-                            <span style="padding: 0.25rem 0.75rem; background: #e0f2fe; color: #0369a1; border-radius: 12px; font-size: 0.85rem;">${topic.trim()}</span>
-                        `).join('')}
-                    </div>
-                    <p style="font-size: 0.9rem; color: var(--text-secondary); margin: 0;">The AI will naturally guide conversations to explore these areas of work-life experience.</p>
-                </div>
-                
-                <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem;">
-                    <button class="btn btn-secondary" onclick="this.closest('.modal').remove()">Close</button>
-                    <button class="btn btn-primary" onclick="testChatLink('${chatData.link}')">Test Chat</button>
-                </div>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(modal);
-    
-    // Auto-select the link text for easy copying
-    setTimeout(() => {
-        document.getElementById('generated-chat-link').select();
-    }, 100);
-}
 
-function showPulseSetup() {
-    const modal = document.createElement('div');
-    modal.className = 'modal';
-    modal.innerHTML = `
-        <div class="modal-content" style="max-width: 700px;">
-            <div class="modal-header">
-                <h3>📊 Pulse Survey Setup</h3>
-                <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
-            </div>
-            
-            <form onsubmit="generatePulseLink(event)">
-                <div style="padding: 1.5rem;">
-                    <div class="form-group">
-                        <label class="form-label">Survey Name</label>
-                        <input type="text" id="pulse-name" class="form-input" required 
-                               placeholder="e.g., Weekly Team Pulse, Employee Satisfaction Check">
+                <!-- Continuous Chat Options (shown by default) -->
+                <div id="continuous-chat-options">
+                    <div style="background: #f0f9ff; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                        <div style="font-weight: 600; color: var(--primary-color); margin-bottom: 0.5rem;">
+                            ℹ️ Continuous Chat Settings
+                        </div>
+                        <div style="font-size: 0.875rem; color: var(--text-secondary);">
+                            This will create a single link that can be shared with unlimited participants.
+                        </div>
                     </div>
                     
                     <div class="form-group">
-                        <label class="form-label">Welcome Messages</label>
-                        <textarea id="pulse-welcome-msg" class="form-input" rows="4" 
-                                  placeholder="Enter welcome messages that users will see when they start the survey...">Hi! I'd like to ask you a few quick questions to get a pulse on how things are going. This should only take a few minutes.</textarea>
-                        <small class="form-help">This message will appear when users first open the chat</small>
+                        <label class="form-label">Chat Expiry</label>
+                        <select id="chat-expiry" class="form-select">
+                            <option value="never">Never Expire</option>
+                            <option value="24h">24 Hours</option>
+                            <option value="7d" selected>7 Days</option>
+                            <option value="30d">30 Days</option>
+                            <option value="90d">90 Days</option>
+                        </select>
                     </div>
                     
                     <div class="form-group">
-                        <label class="form-label">Survey Questions</label>
-                        <div id="pulse-questions-container">
-                            <div class="question-item" style="border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
-                                <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
-                                    <input type="text" class="form-input question-text" placeholder="Enter your question..." style="flex: 2;" value="How satisfied are you with your current workload?">
-                                    <select class="form-select question-type" style="flex: 1;">
-                                        <option value="rating">Rating Scale (1-5)</option>
-                                        <option value="yes-no">Yes/No</option>
-                                        <option value="multiple-choice">Multiple Choice</option>
-                                        <option value="text">Open Text</option>
-                                    </select>
-                                    <button type="button" class="btn btn-danger btn-sm" onclick="removeQuestion(this)">×</button>
-                                </div>
-                                <div class="question-options" style="display: none;">
-                                    <label class="form-label" style="font-size: 0.85rem;">Options (one per line):</label>
-                                    <textarea class="form-input options-text" rows="3" placeholder="Option 1&#10;Option 2&#10;Option 3"></textarea>
-                                </div>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="chat-anonymous" checked>
+                            Allow completely anonymous responses (no tracking)
+                        </label>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="chat-optional-email">
+                            Make email optional (for follow-up purposes)
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Personal Chat Options (hidden by default) -->
+                <div id="personal-chat-options" style="display: none;">
+                    <div style="background: #fef3c7; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                        <div style="font-weight: 600; color: #92400e; margin-bottom: 0.5rem;">
+                            ⚠️ Personal Chat Settings
+                        </div>
+                        <div style="font-size: 0.875rem; color: #92400e;">
+                            You'll need to provide participant details to generate individual links.
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Participant Management</label>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <button type="button" class="btn btn-secondary" onclick="showAddParticipantsModal()">
+                                📋 Add Participants List
+                            </button>
+                            <button type="button" class="btn btn-secondary" onclick="importParticipantsCSV()">
+                                📥 Import from CSV
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Participants Added</label>
+                        <div id="participants-count" style="padding: 1rem; background: var(--bg-secondary); border-radius: 8px;">
+                            <span id="participant-count-text">No participants added yet</span>
+                            <div id="participants-preview" style="margin-top: 0.5rem; display: none;">
+                                <small style="color: var(--text-secondary);">Preview: <span id="preview-list"></span></small>
                             </div>
                         </div>
-                        <button type="button" class="btn btn-secondary" onclick="addPulseQuestion()">+ Add Question</button>
                     </div>
                     
-                    <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
-                        <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').remove()">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Generate Survey Link</button>
+                    <div class="form-group">
+                        <label class="form-label">Link Expiry (per participant)</label>
+                        <select id="personal-chat-expiry" class="form-select">
+                            <option value="7d">7 Days</option>
+                            <option value="14d" selected>14 Days</option>
+                            <option value="30d">30 Days</option>
+                            <option value="90d">90 Days</option>
+                            <option value="never">Never Expire</option>
+                        </select>
                     </div>
+                    
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="send-email-invites" checked>
+                            Send email invitations to all participants
+                        </label>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="track-responses" checked>
+                            Track who has responded
+                        </label>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="allow-multiple-responses">
+                            Allow participants to submit multiple responses
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Common Settings -->
+                <div style="border-top: 1px solid var(--border-color); margin-top: 1.5rem; padding-top: 1.5rem;">
+                    <h4 style="margin-bottom: 1rem;">Additional Settings</h4>
+                    
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="show-progress" checked>
+                            Show progress indicator in chat
+                        </label>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="enable-notifications" checked>
+                            Send me notifications for new responses
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Hidden field to store selected template data -->
+                <input type="hidden" id="selected-template-data" value="">
+
+                <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
+                    <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').remove()">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="generate-chat-btn">
+                        <span id="btn-text">Generate Link</span>
+                    </button>
                 </div>
             </form>
         </div>
     `;
     document.body.appendChild(modal);
     
-    // Add event listeners for question type changes
-    setupQuestionTypeListeners();
-    
-    // Focus on the survey name input
-    setTimeout(() => {
-        document.getElementById('pulse-name').focus();
-    }, 100);
+    // Update the radio button styling when selected
+    updateChatTypeSelection();
 }
 
-// Setup event listeners for question type changes
-function setupQuestionTypeListeners() {
-    document.querySelectorAll('.question-type').forEach(select => {
-        select.addEventListener('change', function() {
-            const optionsDiv = this.closest('.question-item').querySelector('.question-options');
-            if (this.value === 'multiple-choice') {
-                optionsDiv.style.display = 'block';
-            } else {
-                optionsDiv.style.display = 'none';
-            }
-        });
+// New function to toggle fields based on chat type selection
+function toggleChatTypeFields() {
+    const chatType = document.querySelector('input[name="chatType"]:checked').value;
+    const continuousOptions = document.getElementById('continuous-chat-options');
+    const personalOptions = document.getElementById('personal-chat-options');
+    const generateBtn = document.getElementById('generate-chat-btn');
+    const btnText = document.getElementById('btn-text');
+    
+    if (chatType === 'continuous') {
+        continuousOptions.style.display = 'block';
+        personalOptions.style.display = 'none';
+        btnText.textContent = 'Generate Link';
+    } else {
+        continuousOptions.style.display = 'none';
+        personalOptions.style.display = 'block';
+        btnText.textContent = 'Generate Personal Links';
+    }
+    
+    updateChatTypeSelection();
+}
+
+// Update visual selection of chat type
+function updateChatTypeSelection() {
+    const options = document.querySelectorAll('.chat-type-option');
+    options.forEach(option => {
+        const radio = option.querySelector('input[type="radio"]');
+        if (radio.checked) {
+            option.style.borderColor = 'var(--primary-color)';
+            option.style.background = '#f0f9ff';
+        } else {
+            option.style.borderColor = 'var(--border-color)';
+            option.style.background = 'white';
+        }
     });
 }
 
-// Add new question to pulse survey
-function addPulseQuestion() {
-    const container = document.getElementById('pulse-questions-container');
-    const questionItem = document.createElement('div');
-    questionItem.className = 'question-item';
-    questionItem.style.cssText = 'border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; margin-bottom: 1rem;';
-    
-    questionItem.innerHTML = `
-        <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
-            <input type="text" class="form-input question-text" placeholder="Enter your question..." style="flex: 2;">
-            <select class="form-select question-type" style="flex: 1;">
-                <option value="rating">Rating Scale (1-5)</option>
-                <option value="yes-no">Yes/No</option>
-                <option value="multiple-choice">Multiple Choice</option>
-                <option value="text">Open Text</option>
-            </select>
-            <button type="button" class="btn btn-danger btn-sm" onclick="removeQuestion(this)">×</button>
-        </div>
-        <div class="question-options" style="display: none;">
-            <label class="form-label" style="font-size: 0.85rem;">Options (one per line):</label>
-            <textarea class="form-input options-text" rows="3" placeholder="Option 1&#10;Option 2&#10;Option 3"></textarea>
+// Function to show modal for adding participants
+function showAddParticipantsModal() {
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.style.zIndex = '10001'; // Higher than parent modal
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3>Add Participants</h3>
+                <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
+            </div>
+            <div>
+                <div class="form-group">
+                    <label class="form-label">Enter participant details (one per line)</label>
+                    <textarea id="participants-list" class="form-input" rows="10" 
+                              placeholder="Format: Name, Email&#10;Example:&#10;John Doe, john@example.com&#10;Jane Smith, jane@example.com"></textarea>
+                </div>
+                <div style="margin: 1rem 0; padding: 1rem; background: var(--bg-secondary); border-radius: 8px;">
+                    <strong>Tips:</strong>
+                    <ul style="margin: 0.5rem 0 0 1rem; font-size: 0.875rem;">
+                        <li>Use format: Name, Email</li>
+                        <li>One participant per line</li>
+                        <li>You can paste from Excel/CSV</li>
+                    </ul>
+                </div>
+                <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                    <button class="btn btn-secondary" onclick="this.closest('.modal').remove()">Cancel</button>
+                    <button class="btn btn-primary" onclick="addParticipants()">Add Participants</button>
+                </div>
+            </div>
         </div>
     `;
-    
-    container.appendChild(questionItem);
-    setupQuestionTypeListeners();
+    document.body.appendChild(modal);
 }
 
-// Remove question from pulse survey
-function removeQuestion(button) {
-    button.closest('.question-item').remove();
-}
-
-// Generate pulse survey link
-function generatePulseLink(event) {
-    event.preventDefault();
-    
-    const surveyName = document.getElementById('pulse-name').value;
-    const welcomeMsg = document.getElementById('pulse-welcome-msg').value;
-    
-    // Collect all questions
-    const questions = [];
-    document.querySelectorAll('.question-item').forEach(item => {
-        const questionText = item.querySelector('.question-text').value;
-        const questionType = item.querySelector('.question-type').value;
-        const options = item.querySelector('.options-text').value;
-        
-        if (questionText.trim()) {
-            const question = {
-                text: questionText,
-                type: questionType
+// Function to import participants from CSV
+function importParticipantsCSV() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.csv,.txt';
+    input.onchange = function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                processParticipantsCSV(event.target.result);
             };
-            
-            if (questionType === 'multiple-choice' && options.trim()) {
-                question.options = options.split('\n').map(opt => opt.trim()).filter(opt => opt);
-            }
-            
-            questions.push(question);
+            reader.readAsText(file);
+        }
+    };
+    input.click();
+}
+
+// Process CSV content
+function processParticipantsCSV(content) {
+    const lines = content.split('\n').filter(line => line.trim());
+    const participants = [];
+    
+    lines.forEach(line => {
+        const parts = line.split(',').map(part => part.trim());
+        if (parts.length >= 2) {
+            participants.push({
+                name: parts[0],
+                email: parts[1]
+            });
         }
     });
     
-    if (questions.length === 0) {
-        showToast('Please add at least one question', 'warning');
-        return;
+    updateParticipantsDisplay(participants);
+    showToast(`Imported ${participants.length} participants from CSV`, 'success');
+}
+
+// Function to add participants from manual entry
+function addParticipants() {
+    const textarea = document.getElementById('participants-list');
+    const lines = textarea.value.split('\n').filter(line => line.trim());
+    const participants = [];
+    
+    lines.forEach(line => {
+        const parts = line.split(',').map(part => part.trim());
+        if (parts.length >= 2) {
+            participants.push({
+                name: parts[0],
+                email: parts[1]
+            });
+        }
+    });
+    
+    if (participants.length > 0) {
+        updateParticipantsDisplay(participants);
+        document.querySelector('.modal[style*="z-index: 10001"]').remove();
+        showToast(`Added ${participants.length} participants`, 'success');
+    } else {
+        showToast('Please enter valid participant details', 'warning');
     }
-    
-    // Generate unique session ID for pulse survey
-    const sessionId = 'pulse_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-    
-    // Create URL parameters
-    const params = new URLSearchParams({
-        session: sessionId,
-        type: 'pulse',
-        name: surveyName,
-        welcome: welcomeMsg,
-        questions: JSON.stringify(questions)
-    });
-    
-    // Generate the link
-    const pulseLink = window.location.origin + '/chat.html?' + params.toString();
-    
-    // Close current modal
-    document.querySelector('.modal').remove();
-    
-    // Show success modal with link
-    showPulseLinkModal({
-        id: sessionId,
-        name: surveyName,
-        welcome: welcomeMsg,
-        questions: questions,
-        link: pulseLink,
-        created: new Date().toISOString()
-    });
 }
 
-// Show modal with generated pulse survey link
-function showPulseLinkModal(pulseData) {
-    const modal = document.createElement('div');
-    modal.className = 'modal';
-    modal.innerHTML = `
-        <div class="modal-content" style="max-width: 700px;">
-            <div class="modal-header">
-                <h3>🎉 Pulse Survey Created!</h3>
-                <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
-            </div>
-            
-            <div style="padding: 1.5rem;">
-                <div style="background: #dcfce7; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; border-left: 4px solid #10b981;">
-                    <h4 style="margin-bottom: 0.5rem; color: #166534;">✅ "${pulseData.name}" is ready!</h4>
-                    <p style="color: #166534; margin: 0; font-size: 0.9rem;">Your pulse survey with ${pulseData.questions.length} questions is ready to collect responses.</p>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Your Survey Link</label>
-                    <div style="display: flex; gap: 0.5rem; align-items: center;">
-                        <input type="text" class="form-input" value="${pulseData.link}" readonly id="generated-pulse-link" style="flex: 1;">
-                        <button class="btn btn-secondary" onclick="copyToClipboard('generated-pulse-link')" style="white-space: nowrap;">Copy Link</button>
-                    </div>
-                    <small class="form-help">Share this link to collect structured feedback through chat</small>
-                </div>
-                
-                <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin: 1rem 0;">
-                    <h5 style="margin-bottom: 0.75rem;">📊 Survey Questions Preview:</h5>
-                    <div style="max-height: 200px; overflow-y: auto;">
-                        ${pulseData.questions.map((q, index) => `
-                            <div style="margin-bottom: 1rem; padding: 0.75rem; background: white; border-radius: 6px; border-left: 3px solid var(--primary-color);">
-                                <div style="font-weight: 500; margin-bottom: 0.25rem;">${index + 1}. ${q.text}</div>
-                                <div style="font-size: 0.85rem; color: var(--text-secondary);">
-                                    Type: ${q.type === 'rating' ? 'Rating Scale (1-5)' : q.type === 'yes-no' ? 'Yes/No' : q.type === 'multiple-choice' ? 'Multiple Choice' : 'Open Text'}
-                                    ${q.options ? `<br>Options: ${q.options.join(', ')}` : ''}
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-                
-                <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem;">
-                    <button class="btn btn-secondary" onclick="this.closest('.modal').remove()">Close</button>
-                    <button class="btn btn-primary" onclick="testChatLink('${pulseData.link}')">Test Survey</button>
-                </div>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(modal);
+// Update the participants display
+function updateParticipantsDisplay(participants) {
+    // Store participants data (you'll need to implement proper storage)
+    window.tempParticipants = participants;
     
-    // Auto-select the link text for easy copying
-    setTimeout(() => {
-        document.getElementById('generated-pulse-link').select();
-    }, 100);
-}
-
-function toggleChatTypeFields() {
-    // Placeholder for any future functionality
+    const countText = document.getElementById('participant-count-text');
+    const preview = document.getElementById('participants-preview');
+    const previewList = document.getElementById('preview-list');
+    
+    countText.textContent = `${participants.length} participant(s) added`;
+    
+    if (participants.length > 0) {
+        preview.style.display = 'block';
+        const previewNames = participants.slice(0, 3).map(p => p.name).join(', ');
+        const moreText = participants.length > 3 ? `, and ${participants.length - 3} more...` : '';
+        previewList.textContent = previewNames + moreText;
+    } else {
+        preview.style.display = 'none';
+    }
 }
 
 // UPDATE generateChatLink to include template data
@@ -4979,186 +4741,11 @@ async function loadUsersData() {
     }
 }
 
-// Enhanced Chat Management Functions
-
-function toggleDropdown(button) {
-    const dropdown = button.nextElementSibling;
-    const isVisible = dropdown.classList.contains('show');
-    
-    // Close all other dropdowns
-    document.querySelectorAll('.dropdown-menu.show').forEach(menu => {
-        menu.classList.remove('show');
-    });
-    
-    // Toggle current dropdown
-    if (!isVisible) {
-        dropdown.classList.add('show');
-    }
-    
-    // Close dropdown when clicking outside
-    if (!isVisible) {
-        setTimeout(() => {
-            document.addEventListener('click', function closeOnOutside(e) {
-                if (!button.contains(e.target) && !dropdown.contains(e.target)) {
-                    dropdown.classList.remove('show');
-                    document.removeEventListener('click', closeOnOutside);
-                }
-            });
-        }, 0);
-    }
-}
-
-function viewChannelAnalytics(channelId) {
-    showToast(`Opening analytics for ${channelId} channel...`, 'info');
-    // Implementation would load analytics dashboard
-}
-
-function pauseWidget(widgetId) {
-    showToast(`Pausing ${widgetId} widget...`, 'info');
-    // Implementation would pause the widget
-    
-    // Update UI to show paused state
-    const widget = document.querySelector(`[onclick*="${widgetId}"]`)?.closest('.chat-widget-card');
-    if (widget) {
-        const statusTag = widget.querySelector('.tag');
-        if (statusTag) {
-            statusTag.textContent = 'PAUSED';
-            statusTag.style.background = '#fef3c7';
-            statusTag.style.color = '#92400e';
-        }
-        
-        const activeCount = widget.querySelector('[data-active]');
-        if (activeCount) {
-            activeCount.textContent = '👥 0 active';
-        }
-    }
-}
-
-function resumeWidget(widgetId) {
-    showToast(`Resuming ${widgetId} widget...`, 'info');
-    // Implementation would resume the widget
-    
-    // Update UI to show live state
-    const widget = document.querySelector(`[onclick*="${widgetId}"]`)?.closest('.chat-widget-card');
-    if (widget) {
-        const statusTag = widget.querySelector('.tag');
-        if (statusTag) {
-            statusTag.textContent = 'LIVE';
-            statusTag.className = 'tag tag-success';
-        }
-    }
-}
-
-function duplicateWidget(widgetId) {
-    showToast(`Duplicating ${widgetId} widget...`, 'info');
-    // Implementation would create a copy of the widget
-}
-
-function exportWidget(widgetId) {
-    showToast(`Exporting data from ${widgetId} widget...`, 'info');
-    // Implementation would export widget data
-}
-
-function deleteWidget(widgetId) {
-    if (confirm(`Are you sure you want to delete the ${widgetId} widget? This action cannot be undone.`)) {
-        showToast(`Deleting ${widgetId} widget...`, 'warning');
-        // Implementation would delete the widget
-    }
-}
-
-function refreshChannels() {
-    showToast('Refreshing channels...', 'info');
-    // Implementation would refresh the channels list
-    
-    // Simulate refresh with loading animation
-    const refreshBtn = document.querySelector('[onclick="refreshChannels()"]');
-    const originalText = refreshBtn.innerHTML;
-    refreshBtn.innerHTML = '<span style="margin-right: 0.25rem;">🔄</span>Refreshing...';
-    refreshBtn.disabled = true;
-    
-    setTimeout(() => {
-        refreshBtn.innerHTML = originalText;
-        refreshBtn.disabled = false;
-        showToast('Channels refreshed successfully', 'success');
-    }, 1500);
-}
-
-function useTemplate(templateId) {
-    showToast(`Using ${templateId} template...`, 'info');
-    // Implementation would create a new widget based on the template
-}
-
-function previewTemplate(templateId) {
-    const modal = document.createElement('div');
-    modal.className = 'modal';
-    modal.innerHTML = `
-        <div class="modal-content" style="max-width: 500px;">
-            <div class="modal-header">
-                <h3>Template Preview: ${templateId.charAt(0).toUpperCase() + templateId.slice(1)}</h3>
-                <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
-            </div>
-            <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; max-height: 400px; overflow-y: auto;">
-                <div class="chat-preview-message bot">
-                    <strong>AI:</strong> Welcome! I'd like to get your feedback on our ${templateId} experience.
-                </div>
-                <div class="chat-preview-message bot">
-                    <strong>AI:</strong> How would you rate your overall experience? (Scale: 1-5)
-                </div>
-                <div class="chat-preview-message user">
-                    <strong>You:</strong> 4
-                </div>
-                <div class="chat-preview-message bot">
-                    <strong>AI:</strong> Thank you! What did you like most about your experience?
-                </div>
-                <div class="chat-preview-message user">
-                    <strong>You:</strong> The service was quick and helpful.
-                </div>
-                <div class="chat-preview-message bot">
-                    <strong>AI:</strong> Great! Is there anything we could improve?
-                </div>
-            </div>
-            <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem;">
-                <button class="btn btn-secondary" onclick="this.closest('.modal').remove()">Close</button>
-                <button class="btn btn-primary" onclick="useTemplate('${templateId}'); this.closest('.modal').remove();">Use Template</button>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(modal);
-}
-
-function exportAllData() {
-    showToast('Preparing data export...', 'info');
-    // Implementation would export all chat data
-    
-    setTimeout(() => {
-        showToast('Export ready! Check your downloads folder.', 'success');
-    }, 2000);
-}
-
-function viewActiveConversations() {
-    showToast('Opening active conversations dashboard...', 'info');
-    // Implementation would show active conversations
-}
-
-function generateWeeklyReport() {
-    showToast('Generating weekly report...', 'info');
-    // Implementation would generate and download weekly report
-    
-    setTimeout(() => {
-        showToast('Weekly report generated successfully!', 'success');
-    }, 3000);
-}
-
 // Initialize templates on page load
 document.addEventListener('DOMContentLoaded', function() {
     loadTemplates();
     loadOrganizationsData();
     loadUsersData();
-    
-    // Initialize enhanced chat management features
-    if (window.location.hash === '#chat-management') {
-        showSection('chat-management');
-    }
 });
 </script>
 </body>
