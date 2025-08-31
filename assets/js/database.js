@@ -453,101 +453,16 @@ async function saveSurveyResponse(responseData) {
 // =====================================================
 
 async function loadChatSessions() {
-    try {
-        const { data, error } = await window.supabaseClient
-            .from('chat_sessions')
-            .select('*')
-            .order('created_at', { ascending: false });
-        
-        if (error) {
-            console.error('Error loading chat sessions:', error);
-            // If table doesn't exist, return empty array
-            return [];
-        }
-        
-        return data || [];
-    } catch (error) {
-        console.error('Chat sessions database error:', error);
-        return [];
-    }
+    // Use localStorage directly for now - database table creation requires admin access
+    console.info('Loading chat sessions from localStorage');
+    return loadChatSessionsFromLocalStorage();
 }
 
 async function saveChatSession(chatData) {
-    try {
-        // Prepare chat session data
-        const chatToSave = {
-            session_id: chatData.id,
-            name: chatData.name,
-            type: chatData.type,
-            welcome_message: chatData.welcome || chatData.welcomeMessage,
-            link: chatData.link,
-            status: 'active'
-        };
-        
-        // Add type-specific data
-        if (chatData.type === 'chat' && chatData.topics) {
-            chatToSave.topics = Array.isArray(chatData.topics) ? chatData.topics : chatData.topics.split(',').map(t => t.trim());
-        }
-        
-        if (chatData.type === 'pulse' && chatData.questions) {
-            chatToSave.questions = chatData.questions;
-        }
-        
-        console.log('Saving chat session:', chatToSave);
-        
-        const { data, error } = await window.supabaseClient
-            .from('chat_sessions')
-            .insert([chatToSave])
-            .select();
-        
-        if (error) {
-            console.error('Error saving chat session:', error);
-            
-            // Handle table doesn't exist error
-            if (error.code === '42P01') {
-                console.warn('Chat sessions table does not exist. Using local storage as fallback.');
-                // Save to localStorage as fallback
-                saveChatSessionToLocalStorage(chatData);
-                return chatData;
-            }
-            
-            // Handle column errors - try with minimal data
-            if (error.message && (error.message.includes('column') || error.message.includes('violates'))) {
-                console.warn('Some columns missing or invalid, trying with basic fields only...');
-                const basicChatData = {
-                    session_id: chatData.id,
-                    name: chatData.name,
-                    type: chatData.type,
-                    status: 'active'
-                };
-                
-                const { data: basicData, error: basicError } = await window.supabaseClient
-                    .from('chat_sessions')
-                    .insert([basicChatData])
-                    .select();
-                
-                if (basicError) {
-                    console.error('Error saving basic chat data:', basicError);
-                    // Fallback to localStorage
-                    saveChatSessionToLocalStorage(chatData);
-                    return chatData;
-                }
-                
-                return basicData ? basicData[0] : chatData;
-            }
-            
-            // Fallback to localStorage for any other error
-            saveChatSessionToLocalStorage(chatData);
-            return chatData;
-        }
-        
-        return data ? data[0] : chatData;
-    } catch (error) {
-        console.error('Chat session save error:', error);
-        // Fallback to localStorage
-        saveChatSessionToLocalStorage(chatData);
-        return chatData;
-    }
+    // Use localStorage directly - no database calls to avoid 404 errors
+    console.info('Saving chat session to localStorage (database table not available)');
+    saveChatSessionToLocalStorage(chatData);
+    return { ...chatData, stored_in: 'localStorage' };
 }
 
 function saveChatSessionToLocalStorage(chatData) {
@@ -571,29 +486,14 @@ function loadChatSessionsFromLocalStorage() {
 }
 
 async function updateChatSessionStatus(sessionId, status) {
-    try {
-        const { data, error } = await window.supabaseClient
-            .from('chat_sessions')
-            .update({ status: status })
-            .eq('session_id', sessionId)
-            .select();
-        
-        if (error) {
-            console.error('Error updating chat session status:', error);
-            // Update in localStorage as fallback
-            const sessions = loadChatSessionsFromLocalStorage();
-            const updatedSessions = sessions.map(session => 
-                session.id === sessionId ? { ...session, status } : session
-            );
-            localStorage.setItem('chatSessions', JSON.stringify(updatedSessions));
-            return null;
-        }
-        
-        return data ? data[0] : null;
-    } catch (error) {
-        console.error('Chat session update error:', error);
-        return null;
-    }
+    // Use localStorage directly - no database calls to avoid 404 errors
+    console.info('Updating chat session status in localStorage (database table not available)');
+    const sessions = loadChatSessionsFromLocalStorage();
+    const updatedSessions = sessions.map(session => 
+        session.id === sessionId ? { ...session, status } : session
+    );
+    localStorage.setItem('chatSessions', JSON.stringify(updatedSessions));
+    return null;
 }
 
 // =====================================================

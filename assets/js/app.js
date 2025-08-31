@@ -2552,7 +2552,7 @@ function showUserDetails(userName) {
                         <h4>User Information</h4>
                         <div style="display: grid; gap: 1rem; margin: 1rem 0;">
                             <div><strong>Name:</strong> ${userName}</div>
-                            <div><strong>Email:</strong> ${userName.toLowerCase().replace(' ', '.')}@company.com</div>
+                            <div><strong>Email:</strong> ${userName ? userName.toLowerCase().replace(' ', '.') : 'unknown'}@company.com</div>
                             <div><strong>Role:</strong> Administrator</div>
                             <div><strong>Status:</strong> <span class="tag tag-active">Active</span></div>
                             <div><strong>Joined:</strong> June 12, 2024</div>
@@ -2884,7 +2884,7 @@ function handleEditUser(userName) {
                 </div>
                 <div class="form-group">
                     <label class="form-label">Email</label>
-                    <input type="email" name="email" class="form-input" value="${userName.toLowerCase().replace(' ', '.')}@company.com" required>
+                    <input type="email" name="email" class="form-input" value="${userName ? userName.toLowerCase().replace(' ', '.') : 'unknown'}@company.com" required>
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                     <div class="form-group">
@@ -3014,9 +3014,9 @@ async function handleResendInvite(userName) {
     
     // Loop through table rows to find the user
     rows.forEach(row => {
-        if (row.cells[1].textContent === userName) {
-            userEmail = row.cells[2].textContent;
-            organization = row.cells[3].textContent;
+        if (row.cells && row.cells[1] && row.cells[1].textContent === userName) {
+            userEmail = row.cells[2] ? row.cells[2].textContent : '';
+            organization = row.cells[3] ? row.cells[3].textContent : 'Unknown Organization';
         }
     });
     

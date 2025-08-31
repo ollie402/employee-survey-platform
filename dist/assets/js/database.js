@@ -447,3 +447,155 @@ async function saveSurveyResponse(responseData) {
         throw error;
     }
 }
+
+// =====================================================
+// CHAT SESSION DATABASE FUNCTIONS
+// =====================================================
+
+async function loadChatSessions() {
+    // Use localStorage directly for now - database table creation requires admin access
+    console.info('Loading chat sessions from localStorage');
+    return loadChatSessionsFromLocalStorage();
+}
+
+async function saveChatSession(chatData) {
+    // Use localStorage directly - no database calls to avoid 404 errors
+    console.info('Saving chat session to localStorage (database table not available)');
+    saveChatSessionToLocalStorage(chatData);
+    return { ...chatData, stored_in: 'localStorage' };
+}
+
+function saveChatSessionToLocalStorage(chatData) {
+    try {
+        const existingSessions = JSON.parse(localStorage.getItem('chatSessions') || '[]');
+        existingSessions.unshift(chatData); // Add to beginning of array
+        localStorage.setItem('chatSessions', JSON.stringify(existingSessions));
+        console.log('Chat session saved to localStorage');
+    } catch (error) {
+        console.error('Error saving to localStorage:', error);
+    }
+}
+
+function loadChatSessionsFromLocalStorage() {
+    try {
+        return JSON.parse(localStorage.getItem('chatSessions') || '[]');
+    } catch (error) {
+        console.error('Error loading from localStorage:', error);
+        return [];
+    }
+}
+
+async function updateChatSessionStatus(sessionId, status) {
+    // Use localStorage directly - no database calls to avoid 404 errors
+    console.info('Updating chat session status in localStorage (database table not available)');
+    const sessions = loadChatSessionsFromLocalStorage();
+    const updatedSessions = sessions.map(session => 
+        session.id === sessionId ? { ...session, status } : session
+    );
+    localStorage.setItem('chatSessions', JSON.stringify(updatedSessions));
+    return null;
+}
+
+// =====================================================
+// URL SHORTENING SYSTEM
+// =====================================================
+
+function generateSlug(name) {
+    return name
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-+|-+$/g, '');
+}
+
+async function saveUrlMapping(slug, originalUrl, chatData) {
+    try {
+        const mappingData = {
+            slug: slug,
+            original_url: originalUrl,
+            chat_name: chatData.name,
+            chat_type: chatData.type,
+            created_at: new Date().toISOString()
+        };
+        
+        const { data, error } = await window.supabaseClient
+            .from('url_mappings')
+            .insert([mappingData])
+            .select();
+        
+        if (error) {
+            console.warn('Could not save URL mapping to database:', error);
+            // Fallback to localStorage
+            const mappings = JSON.parse(localStorage.getItem('urlMappings') || '[]');
+            mappings.push(mappingData);
+            localStorage.setItem('urlMappings', JSON.stringify(mappings));
+            return mappingData;
+        }
+        
+        return data ? data[0] : mappingData;
+    } catch (error) {
+        console.error('URL mapping save error:', error);
+        // Fallback to localStorage
+        const mappings = JSON.parse(localStorage.getItem('urlMappings') || '[]');
+        const mappingData = {
+            slug: slug,
+            original_url: originalUrl,
+            chat_name: chatData.name,
+            chat_type: chatData.type,
+            created_at: new Date().toISOString()
+        };
+        mappings.push(mappingData);
+        localStorage.setItem('urlMappings', JSON.stringify(mappings));
+        return mappingData;
+    }
+}
+
+async function loadUrlMapping(slug) {
+    try {
+        const { data, error } = await window.supabaseClient
+            .from('url_mappings')
+            .select('*')
+            .eq('slug', slug)
+            .single();
+        
+        if (error || !data) {
+            // Fallback to localStorage
+            const mappings = JSON.parse(localStorage.getItem('urlMappings') || '[]');
+            return mappings.find(mapping => mapping.slug === slug);
+        }
+        
+        return data;
+    } catch (error) {
+        console.error('URL mapping load error:', error);
+        // Fallback to localStorage
+        const mappings = JSON.parse(localStorage.getItem('urlMappings') || '[]');
+        return mappings.find(mapping => mapping.slug === slug);
+    }
+}
+
+function generateShortUrl(chatName, originalUrl, chatData) {
+    const slug = generateSlug(chatName);
+    // Use HTTP for development, HTTPS for production domains
+    let origin = window.location.origin;
+    
+    // Check if this is a development environment
+    const isDevelopment = origin.includes('localhost') || 
+                         origin.includes('127.0.0.1') || 
+                         origin.includes(':3000') || 
+                         origin.includes(':5500') ||
+                         origin.includes(':8080');
+    
+    // Only use HTTPS if not in development
+    if (!isDevelopment && origin.startsWith('http://')) {
+        origin = origin.replace('http://', 'https://');
+    }
+    
+    const shortUrl = `${origin}/?chat=${slug}`;
+    
+    // Save the mapping
+    saveUrlMapping(slug, originalUrl, chatData);
+    
+    return shortUrl;
+}
