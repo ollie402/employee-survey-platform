@@ -3,7 +3,7 @@
 
 const ENV_CONFIG = {
     development: {
-        API_BASE_URL: 'http://localhost:3000/api',
+        API_BASE_URL: 'http://localhost:3001/api',
         APP_NAME: 'Survey Platform (Development)',
         DEBUG: true,
         ENVIRONMENT: 'development'
