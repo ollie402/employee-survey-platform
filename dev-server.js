@@ -10,11 +10,25 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = 3001;
 
-// Load environment variables manually
+// Load environment variables manually (.env first, then .env.local overrides)
 const envPath = path.join(__dirname, '.env');
+const envLocalPath = path.join(__dirname, '.env.local');
+
+// Load .env first
 if (fs.existsSync(envPath)) {
   const envFile = fs.readFileSync(envPath, 'utf8');
   envFile.split('\n').forEach(line => {
+    const [key, value] = line.split('=');
+    if (key && value) {
+      process.env[key.trim()] = value.trim();
+    }
+  });
+}
+
+// Load .env.local second (overrides .env)
+if (fs.existsSync(envLocalPath)) {
+  const envLocalFile = fs.readFileSync(envLocalPath, 'utf8');
+  envLocalFile.split('\n').forEach(line => {
     const [key, value] = line.split('=');
     if (key && value) {
       process.env[key.trim()] = value.trim();
@@ -43,11 +57,10 @@ app.post('/api/send-invitation', async (req, res) => {
   const SMTP2GO_SENDER_EMAIL = process.env.SMTP2GO_SENDER_EMAIL;
   const SMTP2GO_SENDER_NAME = process.env.SMTP2GO_SENDER_NAME || 'Realworld';
 
-  console.log('SMTP2GO Config:', {
-    hasApiKey: !!SMTP2GO_API_KEY,
-    hasEmail: !!SMTP2GO_SENDER_EMAIL,
-    senderName: SMTP2GO_SENDER_NAME
-  });
+  console.log('🔧 SMTP2GO Config Debug:');
+  console.log('  API Key:', SMTP2GO_API_KEY ? SMTP2GO_API_KEY.substring(0, 20) + '...' : 'MISSING');
+  console.log('  Sender Email:', SMTP2GO_SENDER_EMAIL);
+  console.log('  Sender Name:', SMTP2GO_SENDER_NAME);
 
   // Check if credentials exist
   if (!SMTP2GO_API_KEY || !SMTP2GO_SENDER_EMAIL) {
