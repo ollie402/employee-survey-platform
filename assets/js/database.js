@@ -1,18 +1,33 @@
 // Database operations using Supabase
 async function loadOrganizations() {
     try {
-        const { data, error } = await window.supabaseClient
+        // Get organizations
+        const { data: organizations, error: orgError } = await window.supabaseClient
             .from('organizations')
             .select('*')
             .order('created_at', { ascending: false });
         
-        if (error) {
-            console.error('Error loading organizations:', error);
-            // If table doesn't exist, return empty array
+        if (orgError) {
+            console.error('Error loading organizations:', orgError);
             return [];
         }
         
-        return data || [];
+        // Get user counts for each organization
+        const orgsWithUserCounts = await Promise.all((organizations || []).map(async (org) => {
+            const { count, error: countError } = await window.supabaseClient
+                .from('users')
+                .select('*', { count: 'exact', head: true })
+                .eq('organization_id', org.id);
+            
+            if (countError) {
+                console.error('Error counting users for org', org.id, countError);
+                return { ...org, user_count: 0 };
+            }
+            
+            return { ...org, user_count: count || 0 };
+        }));
+        
+        return orgsWithUserCounts;
     } catch (error) {
         console.error('Database error:', error);
         return [];
@@ -141,7 +156,13 @@ async function loadUsers() {
     try {
         const { data, error } = await window.supabaseClient
             .from('users')
-            .select('*')
+            .select(`
+                *,
+                organizations(
+                    id,
+                    name
+                )
+            `)
             .order('created_at', { ascending: false });
         
         if (error) {
@@ -149,7 +170,13 @@ async function loadUsers() {
             return [];
         }
         
-        return data || [];
+        // Transform the data to include organization name
+        const usersWithOrgNames = (data || []).map(user => ({
+            ...user,
+            organization: user.organizations?.name || 'No Organization'
+        }));
+        
+        return usersWithOrgNames;
     } catch (error) {
         console.error('Users database error:', error);
         return [];

@@ -2538,58 +2538,9 @@ function showOrganizationDetails(orgName) {
 }
 
 function showUserDetails(userName) {
-    const modal = document.createElement('div');
-    modal.className = 'modal';
-    modal.innerHTML = `
-        <div class="modal-content" style="max-width: 600px;">
-            <div class="modal-header">
-                <h3>${userName} - User Details</h3>
-                <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
-            </div>
-            <div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
-                    <div>
-                        <h4>User Information</h4>
-                        <div style="display: grid; gap: 1rem; margin: 1rem 0;">
-                            <div><strong>Name:</strong> ${userName}</div>
-                            <div><strong>Email:</strong> ${userName ? userName.toLowerCase().replace(' ', '.') : 'unknown'}@company.com</div>
-                            <div><strong>Role:</strong> Administrator</div>
-                            <div><strong>Status:</strong> <span class="tag tag-active">Active</span></div>
-                            <div><strong>Joined:</strong> June 12, 2024</div>
-                            <div><strong>Last Login:</strong> 2 hours ago</div>
-                        </div>
-                    </div>
-                    <div>
-                        <h4>Activity Summary</h4>
-                        <div class="dashboard-grid">
-                            <div class="stat-card">
-                                <div class="stat-value">23</div>
-                                <div class="stat-label">Surveys Created</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-value">156</div>
-                                <div class="stat-label">Logins This Month</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div style="margin-top: 2rem;">
-                    <h4>Permissions</h4>
-                    <div style="display: grid; gap: 0.5rem;">
-                        <label class="checkbox-label"><input type="checkbox" checked disabled> Create Surveys</label>
-                        <label class="checkbox-label"><input type="checkbox" checked disabled> View Analytics</label>
-                        <label class="checkbox-label"><input type="checkbox" checked disabled> Manage Participants</label>
-                        <label class="checkbox-label"><input type="checkbox" disabled> Admin Functions</label>
-                    </div>
-                </div>
-                <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
-                    <button class="btn btn-secondary" onclick="this.closest('.modal').remove()">Close</button>
-                    <button class="btn btn-primary" onclick="editUser('${userName}')">Edit User</button>
-                </div>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(modal);
+    // Disabled - this modal was interfering with user management
+    console.log('showUserDetails called for:', userName, '- function disabled');
+    return;
 }
 
 // UPDATED: Create/Edit functions with working forms and EMAIL INTEGRATION
