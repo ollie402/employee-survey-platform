@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": ["@modelcontextprotocol/server-filesystem", "C:\Users\paule\OneDrive\Desktop\employee-survey-platform"],
+      "env": {}
+    }
+  }
+}

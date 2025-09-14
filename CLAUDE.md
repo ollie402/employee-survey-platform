@@ -78,3 +78,4 @@ This is a **multi-environment employee survey platform** with the following key 
 - Email functionality requires SMTP2GO API credentials in environment variables
 - The project supports both local development and cloud deployment workflows
 - File watching and auto-deployment features are available for rapid development iteration
+- it isnt working but shows this & 'c:\Users\paule\Pictures\Screenshots\Screenshot 2025-09-02 114648.png'

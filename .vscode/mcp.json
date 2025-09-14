@@ -1,0 +1,12 @@
+{
+	"servers": {
+		"my-mcp-server-f9679c80": {
+			"type": "stdio",
+			"command": "npx",
+			"args": [
+				"@modelcontextprotocol/server-filesystem"
+			]
+		}
+	},
+	"inputs": []
+}

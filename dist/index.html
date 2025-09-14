@@ -6,6 +6,44 @@
     <title>Realworld Employee Survey Platform</title>
     <link rel="stylesheet" href="assets/css/styles.css">
     <style>
+        /* Fix dropdown visibility issues */
+        .dropdown-menu {
+            position: absolute !important;
+            z-index: 9999 !important;
+            background: white !important;
+            border: 1px solid #e2e8f0 !important;
+            border-radius: 8px !important;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+            min-width: 200px !important;
+            padding: 8px 0 !important;
+            top: 100% !important;
+            right: 0 !important;
+        }
+        
+        .dropdown-menu[style*="display: block"] {
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+        
+        .dropdown-item {
+            width: 100% !important;
+            text-align: left !important;
+            padding: 0.75rem 1rem !important;
+            border: none !important;
+            background: none !important;
+            cursor: pointer !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 0.5rem !important;
+            font-size: 0.875rem !important;
+            color: #1e293b !important;
+        }
+        
+        .dropdown-item:hover {
+            background-color: #f8f9fa !important;
+        }
+
         /* Adaptable Logo Styles - NEW ADDITION */
         .logo-icon {
             width: 40px;
@@ -1103,6 +1141,133 @@
             }
         }
         /* END TEMPLATE BUILDER STYLES */
+        
+        /* Enhanced Navigation Layout - Better spacing after Keep Listening removal */
+        .nav-section {
+            margin-bottom: 3rem !important;
+            padding: 1.5rem 0;
+            border-bottom: 1px solid rgba(226, 232, 240, 0.3);
+        }
+        
+        .nav-section:last-child {
+            border-bottom: none;
+        }
+        
+        .nav-title {
+            font-size: 1rem !important;
+            font-weight: 700 !important;
+            margin-bottom: 1.5rem !important;
+            padding: 0.75rem 1rem;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border-radius: 8px;
+            border-left: 4px solid var(--primary-color);
+            color: var(--text-primary) !important;
+            text-transform: none !important;
+        }
+        
+        .nav-item {
+            padding: 1rem 1.25rem !important;
+            margin-bottom: 0.75rem !important;
+            font-weight: 500;
+            font-size: 0.95rem;
+            border-radius: 10px !important;
+            transition: all 0.3s ease !important;
+        }
+        
+        .nav-item:hover {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%) !important;
+            transform: translateX(4px) !important;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15) !important;
+        }
+        
+        .nav-item.active {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #1d4ed8 100%) !important;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3) !important;
+            transform: translateX(2px) !important;
+        }
+        
+        .nav-icon {
+            width: 24px !important;
+            height: 24px !important;
+            margin-right: 16px !important;
+            font-size: 1.1rem;
+        }
+        
+        /* Better sidebar spacing */
+        .sidebar {
+            padding: 2rem !important;
+        }
+        
+        .sidebar nav {
+            margin-top: 2rem;
+        }
+        
+        /* CSS GRID ORGANIZATIONS TABLE */
+        .organizations-grid-container {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1.5fr 2fr; /* Organization, Users, Status, Date, Actions */
+            grid-auto-flow: row;
+            gap: 0;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            background: white;
+        }
+        
+        .org-grid-header {
+            background: var(--bg-secondary);
+            padding: 1rem;
+            font-weight: 600;
+            border-bottom: 1px solid var(--border-color);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            min-height: 60px;
+        }
+        
+        .org-grid-header:last-child {
+            border-right: none;
+        }
+        
+        .org-grid-cell {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            min-height: 60px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .org-grid-cell:last-child {
+            border-right: none;
+            cursor: default;
+        }
+        
+        .org-grid-cell:nth-child(5n+1):hover,
+        .org-grid-cell:nth-child(5n+1):hover + .org-grid-cell,
+        .org-grid-cell:nth-child(5n+1):hover + .org-grid-cell + .org-grid-cell,
+        .org-grid-cell:nth-child(5n+1):hover + .org-grid-cell + .org-grid-cell + .org-grid-cell,
+        .org-grid-cell:nth-child(5n+1):hover + .org-grid-cell + .org-grid-cell + .org-grid-cell + .org-grid-cell {
+            background: var(--bg-secondary);
+        }
+        
+        
+        .org-grid-empty {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        /* Individual column classes */
+        .org-grid-cell-1 { grid-column: 1; } /* Organization Name */
+        .org-grid-cell-2 { grid-column: 2; } /* Users */
+        .org-grid-cell-3 { grid-column: 3; } /* Status */
+        .org-grid-cell-4 { grid-column: 4; } /* Last Activity */
+        .org-grid-cell-5 { grid-column: 5; } /* Actions */
     </style>
 </head>
 <body>
@@ -1227,7 +1392,7 @@
             <nav>
                 <div class="nav-section" id="master-admin-section">
                     <div class="nav-title" data-translate="master-admin">Master Admin</div>
-                    <div class="nav-item active" onclick="showSection('dashboard')">
+                    <div class="nav-item" onclick="showSection('dashboard')">
                         <div class="nav-icon">📊</div>
                         <span data-translate="dashboard">Dashboard</span>
                     </div>
@@ -1261,29 +1426,6 @@
                     </div>
                 </div>
 
-                <div class="nav-section" id="keep-listening-section">
-                    <div class="nav-title" data-translate="keep-listening">Keep Listening</div>
-                    <div class="nav-item" onclick="showSection('survey-builder')">
-                        <div class="nav-icon">📝</div>
-                        <span data-translate="survey-builder">Survey Builder</span>
-                    </div>
-                    <div class="nav-item" onclick="showSection('survey-analytics')">
-                        <div class="nav-icon">📊</div>
-                        <span data-translate="survey-analytics">Survey Analytics</span>
-                    </div>
-                    <div class="nav-item" onclick="showSection('participants')">
-                        <div class="nav-icon">👤</div>
-                        <span data-translate="participants">Participants</span>
-                    </div>
-                    <div class="nav-item" onclick="showSection('data-management')">
-                        <div class="nav-icon">📊</div>
-                        <span data-translate="data-management">Data Management</span>
-                    </div>
-                    <div class="nav-item" onclick="showSection('ai-data-chat')">
-                        <div class="nav-icon">🤖</div>
-                        <span data-translate="ai-data-chat">AI Data Chat</span>
-                    </div>
-                </div>
             </nav>
         </aside>
 
@@ -1484,7 +1626,6 @@
                                 <div>💬</div>
                                 <div data-translate="create-new-chat">Create Chat</div>
                             </button>
-                            <button class="btn btn-secondary" onclick="showSection('survey-builder')" style="padding: 1rem;">
                                 <div>📝</div>
                                 <div>Build Survey</div>
                             </button>
@@ -1516,15 +1657,6 @@
                                        style="min-width: 200px;" oninput="filterOrganizations('search', this.value)">
                             </div>
                             <div class="filter-group">
-                                <label class="filter-label" data-translate="plan">Plan</label>
-                                <select class="form-select" style="min-width: 150px;" onchange="filterOrganizations('plan', this.value)">
-                                    <option value="">All Plans</option>
-                                    <option value="start">Start Listening</option>
-                                    <option value="keep">Keep Listening</option>
-                                    <option value="both">Start + Keep</option>
-                                </select>
-                            </div>
-                            <div class="filter-group">
                                 <label class="filter-label" data-translate="status">Status</label>
                                 <select class="form-select" style="min-width: 120px;" onchange="filterOrganizations('status', this.value)">
                                     <option value="">All Status</option>
@@ -1535,24 +1667,17 @@
                             </div>
                         </div>
 
-                        <table class="table" id="organizations-table">
-                            <thead>
-                                <tr>
-                                    <th onclick="sortTable(this, 0)" data-translate="organization-name">Organization Name</th>
-                                    <th onclick="sortTable(this, 1)" data-translate="plan">Plan</th>
-                                    <th onclick="sortTable(this, 2)" data-translate="users">Users</th>
-                                    <th onclick="sortTable(this, 3)" data-translate="status">Status</th>
-                                    <th onclick="sortTable(this, 4)">Last Activity</th>
-                                    <th data-translate="actions">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="organizations-table-body">
-                                <!-- Organizations will be loaded from database -->
-                                <tr style="text-align: center; color: var(--text-secondary);">
-                                    <td colspan="6">No organizations found. Click 'Add Organization' to create your first organization.</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                        <!-- CSS GRID ORGANIZATIONS TABLE -->
+                        <div class="organizations-grid-container">
+                            <!-- Header -->
+                            <div class="org-grid-header org-grid-cell-1">Organization Name</div>
+                            <div class="org-grid-header org-grid-cell-2">Users</div>
+                            <div class="org-grid-header org-grid-cell-3">Status</div>
+                            <div class="org-grid-header org-grid-cell-4">Last Activity</div>
+                            <div class="org-grid-header org-grid-cell-5">Actions</div>
+                            
+                            <!-- Data rows will be populated here via JavaScript -->
+                        </div>
                     </div>
                 </div>
 
@@ -2128,8 +2253,13 @@
 
                         <div class="card">
                             <div class="card-header">
-                                <h4>Active Chats</h4>
-                                <small style="color: var(--text-secondary);">Currently active chat sessions</small>
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <div>
+                                        <h4>Active Chats</h4>
+                                        <small style="color: var(--text-secondary);">Currently active chat sessions</small>
+                                    </div>
+                                    <button class="btn btn-secondary btn-sm" onclick="loadActiveChatsList()" style="font-size: 0.75rem;">🔄 Refresh</button>
+                                </div>
                             </div>
                             
                             <!-- Empty state for now -->
@@ -2216,409 +2346,6 @@
                     </div>
                 </div>
 
-                <!-- Survey Builder Section -->
-                <div id="survey-builder-section" class="hidden">
-                    <div class="card">
-                        <div class="card-header">
-                            <h2 class="card-title">Survey Builder</h2>
-                            <button class="btn btn-primary" onclick="createNewSurvey()">Create New Survey</button>
-                        </div>
-
-                        <div class="dashboard-grid">
-                            <div class="stat-card">
-                                <div class="stat-value">23</div>
-                                <div class="stat-label">Active Surveys</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-value">156</div>
-                                <div class="stat-label">Total Surveys</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-value">2,847</div>
-                                <div class="stat-label">Total Responses</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-value">78%</div>
-                                <div class="stat-label">Completion Rate</div>
-                            </div>
-                        </div>
-
-                        <div class="card">
-                            <div class="card-header">
-                                <h4>My Surveys</h4>
-                                <div>
-                                    <select class="form-select" style="margin-right: 1rem;">
-                                        <option>All Surveys</option>
-                                        <option>Active</option>
-                                        <option>Draft</option>
-                                        <option>Completed</option>
-                                    </select>
-                                    <button class="btn btn-secondary">Templates</button>
-                                </div>
-                            </div>
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th>Survey Name</th>
-                                        <th>Status</th>
-                                        <th>Responses</th>
-                                        <th>Created</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td><strong>Q4 Employee Satisfaction</strong></td>
-                                        <td><span class="tag tag-active">Active</span></td>
-                                        <td>127/200</td>
-                                        <td>Dec 1, 2024</td>
-                                        <td>
-                                            <button class="btn btn-secondary btn-sm">Edit</button>
-                                            <button class="btn btn-primary btn-sm">Results</button>
-                                            <button class="btn btn-warning btn-sm">Share</button>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>Product Feedback Survey</strong></td>
-                                        <td><span class="tag tag-processing">Draft</span></td>
-                                        <td>0/∞</td>
-                                        <td>Dec 10, 2024</td>
-                                        <td>
-                                            <button class="btn btn-secondary btn-sm">Edit</button>
-                                            <button class="btn btn-success btn-sm">Publish</button>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Survey Analytics Section -->
-                <div id="survey-analytics-section" class="hidden">
-                    <div class="card">
-                        <div class="card-header">
-                            <h2 class="card-title">Survey Analytics</h2>
-                            <div>
-                                <select class="form-select" style="margin-right: 1rem;">
-                                    <option>All Surveys</option>
-                                    <option>Q4 Employee Satisfaction</option>
-                                    <option>Product Feedback</option>
-                                </select>
-                                <button class="btn btn-secondary">Export Results</button>
-                            </div>
-                        </div>
-
-                        <div class="dashboard-grid">
-                            <div class="stat-card">
-                                <div class="stat-value">85%</div>
-                                <div class="stat-label">Response Rate</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-value">4.2/5</div>
-                                <div class="stat-label">Average Score</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-value">3m 24s</div>
-                                <div class="stat-label">Avg. Completion Time</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-value">847</div>
-                                <div class="stat-label">Total Responses</div>
-                            </div>
-                        </div>
-
-                        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem;">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h4>Response Timeline</h4>
-                                </div>
-                                <div class="chart-placeholder">
-                                    📊 Response volume over time chart
-                                </div>
-                            </div>
-
-                            <div class="card">
-                                <div class="card-header">
-                                    <h4>Question Performance</h4>
-                                </div>
-                                <div style="display: grid; gap: 1rem;">
-                                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                                        <span>Overall Satisfaction</span>
-                                        <span><strong>89%</strong></span>
-                                    </div>
-                                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                                        <span>Work-Life Balance</span>
-                                        <span><strong>76%</strong></span>
-                                    </div>
-                                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                                        <span>Management</span>
-                                        <span><strong>82%</strong></span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Participants Section -->
-                <div id="participants-section" class="hidden">
-                    <div class="card">
-                        <div class="card-header">
-                            <h2 class="card-title">Participants</h2>
-                            <div>
-                                <button class="btn btn-secondary" onclick="importParticipants()">Import</button>
-                                <button class="btn btn-primary" onclick="addParticipant()">Add Participant</button>
-                            </div>
-                        </div>
-
-                        <div class="dashboard-grid">
-                            <div class="stat-card">
-                                <div class="stat-value">1,247</div>
-                                <div class="stat-label">Total Participants</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-value">892</div>
-                                <div class="stat-label">Active This Month</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-value">156</div>
-                                <div class="stat-label">New This Week</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-value">23</div>
-                                <div class="stat-label">Pending Invites</div>
-                            </div>
-                        </div>
-
-                        <div class="filters">
-                            <div class="filter-group">
-                                <label class="filter-label">Search</label>
-                                <input type="text" class="form-input" placeholder="Search participants..." style="min-width: 200px;">
-                            </div>
-                            <div class="filter-group">
-                                <label class="filter-label">Department</label>
-                                <select class="form-select">
-                                    <option>All Departments</option>
-                                    <option>Engineering</option>
-                                    <option>Marketing</option>
-                                    <option>Sales</option>
-                                    <option>HR</option>
-                                </select>
-                            </div>
-                            <div class="filter-group">
-                                <label class="filter-label">Status</label>
-                                <select class="form-select">
-                                    <option>All Status</option>
-                                    <option>Active</option>
-                                    <option>Inactive</option>
-                                    <option>Pending</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="card">
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th><input type="checkbox"></th>
-                                        <th>Name</th>
-                                        <th>Email</th>
-                                        <th>Department</th>
-                                        <th>Last Response</th>
-                                        <th>Status</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td><input type="checkbox"></td>
-                                        <td>John Smith</td>
-                                        <td>john.smith@techcorp.com</td>
-                                        <td>Engineering</td>
-                                        <td>2 days ago</td>
-                                        <td><span class="tag tag-active">Active</span></td>
-                                        <td>
-                                            <button class="btn btn-secondary btn-sm">Edit</button>
-                                            <button class="btn btn-warning btn-sm">Suspend</button>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td><input type="checkbox"></td>
-                                        <td>Emma Davis</td>
-                                        <td>emma.davis@techcorp.com</td>
-                                        <td>Marketing</td>
-                                        <td>1 week ago</td>
-                                        <td><span class="tag tag-active">Active</span></td>
-                                        <td>
-                                            <button class="btn btn-secondary btn-sm">Edit</button>
-                                            <button class="btn btn-warning btn-sm">Suspend</button>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Data Management Section -->
-                <div id="data-management-section" class="hidden">
-                    <div class="card">
-                        <div class="card-header">
-                            <h2 class="card-title">Data Management</h2>
-                            <div>
-                                <button class="btn btn-secondary" onclick="backupData()">Backup Data</button>
-                                <button class="btn btn-primary" onclick="exportAllData()">Export All</button>
-                            </div>
-                        </div>
-
-                        <div class="dashboard-grid">
-                            <div class="stat-card">
-                                <div class="stat-value">15.4GB</div>
-                                <div class="stat-label">Total Data Size</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-value">45,847</div>
-                                <div class="stat-label">Total Records</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-value">Dec 15</div>
-                                <div class="stat-label">Last Backup</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-value">99.9%</div>
-                                <div class="stat-label">Data Integrity</div>
-                            </div>
-                        </div>
-
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h4>Export Data</h4>
-                                </div>
-                                <div style="display: grid; gap: 1rem;">
-                                    <div>
-                                        <label class="form-label">Data Type</label>
-                                        <select class="form-select">
-                                            <option>All Data</option>
-                                            <option>Survey Responses</option>
-                                            <option>Chat Feedback</option>
-                                            <option>Participants</option>
-                                            <option>Analytics Data</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label class="form-label">Format</label>
-                                        <select class="form-select">
-                                            <option>CSV</option>
-                                            <option>Excel (XLSX)</option>
-                                            <option>JSON</option>
-                                            <option>PDF Report</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label class="form-label">Date Range</label>
-                                        <select class="form-select">
-                                            <option>All Time</option>
-                                            <option>Last 30 days</option>
-                                            <option>Last 90 days</option>
-                                            <option>This Year</option>
-                                            <option>Custom Range</option>
-                                        </select>
-                                    </div>
-                                    <button class="btn btn-primary">Generate Export</button>
-                                </div>
-                            </div>
-
-                            <div class="card">
-                                <div class="card-header">
-                                    <h4>Data Sources</h4>
-                                </div>
-                                <div style="display: grid; gap: 1rem;">
-                                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; border: 1px solid var(--border-color); border-radius: 8px;">
-                                        <div>
-                                            <strong>Survey Responses</strong><br>
-                                            <small style="color: var(--text-secondary);">8.2GB • 23,847 records</small>
-                                        </div>
-                                        <span class="tag tag-active">Active</span>
-                                    </div>
-                                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; border: 1px solid var(--border-color); border-radius: 8px;">
-                                        <div>
-                                            <strong>Chat Feedback</strong><br>
-                                            <small style="color: var(--text-secondary);">4.7GB • 15,247 records</small>
-                                        </div>
-                                        <span class="tag tag-active">Active</span>
-                                    </div>
-                                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; border: 1px solid var(--border-color); border-radius: 8px;">
-                                        <div>
-                                            <strong>User Analytics</strong><br>
-                                            <small style="color: var(--text-secondary);">2.5GB • 6,753 records</small>
-                                        </div>
-                                        <span class="tag tag-active">Active</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- AI Data Chat Section -->
-                <div id="ai-data-chat-section" class="hidden">
-                    <div class="card">
-                        <div class="card-header">
-                            <h2 class="card-title">AI Data Chat</h2>
-                            <div>
-                                <select class="form-select" style="margin-right: 1rem;">
-                                    <option>All Data Sources</option>
-                                    <option>Survey Data Only</option>
-                                    <option>Chat Feedback Only</option>
-                                    <option>Combined Analytics</option>
-                                </select>
-                                <button class="btn btn-primary" onclick="clearAIChat()">Clear Chat</button>
-                            </div>
-                        </div>
-
-                        <div class="dashboard-grid">
-                            <div class="stat-card">
-                                <div class="stat-value">847</div>
-                                <div class="stat-label">AI Queries Processed</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-value">156</div>
-                                <div class="stat-label">Insights Generated</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-value">98.7%</div>
-                                <div class="stat-label">Accuracy Rate</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-value">2.3s</div>
-                                <div class="stat-label">Avg. Response Time</div>
-                            </div>
-                        </div>
-
-                        <div class="card" style="height: 500px; display: flex; flex-direction: column;">
-                            <div class="card-header">
-                                <h4>Chat with Your Data</h4>
-                            </div>
-                            <div id="ai-chat-messages" style="flex: 1; overflow-y: auto; padding: 1rem; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-secondary);">
-                                <div style="margin-bottom: 1rem; padding: 1rem; background: var(--bg-primary); border-radius: 8px; border-left: 4px solid var(--primary-color);">
-                                    <strong>AI Assistant:</strong> Hello! I can help you analyze your survey and feedback data. Try asking me questions like "What's the average satisfaction score?" or "Show me trends in customer feedback over the last month."
-                                </div>
-                            </div>
-                            <div style="display: flex; gap: 1rem; margin-top: 1rem;">
-                                <input type="text" id="ai-chat-input" class="form-input" placeholder="Ask me anything about your data..." style="flex: 1;" onkeypress="if(event.key==='Enter') sendAIMessage()">
-                                <button class="btn btn-primary" onclick="sendAIMessage()">Send</button>
-                            </div>
-                            <div style="display: flex; gap: 0.5rem; margin-top: 1rem; flex-wrap: wrap;">
-                                <button class="btn btn-secondary btn-sm" onclick="sendSuggestion('What is the average satisfaction score?')">Average satisfaction</button>
-                                <button class="btn btn-secondary btn-sm" onclick="sendSuggestion('Show me feedback trends this month')">Monthly trends</button>
-                                <button class="btn btn-secondary btn-sm" onclick="sendSuggestion('Which departments need improvement?')">Department insights</button>
-                                <button class="btn btn-secondary btn-sm" onclick="sendSuggestion('Generate a summary report')">Summary report</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
         </main>
     </div>
@@ -2905,7 +2632,6 @@
                     </div>
                     <div style="display: grid; gap: 0.5rem;">
                         <a href="#" onclick="openHelpArticle('getting-started')" style="color: var(--primary-color); text-decoration: none;">Getting Started Guide</a>
-                        <a href="#" onclick="openHelpArticle('survey-builder')" style="color: var(--primary-color); text-decoration: none;">Survey Builder Tutorial</a>
                         <a href="#" onclick="openHelpArticle('analytics')" style="color: var(--primary-color); text-decoration: none;">Analytics & Reporting</a>
                         <a href="#" onclick="openHelpArticle('user-management')" style="color: var(--primary-color); text-decoration: none;">User Management</a>
                         <a href="#" onclick="openHelpArticle('api')" style="color: var(--primary-color); text-decoration: none;">API Documentation</a>
@@ -2991,7 +2717,7 @@
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; font-size: 0.875rem;">
                     <div><strong>Version:</strong> 2.4.1</div>
                     <div><strong>Browser:</strong> <span id="browser-info">Chrome 91.0</span></div>
-                    <div><strong>Plan:</strong> <span id="user-plan">Professional</span></div>
+                    <div><strong>Plan:</strong> <span id="user-plan">Start Listening</span></div>
                     <div><strong>Organization:</strong> <span id="user-org">TechCorp Ltd</span></div>
                     <div><strong>Last Updated:</strong> Dec 15, 2024</div>
                     <div><strong>Server Status:</strong> <span style="color: var(--success-color);">● All systems operational</span></div>
@@ -3010,7 +2736,7 @@
 <script src="lib/supabase.js"></script>
 <script src="assets/js/config.js"></script>
 <script src="assets/js/database.js"></script>
-<script src="assets/js/app.js"></script>
+<script src="assets/js/app.js?v=20250908-2125"></script>
 <script>
 // NEW CHAT WIDGET FUNCTIONS
 
@@ -3081,6 +2807,41 @@ function selectChatType(element, type) {
     
     // Enable the Next button
     document.getElementById('next-btn').disabled = false;
+}
+
+// Select access type function
+function selectAccessType(element, type) {
+    // Remove selection from all access type options
+    document.querySelectorAll('.access-type-option').forEach(option => {
+        option.style.borderColor = 'var(--border-color)';
+        option.style.backgroundColor = 'transparent';
+    });
+    
+    // Select current option
+    element.style.borderColor = 'var(--primary-color)';
+    element.style.backgroundColor = '#f0f9ff';
+    
+    // Update radio button
+    const radio = element.querySelector('input[type="radio"]');
+    radio.checked = true;
+    
+    // Show/hide email invites field based on access type
+    const emailInvitesGroup = document.getElementById('email-invites-group');
+    if (type === 'closed') {
+        emailInvitesGroup.style.display = 'block';
+        // Make email field required for closed access
+        const emailField = document.getElementById('listening-email-invites') || document.getElementById('chat-email-invites') || document.getElementById('pulse-email-invites');
+        if (emailField) {
+            emailField.required = true;
+        }
+    } else {
+        emailInvitesGroup.style.display = 'none';
+        // Remove required for open access
+        const emailField = document.getElementById('listening-email-invites') || document.getElementById('chat-email-invites') || document.getElementById('pulse-email-invites');
+        if (emailField) {
+            emailField.required = false;
+        }
+    }
 }
 
 // Proceed to chat setup based on selected type
@@ -3199,11 +2960,35 @@ function generateListeningChatLink(event) {
         console.error('Error saving listening chat:', error);
     });
     
-    // Close current modal
-    document.querySelector('.modal').remove();
+    // Close current modal (remove all modals to be safe)
+    document.querySelectorAll('.modal').forEach(modal => modal.remove());
     
-    // Show success modal with link
-    showListeningLinkModal(chatData);
+    // Show success toast
+    showToast(`Listening chat "${chatName}" created successfully!`, 'success');
+    
+    // Add to chat management interface
+    addChatToManagement(chatData);
+    
+    // Navigate to chat management section
+    setTimeout(() => {
+        // Hide all sections first
+        document.querySelectorAll('[id$="-section"]').forEach(section => {
+            section.classList.add('hidden');
+        });
+        
+        // Show chat management section
+        const chatMgmtSection = document.getElementById('chat-management-section');
+        if (chatMgmtSection) {
+            chatMgmtSection.classList.remove('hidden');
+        }
+        
+        // Update navigation highlight
+        document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+        const chatMgmtNavItem = document.querySelector('[onclick="showSection(\'chat-management\')"]');
+        if (chatMgmtNavItem) {
+            chatMgmtNavItem.classList.add('active');
+        }
+    }, 100);
 }
 
 // Show modal with generated listening chat link
@@ -3303,6 +3088,32 @@ function showChatSetup() {
                         <small class="form-help">The AI will naturally weave these topics into conversations, not as direct questions but as discussion areas</small>
                     </div>
                     
+                    <div class="form-group">
+                        <label class="form-label">Access Type</label>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                            <div class="access-type-option" onclick="selectAccessType(this, 'open')" style="padding: 1rem; border: 2px solid var(--border-color); border-radius: 8px; cursor: pointer; transition: all 0.2s; text-align: center;">
+                                <input type="radio" name="accessType" value="open" style="display: none;" checked>
+                                <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">🌍</div>
+                                <h6 style="margin: 0;">Open Access</h6>
+                                <small style="color: var(--text-secondary);">Anyone with the link can access</small>
+                            </div>
+                            
+                            <div class="access-type-option" onclick="selectAccessType(this, 'closed')" style="padding: 1rem; border: 2px solid var(--border-color); border-radius: 8px; cursor: pointer; transition: all 0.2s; text-align: center;">
+                                <input type="radio" name="accessType" value="closed" style="display: none;">
+                                <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">🔒</div>
+                                <h6 style="margin: 0;">Invite Only</h6>
+                                <small style="color: var(--text-secondary);">Only invited emails can access</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group" id="email-invites-group" style="display: none;">
+                        <label class="form-label">Email Invitations</label>
+                        <textarea id="chat-email-invites" class="form-input" rows="3" 
+                                  placeholder="Enter email addresses separated by commas or new lines&#10;e.g., john@company.com, sarah@company.com"></textarea>
+                        <small class="form-help">Only these email addresses will be able to access the chat</small>
+                    </div>
+                    
                     <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
                         <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').remove()">Cancel</button>
                         <button type="submit" class="btn btn-primary">Generate Link</button>
@@ -3326,6 +3137,29 @@ function generateGuidedChatLink(event) {
     const chatName = document.getElementById('chat-name').value;
     const welcomeMsg = document.getElementById('chat-welcome-msg').value;
     const topics = document.getElementById('chat-topics').value;
+    const accessType = document.querySelector('input[name="accessType"]:checked').value;
+    const emailInvites = document.getElementById('chat-email-invites').value;
+    
+    // Validate email invites for closed access
+    if (accessType === 'closed' && (!emailInvites || emailInvites.trim() === '')) {
+        showToast('Please enter email addresses for invite-only access', 'error');
+        return;
+    }
+    
+    // Parse and validate email addresses for closed access
+    let invitedEmails = [];
+    if (accessType === 'closed') {
+        const rawEmails = emailInvites.split(/[,\n]/).map(email => email.trim()).filter(email => email);
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        
+        for (let email of rawEmails) {
+            if (!emailRegex.test(email)) {
+                showToast(`Invalid email address: ${email}`, 'error');
+                return;
+            }
+        }
+        invitedEmails = rawEmails;
+    }
     
     // Generate unique session ID for chat
     const sessionId = 'chat_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
@@ -3350,6 +3184,8 @@ function generateGuidedChatLink(event) {
         welcome: welcomeMsg,
         topics: topics,
         link: originalLink,
+        accessType: accessType,
+        invitedEmails: invitedEmails,
         created: new Date().toISOString()
     };
     
@@ -3472,6 +3308,32 @@ function showPulseSetup() {
                         <button type="button" class="btn btn-secondary" onclick="addPulseQuestion()">+ Add Question</button>
                     </div>
                     
+                    <div class="form-group">
+                        <label class="form-label">Access Type</label>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                            <div class="access-type-option" onclick="selectAccessType(this, 'open')" style="padding: 1rem; border: 2px solid var(--border-color); border-radius: 8px; cursor: pointer; transition: all 0.2s; text-align: center;">
+                                <input type="radio" name="accessType" value="open" style="display: none;" checked>
+                                <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">🌍</div>
+                                <h6 style="margin: 0;">Open Access</h6>
+                                <small style="color: var(--text-secondary);">Anyone with the link can access</small>
+                            </div>
+                            
+                            <div class="access-type-option" onclick="selectAccessType(this, 'closed')" style="padding: 1rem; border: 2px solid var(--border-color); border-radius: 8px; cursor: pointer; transition: all 0.2s; text-align: center;">
+                                <input type="radio" name="accessType" value="closed" style="display: none;">
+                                <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">🔒</div>
+                                <h6 style="margin: 0;">Invite Only</h6>
+                                <small style="color: var(--text-secondary);">Only invited emails can access</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group" id="email-invites-group" style="display: none;">
+                        <label class="form-label">Email Invitations</label>
+                        <textarea id="pulse-email-invites" class="form-input" rows="3" 
+                                  placeholder="Enter email addresses separated by commas or new lines&#10;e.g., john@company.com, sarah@company.com"></textarea>
+                        <small class="form-help">Only these email addresses will be able to access the survey</small>
+                    </div>
+                    
                     <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
                         <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').remove()">Cancel</button>
                         <button type="submit" class="btn btn-primary">Generate Survey Link</button>
@@ -3544,6 +3406,8 @@ function generatePulseLink(event) {
     
     const surveyName = document.getElementById('pulse-name').value;
     const welcomeMsg = document.getElementById('pulse-welcome-msg').value;
+    const accessType = document.querySelector('input[name="accessType"]:checked').value;
+    const emailInvites = document.getElementById('pulse-email-invites').value;
     
     // Collect all questions
     const questions = [];
@@ -3571,6 +3435,27 @@ function generatePulseLink(event) {
         return;
     }
     
+    // Validate email invites for closed access
+    if (accessType === 'closed' && (!emailInvites || emailInvites.trim() === '')) {
+        showToast('Please enter email addresses for invite-only access', 'error');
+        return;
+    }
+    
+    // Parse and validate email addresses for closed access
+    let invitedEmails = [];
+    if (accessType === 'closed') {
+        const rawEmails = emailInvites.split(/[,\n]/).map(email => email.trim()).filter(email => email);
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        
+        for (let email of rawEmails) {
+            if (!emailRegex.test(email)) {
+                showToast(`Invalid email address: ${email}`, 'error');
+                return;
+            }
+        }
+        invitedEmails = rawEmails;
+    }
+    
     // Generate unique session ID for pulse survey
     const sessionId = 'pulse_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
     
@@ -3594,6 +3479,8 @@ function generatePulseLink(event) {
         welcome: welcomeMsg,
         questions: questions,
         link: originalLink,
+        accessType: accessType,
+        invitedEmails: invitedEmails,
         created: new Date().toISOString()
     };
     
@@ -3610,11 +3497,35 @@ function generatePulseLink(event) {
         console.error('Error saving pulse survey:', error);
     });
     
-    // Close current modal
-    document.querySelector('.modal').remove();
+    // Close current modal (remove all modals to be safe)
+    document.querySelectorAll('.modal').forEach(modal => modal.remove());
     
-    // Show success modal with link
-    showPulseLinkModal(chatData);
+    // Show success toast
+    showToast(`Pulse survey "${surveyName}" created successfully!`, 'success');
+    
+    // Add to chat management interface
+    addChatToManagement(chatData);
+    
+    // Navigate to chat management section
+    setTimeout(() => {
+        // Hide all sections first
+        document.querySelectorAll('[id$="-section"]').forEach(section => {
+            section.classList.add('hidden');
+        });
+        
+        // Show chat management section
+        const chatMgmtSection = document.getElementById('chat-management-section');
+        if (chatMgmtSection) {
+            chatMgmtSection.classList.remove('hidden');
+        }
+        
+        // Update navigation highlight
+        document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+        const chatMgmtNavItem = document.querySelector('[onclick="showSection(\'chat-management\')"]');
+        if (chatMgmtNavItem) {
+            chatMgmtNavItem.classList.add('active');
+        }
+    }, 100);
 }
 
 // Show modal with generated pulse survey link
@@ -4909,7 +4820,7 @@ async function handleOrganizationUpdate(event) {
         country: document.getElementById('org-country').value,
         website: document.getElementById('org-website').value,
         description: document.getElementById('org-description').value,
-        plan: document.getElementById('org-plan').value
+        plan: 'Start Listening'
     };
     
     try {
@@ -4945,48 +4856,82 @@ async function handleUserSubmit(event) {
     }
 }
 
-// Load organizations data from database
+// Force remove any checkboxes from organizations table
+
+// Load organizations data from database - SIMPLIFIED VERSION
 async function loadOrganizationsData() {
     try {
+        console.log('🔄 LOADING ORGANIZATIONS GRID');
+        
         const organizations = await loadOrganizations();
-        const tbody = document.getElementById('organizations-table-body');
+        const gridContainer = document.querySelector('.organizations-grid-container');
+        
+        console.log('📊 Data received:', organizations);
+        
+        // Clear existing data rows (keep headers)
+        const existingDataCells = gridContainer.querySelectorAll('.org-grid-cell');
+        existingDataCells.forEach(cell => cell.remove());
+        
+        const existingEmptyMsg = gridContainer.querySelector('.org-grid-empty');
+        if (existingEmptyMsg) existingEmptyMsg.remove();
         
         if (organizations.length === 0) {
-            tbody.innerHTML = `
-                <tr>
-                    <td colspan="6" style="text-align: center; padding: 2rem; color: var(--text-secondary);">
-                        No organizations found. Add your first organization to get started.
-                    </td>
-                </tr>
-            `;
+            const emptyDiv = document.createElement('div');
+            emptyDiv.className = 'org-grid-empty';
+            emptyDiv.style.gridColumn = '1 / -1';
+            emptyDiv.style.textAlign = 'center';
+            emptyDiv.style.padding = '2rem';
+            emptyDiv.style.color = 'var(--text-secondary)';
+            emptyDiv.textContent = 'No organizations found. Click \'Add Organization\' to create your first organization.';
+            gridContainer.appendChild(emptyDiv);
             return;
         }
         
-        tbody.innerHTML = organizations.map(org => `
-            <tr onclick="showOrganizationDetails('${org.id}')">
-                <td>${org.name}</td>
-                <td><span class="tag tag-active">${org.plan || 'Basic'}</span></td>
-                <td>0</td>
-                <td><span class="tag tag-active">Active</span></td>
-                <td>${new Date(org.created_at).toLocaleDateString()}</td>
-                <td onclick="event.stopPropagation()">
-                    <button class="btn btn-secondary btn-sm" onclick="handleEditOrganization('${org.id}')" data-translate="edit">Edit</button>
-                    <button class="btn btn-warning btn-sm" onclick="handleSuspendOrganization('${org.id}')" data-translate="suspend">Suspend</button>
-                    <button class="btn btn-danger btn-sm" onclick="handleDeleteOrganization('${org.id}')">Delete</button>
-                </td>
-            </tr>
-        `).join('');
+        // Build each row explicitly using CSS Grid
+        let gridHTML = '';
+        for (let i = 0; i < organizations.length; i++) {
+            const org = organizations[i];
+            console.log(`Building grid row ${i+1}:`, org);
+            
+            // Create 5 grid cells for each organization (auto-wraps to next row)
+            gridHTML += '<div class="org-grid-cell" onclick="showOrganizationDetails(\'' + (org.id || 'temp') + '\')">' + (org.name || 'Unnamed') + '</div>';
+            gridHTML += '<div class="org-grid-cell" onclick="showOrganizationDetails(\'' + (org.id || 'temp') + '\')">' + (org.user_count || 0) + '</div>';
+            gridHTML += '<div class="org-grid-cell" onclick="showOrganizationDetails(\'' + (org.id || 'temp') + '\')"><span class="tag tag-active">Active</span></div>';
+            gridHTML += '<div class="org-grid-cell" onclick="showOrganizationDetails(\'' + (org.id || 'temp') + '\')">' + (org.created_at ? new Date(org.created_at).toLocaleDateString() : 'Today') + '</div>';
+            gridHTML += '<div class="org-grid-cell" onclick="event.stopPropagation()">';
+            gridHTML += '<button class="btn btn-secondary btn-sm" onclick="handleEditOrganization(\'' + (org.id || 'temp') + '\')">Edit</button> ';
+            gridHTML += '<button class="btn btn-warning btn-sm" onclick="handleSuspendOrganization(\'' + (org.id || 'temp') + '\')">Suspend</button> ';
+            gridHTML += '<button class="btn btn-danger btn-sm" onclick="handleDeleteOrganization(\'' + (org.id || 'temp') + '\')">Delete</button>';
+            gridHTML += '</div>';
+        }
         
-        // Update organization filter
+        gridContainer.insertAdjacentHTML('beforeend', gridHTML);
+        console.log('✅ GRID POPULATED SUCCESSFULLY');
+        
+        // Update filter
         const filter = document.getElementById('organization-filter');
         if (filter) {
-            filter.innerHTML = '<option value="">All Organizations</option>' + 
-                organizations.map(org => `<option value="${org.id}">${org.name}</option>`).join('');
+            let filterHTML = '<option value="">All Organizations</option>';
+            for (let i = 0; i < organizations.length; i++) {
+                const org = organizations[i];
+                filterHTML += '<option value="' + (org.id || 'temp') + '">' + (org.name || 'Unnamed') + '</option>';
+            }
+            filter.innerHTML = filterHTML;
         }
         
     } catch (error) {
-        console.error('Error loading organizations:', error);
-        showToast('Failed to load organizations', 'error');
+        console.error('❌ ERROR:', error);
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'org-grid-empty';
+        errorDiv.style.gridColumn = '1 / -1';
+        errorDiv.style.textAlign = 'center';
+        errorDiv.style.padding = '2rem';
+        errorDiv.style.color = 'red';
+        errorDiv.textContent = 'Error: ' + error.message;
+        const gridContainer = document.querySelector('.organizations-grid-container');
+        if (gridContainer) {
+            gridContainer.appendChild(errorDiv);
+        }
     }
 }
 
@@ -5008,7 +4953,7 @@ async function loadUsersData() {
         }
         
         tbody.innerHTML = users.map(user => `
-            <tr onclick="showUserDetails('${user.id}')">
+            <tr>
                 <td onclick="event.stopPropagation()"><input type="checkbox"></td>
                 <td>${user.name}</td>
                 <td>${user.email}</td>
@@ -5177,14 +5122,6 @@ function previewTemplate(templateId) {
     document.body.appendChild(modal);
 }
 
-function exportAllData() {
-    showToast('Preparing data export...', 'info');
-    // Implementation would export all chat data
-    
-    setTimeout(() => {
-        showToast('Export ready! Check your downloads folder.', 'success');
-    }, 2000);
-}
 
 function viewActiveConversations() {
     showToast('Opening active conversations dashboard...', 'info');
@@ -5200,10 +5137,467 @@ function generateWeeklyReport() {
     }, 3000);
 }
 
+// Modal utility functions
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.remove();
+    }
+}
+
+// Close modal when clicking outside the modal content
+function setupModalCloseOnOutsideClick(modal) {
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            modal.remove();
+        }
+    });
+}
+
+// Close modal on Escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        const modals = document.querySelectorAll('.modal');
+        modals.forEach(modal => modal.remove());
+    }
+});
+
+// Show create organization modal (without plan selection)
+function showCreateOrganizationModal() {
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.id = 'create-organization-modal';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Create New Organization</h3>
+                <button class="close-btn" onclick="closeModal('create-organization-modal')">&times;</button>
+            </div>
+            <form onsubmit="handleCreateOrganization(event)">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label class="form-label">Organization Name *</label>
+                        <input type="text" id="create-org-name" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Industry</label>
+                        <select id="create-org-industry" class="form-select">
+                            <option value="">Select Industry</option>
+                            <option value="technology">Technology</option>
+                            <option value="healthcare">Healthcare</option>
+                            <option value="finance">Finance</option>
+                            <option value="education">Education</option>
+                            <option value="retail">Retail</option>
+                            <option value="manufacturing">Manufacturing</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label class="form-label">Company Size</label>
+                        <select id="create-org-size" class="form-select">
+                            <option value="">Select Size</option>
+                            <option value="1-10">1-10 employees</option>
+                            <option value="11-50">11-50 employees</option>
+                            <option value="51-200">51-200 employees</option>
+                            <option value="201-1000">201-1000 employees</option>
+                            <option value="1000+">1000+ employees</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Country</label>
+                        <select id="create-org-country" class="form-select">
+                            <option value="">Select Country</option>
+                            <option value="GB">United Kingdom</option>
+                            <option value="US">United States</option>
+                            <option value="CA">Canada</option>
+                            <option value="DE">Germany</option>
+                            <option value="FR">France</option>
+                            <option value="ES">Spain</option>
+                            <option value="AU">Australia</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Website</label>
+                    <input type="url" id="create-org-website" class="form-input" placeholder="https://www.example.com">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <textarea id="create-org-description" class="form-input" rows="3" placeholder="Describe your organization..."></textarea>
+                </div>
+                <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('create-organization-modal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create Organization</button>
+                </div>
+            </form>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    modal.style.display = 'flex';
+    setupModalCloseOnOutsideClick(modal);
+}
+
+// Show create user modal (without plan selection)
+async function showCreateUserModal() {
+    // Load organizations for the dropdown
+    const organizations = await loadOrganizations();
+    
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.id = 'create-user-modal';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Create New User</h3>
+                <button class="close-btn" onclick="closeModal('create-user-modal')">&times;</button>
+            </div>
+            <form onsubmit="handleCreateUser(event)">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label class="form-label">Full Name *</label>
+                        <input type="text" id="create-user-name" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email Address *</label>
+                        <input type="email" id="create-user-email" class="form-input" required>
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label class="form-label">Organization</label>
+                        <select id="create-user-organization" class="form-select">
+                            <option value="">Select Organization</option>
+                            ${organizations.map(org => `<option value="${org.id}">${org.name}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Role</label>
+                        <select id="create-user-role" class="form-select">
+                            <option value="user">User</option>
+                            <option value="admin">Admin</option>
+                            <option value="viewer">Viewer</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Phone Number</label>
+                    <input type="tel" id="create-user-phone" class="form-input" placeholder="+1 (555) 123-4567">
+                </div>
+                <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('create-user-modal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create User</button>
+                </div>
+            </form>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    modal.style.display = 'flex';
+    setupModalCloseOnOutsideClick(modal);
+}
+
+// Handle create organization form submission
+async function handleCreateOrganization(event) {
+    event.preventDefault();
+    
+    const formData = {
+        name: document.getElementById('create-org-name').value,
+        industry: document.getElementById('create-org-industry').value,
+        size: document.getElementById('create-org-size').value,
+        country: document.getElementById('create-org-country').value,
+        website: document.getElementById('create-org-website').value,
+        description: document.getElementById('create-org-description').value,
+        plan: 'Start Listening' // Fixed plan - no selection needed
+    };
+    
+    try {
+        const result = await saveOrganization(formData);
+        showToast('Organization created successfully!', 'success');
+        closeModal('create-organization-modal');
+        loadOrganizationsData(); // Refresh the table
+    } catch (error) {
+        console.error('Error creating organization:', error);
+        showToast('Failed to create organization', 'error');
+    }
+}
+
+// Handle create user form submission
+async function handleCreateUser(event) {
+    event.preventDefault();
+    
+    const formData = {
+        name: document.getElementById('create-user-name').value,
+        email: document.getElementById('create-user-email').value,
+        organization_id: document.getElementById('create-user-organization').value,
+        role: document.getElementById('create-user-role').value,
+        phone: document.getElementById('create-user-phone').value,
+        plan: 'Start Listening', // Fixed plan - no selection needed
+        status: 'active'
+    };
+    
+    console.log('User form data being sent:', formData);
+    
+    try {
+        const result = await saveUser(formData);
+        console.log('User creation result:', result);
+        showToast('User created successfully!', 'success');
+        closeModal('create-user-modal');
+        loadUsersData(); // Refresh the users table
+        // Small delay to ensure database is updated before refreshing organization counts
+        setTimeout(() => {
+            loadOrganizationsData(); // Refresh organizations to update user counts
+        }, 500);
+    } catch (error) {
+        console.error('Error creating user:', error);
+        showToast('Failed to create user: ' + error.message, 'error');
+    }
+}
+
+// Organization action handlers
+async function handleDeleteOrganization(orgId) {
+    if (!orgId || orgId === 'temp') {
+        showToast('Invalid organization ID', 'error');
+        return;
+    }
+    
+    // First check if there are users assigned to this organization
+    try {
+        const users = await loadUsers();
+        const usersInOrg = users.filter(user => user.organization_id === orgId);
+        
+        if (usersInOrg.length > 0) {
+            showToast(`Cannot delete organization: ${usersInOrg.length} user(s) are still assigned to it. Please reassign or remove these users first.`, 'error');
+            return;
+        }
+        
+        if (confirm('Are you sure you want to delete this organization? This action cannot be undone.')) {
+            const result = await deleteOrganization(orgId);
+            if (result) {
+                showToast('Organization deleted successfully!', 'success');
+                loadOrganizationsData(); // Refresh the grid
+                loadUsersData(); // Refresh users table too
+            } else {
+                showToast('Failed to delete organization. It may not exist.', 'error');
+            }
+        }
+    } catch (error) {
+        console.error('Error deleting organization:', error);
+        if (error.message && error.message.includes('still referenced')) {
+            showToast('Cannot delete organization: Users are still assigned to it. Please reassign or remove these users first.', 'error');
+        } else {
+            showToast('Failed to delete organization: ' + error.message, 'error');
+        }
+    }
+}
+
+async function handleEditOrganization(orgId) {
+    if (!orgId || orgId === 'temp') {
+        showToast('Invalid organization ID', 'error');
+        return;
+    }
+    
+    // TODO: Implement edit organization modal
+    showToast('Edit functionality coming soon!', 'info');
+}
+
+async function handleSuspendOrganization(orgId) {
+    if (!orgId || orgId === 'temp') {
+        showToast('Invalid organization ID', 'error');
+        return;
+    }
+    
+    if (confirm('Are you sure you want to suspend this organization?')) {
+        try {
+            const result = await updateOrganization(orgId, { status: 'suspended' });
+            if (result) {
+                showToast('Organization suspended successfully!', 'success');
+                loadOrganizationsData(); // Refresh the grid
+            } else {
+                showToast('Failed to suspend organization', 'error');
+            }
+        } catch (error) {
+            console.error('Error suspending organization:', error);
+            showToast('Failed to suspend organization: ' + error.message, 'error');
+        }
+    }
+}
+
+function showOrganizationDetails(orgId) {
+    if (!orgId || orgId === 'temp') {
+        showToast('Invalid organization ID', 'error');
+        return;
+    }
+    
+    // TODO: Implement organization details modal
+    showToast('Organization details coming soon!', 'info');
+}
+
+// User action handlers
+async function handleRemoveUser(userId) {
+    if (!userId || userId === 'temp') {
+        showToast('Invalid user ID', 'error');
+        return;
+    }
+    
+    if (confirm('Are you sure you want to remove this user? This action cannot be undone.')) {
+        try {
+            const result = await deleteUser(userId);
+            if (result) {
+                showToast('User removed successfully!', 'success');
+                loadUsersData(); // Refresh the users table
+                // Small delay to ensure database is updated before refreshing organization counts
+                setTimeout(() => {
+                    loadOrganizationsData(); // Refresh organizations to update user counts
+                }, 500);
+            } else {
+                showToast('Failed to remove user. It may not exist.', 'error');
+            }
+        } catch (error) {
+            console.error('Error removing user:', error);
+            showToast('Failed to remove user: ' + error.message, 'error');
+        }
+    }
+}
+
+async function handleEditUser(userId) {
+    if (!userId || userId === 'temp') {
+        showToast('Invalid user ID', 'error');
+        return;
+    }
+    
+    // TODO: Implement edit user modal
+    showToast('Edit user functionality coming soon!', 'info');
+}
+
+async function handleSuspendUser(userId) {
+    if (!userId || userId === 'temp') {
+        showToast('Invalid user ID', 'error');
+        return;
+    }
+    
+    if (confirm('Are you sure you want to suspend this user?')) {
+        try {
+            const result = await updateUser(userId, { status: 'suspended' });
+            if (result) {
+                showToast('User suspended successfully!', 'success');
+                loadUsersData(); // Refresh the users table
+            } else {
+                showToast('Failed to suspend user', 'error');
+            }
+        } catch (error) {
+            console.error('Error suspending user:', error);
+            showToast('Failed to suspend user: ' + error.message, 'error');
+        }
+    }
+}
+
+// Database connection test
+/*
+REQUIRED SUPABASE TABLES - Create these in your Supabase dashboard:
+
+1. organizations
+CREATE TABLE organizations (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    name TEXT NOT NULL,
+    description TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+);
+
+2. users  
+CREATE TABLE users (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    name TEXT NOT NULL,
+    email TEXT NOT NULL UNIQUE,
+    organization_id UUID REFERENCES organizations(id),
+    role TEXT DEFAULT 'user',
+    status TEXT DEFAULT 'active',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+);
+
+3. surveys
+CREATE TABLE surveys (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    title TEXT NOT NULL,
+    description TEXT,
+    organization_id UUID REFERENCES organizations(id),
+    created_by UUID REFERENCES users(id),
+    status TEXT DEFAULT 'draft',
+    questions JSONB,
+    settings JSONB,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+);
+
+4. responses
+CREATE TABLE responses (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    survey_id UUID REFERENCES surveys(id),
+    respondent_email TEXT,
+    responses JSONB NOT NULL,
+    submitted_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+);
+
+5. url_mappings
+CREATE TABLE url_mappings (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    slug TEXT NOT NULL UNIQUE,
+    original_url TEXT NOT NULL,
+    chat_name TEXT,
+    chat_type TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+);
+*/
+
+async function testDatabaseConnection() {
+    console.log('🔍 Testing database connection...');
+    
+    const tables = ['organizations', 'users', 'surveys', 'responses', 'url_mappings'];
+    const tableStatus = {};
+    
+    for (const table of tables) {
+        try {
+            const { data, error } = await window.supabaseClient
+                .from(table)
+                .select('*')
+                .limit(1);
+            
+            if (error) {
+                tableStatus[table] = `❌ Error: ${error.message}`;
+                console.error(`Table '${table}':`, error);
+            } else {
+                tableStatus[table] = `✅ OK (${data ? data.length : 0} records)`;
+                console.log(`Table '${table}': OK`);
+            }
+        } catch (err) {
+            tableStatus[table] = `❌ Exception: ${err.message}`;
+            console.error(`Table '${table}' exception:`, err);
+        }
+    }
+    
+    console.log('📊 Database Table Status:', tableStatus);
+    
+    // Show status to user
+    const missingTables = Object.entries(tableStatus)
+        .filter(([table, status]) => status.includes('❌'))
+        .map(([table]) => table);
+    
+    if (missingTables.length > 0) {
+        showToast(`Missing database tables: ${missingTables.join(', ')}. Check console for details.`, 'error', 8000);
+    } else {
+        showToast('All database tables are accessible!', 'success');
+    }
+}
+
 // Initialize templates on page load
 document.addEventListener('DOMContentLoaded', function() {
     // Check for short URL redirect first
     handleShortUrlRedirect();
+    
+    // Test database connection first
+    if (window.supabaseClient) {
+        testDatabaseConnection();
+    }
     
     loadTemplates();
     loadOrganizationsData();
@@ -5259,7 +5653,20 @@ async function handleShortUrlRedirect() {
 
 // Load and display active chats
 async function loadActiveChatsList() {
+    console.log('🔄 Loading active chats list...');
     try {
+        // Check if we're in the right section first
+        const chatSection = document.getElementById('chat-management-section');
+        if (!chatSection) {
+            console.error('❌ Chat management section not found');
+            return;
+        }
+        if (chatSection.classList.contains('hidden')) {
+            console.log('⚠️ Chat management section not visible, skipping load');
+            return;
+        }
+        console.log('✅ Chat management section is visible, proceeding with load');
+
         // Try to load from database first
         let chatSessions = await loadChatSessions();
         
@@ -5272,6 +5679,10 @@ async function loadActiveChatsList() {
         chatSessions = chatSessions.filter(chat => chat.status !== 'deleted');
         
         const activeChatsContainer = document.getElementById('active-chats-list');
+        if (!activeChatsContainer) {
+            console.error('active-chats-list element not found');
+            return;
+        }
         const emptyState = activeChatsContainer.previousElementSibling;
         
         if (chatSessions.length === 0) {
@@ -5323,10 +5734,32 @@ async function loadActiveChatsList() {
                         </div>
                     </div>
                     <div style="display: flex; gap: 0.5rem; align-items: center;">
-                        <button class="btn btn-secondary btn-sm" onclick="copyToClipboard('chat-link-${chat.id}', '${chat.link}')" title="Copy Link">📋</button>
-                        <button class="btn btn-secondary btn-sm" onclick="editChatSession('${chat.session_id || chat.id}')" title="Edit">✏️</button>
-                        <button class="btn btn-secondary btn-sm" onclick="testChatLink('${chat.link}')" title="Test">🔗</button>
-                        <button class="btn btn-danger btn-sm" onclick="deleteChatSession('${chat.session_id || chat.id}')" title="Delete">🗑️</button>
+                        <div class="dropdown" style="position: relative;">
+                            <button class="btn btn-secondary btn-sm" onclick="toggleChatDropdown(this, event)" style="border-radius: 4px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; padding: 0;" title="Chat Settings">
+                                ⚙️
+                            </button>
+                            <div class="dropdown-menu" style="display: none; position: absolute; top: 100%; right: 0; background: white; border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; min-width: 200px; padding: 8px 0;">
+                                <button class="dropdown-item" onclick="editChatSession('${chat.session_id || chat.id}')" style="width: 100%; text-align: left; padding: 0.75rem 1rem; border: none; background: none; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem;">
+                                    <span style="width: 16px;">✏️</span> Edit Chat
+                                </button>
+                                <button class="dropdown-item" onclick="copyChatSession('${chat.id}')" style="width: 100%; text-align: left; padding: 0.75rem 1rem; border: none; background: none; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem;">
+                                    <span style="width: 16px;">📄</span> Copy Chat
+                                </button>
+                                <button class="dropdown-item" onclick="exportPrintCopy('${chat.id}')" style="width: 100%; text-align: left; padding: 0.75rem 1rem; border: none; background: none; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem;">
+                                    <span style="width: 16px;">📤</span> Export Print Copy
+                                </button>
+                                <button class="dropdown-item" onclick="downloadChatData('${chat.id}')" style="width: 100%; text-align: left; padding: 0.75rem 1rem; border: none; background: none; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem;">
+                                    <span style="width: 16px;">💾</span> Download Chat Data
+                                </button>
+                                <button class="dropdown-item" onclick="manageRecipients('${chat.id}')" style="width: 100%; text-align: left; padding: 0.75rem 1rem; border: none; background: none; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem;">
+                                    <span style="width: 16px;">👥</span> Manage Recipients
+                                </button>
+                                <hr style="margin: 0.5rem 0; border: none; border-top: 1px solid var(--border-color);">
+                                <button class="dropdown-item" onclick="deleteChatSession('${chat.session_id || chat.id}')" style="width: 100%; text-align: left; padding: 0.75rem 1rem; border: none; background: none; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; color: var(--danger-color);">
+                                    <span style="width: 16px;">🗑️</span> Delete Chat
+                                </button>
+                            </div>
+                        </div>
                     </div>
                     <input type="hidden" id="chat-link-${chat.id}" value="${chat.link}">
                 </div>
@@ -5391,6 +5824,2043 @@ async function deleteChatSession(sessionId) {
         }
     }
 }
+
+// Function to add chat to management interface
+function addChatToManagement(chatSessionData) {
+    const activeChatsList = document.getElementById('active-chats-list');
+    const emptyState = document.querySelector('#chat-management-section .card:nth-child(2) > div:not(#active-chats-list)');
+    
+    // Hide empty state and show the list
+    if (emptyState) {
+        emptyState.style.display = 'none';
+    }
+    activeChatsList.style.display = 'block';
+    
+    // Create chat item
+    const chatItem = document.createElement('div');
+    chatItem.className = 'chat-item';
+    chatItem.style.cssText = `
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        background: var(--bg-primary);
+    `;
+    
+    const chatTypeBadge = chatSessionData.type === 'listening' ? 'Listening' : chatSessionData.type === 'pulse' ? 'Pulse' : 'Chat';
+    const welcomeMsg = chatSessionData.welcome || chatSessionData.welcomeMsg || 'No welcome message';
+    
+    chatItem.innerHTML = `
+        <div>
+            <h4 style="margin: 0 0 0.5rem 0;">${chatSessionData.name}</h4>
+            <p style="margin: 0; color: var(--text-secondary); font-size: 0.875rem;">${welcomeMsg}</p>
+            <div style="margin-top: 0.5rem;">
+                <span class="tag tag-active" style="font-size: 0.75rem;">Active</span>
+                <span class="tag" style="font-size: 0.75rem; margin-left: 0.5rem; background: var(--primary-color); color: white;">${chatTypeBadge}</span>
+                <span style="color: var(--text-secondary); font-size: 0.75rem; margin-left: 1rem;">
+                    Created: ${new Date().toLocaleDateString()}
+                </span>
+            </div>
+        </div>
+        <div style="display: flex; gap: 0.5rem; align-items: center;">
+            <div class="dropdown" style="position: relative;">
+                <button class="btn btn-secondary btn-sm" onclick="toggleChatDropdown(this, event)" style="border-radius: 4px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; padding: 0;" title="Chat Settings">
+                    ⚙️
+                </button>
+                <div class="dropdown-menu" style="display: none; position: absolute; top: 100%; right: 0; background: white; border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; min-width: 200px; padding: 8px 0;">
+                    <button class="dropdown-item" onclick="editChatSettings('${chatSessionData.id}')" style="width: 100%; text-align: left; padding: 0.75rem 1rem; border: none; background: none; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem;">
+                        <span style="width: 16px;">✏️</span> Edit Chat
+                    </button>
+                    <button class="dropdown-item" onclick="copyChatSession('${chatSessionData.id}')" style="width: 100%; text-align: left; padding: 0.75rem 1rem; border: none; background: none; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem;">
+                        <span style="width: 16px;">📄</span> Copy Chat
+                    </button>
+                    <button class="dropdown-item" onclick="exportPrintCopy('${chatSessionData.id}')" style="width: 100%; text-align: left; padding: 0.75rem 1rem; border: none; background: none; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem;">
+                        <span style="width: 16px;">📤</span> Export Print Copy
+                    </button>
+                    <button class="dropdown-item" onclick="downloadChatData('${chatSessionData.id}')" style="width: 100%; text-align: left; padding: 0.75rem 1rem; border: none; background: none; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem;">
+                        <span style="width: 16px;">💾</span> Download Chat Data
+                    </button>
+                    <button class="dropdown-item" onclick="manageRecipients('${chatSessionData.id}')" style="width: 100%; text-align: left; padding: 0.75rem 1rem; border: none; background: none; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem;">
+                        <span style="width: 16px;">👥</span> Manage Recipients
+                    </button>
+                    <hr style="margin: 0.5rem 0; border: none; border-top: 1px solid var(--border-color);">
+                    <button class="dropdown-item" onclick="deleteChat('${chatSessionData.id}')" style="width: 100%; text-align: left; padding: 0.75rem 1rem; border: none; background: none; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; color: var(--danger-color);">
+                        <span style="width: 16px;">🗑️</span> Delete Chat
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    activeChatsList.appendChild(chatItem);
+}
+
+// Universal chat finder function
+function findChatById(chatId) {
+    console.log('Finding chat with ID:', chatId);
+    
+    let chat = null;
+    
+    // Try different storage locations with different ID formats
+    const sources = [
+        window.chatSessions,
+        window.activeChatSessions
+    ];
+    
+    for (let source of sources) {
+        if (source && Array.isArray(source) && source.length > 0) {
+            chat = source.find(c => 
+                c.id === chatId || 
+                c.session_id === chatId ||
+                c.id === String(chatId) ||
+                c.session_id === String(chatId) ||
+                String(c.id) === String(chatId) ||
+                String(c.session_id) === String(chatId)
+            );
+            
+            if (chat) {
+                console.log('Found chat in source:', chat);
+                return chat;
+            }
+        }
+    }
+    
+    // If not found, get from the DOM (extract from chat item)
+    const chatElements = document.querySelectorAll('.chat-item');
+    for (let element of chatElements) {
+        const buttons = element.querySelectorAll('button[onclick*="' + chatId + '"]');
+        if (buttons.length > 0) {
+            // Extract data from DOM element
+            const nameElement = element.querySelector('h4, strong');
+            const typeElement = element.querySelector('[style*="Type:"]');
+            
+            chat = {
+                id: chatId,
+                session_id: chatId,
+                name: nameElement ? nameElement.textContent.trim() : 'Chat',
+                type: 'listening', // Default type
+                status: 'active',
+                welcome: 'Welcome to our feedback chat!',
+                welcomeMsg: 'Welcome to our feedback chat!',
+                created: new Date().toISOString(),
+                link: window.location.origin + '?chat=' + chatId,
+                shortUrl: window.location.origin + '?chat=' + chatId
+            };
+            
+            console.log('Created chat from DOM:', chat);
+            return chat;
+        }
+    }
+    
+    // Final fallback - create dummy chat
+    chat = {
+        id: chatId,
+        session_id: chatId,
+        name: 'Chat',
+        type: 'listening',
+        status: 'active',
+        welcome: 'Welcome to our feedback chat!',
+        welcomeMsg: 'Welcome to our feedback chat!',
+        created: new Date().toISOString(),
+        link: window.location.origin + '?chat=' + chatId,
+        shortUrl: window.location.origin + '?chat=' + chatId
+    };
+    
+    console.log('Created fallback chat:', chat);
+    return chat;
+}
+
+// Helper functions for chat management
+function copyLink(link) {
+    navigator.clipboard.writeText(link).then(() => {
+        showToast('Link copied to clipboard!', 'success');
+    }).catch(() => {
+        // Fallback for older browsers
+        const textarea = document.createElement('textarea');
+        textarea.value = link;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        showToast('Link copied to clipboard!', 'success');
+    });
+}
+
+function toggleChatDropdown(button, event) {
+    console.log('toggleChatDropdown called', button); // Debug log
+    
+    // Prevent event bubbling
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+    
+    const dropdown = button.nextElementSibling;
+    if (!dropdown) {
+        console.error('Dropdown menu not found');
+        return;
+    }
+    
+    const isVisible = dropdown.style.display === 'block';
+    console.log('Dropdown current state:', isVisible ? 'visible' : 'hidden'); // Debug log
+    
+    // Close all other dropdowns
+    document.querySelectorAll('.dropdown-menu').forEach(menu => {
+        menu.style.display = 'none';
+    });
+    
+    // Toggle this dropdown
+    dropdown.style.display = isVisible ? 'none' : 'block';
+    console.log('Dropdown new state:', dropdown.style.display); // Debug log
+    
+    // Close dropdown when clicking outside
+    if (!isVisible) {
+        setTimeout(() => {
+            document.addEventListener('click', function closeDropdown(e) {
+                if (!button.contains(e.target) && !dropdown.contains(e.target)) {
+                    dropdown.style.display = 'none';
+                    document.removeEventListener('click', closeDropdown);
+                }
+            });
+        }, 0);
+    }
+}
+
+function viewChatDetails(chatId) {
+    // Find the chat data (check both window storage locations)
+    let chat = null;
+    if (window.chatSessions) {
+        chat = window.chatSessions.find(c => c.id === chatId);
+    }
+    if (!chat && window.activeChatSessions) {
+        chat = window.activeChatSessions.find(c => c.id === chatId);
+    }
+    
+    if (!chat) {
+        showToast('Chat details not found', 'warning');
+        return;
+    }
+    
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3>Chat Details: ${chat.name}</h3>
+                <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
+            </div>
+            <div>
+                <div class="form-group">
+                    <label class="form-label">Chat Link:</label>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <input type="text" class="form-input" value="${chat.link || chat.shortUrl}" readonly style="font-family: monospace; font-size: 0.875rem;">
+                        <button class="btn btn-primary btn-sm" onclick="copyLink('${chat.link || chat.shortUrl}')">Copy</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Welcome Message:</label>
+                    <textarea class="form-input" readonly rows="3">${chat.welcome || chat.welcomeMsg || 'No welcome message'}</textarea>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label class="form-label">Type:</label>
+                        <input type="text" class="form-input" value="${chat.type || 'Chat'}" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Status:</label>
+                        <input type="text" class="form-input" value="Active" readonly>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
+                    <button class="btn btn-secondary" onclick="testChatLink('${chat.link || chat.shortUrl}')">Test Chat</button>
+                    <button class="btn btn-primary" onclick="this.closest('.modal').remove()">Close</button>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+}
+
+function editChatSettings(chatId) {
+    console.log('=== EDIT CHAT SETTINGS DEBUG ===');
+    console.log('ChatId received:', chatId, typeof chatId);
+    
+    try {
+        const chat = findChatById(chatId);
+        console.log('Chat found:', chat);
+        
+        if (!chat) {
+            console.error('Chat is null/undefined');
+            showToast('Unable to load chat data', 'error');
+            return;
+        }
+        
+        // Safely get chat properties with fallbacks and escape them
+        const chatName = (chat.name || 'Unnamed Chat').replace(/"/g, '&quot;');
+        const chatWelcome = (chat.welcome || chat.welcomeMsg || 'Welcome!').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        const chatType = (chat.type || 'listening').replace(/"/g, '&quot;');
+        const chatStatus = chat.status || 'active';
+        
+        console.log('Using chat data:', {
+            name: chatName,
+            welcome: chatWelcome,
+            type: chatType,
+            status: chatStatus
+        });
+        
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        
+        // Create the modal content step by step to avoid template literal issues
+        const modalContent = document.createElement('div');
+        modalContent.className = 'modal-content';
+        modalContent.style.maxWidth = '600px';
+        
+        modalContent.innerHTML = `
+            <div class="modal-header">
+                <h3>✏️ Edit Chat: ${chatName}</h3>
+                <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
+            </div>
+            <form id="edit-chat-form">
+                <div style="padding: 1.5rem;">
+                    <div class="form-group">
+                        <label class="form-label">Chat Name</label>
+                        <input type="text" id="edit-chat-name" class="form-input" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Welcome Message</label>
+                        <textarea id="edit-chat-welcome" class="form-input" rows="4" required></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Chat Type</label>
+                        <input type="text" id="edit-chat-type" class="form-input" readonly style="background-color: #f8f9fa;">
+                        <small class="form-help">Chat type cannot be changed after creation</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Status</label>
+                        <select id="edit-chat-status" class="form-input">
+                            <option value="active">Active</option>
+                            <option value="paused">Paused</option>
+                            <option value="archived">Archived</option>
+                        </select>
+                    </div>
+                    
+                    <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
+                        <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').remove()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </div>
+            </form>
+        `;
+        
+        modal.appendChild(modalContent);
+        document.body.appendChild(modal);
+        
+        // Set form values after modal is added to DOM
+        setTimeout(() => {
+            const nameInput = document.getElementById('edit-chat-name');
+            const welcomeInput = document.getElementById('edit-chat-welcome');
+            const typeInput = document.getElementById('edit-chat-type');
+            const statusSelect = document.getElementById('edit-chat-status');
+            
+            if (nameInput) nameInput.value = chat.name || 'Unnamed Chat';
+            if (welcomeInput) welcomeInput.value = chat.welcome || chat.welcomeMsg || 'Welcome!';
+            if (typeInput) typeInput.value = chat.type || 'listening';
+            if (statusSelect) statusSelect.value = chat.status || 'active';
+            
+            console.log('Form values set successfully');
+        }, 10);
+        
+        // Add form submit handler
+        const form = document.getElementById('edit-chat-form');
+        if (form) {
+            form.onsubmit = function(event) {
+                event.preventDefault();
+                saveEditedChat(event, chatId);
+            };
+        }
+        
+        console.log('Edit modal created and added to page');
+        
+    } catch (error) {
+        console.error('Error in editChatSettings:', error);
+        showToast('Error opening edit dialog: ' + error.message, 'error');
+    }
+}
+
+function saveEditedChat(event, chatId) {
+    console.log('=== SAVE EDITED CHAT DEBUG ===');
+    event.preventDefault();
+    
+    try {
+        const newName = document.getElementById('edit-chat-name').value;
+        const newWelcome = document.getElementById('edit-chat-welcome').value;
+        const newStatus = document.getElementById('edit-chat-status').value;
+        
+        console.log('Form values:', { newName, newWelcome, newStatus });
+        
+        if (!newName.trim()) {
+            showToast('Chat name is required', 'warning');
+            return;
+        }
+        
+        // Update chat data in storage
+        let updated = false;
+        
+        if (window.chatSessions) {
+            const chat = window.chatSessions.find(c => 
+                c.id === chatId || c.session_id === chatId ||
+                String(c.id) === String(chatId) || String(c.session_id) === String(chatId)
+            );
+            if (chat) {
+                console.log('Updating chat in chatSessions:', chat);
+                chat.name = newName;
+                chat.welcome = newWelcome;
+                chat.welcomeMsg = newWelcome;
+                chat.status = newStatus;
+                updated = true;
+            }
+        }
+        
+        if (!updated && window.activeChatSessions) {
+            const chat = window.activeChatSessions.find(c => 
+                c.id === chatId || c.session_id === chatId ||
+                String(c.id) === String(chatId) || String(c.session_id) === String(chatId)
+            );
+            if (chat) {
+                console.log('Updating chat in activeChatSessions:', chat);
+                chat.name = newName;
+                chat.welcome = newWelcome;
+                chat.welcomeMsg = newWelcome;
+                chat.status = newStatus;
+                updated = true;
+            }
+        }
+        
+        // Close modal
+        const modal = event.target.closest('.modal');
+        if (modal) {
+            modal.remove();
+        }
+        
+        // Always refresh the chat list to show changes
+        setTimeout(() => {
+            loadActiveChatsList();
+        }, 100);
+        
+        showToast(`Chat "${newName}" updated successfully!`, 'success');
+        console.log('Chat update completed, updated:', updated);
+        
+    } catch (error) {
+        console.error('Error saving chat:', error);
+        showToast('Error saving changes: ' + error.message, 'error');
+    }
+}
+
+function copyChatSession(chatId) {
+    const originalChat = findChatById(chatId);
+    
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3>📄 Copy Chat</h3>
+                <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
+            </div>
+            <form onsubmit="createCopiedChat(event, '${chatId}')">
+                <div style="padding: 1.5rem;">
+                    <div class="alert alert-info" style="margin-bottom: 1.5rem;">
+                        <strong>Copying:</strong> ${originalChat.name}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">New Chat Name</label>
+                        <input type="text" id="copy-chat-name" class="form-input" value="${originalChat.name} (Copy)" required>
+                        <small class="form-help">Enter a name for the copied chat</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">What will be copied:</label>
+                        <ul style="margin: 0.5rem 0; padding-left: 1.5rem; font-size: 0.875rem;">
+                            <li>Chat type (${originalChat.type})</li>
+                            <li>Welcome message</li>
+                            <li>Configuration settings</li>
+                            ${originalChat.topics ? '<li>Topics</li>' : ''}
+                            ${originalChat.questions ? '<li>Questions</li>' : ''}
+                        </ul>
+                        <small class="form-help" style="color: var(--text-secondary);">A new chat link will be generated</small>
+                    </div>
+                    
+                    <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
+                        <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').remove()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Copy Chat</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    
+    // Focus on the name input
+    setTimeout(() => {
+        document.getElementById('copy-chat-name').focus();
+        document.getElementById('copy-chat-name').select();
+    }, 100);
+}
+
+function createCopiedChat(event, originalChatId) {
+    event.preventDefault();
+    
+    const newName = document.getElementById('copy-chat-name').value;
+    const originalChat = findChatById(originalChatId);
+    
+    // Create new chat data by copying from original
+    const newChatId = originalChat.type + '_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    const newLink = window.location.origin + '/chat.html?session=' + newChatId;
+    
+    const copiedChat = {
+        id: newChatId,
+        session_id: newChatId,
+        name: newName,
+        type: originalChat.type,
+        welcome: originalChat.welcome || originalChat.welcomeMsg,
+        welcomeMsg: originalChat.welcome || originalChat.welcomeMsg,
+        link: newLink,
+        shortUrl: newLink,
+        status: 'active',
+        created: new Date().toISOString(),
+        created_at: new Date().toISOString(),
+        // Copy additional properties
+        topics: originalChat.topics,
+        questions: originalChat.questions,
+        allowAnonymous: originalChat.allowAnonymous,
+        expiry: originalChat.expiry
+    };
+    
+    // Add to storage
+    if (!window.chatSessions) {
+        window.chatSessions = [];
+    }
+    window.chatSessions.push(copiedChat);
+    
+    // Close modal
+    event.target.closest('.modal').remove();
+    
+    // Add to management interface and refresh
+    addChatToManagement(copiedChat);
+    loadActiveChatsList();
+    
+    showToast(`Chat "${newName}" created successfully!`, 'success');
+}
+
+function exportPrintCopy(chatId) {
+    const chat = findChatById(chatId);
+    
+    // Create printable HTML content
+    const printContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Chat Export - ${chat.name}</title>
+            <style>
+                body { font-family: Arial, sans-serif; margin: 2rem; line-height: 1.6; }
+                .header { border-bottom: 2px solid #333; padding-bottom: 1rem; margin-bottom: 2rem; }
+                .section { margin-bottom: 1.5rem; }
+                .label { font-weight: bold; color: #555; }
+                .value { margin-bottom: 1rem; }
+                .chat-link { font-family: monospace; background: #f5f5f5; padding: 0.5rem; border-radius: 4px; }
+                @media print {
+                    body { margin: 1rem; }
+                    .no-print { display: none; }
+                }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h1>Chat Export</h1>
+                <p>Generated on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}</p>
+            </div>
+            
+            <div class="section">
+                <div class="label">Chat Name:</div>
+                <div class="value">${chat.name}</div>
+            </div>
+            
+            <div class="section">
+                <div class="label">Chat Type:</div>
+                <div class="value">${chat.type || 'Chat'}</div>
+            </div>
+            
+            <div class="section">
+                <div class="label">Status:</div>
+                <div class="value">${chat.status || 'Active'}</div>
+            </div>
+            
+            <div class="section">
+                <div class="label">Created:</div>
+                <div class="value">${new Date(chat.created || chat.created_at).toLocaleString()}</div>
+            </div>
+            
+            <div class="section">
+                <div class="label">Welcome Message:</div>
+                <div class="value">${chat.welcome || chat.welcomeMsg || 'No welcome message'}</div>
+            </div>
+            
+            <div class="section">
+                <div class="label">Chat Link:</div>
+                <div class="value chat-link">${chat.link || chat.shortUrl}</div>
+            </div>
+            
+            ${chat.topics ? `
+                <div class="section">
+                    <div class="label">Topics:</div>
+                    <div class="value">${Array.isArray(chat.topics) ? chat.topics.join(', ') : chat.topics}</div>
+                </div>
+            ` : ''}
+            
+            ${chat.questions ? `
+                <div class="section">
+                    <div class="label">Questions:</div>
+                    <div class="value">${Array.isArray(chat.questions) ? chat.questions.length + ' questions configured' : 'Custom questions configured'}</div>
+                </div>
+            ` : ''}
+            
+            <div class="section">
+                <div class="label">Additional Settings:</div>
+                <div class="value">
+                    • Anonymous Access: ${chat.allowAnonymous ? 'Enabled' : 'Disabled'}<br>
+                    • Expiry: ${chat.expiry || 'Never expires'}<br>
+                    • Link Sharing: Enabled
+                </div>
+            </div>
+            
+            <div class="no-print" style="margin-top: 3rem; text-align: center;">
+                <button onclick="window.print()" style="background: #2563eb; color: white; border: none; padding: 0.75rem 2rem; border-radius: 4px; cursor: pointer;">Print This Page</button>
+                <button onclick="window.close()" style="background: #6b7280; color: white; border: none; padding: 0.75rem 2rem; border-radius: 4px; cursor: pointer; margin-left: 1rem;">Close</button>
+            </div>
+        </body>
+        </html>
+    `;
+    
+    // Open in new window for printing
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+    
+    showToast('Print preview opened in new window', 'success');
+}
+
+function downloadChatData(chatId) {
+    const chat = findChatById(chatId);
+    
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3>💾 Download Chat Data</h3>
+                <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
+            </div>
+            <div style="padding: 1.5rem;">
+                <div class="alert alert-info" style="margin-bottom: 1.5rem;">
+                    <strong>Chat:</strong> ${chat.name}
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Select Data to Download:</label>
+                    <div style="margin: 1rem 0;">
+                        <label style="display: flex; align-items: center; margin-bottom: 0.5rem; cursor: pointer;">
+                            <input type="checkbox" id="download-config" checked style="margin-right: 0.5rem;"> Chat Configuration
+                        </label>
+                        <label style="display: flex; align-items: center; margin-bottom: 0.5rem; cursor: pointer;">
+                            <input type="checkbox" id="download-responses" checked style="margin-right: 0.5rem;"> User Responses (Sample)
+                        </label>
+                        <label style="display: flex; align-items: center; margin-bottom: 0.5rem; cursor: pointer;">
+                            <input type="checkbox" id="download-analytics" checked style="margin-right: 0.5rem;"> Analytics Summary
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">File Format:</label>
+                    <select id="download-format" class="form-input">
+                        <option value="csv">CSV (Excel compatible)</option>
+                        <option value="json">JSON (Developer format)</option>
+                        <option value="txt">Text Report</option>
+                    </select>
+                </div>
+                
+                <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
+                    <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').remove()">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="performDownload('${chatId}')">Download</button>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+}
+
+function performDownload(chatId) {
+    const includeConfig = document.getElementById('download-config').checked;
+    const includeResponses = document.getElementById('download-responses').checked;
+    const includeAnalytics = document.getElementById('download-analytics').checked;
+    const format = document.getElementById('download-format').value;
+    
+    const chat = findChatById(chatId);
+    
+    // Generate sample data
+    const currentDate = new Date().toLocaleDateString();
+    const currentTime = new Date().toLocaleTimeString();
+    
+    let data = {};
+    
+    if (includeConfig) {
+        data.configuration = {
+            name: chat.name,
+            type: chat.type,
+            status: chat.status || 'active',
+            created: chat.created || chat.created_at,
+            welcome_message: chat.welcome || chat.welcomeMsg,
+            link: chat.link,
+            topics: chat.topics,
+            questions: chat.questions
+        };
+    }
+    
+    if (includeResponses) {
+        data.responses = [
+            {
+                timestamp: new Date(Date.now() - 86400000).toISOString(),
+                user_id: 'user_001',
+                message: 'Great initiative! Really happy with the new features.',
+                sentiment: 'positive',
+                topics: ['features', 'satisfaction']
+            },
+            {
+                timestamp: new Date(Date.now() - 43200000).toISOString(),
+                user_id: 'user_002',
+                message: 'Could improve the user interface, but overall good.',
+                sentiment: 'neutral',
+                topics: ['ui', 'improvement']
+            },
+            {
+                timestamp: new Date(Date.now() - 21600000).toISOString(),
+                user_id: 'user_003',
+                message: 'Loving the new chat system!',
+                sentiment: 'positive',
+                topics: ['chat', 'satisfaction']
+            }
+        ];
+    }
+    
+    if (includeAnalytics) {
+        data.analytics = {
+            total_responses: 3,
+            positive_sentiment: 2,
+            neutral_sentiment: 1,
+            negative_sentiment: 0,
+            top_topics: ['satisfaction', 'features', 'ui'],
+            response_rate: '15.2%',
+            avg_response_length: 45,
+            generated_on: currentDate + ' ' + currentTime
+        };
+    }
+    
+    let content = '';
+    let filename = '';
+    let mimeType = '';
+    
+    if (format === 'csv') {
+        filename = `${chat.name}_data_${new Date().toISOString().split('T')[0]}.csv`;
+        mimeType = 'text/csv';
+        content = generateCSV(data);
+    } else if (format === 'json') {
+        filename = `${chat.name}_data_${new Date().toISOString().split('T')[0]}.json`;
+        mimeType = 'application/json';
+        content = JSON.stringify(data, null, 2);
+    } else if (format === 'txt') {
+        filename = `${chat.name}_report_${new Date().toISOString().split('T')[0]}.txt`;
+        mimeType = 'text/plain';
+        content = generateTextReport(data, chat);
+    }
+    
+    // Create and download file
+    const blob = new Blob([content], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    
+    // Close modal
+    document.querySelector('.modal').remove();
+    
+    showToast(`Data downloaded as ${filename}`, 'success');
+}
+
+function generateCSV(data) {
+    let csv = '';
+    
+    if (data.configuration) {
+        csv += 'CONFIGURATION\n';
+        csv += 'Property,Value\n';
+        Object.entries(data.configuration).forEach(([key, value]) => {
+            csv += `"${key}","${value}"\n`;
+        });
+        csv += '\n';
+    }
+    
+    if (data.responses) {
+        csv += 'RESPONSES\n';
+        csv += 'Timestamp,User ID,Message,Sentiment,Topics\n';
+        data.responses.forEach(response => {
+            csv += `"${response.timestamp}","${response.user_id}","${response.message}","${response.sentiment}","${response.topics.join(', ')}"\n`;
+        });
+        csv += '\n';
+    }
+    
+    if (data.analytics) {
+        csv += 'ANALYTICS\n';
+        csv += 'Metric,Value\n';
+        Object.entries(data.analytics).forEach(([key, value]) => {
+            csv += `"${key}","${value}"\n`;
+        });
+    }
+    
+    return csv;
+}
+
+function generateTextReport(data, chat) {
+    let report = `CHAT DATA REPORT\n`;
+    report += `================\n\n`;
+    report += `Chat: ${chat.name}\n`;
+    report += `Generated: ${new Date().toLocaleString()}\n\n`;
+    
+    if (data.configuration) {
+        report += `CONFIGURATION:\n`;
+        report += `- Name: ${data.configuration.name}\n`;
+        report += `- Type: ${data.configuration.type}\n`;
+        report += `- Status: ${data.configuration.status}\n`;
+        report += `- Created: ${new Date(data.configuration.created).toLocaleString()}\n`;
+        report += `- Link: ${data.configuration.link}\n\n`;
+    }
+    
+    if (data.analytics) {
+        report += `ANALYTICS SUMMARY:\n`;
+        report += `- Total Responses: ${data.analytics.total_responses}\n`;
+        report += `- Sentiment: ${data.analytics.positive_sentiment} positive, ${data.analytics.neutral_sentiment} neutral, ${data.analytics.negative_sentiment} negative\n`;
+        report += `- Response Rate: ${data.analytics.response_rate}\n`;
+        report += `- Top Topics: ${data.analytics.top_topics.join(', ')}\n\n`;
+    }
+    
+    if (data.responses) {
+        report += `RECENT RESPONSES:\n`;
+        data.responses.forEach((response, index) => {
+            report += `\n${index + 1}. [${new Date(response.timestamp).toLocaleString()}] (${response.sentiment})\n`;
+            report += `   "${response.message}"\n`;
+            report += `   Topics: ${response.topics.join(', ')}\n`;
+        });
+    }
+    
+    return report;
+}
+
+function manageRecipients(chatId) {
+    // Set the global chat ID for recipient management
+    window.currentChatId = chatId;
+    console.log('🔧 Set current chat ID to:', chatId);
+    
+    const contentArea = document.getElementById('content-area');
+    
+    // Get chat data to show the chat name
+    const chat = findChatById(chatId);
+    const chatName = chat ? chat.name : 'Unknown Chat';
+    
+    // Create the full-screen recipients management interface
+    contentArea.innerHTML = `
+        <div class="manage-recipients-container">
+            <!-- Navigation Breadcrumb -->
+            <nav class="recipients-nav">
+                <div class="breadcrumb">
+                    <span class="breadcrumb-item">
+                        <a href="#" onclick="showDashboard()" class="breadcrumb-link">Manage Surveys</a>
+                    </span>
+                    <span class="breadcrumb-separator">></span>
+                    <span class="breadcrumb-item">
+                        <a href="#" onclick="showSection('chat-management')" class="breadcrumb-link">Chat Management</a>
+                    </span>
+                    <span class="breadcrumb-separator">></span>
+                    <span class="breadcrumb-item current">
+                        Manage Recipients: ${chatName}
+                    </span>
+                </div>
+                <div class="back-arrow">
+                    <button onclick="showSection('chat-management')" class="back-btn" title="Back to Chat Management">
+                        <span class="back-icon">←</span> Back
+                    </button>
+                </div>
+            </nav>
+
+            <!-- Header Section -->
+            <div class="recipients-header">
+                <h1>👥 Manage Recipients: ${chatName}</h1>
+                
+                <!-- Stats Cards -->
+                <div class="recipients-stats">
+                    <div class="stat-card">
+                        <div class="stat-label">Participation Rate</div>
+                        <div class="stat-value">-</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Completion Rate</div>
+                        <div class="stat-value">-</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="recipients-actions">
+                <button class="btn btn-primary" onclick="sendEmailInvitation()">
+                    <span>📧</span> Send E-mail Invitation / Reminder to Selected Recipients
+                </button>
+                
+                <button class="btn btn-secondary" onclick="preloadRecipients()">
+                    <span>📋</span> Pre-load recipients and demographic data
+                </button>
+                
+                <button class="btn btn-success" onclick="addRecipient()">
+                    <span>➕</span> Add Recipient
+                </button>
+                
+                <button class="btn btn-info" onclick="uploadRecipient()">
+                    <span>📤</span> Upload Recipient
+                </button>
+                
+                <button class="btn btn-warning" onclick="uploadSurveyResponses()">
+                    <span>📊</span> Upload Survey Responses
+                </button>
+            </div>
+
+            <!-- Data Table -->
+            <div class="recipients-table-container">
+                <table class="recipients-table">
+                    <thead>
+                        <tr>
+                            <th class="checkbox-column">
+                                <input type="checkbox" id="select-all" onchange="toggleSelectAllRecipients()">
+                            </th>
+                            <th>Forename</th>
+                            <th>Surname</th>
+                            <th>E-mail</th>
+                            <th>Employee No</th>
+                            <th>Invite Sent</th>
+                            <th>No. Reminders Sent</th>
+                            <th>Last Reminder Sent</th>
+                            <th class="sortable" onclick="sortTable('date_started')">
+                                Date Survey Started 
+                                <span class="sort-arrow">↕️</span>
+                            </th>
+                            <th class="sortable" onclick="sortTable('date_completed')">
+                                Date Survey Completed 
+                                <span class="sort-arrow">↕️</span>
+                            </th>
+                            <th>Edit Survey Recipient</th>
+                            <th>Delete Survey Recipient</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recipients-table-body">
+                        <tr class="no-data-row">
+                            <td colspan="12" class="no-data">No data</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    `;
+    
+    // Load recipients data for this chat
+    loadRecipientsData(chatId);
+}
+
+function generateInviteMessage(chat) {
+    return `Hi there!
+
+You're invited to share your thoughts through our ${chat.type} chat: "${chat.name}".
+
+${chat.welcome || chat.welcomeMsg || 'Your feedback is valuable to us!'}
+
+Please click the link below to get started:
+{CHAT_LINK}
+
+Thank you for your time!`;
+}
+
+function sendInvitations(chatId) {
+    const emails = document.getElementById('recipient-emails').value.trim();
+    const message = document.getElementById('invitation-message').value;
+    
+    if (!emails) {
+        showToast('Please enter at least one email address', 'warning');
+        return;
+    }
+    
+    const emailList = emails.split('\n').filter(email => email.trim());
+    const validEmails = emailList.filter(email => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()));
+    
+    if (validEmails.length === 0) {
+        showToast('Please enter valid email addresses', 'warning');
+        return;
+    }
+    
+    if (validEmails.length !== emailList.length) {
+        showToast(`${emailList.length - validEmails.length} invalid email(s) were skipped`, 'warning');
+    }
+    
+    // Simulate sending invitations
+    showToast(`Sending invitations to ${validEmails.length} recipient(s)...`, 'info');
+    
+    setTimeout(() => {
+        // Add new recipients to the list (simulation)
+        const recipientsList = document.getElementById('current-recipients');
+        validEmails.forEach(email => {
+            const recipientItem = document.createElement('div');
+            recipientItem.className = 'recipient-item';
+            recipientItem.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 4px; margin-bottom: 0.5rem;';
+            recipientItem.innerHTML = `
+                <div>
+                    <div style="font-weight: 500;">${email.trim()}</div>
+                    <small style="color: var(--text-secondary);">Invited just now • Pending</small>
+                </div>
+                <span style="color: var(--warning-color); font-size: 0.75rem;">⏳</span>
+            `;
+            recipientsList.appendChild(recipientItem);
+        });
+        
+        // Clear the input
+        document.getElementById('recipient-emails').value = '';
+        
+        showToast(`Invitations sent successfully to ${validEmails.length} recipient(s)!`, 'success');
+    }, 2000);
+}
+
+function archiveChat(chatId) {
+    if (confirm('Are you sure you want to archive this chat? It will no longer be accessible to participants.')) {
+        showToast('Chat archived successfully!', 'success');
+        // In a real app, update the database status here
+    }
+}
+
+function deleteChat(chatId) {
+    if (confirm('Are you sure you want to delete this chat? This action cannot be undone.')) {
+        const chatItem = document.querySelector(`[onclick*="${chatId}"]`)?.closest('.chat-item');
+        if (chatItem) {
+            chatItem.remove();
+        }
+        
+        // Remove from sessions arrays
+        if (window.chatSessions) {
+            window.chatSessions = window.chatSessions.filter(c => c.id !== chatId);
+        }
+        if (window.activeChatSessions) {
+            window.activeChatSessions = window.activeChatSessions.filter(c => c.id !== chatId);
+        }
+        
+        // Show empty state if no chats left
+        const activeChatsList = document.getElementById('active-chats-list');
+        if (activeChatsList && activeChatsList.children.length === 0) {
+            activeChatsList.style.display = 'none';
+            const emptyState = document.querySelector('#chat-management-section .card:nth-child(2) > div:not(#active-chats-list)');
+            if (emptyState) {
+                emptyState.style.display = 'block';
+            }
+        }
+        
+        showToast('Chat deleted successfully!', 'success');
+    }
+}
+
+// Debug function to test chat functionality
+window.testChatFunctions = function() {
+    console.log('=== CHAT FUNCTION TEST ===');
+    console.log('Available chat data:');
+    console.log('window.chatSessions:', window.chatSessions);
+    console.log('window.activeChatSessions:', window.activeChatSessions);
+    
+    // Test with different ID formats
+    const testIds = ['test', 'test2', 'listening_123', '1', 'user_001'];
+    testIds.forEach(id => {
+        const chat = findChatById(id);
+        console.log(`Test ID "${id}":`, chat);
+    });
+    
+    // Try to edit first available chat
+    if (window.chatSessions && window.chatSessions.length > 0) {
+        const firstChat = window.chatSessions[0];
+        console.log('Testing edit with first chat:', firstChat);
+        editChatSettings(firstChat.id || firstChat.session_id);
+    } else if (window.activeChatSessions && window.activeChatSessions.length > 0) {
+        const firstChat = window.activeChatSessions[0];
+        console.log('Testing edit with first active chat:', firstChat);
+        editChatSettings(firstChat.id || firstChat.session_id);
+    } else {
+        console.log('Testing edit with dummy ID: test');
+        editChatSettings('test');
+    }
+};
+
+// Simple edit test function
+window.testEditFunction = function() {
+    console.log('=== TESTING EDIT FUNCTION DIRECTLY ===');
+    try {
+        console.log('Calling editChatSettings with "test"');
+        editChatSettings('test');
+        console.log('Edit function completed without error');
+    } catch (error) {
+        console.error('Error calling edit function:', error);
+    }
+};
+
+// Test if the function exists
+console.log('editChatSettings function exists:', typeof editChatSettings);
+
+
+// Make sure showSection function is available with navigation highlighting
+function showSection(sectionName) {
+    console.log(`🔄 showSection called with: ${sectionName}`);
+
+    const sections = document.querySelectorAll('[id$="-section"]');
+    console.log(`Found ${sections.length} sections to hide`);
+    sections.forEach(section => {
+        section.classList.add('hidden');
+        console.log(`Hidden section: ${section.id}`);
+    });
+
+    const targetSectionId = sectionName + '-section';
+    console.log(`Looking for section: ${targetSectionId}`);
+
+    // Try to find the element with multiple approaches
+    let targetSection = document.getElementById(targetSectionId);
+
+    if (!targetSection) {
+        // Fallback: search by querySelector
+        console.log(`Retrying with querySelector...`);
+        targetSection = document.querySelector(`#${targetSectionId}`);
+    }
+
+    if (!targetSection) {
+        // Debug: List all sections with matching pattern
+        console.log(`All sections found:`, Array.from(sections).map(s => s.id));
+        console.error(`❌ Target section not found: ${targetSectionId}`);
+
+        // Try a delayed retry in case of timing issues
+        setTimeout(() => {
+            console.log(`Retrying showSection after delay...`);
+            const retrySection = document.getElementById(targetSectionId);
+            if (retrySection) {
+                console.log(`✅ Found section on retry: ${retrySection.id}`);
+                retrySection.classList.remove('hidden');
+                updateNavHighlight(sectionName);
+            } else {
+                console.error(`❌ Section still not found after retry: ${targetSectionId}`);
+            }
+        }, 100);
+        return;
+    }
+
+    targetSection.classList.remove('hidden');
+    console.log(`✅ Showed section: ${targetSection.id}`);
+
+    updateNavHighlight(sectionName);
+    
+    // Reload chat list when showing chat management to ensure latest template is used
+    if (sectionName === 'chat-management') {
+        // Wait for DOM to update, then load chats
+        setTimeout(() => {
+            try {
+                console.log('⏰ Delayed loading of active chats...');
+                loadActiveChatsList();
+            } catch (error) {
+                console.error('Error loading active chats list:', error);
+            }
+        }, 500);
+    }
+}
+
+// Helper function to update navigation highlighting
+function updateNavHighlight(sectionName) {
+    // Update navigation highlighting
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.classList.remove('active');
+    });
+
+    // Find and highlight the correct nav item
+    const navItem = document.querySelector(`[onclick="showSection('${sectionName}')"]`);
+    if (navItem) {
+        navItem.classList.add('active');
+    }
+}
+
+// Database cleanup function for testing
+async function cleanupTestRecipients() {
+    try {
+        console.log('🧹 Cleaning up old test recipients...');
+        
+        // Delete all recipients with survey_id 'test' (from earlier testing)
+        const { data, error } = await window.supabaseClient
+            .from('survey_recipients')
+            .delete()
+            .eq('survey_id', 'test');
+            
+        if (error) {
+            console.error('❌ Error cleaning up:', error);
+        } else {
+            console.log('✅ Cleanup complete');
+        }
+    } catch (error) {
+        console.error('❌ Cleanup failed:', error);
+    }
+}
+
+// Function to get current chat ID from the page context
+function getCurrentChatId() {
+    // Try to get from global variable or page context
+    if (window.currentChatId) {
+        return window.currentChatId;
+    }
+    
+    // Try to extract from URL or page title
+    const breadcrumb = document.querySelector('.breadcrumb');
+    if (breadcrumb) {
+        const breadcrumbText = breadcrumb.textContent;
+        const match = breadcrumbText.match(/survey - (.+)/);
+        if (match) {
+            return match[1];
+        }
+    }
+    
+    // Fallback to 'test' if we can't determine the chat ID
+    return 'test';
+}
+
+// Recipients Management Helper Functions
+// loadRecipientsData function removed - using version from app.js to avoid conflicts
+
+function updateRecipientStats(recipients) {
+    const total = recipients.length;
+    const completed = recipients.filter(r => r.status === 'completed').length;
+    const invited = recipients.filter(r => r.inviteSent === 'Yes').length;
+    
+    const participationRate = total > 0 ? Math.round((invited / total) * 100) : 0;
+    const completionRate = invited > 0 ? Math.round((completed / invited) * 100) : 0;
+
+    // Update the stats cards - show "-" when no data
+    const statsCards = document.querySelectorAll('.recipients-stats .stat-card');
+    if (statsCards[0]) {
+        statsCards[0].querySelector('.stat-value').textContent = total > 0 ? `${participationRate}%` : '-';
+    }
+    if (statsCards[1]) {
+        statsCards[1].querySelector('.stat-value').textContent = total > 0 ? `${completionRate}%` : '-';
+    }
+}
+
+function toggleSelectAllRecipients() {
+    const selectAllCheckbox = document.getElementById('select-all');
+    const checkboxes = document.querySelectorAll('#recipients-table-body input[type="checkbox"]');
+
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = selectAllCheckbox.checked;
+    });
+}
+
+function sortRecipientsTable(column) {
+    showToast(`Sorting by ${column}`, 'info');
+    // TODO: Implement table sorting functionality
+}
+
+function sendEmailInvitation() {
+    const selectedRecipients = document.querySelectorAll('#recipients-table-body input[type="checkbox"]:checked');
+    if (selectedRecipients.length === 0) {
+        showToast('Please select recipients to send invitations to', 'warning');
+        return;
+    }
+
+    // Get selected recipient details
+    const selectedDetails = Array.from(selectedRecipients).map(checkbox => {
+        const row = checkbox.closest('tr');
+        return {
+            id: checkbox.dataset.recipientId,
+            name: `${row.cells[1].textContent} ${row.cells[2].textContent}`,
+            email: row.cells[3].textContent
+        };
+    });
+
+    // Create email invitation modal
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3>📧 Send Email Invitations</h3>
+                <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Recipients (${selectedDetails.length} selected):</label>
+                    <div class="recipients-preview">
+                        ${selectedDetails.map(r => `
+                            <div class="recipient-tag">
+                                <span>${r.name} (${r.email})</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Email Subject:</label>
+                    <input type="text" id="email-subject" class="form-input" 
+                           value="Survey Invitation - Your Feedback Matters" 
+                           placeholder="Enter email subject">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Email Message:</label>
+                    <textarea id="email-message" class="form-input" rows="6" placeholder="Enter your message...">Hi {name},
+
+We would love to hear your feedback! Please take a few minutes to complete our survey.
+
+Click here to start: {survey_link}
+
+Thank you for your time!
+
+Best regards,
+Survey Team</textarea>
+                    <small class="form-help">Use {name} for recipient name and {survey_link} for the survey link</small>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        <input type="checkbox" id="send-reminder" checked> Send as reminder (for previously invited recipients)
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').remove()">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="confirmSendInvitations(${JSON.stringify(selectedDetails).replace(/"/g, '&quot;')})">
+                    Send ${selectedDetails.length} Invitation${selectedDetails.length > 1 ? 's' : ''}
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+}
+
+function preloadRecipients() {
+    // Create pre-load recipients modal
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h3>📋 Pre-load Recipients and Demographic Data</h3>
+                <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Import recipient lists and demographic information from various sources.</p>
+                
+                <div class="preload-options">
+                    <div class="option-card" onclick="preloadFromCSV()">
+                        <div class="option-icon">📄</div>
+                        <h4>CSV/Excel Import</h4>
+                        <p>Upload a CSV or Excel file with recipient details and demographic information.</p>
+                        <div class="option-features">
+                            <span class="feature">✓ Bulk import</span>
+                            <span class="feature">✓ Demographic data</span>
+                            <span class="feature">✓ Validation</span>
+                        </div>
+                    </div>
+                    
+                    <div class="option-card" onclick="preloadFromHR()">
+                        <div class="option-icon">🏢</div>
+                        <h4>HR System Integration</h4>
+                        <p>Connect to your HR system to automatically import employee data.</p>
+                        <div class="option-features">
+                            <span class="feature">✓ Live sync</span>
+                            <span class="feature">✓ Department data</span>
+                            <span class="feature">✓ Role information</span>
+                        </div>
+                    </div>
+                    
+                    <div class="option-card" onclick="preloadFromAD()">
+                        <div class="option-icon">🔐</div>
+                        <h4>Active Directory</h4>
+                        <p>Import users from your organization's Active Directory.</p>
+                        <div class="option-features">
+                            <span class="feature">✓ AD integration</span>
+                            <span class="feature">✓ Group filtering</span>
+                            <span class="feature">✓ Auto-sync</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="sample-data-section" style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
+                    <h4>Quick Start: Load Sample Data</h4>
+                    <p>Add sample recipients with demographic data for testing purposes.</p>
+                    <button class="btn btn-info" onclick="loadSampleData()">
+                        🎯 Load Sample Recipients
+                    </button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').remove()">Close</button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+}
+
+function addRecipient() {
+    // Create add recipient modal
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3>➕ Add New Recipient</h3>
+                <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="add-recipient-form">
+                    <div class="form-group">
+                        <label class="form-label">First Name *</label>
+                        <input type="text" id="recipient-forename" class="form-input" required 
+                               placeholder="Enter first name">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Last Name *</label>
+                        <input type="text" id="recipient-surname" class="form-input" required 
+                               placeholder="Enter last name">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Email Address *</label>
+                        <input type="email" id="recipient-email" class="form-input" required 
+                               placeholder="name@company.com">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Employee Number</label>
+                        <input type="text" id="recipient-employee-no" class="form-input" 
+                               placeholder="EMP001 (optional)">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">
+                            <input type="checkbox" id="send-immediate-invitation"> 
+                            Send invitation immediately after adding
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').remove()">Cancel</button>
+                <button type="button" class="btn btn-success" onclick="confirmAddRecipient()">Add Recipient</button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+}
+
+function uploadRecipient() {
+    // Create upload modal
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3>📤 Upload Recipients</h3>
+                <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="upload-section">
+                    <p>Upload a CSV or Excel file containing recipient information.</p>
+                    
+                    <div class="file-upload-area" onclick="document.getElementById('recipient-file').click()">
+                        <div class="upload-icon">📁</div>
+                        <div class="upload-text">
+                            <strong>Click to select file</strong> or drag and drop
+                        </div>
+                        <div class="upload-hint">Supported formats: .csv, .xlsx, .xls</div>
+                    </div>
+                    
+                    <input type="file" id="recipient-file" accept=".csv,.xlsx,.xls" style="display: none;" 
+                           onchange="handleRecipientFileUpload(event)">
+                    
+                    <div class="template-section" style="margin-top: 2rem;">
+                        <h4>Expected File Format:</h4>
+                        <div class="format-example">
+                            <table style="width: 100%; font-size: 0.875rem; border-collapse: collapse;">
+                                <thead>
+                                    <tr style="background: #f8f9fa;">
+                                        <th style="border: 1px solid #dee2e6; padding: 0.5rem;">Forename</th>
+                                        <th style="border: 1px solid #dee2e6; padding: 0.5rem;">Surname</th>
+                                        <th style="border: 1px solid #dee2e6; padding: 0.5rem;">Email</th>
+                                        <th style="border: 1px solid #dee2e6; padding: 0.5rem;">Employee_No</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td style="border: 1px solid #dee2e6; padding: 0.5rem;">John</td>
+                                        <td style="border: 1px solid #dee2e6; padding: 0.5rem;">Smith</td>
+                                        <td style="border: 1px solid #dee2e6; padding: 0.5rem;">john@company.com</td>
+                                        <td style="border: 1px solid #dee2e6; padding: 0.5rem;">EMP001</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <button class="btn btn-info" onclick="downloadTemplate()" style="margin-top: 1rem;">
+                            📥 Download Template
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="upload-preview" style="display: none; margin-top: 2rem;">
+                    <h4>Preview:</h4>
+                    <div id="preview-content"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').remove()">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirm-upload-btn" style="display: none;" 
+                        onclick="confirmUploadRecipients()">Import Recipients</button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+}
+
+function uploadSurveyResponses() {
+    // Create survey responses upload modal
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3>📊 Upload Survey Responses</h3>
+                <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="upload-section">
+                    <p>Upload survey responses to import existing data or bulk update participant responses.</p>
+                    
+                    <div class="file-upload-area" onclick="document.getElementById('responses-file').click()">
+                        <div class="upload-icon">📊</div>
+                        <div class="upload-text">
+                            <strong>Click to select responses file</strong> or drag and drop
+                        </div>
+                        <div class="upload-hint">Supported formats: .csv, .xlsx, .json</div>
+                    </div>
+                    
+                    <input type="file" id="responses-file" accept=".csv,.xlsx,.json" style="display: none;" 
+                           onchange="handleResponsesFileUpload(event)">
+                    
+                    <div class="template-section" style="margin-top: 2rem;">
+                        <h4>Expected Response Format:</h4>
+                        <div class="format-example">
+                            <table style="width: 100%; font-size: 0.875rem; border-collapse: collapse;">
+                                <thead>
+                                    <tr style="background: #f8f9fa;">
+                                        <th style="border: 1px solid #dee2e6; padding: 0.5rem;">Email</th>
+                                        <th style="border: 1px solid #dee2e6; padding: 0.5rem;">Response_Date</th>
+                                        <th style="border: 1px solid #dee2e6; padding: 0.5rem;">Status</th>
+                                        <th style="border: 1px solid #dee2e6; padding: 0.5rem;">Score</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td style="border: 1px solid #dee2e6; padding: 0.5rem;">john@company.com</td>
+                                        <td style="border: 1px solid #dee2e6; padding: 0.5rem;">2025-09-01</td>
+                                        <td style="border: 1px solid #dee2e6; padding: 0.5rem;">Completed</td>
+                                        <td style="border: 1px solid #dee2e6; padding: 0.5rem;">85</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <button class="btn btn-info" onclick="downloadResponsesTemplate()" style="margin-top: 1rem;">
+                            📥 Download Response Template
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="responses-preview" style="display: none; margin-top: 2rem;">
+                    <h4>Preview:</h4>
+                    <div id="responses-preview-content"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').remove()">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirm-responses-btn" style="display: none;" 
+                        onclick="confirmUploadResponses()">Import Responses</button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+}
+
+function confirmSendInvitations(recipients) {
+    const subject = document.getElementById('email-subject').value;
+    const message = document.getElementById('email-message').value;
+    const isReminder = document.getElementById('send-reminder').checked;
+    
+    if (!subject.trim() || !message.trim()) {
+        showToast('Please fill in both subject and message', 'warning');
+        return;
+    }
+    
+    // Close modal
+    document.querySelector('.modal').remove();
+    
+    // Simulate sending emails
+    showToast('Sending invitations...', 'info');
+    
+    setTimeout(() => {
+        showToast(`Successfully sent ${recipients.length} invitation${recipients.length > 1 ? 's' : ''}!`, 'success');
+        
+        // Update table data to reflect sent invitations
+        recipients.forEach(recipient => {
+            const checkbox = document.querySelector(`input[data-recipient-id="${recipient.id}"]`);
+            if (checkbox) {
+                const row = checkbox.closest('tr');
+                // Update invite sent status
+                const inviteCell = row.cells[5];
+                inviteCell.innerHTML = '<span class="status-badge status-sent">Yes</span>';
+                
+                // Update reminders sent
+                const remindersCell = row.cells[6];
+                const currentReminders = parseInt(remindersCell.textContent) || 0;
+                remindersCell.textContent = currentReminders + 1;
+                
+                // Update last reminder date
+                const lastReminderCell = row.cells[7];
+                lastReminderCell.textContent = new Date().toISOString().split('T')[0];
+            }
+        });
+        
+        // Clear selections
+        document.querySelectorAll('#recipients-table-body input[type="checkbox"]:checked').forEach(cb => cb.checked = false);
+        document.getElementById('select-all').checked = false;
+    }, 2000);
+}
+
+async function confirmAddRecipient() {
+    const forename = document.getElementById('recipient-forename').value.trim();
+    const surname = document.getElementById('recipient-surname').value.trim();
+    const email = document.getElementById('recipient-email').value.trim();
+    const employeeNo = document.getElementById('recipient-employee-no').value.trim();
+    const sendInvitation = document.getElementById('send-immediate-invitation').checked;
+    
+    // Validation
+    if (!forename || !surname || !email) {
+        showToast('Please fill in all required fields', 'warning');
+        return;
+    }
+    
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        showToast('Please enter a valid email address', 'warning');
+        return;
+    }
+    
+    try {
+        console.log('🔍 Checking for duplicate email:', email);
+        
+        // Get the current chat ID from the page
+        const currentChatId = getCurrentChatId() || 'test';
+        console.log('🔍 Using survey ID:', currentChatId);
+        
+        // Check for duplicate email in database
+        const { data: existingRecipient, error: checkError } = await window.supabaseClient
+            .from('survey_recipients')
+            .select('email')
+            .eq('email', email)
+            .eq('survey_id', currentChatId)
+            .single();
+            
+        console.log('✅ Duplicate check result:', { existingRecipient, checkError });
+        
+        if (existingRecipient) {
+            showToast('A recipient with this email already exists', 'warning');
+            return;
+        }
+        
+        // Create new recipient object for database
+        const newRecipient = {
+            survey_id: currentChatId,
+            forename: forename,
+            surname: surname,
+            email: email,
+            employee_no: employeeNo || `EMP${Date.now().toString().slice(-3)}`,
+            invite_sent: sendInvitation,
+            reminder_count: sendInvitation ? 1 : 0,
+            last_reminder_sent: sendInvitation ? new Date().toISOString().split('T')[0] : null,
+            survey_started_date: null,
+            survey_completed_date: null,
+            created_at: new Date().toISOString()
+        };
+        
+        console.log('💾 Saving recipient to database:', newRecipient);
+        
+        // Save to database
+        const { data: savedRecipient, error } = await window.supabaseClient
+            .from('survey_recipients')
+            .insert([newRecipient])
+            .select()
+            .single();
+            
+        console.log('💾 Save result:', { savedRecipient, error });
+        
+        if (error) {
+            console.error('❌ Error saving recipient:', error);
+            showToast('Error saving recipient to database', 'error');
+            return;
+        }
+        
+        console.log('✅ Recipient saved successfully:', savedRecipient);
+        
+        // Close modal
+        document.querySelector('.modal').remove();
+        
+        // Reload the data to show the new recipient
+        loadRecipientsData(currentChatId);
+        
+        // Show success message
+        showToast(`Recipient ${forename} ${surname} added successfully!`, 'success');
+        
+        // Send invitation if requested
+        if (sendInvitation) {
+            // You can implement invitation sending logic here
+            showToast(`Invitation sent to ${email}`, 'info');
+        }
+        
+    } catch (error) {
+        console.error('Error adding recipient:', error);
+        showToast('Error adding recipient', 'error');
+    }
+}
+
+function handleRecipientFileUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    showToast('Processing file...', 'info');
+    
+    // Simulate file processing
+    setTimeout(() => {
+        // Mock data for preview
+        const mockData = [
+            { forename: 'Alice', surname: 'Wilson', email: 'alice.wilson@company.com', employeeNo: 'EMP005' },
+            { forename: 'Bob', surname: 'Taylor', email: 'bob.taylor@company.com', employeeNo: 'EMP006' },
+            { forename: 'Carol', surname: 'Anderson', email: 'carol.anderson@company.com', employeeNo: 'EMP007' }
+        ];
+        
+        // Show preview
+        const previewDiv = document.getElementById('upload-preview');
+        const previewContent = document.getElementById('preview-content');
+        
+        previewContent.innerHTML = `
+            <div style="margin-bottom: 1rem;">
+                <strong>${mockData.length} recipients found in file: ${file.name}</strong>
+            </div>
+            <div style="max-height: 200px; overflow-y: auto; border: 1px solid #dee2e6;">
+                <table style="width: 100%; font-size: 0.875rem;">
+                    <thead>
+                        <tr style="background: #f8f9fa;">
+                            <th style="padding: 0.5rem; border-bottom: 1px solid #dee2e6;">Name</th>
+                            <th style="padding: 0.5rem; border-bottom: 1px solid #dee2e6;">Email</th>
+                            <th style="padding: 0.5rem; border-bottom: 1px solid #dee2e6;">Employee No</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${mockData.map(r => `
+                            <tr>
+                                <td style="padding: 0.5rem;">${r.forename} ${r.surname}</td>
+                                <td style="padding: 0.5rem;">${r.email}</td>
+                                <td style="padding: 0.5rem;">${r.employeeNo}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
+        
+        previewDiv.style.display = 'block';
+        document.getElementById('confirm-upload-btn').style.display = 'inline-block';
+        
+        showToast('File processed successfully!', 'success');
+    }, 1500);
+}
+
+function downloadTemplate() {
+    const csvContent = "Forename,Surname,Email,Employee_No\nJohn,Smith,john.smith@company.com,EMP001\nJane,Doe,jane.doe@company.com,EMP002";
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'recipients_template.csv';
+    a.click();
+    window.URL.revokeObjectURL(url);
+    showToast('Template downloaded!', 'success');
+}
+
+function confirmUploadRecipients() {
+    // Mock implementation - would normally process the actual file data
+    showToast('Importing recipients...', 'info');
+    
+    setTimeout(() => {
+        // Simulate adding the mock data to the table
+        const mockData = [
+            { forename: 'Alice', surname: 'Wilson', email: 'alice.wilson@company.com', employeeNo: 'EMP005' },
+            { forename: 'Bob', surname: 'Taylor', email: 'bob.taylor@company.com', employeeNo: 'EMP006' },
+            { forename: 'Carol', surname: 'Anderson', email: 'carol.anderson@company.com', employeeNo: 'EMP007' }
+        ];
+        
+        const tableBody = document.getElementById('recipients-table-body');
+        
+        // Remove "No data" row if it exists
+        const noDataRow = tableBody.querySelector('.no-data-row');
+        if (noDataRow) {
+            noDataRow.remove();
+        }
+        
+        mockData.forEach(recipient => {
+            const newId = Date.now() + Math.random();
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td class="checkbox-column">
+                    <input type="checkbox" data-recipient-id="${newId}">
+                </td>
+                <td>${recipient.forename}</td>
+                <td>${recipient.surname}</td>
+                <td>${recipient.email}</td>
+                <td>${recipient.employeeNo}</td>
+                <td>
+                    <span class="status-badge status-not-sent">No</span>
+                </td>
+                <td>0</td>
+                <td>-</td>
+                <td>-</td>
+                <td>-</td>
+                <td>
+                    <button class="btn btn-small btn-info" onclick="editRecipient('${newId}')" title="Edit Recipient">
+                        ✏️
+                    </button>
+                </td>
+                <td>
+                    <button class="btn btn-small btn-danger" onclick="deleteRecipient('${newId}')" title="Delete Recipient">
+                        🗑️
+                    </button>
+                </td>
+            `;
+            tableBody.appendChild(row);
+        });
+        
+        // Close modal
+        document.querySelector('.modal').remove();
+        showToast(`Successfully imported ${mockData.length} recipients!`, 'success');
+    }, 2000);
+}
+
+function editRecipient(id) {
+    showToast(`Edit recipient ${id} - Feature coming soon!`, 'info');
+}
+
+
+function preloadFromCSV() {
+    document.querySelector('.modal').remove();
+    uploadRecipient(); // Reuse the upload functionality
+}
+
+function preloadFromHR() {
+    showToast('HR System integration coming soon!', 'info');
+    document.querySelector('.modal').remove();
+}
+
+function preloadFromAD() {
+    showToast('Active Directory integration coming soon!', 'info');
+    document.querySelector('.modal').remove();
+}
+
+function loadSampleData() {
+    document.querySelector('.modal').remove();
+    showToast('Loading enhanced sample data...', 'info');
+    
+    setTimeout(() => {
+        const sampleData = [
+            { forename: 'David', surname: 'Williams', email: 'david.williams@company.com', employeeNo: 'EMP008' },
+            { forename: 'Lisa', surname: 'Garcia', email: 'lisa.garcia@company.com', employeeNo: 'EMP009' },
+            { forename: 'Robert', surname: 'Martinez', email: 'robert.martinez@company.com', employeeNo: 'EMP010' },
+            { forename: 'Jennifer', surname: 'Lopez', email: 'jennifer.lopez@company.com', employeeNo: 'EMP011' },
+            { forename: 'James', surname: 'Wilson', email: 'james.wilson@company.com', employeeNo: 'EMP012' }
+        ];
+        
+        const tableBody = document.getElementById('recipients-table-body');
+        
+        // Remove "No data" row if it exists
+        const noDataRow = tableBody.querySelector('.no-data-row');
+        if (noDataRow) {
+            noDataRow.remove();
+        }
+        
+        sampleData.forEach(recipient => {
+            const newId = Date.now() + Math.random();
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td class="checkbox-column">
+                    <input type="checkbox" data-recipient-id="${newId}">
+                </td>
+                <td>${recipient.forename}</td>
+                <td>${recipient.surname}</td>
+                <td>${recipient.email}</td>
+                <td>${recipient.employeeNo}</td>
+                <td>
+                    <span class="status-badge status-not-sent">No</span>
+                </td>
+                <td>0</td>
+                <td>-</td>
+                <td>-</td>
+                <td>-</td>
+                <td>
+                    <button class="btn btn-small btn-info" onclick="editRecipient('${newId}')" title="Edit Recipient">
+                        ✏️
+                    </button>
+                </td>
+                <td>
+                    <button class="btn btn-small btn-danger" onclick="deleteRecipient('${newId}')" title="Delete Recipient">
+                        🗑️
+                    </button>
+                </td>
+            `;
+            tableBody.appendChild(row);
+        });
+        
+        showToast(`Successfully loaded ${sampleData.length} sample recipients!`, 'success');
+    }, 1500);
+}
+
+function handleResponsesFileUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    showToast('Processing responses file...', 'info');
+    
+    setTimeout(() => {
+        // Mock response data for preview
+        const mockResponses = [
+            { email: 'john.smith@company.com', responseDate: '2025-09-01', status: 'Completed', score: 85 },
+            { email: 'sarah.johnson@company.com', responseDate: '2025-09-01', status: 'In Progress', score: 0 }
+        ];
+        
+        const previewDiv = document.getElementById('responses-preview');
+        const previewContent = document.getElementById('responses-preview-content');
+        
+        previewContent.innerHTML = `
+            <div style="margin-bottom: 1rem;">
+                <strong>${mockResponses.length} responses found in file: ${file.name}</strong>
+            </div>
+            <div style="max-height: 200px; overflow-y: auto; border: 1px solid #dee2e6;">
+                <table style="width: 100%; font-size: 0.875rem;">
+                    <thead>
+                        <tr style="background: #f8f9fa;">
+                            <th style="padding: 0.5rem; border-bottom: 1px solid #dee2e6;">Email</th>
+                            <th style="padding: 0.5rem; border-bottom: 1px solid #dee2e6;">Date</th>
+                            <th style="padding: 0.5rem; border-bottom: 1px solid #dee2e6;">Status</th>
+                            <th style="padding: 0.5rem; border-bottom: 1px solid #dee2e6;">Score</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${mockResponses.map(r => `
+                            <tr>
+                                <td style="padding: 0.5rem;">${r.email}</td>
+                                <td style="padding: 0.5rem;">${r.responseDate}</td>
+                                <td style="padding: 0.5rem;">${r.status}</td>
+                                <td style="padding: 0.5rem;">${r.score}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
+        
+        previewDiv.style.display = 'block';
+        document.getElementById('confirm-responses-btn').style.display = 'inline-block';
+        
+        showToast('Response file processed successfully!', 'success');
+    }, 1500);
+}
+
+function downloadResponsesTemplate() {
+    const csvContent = "Email,Response_Date,Status,Score\njohn.smith@company.com,2025-09-01,Completed,85\nsarah.johnson@company.com,2025-09-01,In Progress,0";
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'survey_responses_template.csv';
+    a.click();
+    window.URL.revokeObjectURL(url);
+    showToast('Response template downloaded!', 'success');
+}
+
+function confirmUploadResponses() {
+    showToast('Importing survey responses...', 'info');
+    
+    setTimeout(() => {
+        // Update existing recipients with response data
+        const existingRows = document.querySelectorAll('#recipients-table-body tr');
+        let updatedCount = 0;
+        
+        existingRows.forEach(row => {
+            const email = row.cells[3]?.textContent;
+            if (email === 'john.smith@company.com') {
+                // Update John's data
+                row.cells[8].textContent = '2025-09-01'; // Date Started
+                row.cells[9].innerHTML = '<span class="status-badge status-completed">2025-09-01</span>'; // Date Completed
+                updatedCount++;
+            } else if (email === 'sarah.johnson@company.com') {
+                // Update Sarah's data
+                row.cells[8].textContent = '2025-09-01'; // Date Started
+                row.cells[9].textContent = '-'; // Still in progress
+                updatedCount++;
+            }
+        });
+        
+        document.querySelector('.modal').remove();
+        showToast(`Successfully imported responses for ${updatedCount} recipients!`, 'success');
+    }, 2000);
+}
+
+function showDashboard() {
+    // Return to dashboard view by reloading content
+    location.reload();
+}
+
 </script>
 </body>
 </html>

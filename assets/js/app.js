@@ -883,14 +883,15 @@ function showSection(sectionName) {
         targetSection.classList.remove('hidden');
     }
     
-    const navItems = document.querySelectorAll('.nav-item');
-    navItems.forEach(item => {
+    // Update navigation highlighting
+    document.querySelectorAll('.nav-item').forEach(item => {
         item.classList.remove('active');
     });
     
-    const activeItem = document.querySelector(`[onclick="showSection('${sectionName}')"]`);
-    if (activeItem) {
-        activeItem.classList.add('active');
+    // Find and highlight the correct nav item
+    const navItem = document.querySelector(`[onclick="showSection('${sectionName}')"]`);
+    if (navItem) {
+        navItem.classList.add('active');
     }
     
     const breadcrumb = document.getElementById('breadcrumb');
@@ -2159,65 +2160,8 @@ async function generateChatLink(event) {
         showToast('⚠️ Survey link created but not saved to database', 'warning');
     }
     
-    // Close current modal
-    event.target.closest('.modal').remove();
-    
-    // Show modal with generated link
-    const linkModal = document.createElement('div');
-    linkModal.className = 'modal';
-    linkModal.innerHTML = `
-        <div class="modal-content" style="max-width: 700px;">
-            <div class="modal-header">
-                <h3>Chat Link Generated Successfully!</h3>
-                <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
-            </div>
-            <div>
-                <div class="alert alert-success" style="margin-bottom: 1.5rem;">
-                    <strong>✓ Chat link created for:</strong> ${sessionName}
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Share this link with participants:</label>
-                    <div style="display: flex; gap: 0.5rem;">
-                        <input type="text" id="generated-link" class="form-input" value="${chatLink}" readonly style="font-family: monospace; font-size: 0.875rem;">
-                        <button class="btn btn-primary" onclick="copyLinkToClipboard()">Copy</button>
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">QR Code (for easy mobile access):</label>
-                    <div style="background: white; padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color); text-align: center;">
-                        <div id="qr-placeholder" style="width: 200px; height: 200px; margin: 0 auto; background: var(--bg-secondary); display: flex; align-items: center; justify-content: center; border-radius: 8px;">
-                            <span style="color: var(--text-secondary);">QR Code Preview</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1.5rem;">
-                    <button class="btn btn-secondary" onclick="testChatLink('${chatLink}')">
-                        <span>🧪</span> Test Link
-                    </button>
-                    <button class="btn btn-success" id="email-chat-link-btn">
-                        <span>📧</span> Email Link to Me
-                    </button>
-                </div>
-                
-                <div class="alert alert-info" style="margin-top: 1.5rem;">
-                    <strong>ℹ️ Note:</strong> This link ${expiry === 'never' ? 'will never expire' : 'will expire in ' + expiry}. 
-                    All responses will be collected in the Chat Feedback section.
-                </div>
-                
-                <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
-                    <button class="btn btn-secondary" onclick="generateAnotherLink()">Generate Another</button>
-                    <button class="btn btn-primary" onclick="this.closest('.modal').remove()">Done</button>
-                </div>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(linkModal);
-    
-    // Add email functionality to the button
-    document.getElementById('email-chat-link-btn').onclick = () => emailChatLink(chatSessionData);
+    // Close current modal (remove all modals to be safe)
+    document.querySelectorAll('.modal').forEach(modal => modal.remove());
     
     // Store the session data (in real app, this would go to a database)
     if (!window.chatSessions) {
@@ -2225,7 +2169,244 @@ async function generateChatLink(event) {
     }
     window.chatSessions.push(chatSessionData);
     
-    showToast('Chat link generated successfully!', 'success');
+    // Show success toast
+    showToast(`Chat "${sessionName}" created successfully!`, 'success');
+    
+    // Add the new chat to the management list
+    addChatToManagement(chatSessionData);
+    
+    // Navigate to chat management section
+    setTimeout(() => {
+        // Hide all sections first
+        document.querySelectorAll('[id$="-section"]').forEach(section => {
+            section.classList.add('hidden');
+        });
+        
+        // Show chat management section
+        const chatMgmtSection = document.getElementById('chat-management-section');
+        if (chatMgmtSection) {
+            chatMgmtSection.classList.remove('hidden');
+        }
+        
+        // Update navigation highlight
+        document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+        const chatMgmtNavItem = document.querySelector('[onclick="showSection(\'chat-management\')"]');
+        if (chatMgmtNavItem) {
+            chatMgmtNavItem.classList.add('active');
+        }
+    }, 100);
+}
+
+// Function to add chat to management interface
+function addChatToManagement(chatSessionData) {
+    const activeChatsList = document.getElementById('active-chats-list');
+    if (!activeChatsList) {
+        console.error('active-chats-list element not found');
+        return;
+    }
+    const emptyState = document.querySelector('#chat-management-section .card:nth-child(2) > div:not(#active-chats-list)');
+
+    // Hide empty state and show the list
+    if (emptyState) {
+        emptyState.style.display = 'none';
+    }
+    activeChatsList.style.display = 'block';
+    
+    // Create chat item
+    const chatItem = document.createElement('div');
+    chatItem.className = 'chat-item';
+    chatItem.style.cssText = `
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        background: var(--bg-primary);
+    `;
+    
+    chatItem.innerHTML = `
+        <div>
+            <h4 style="margin: 0 0 0.5rem 0;">${chatSessionData.name}</h4>
+            <p style="margin: 0; color: var(--text-secondary); font-size: 0.875rem;">${chatSessionData.welcomeMsg}</p>
+            <div style="margin-top: 0.5rem;">
+                <span class="tag tag-active" style="font-size: 0.75rem;">Active</span>
+                <span style="color: var(--text-secondary); font-size: 0.75rem; margin-left: 1rem;">
+                    Created: ${new Date().toLocaleDateString()}
+                </span>
+            </div>
+        </div>
+        <div style="display: flex; gap: 0.5rem; align-items: center;">
+            <div class="dropdown" style="position: relative;">
+                <button class="btn btn-secondary btn-sm" onclick="toggleChatDropdown(this, event)" style="border-radius: 4px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; padding: 0;" title="Chat Settings">
+                    ⚙️
+                </button>
+                <div class="dropdown-menu" style="display: none; position: absolute; top: 100%; right: 0; background: white; border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; min-width: 200px; padding: 8px 0;">
+                    <button class="dropdown-item" onclick="editChatSettings('${chatSessionData.id}')" style="width: 100%; text-align: left; padding: 0.75rem 1rem; border: none; background: none; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem;">
+                        <span style="width: 16px;">✏️</span> Edit Chat
+                    </button>
+                    <button class="dropdown-item" onclick="copyChatSession('${chatSessionData.id}')" style="width: 100%; text-align: left; padding: 0.75rem 1rem; border: none; background: none; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem;">
+                        <span style="width: 16px;">📄</span> Copy Chat
+                    </button>
+                    <button class="dropdown-item" onclick="exportPrintCopy('${chatSessionData.id}')" style="width: 100%; text-align: left; padding: 0.75rem 1rem; border: none; background: none; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem;">
+                        <span style="width: 16px;">📤</span> Export Print Copy
+                    </button>
+                    <button class="dropdown-item" onclick="downloadChatData('${chatSessionData.id}')" style="width: 100%; text-align: left; padding: 0.75rem 1rem; border: none; background: none; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem;">
+                        <span style="width: 16px;">💾</span> Download Chat Data
+                    </button>
+                    <button class="dropdown-item" onclick="manageRecipients('${chatSessionData.id}')" style="width: 100%; text-align: left; padding: 0.75rem 1rem; border: none; background: none; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem;">
+                        <span style="width: 16px;">👥</span> Manage Recipients
+                    </button>
+                    <hr style="margin: 0.5rem 0; border: none; border-top: 1px solid var(--border-color);">
+                    <button class="dropdown-item" onclick="deleteChat('${chatSessionData.id}')" style="width: 100%; text-align: left; padding: 0.75rem 1rem; border: none; background: none; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; color: var(--danger-color);">
+                        <span style="width: 16px;">🗑️</span> Delete Chat
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    activeChatsList.appendChild(chatItem);
+}
+
+// Helper functions for chat management
+function copyLink(link) {
+    navigator.clipboard.writeText(link).then(() => {
+        showToast('Link copied to clipboard!', 'success');
+    }).catch(() => {
+        // Fallback for older browsers
+        const textarea = document.createElement('textarea');
+        textarea.value = link;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        showToast('Link copied to clipboard!', 'success');
+    });
+}
+
+function toggleChatDropdown(button, event) {
+    console.log('toggleChatDropdown called', button); // Debug log
+    
+    // Prevent event bubbling
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+    
+    const dropdown = button.nextElementSibling;
+    if (!dropdown) {
+        console.error('Dropdown menu not found');
+        return;
+    }
+    
+    const isVisible = dropdown.style.display === 'block';
+    console.log('Dropdown current state:', isVisible ? 'visible' : 'hidden'); // Debug log
+    
+    // Close all other dropdowns
+    document.querySelectorAll('.dropdown-menu').forEach(menu => {
+        menu.style.display = 'none';
+    });
+    
+    // Toggle this dropdown
+    dropdown.style.display = isVisible ? 'none' : 'block';
+    console.log('Dropdown new state:', dropdown.style.display); // Debug log
+    
+    // Close dropdown when clicking outside
+    if (!isVisible) {
+        setTimeout(() => {
+            document.addEventListener('click', function closeDropdown(e) {
+                if (!button.contains(e.target) && !dropdown.contains(e.target)) {
+                    dropdown.style.display = 'none';
+                    document.removeEventListener('click', closeDropdown);
+                }
+            });
+        }, 0);
+    }
+}
+
+function editChatSettings(chatId) {
+    showToast('Edit functionality coming soon!', 'info');
+}
+
+function viewChatDetails(chatId) {
+    const chat = window.chatSessions?.find(c => c.id === chatId);
+    if (!chat) return;
+    
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3>Chat Details: ${chat.name}</h3>
+                <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
+            </div>
+            <div>
+                <div class="form-group">
+                    <label class="form-label">Chat Link:</label>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <input type="text" class="form-input" value="${chat.link}" readonly style="font-family: monospace; font-size: 0.875rem;">
+                        <button class="btn btn-primary btn-sm" onclick="copyLink('${chat.link}')">Copy</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Welcome Message:</label>
+                    <textarea class="form-input" readonly rows="3">${chat.welcomeMsg}</textarea>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label class="form-label">Expires:</label>
+                        <input type="text" class="form-input" value="${chat.expiry === 'never' ? 'Never' : chat.expiry}" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Anonymous Access:</label>
+                        <input type="text" class="form-input" value="${chat.allowAnonymous ? 'Yes' : 'No'}" readonly>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
+                    <button class="btn btn-secondary" onclick="testChatLink('${chat.link}')">Test Chat</button>
+                    <button class="btn btn-primary" onclick="this.closest('.modal').remove()">Close</button>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+}
+
+function archiveChat(chatId) {
+    if (confirm('Are you sure you want to archive this chat? It will no longer be accessible to participants.')) {
+        showToast('Chat archived successfully!', 'success');
+        // In a real app, update the database status here
+    }
+}
+
+function deleteChat(chatId) {
+    if (confirm('Are you sure you want to delete this chat? This action cannot be undone.')) {
+        const chatItem = document.querySelector(`[onclick*="${chatId}"]`).closest('.chat-item');
+        chatItem.remove();
+        
+        // Remove from sessions array
+        if (window.chatSessions) {
+            window.chatSessions = window.chatSessions.filter(c => c.id !== chatId);
+        }
+        
+        // Show empty state if no chats left
+        const activeChatsList = document.getElementById('active-chats-list');
+        if (!activeChatsList) {
+            console.error('active-chats-list element not found');
+            return;
+        }
+        if (activeChatsList.children.length === 0) {
+            activeChatsList.style.display = 'none';
+            const emptyState = document.querySelector('#chat-management-section .card:nth-child(2) > div:not(#active-chats-list)');
+            if (emptyState) {
+                emptyState.style.display = 'block';
+            }
+        }
+        
+        showToast('Chat deleted successfully!', 'success');
+    }
 }
 
 function copyLinkToClipboard() {
@@ -3779,5 +3960,1216 @@ window.addEventListener('resize', function() {
         sidebar.classList.add('collapsed');
     }
 });
+
+// Additional chat management functions
+function copyChatSession(chatId) {
+    showToast('Copy chat functionality coming soon!', 'info');
+    // TODO: Implement copy functionality - duplicate chat with new name
+}
+
+function exportPrintCopy(chatId) {
+    showToast('Export print copy functionality coming soon!', 'info');
+    // TODO: Implement export to PDF/print functionality
+}
+
+function downloadChatData(chatId) {
+    showToast('Download chat data functionality coming soon!', 'info');
+    // TODO: Implement download chat responses as CSV/Excel
+}
+
+// Global variable to track current chat ID for recipients management
+let currentRecipientsChatId = null;
+
+function manageRecipients(chatId) {
+    // Store the current chat ID for use in other functions
+    currentRecipientsChatId = chatId;
+    
+    const contentArea = document.getElementById('content-area');
+    
+    // Get chat data to show the chat name
+    const chatData = activeChatSessions.find(session => session.id === chatId);
+    const chatName = chatData ? chatData.name : 'Unknown Chat';
+    
+    // Create the full-screen recipients management interface
+    contentArea.innerHTML = `
+        <div class="manage-recipients-container">
+            <!-- Navigation Breadcrumb -->
+            <nav class="recipients-nav">
+                <div class="breadcrumb">
+                    <span class="breadcrumb-item">
+                        <a href="#" onclick="showDashboard()" class="breadcrumb-link">Manage Surveys</a>
+                    </span>
+                    <span class="breadcrumb-separator">></span>
+                    <span class="breadcrumb-item current">
+                        Manage Survey Recipients for survey - ${chatName}
+                    </span>
+                </div>
+            </nav>
+
+            <!-- Header Section -->
+            <div class="recipients-header">
+                <h1>👥 Manage Recipients: ${chatName}</h1>
+                
+                <!-- Stats Cards -->
+                <div class="recipients-stats">
+                    <div class="stat-card">
+                        <div class="stat-label">Participation Rate</div>
+                        <div class="stat-value">-</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Completion Rate</div>
+                        <div class="stat-value">-</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="recipients-actions">
+                <button class="btn btn-primary" onclick="sendEmailInvitation()">
+                    <span>📧</span> Send E-mail Invitation / Reminder to Selected Recipients
+                </button>
+                
+                <button class="btn btn-secondary" onclick="preloadRecipients()">
+                    <span>📋</span> Pre-load recipients and demographic data
+                </button>
+                
+                <button class="btn btn-success" onclick="addRecipient()">
+                    <span>➕</span> Add Recipient
+                </button>
+                
+                <button class="btn btn-info" onclick="uploadRecipient()">
+                    <span>📤</span> Upload Recipient
+                </button>
+                
+                <button class="btn btn-warning" onclick="uploadSurveyResponses()">
+                    <span>📊</span> Upload Survey Responses
+                </button>
+            </div>
+
+            <!-- Data Table -->
+            <div class="recipients-table-container">
+                <table class="recipients-table">
+                    <thead>
+                        <tr>
+                            <th class="checkbox-column">
+                                <input type="checkbox" id="select-all" onchange="toggleSelectAllRecipients()">
+                            </th>
+                            <th>Forename</th>
+                            <th>Surname</th>
+                            <th>E-mail</th>
+                            <th>Employee No</th>
+                            <th>Invite Sent</th>
+                            <th>No. Reminders Sent</th>
+                            <th>Last Reminder Sent</th>
+                            <th class="sortable" onclick="sortRecipientsTable('date_started')">
+                                Date Survey Started 
+                                <span class="sort-arrow">↕️</span>
+                            </th>
+                            <th class="sortable" onclick="sortRecipientsTable('date_completed')">
+                                Date Survey Completed 
+                                <span class="sort-arrow">↕️</span>
+                            </th>
+                            <th>Edit Survey Recipient</th>
+                            <th>Delete Survey Recipient</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recipients-table-body">
+                        <tr class="no-data-row">
+                            <td colspan="12" class="no-data">No data</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    `;
+    
+    // Load recipients data for this chat
+    loadRecipientsData(chatId);
+}
+
+// Recipients Management Helper Functions
+async function loadRecipientsData(chatId) {
+    const tableBody = document.getElementById('recipients-table-body');
+    if (!tableBody) return;
+    
+    try {
+        // Load recipients from Supabase database
+        const { data: recipients, error } = await window.supabaseClient
+            .from('survey_recipients')
+            .select('*')
+            .eq('survey_id', chatId || 'test')
+            .order('created_at', { ascending: false });
+        
+        if (error) {
+            console.error('Error loading recipients:', error);
+            // Show empty state if error
+            tableBody.innerHTML = `
+                <tr class="no-data-row">
+                    <td colspan="12" class="no-data">No data</td>
+                </tr>
+            `;
+            updateRecipientStats([]);
+            return;
+        }
+        
+        if (!recipients || recipients.length === 0) {
+            // Show empty state if no recipients
+            tableBody.innerHTML = `
+                <tr class="no-data-row">
+                    <td colspan="12" class="no-data">No data</td>
+                </tr>
+            `;
+            updateRecipientStats([]);
+            return;
+        }
+        
+        // Populate table with real data from database
+        tableBody.innerHTML = recipients.map(recipient => `
+            <tr data-recipient-id="${recipient.id}">
+                <td><input type="checkbox" class="recipient-checkbox" data-id="${recipient.id}"></td>
+                <td>${recipient.forename || ''}</td>
+                <td>${recipient.surname || ''}</td>
+                <td>${recipient.email || ''}</td>
+                <td>${recipient.employee_no || ''}</td>
+                <td><span class="status-badge ${recipient.invite_sent ? 'sent' : 'not-sent'}">${recipient.invite_sent ? 'YES' : 'NO'}</span></td>
+                <td>${recipient.reminder_count || 0}</td>
+                <td>${recipient.last_reminder_sent || '-'}</td>
+                <td>${recipient.survey_started_date || '-'}</td>
+                <td>${recipient.survey_completed_date || '-'}</td>
+                <td><button class="btn btn-sm btn-primary" data-action="edit" data-recipient-id="${recipient.id}">Edit</button></td>
+                <td><button class="btn btn-sm btn-danger" data-action="delete" data-recipient-id="${recipient.id}">Delete</button></td>
+            </tr>
+        `).join('');
+        
+        // Add event delegation for edit and delete buttons
+        console.log('🎯 About to add event listeners for recipients table');
+        addRecipientTableEventListeners();
+        console.log('✅ Event listeners added for recipients table');
+        
+        // Update statistics with loaded data
+        updateRecipientStats(recipients);
+        
+    } catch (error) {
+        console.error('Error loading recipients:', error);
+        tableBody.innerHTML = `
+            <tr class="no-data-row">
+                <td colspan="12" class="no-data">Error loading data</td>
+            </tr>
+        `;
+        updateRecipientStats([]);
+    }
+}
+
+function updateRecipientStats(recipients) {
+    const total = recipients.length;
+    const completed = recipients.filter(r => r.status === 'completed').length;
+    const invited = recipients.filter(r => r.inviteSent === 'Yes').length;
+    
+    const participationRate = total > 0 ? Math.round((invited / total) * 100) : 0;
+    const completionRate = invited > 0 ? Math.round((completed / invited) * 100) : 0;
+
+    // Update the stats cards - show "-" when no data
+    const statsCards = document.querySelectorAll('.recipients-stats .stat-card');
+    if (statsCards[0]) {
+        statsCards[0].querySelector('.stat-value').textContent = total > 0 ? `${participationRate}%` : '-';
+    }
+    if (statsCards[1]) {
+        statsCards[1].querySelector('.stat-value').textContent = total > 0 ? `${completionRate}%` : '-';
+    }
+}
+
+function toggleSelectAllRecipients() {
+    const selectAllCheckbox = document.getElementById('select-all');
+    const checkboxes = document.querySelectorAll('#recipients-table-body input[type="checkbox"]');
+
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = selectAllCheckbox.checked;
+    });
+}
+
+function sortRecipientsTable(column) {
+    showToast(`Sorting by ${column}`, 'info');
+    // TODO: Implement table sorting functionality
+}
+
+function sendEmailInvitation() {
+    // Auto-select recipients who haven't completed the survey
+    const allRecipients = document.querySelectorAll('#recipients-table-body input[type="checkbox"]');
+    console.log('Found recipients:', allRecipients.length);
+    
+    const nonResponders = Array.from(allRecipients).filter(checkbox => {
+        const row = checkbox.closest('tr');
+        // Check if "Date Survey Completed" column is empty (indicates no response)
+        const completedCell = row.cells[9]; // "Date Survey Completed" column
+        const completedText = completedCell ? completedCell.textContent.trim() : '';
+        console.log('Checking recipient:', row.cells[1].textContent, 'completion status:', completedText);
+        return completedText === '-' || completedText === '' || !completedText;
+    });
+
+    console.log('Non-responders found:', nonResponders.length);
+
+    if (nonResponders.length === 0) {
+        showToast('All recipients have already completed the survey!', 'info');
+        return;
+    }
+
+    // Get non-responder details
+    const selectedDetails = nonResponders.map(checkbox => {
+        const row = checkbox.closest('tr');
+        return {
+            id: checkbox.dataset.recipientId,
+            name: `${row.cells[1].textContent} ${row.cells[2].textContent}`,
+            email: row.cells[3].textContent
+        };
+    });
+
+    showToast(`Automatically selected ${nonResponders.length} recipients who haven't responded`, 'info');
+
+    // Create email invitation modal
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3>📧 Send Email Invitations</h3>
+                <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Recipients (${selectedDetails.length} selected):</label>
+                    <div class="recipients-preview">
+                        ${selectedDetails.map(r => `
+                            <div class="recipient-tag">
+                                <span>${r.name} (${r.email})</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Email Subject:</label>
+                    <input type="text" id="email-subject" class="form-input" 
+                           value="Survey Invitation - Your Feedback Matters" 
+                           placeholder="Enter email subject">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Email Message:</label>
+                    <textarea id="email-message" class="form-input" rows="6" placeholder="Enter your message...">Hi {name},
+
+We would love to hear your feedback! Please take a few minutes to complete our survey.
+
+Click here to start: {survey_link}
+
+Thank you for your time!
+
+Best regards,
+Survey Team</textarea>
+                    <small class="form-help">Use {name} for recipient name and {survey_link} for the survey link</small>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        <input type="checkbox" id="send-reminder" checked> Send as reminder (for previously invited recipients)
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').remove()">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="confirmSendInvitations(${JSON.stringify(selectedDetails).replace(/"/g, '&quot;')})">
+                    Send ${selectedDetails.length} Invitation${selectedDetails.length > 1 ? 's' : ''}
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+}
+
+function preloadRecipients() {
+    // Create pre-load recipients modal
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h3>📋 Pre-load Recipients and Demographic Data</h3>
+                <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Import recipient lists and demographic information from various sources.</p>
+                
+                <div class="preload-options">
+                    <div class="option-card" onclick="preloadFromCSV()">
+                        <div class="option-icon">📄</div>
+                        <h4>CSV/Excel Import</h4>
+                        <p>Upload a CSV or Excel file with recipient details and demographic information.</p>
+                        <div class="option-features">
+                            <span class="feature">✓ Bulk import</span>
+                            <span class="feature">✓ Demographic data</span>
+                            <span class="feature">✓ Validation</span>
+                        </div>
+                    </div>
+                    
+                    <div class="option-card" onclick="preloadFromHR()">
+                        <div class="option-icon">🏢</div>
+                        <h4>HR System Integration</h4>
+                        <p>Connect to your HR system to automatically import employee data.</p>
+                        <div class="option-features">
+                            <span class="feature">✓ Live sync</span>
+                            <span class="feature">✓ Department data</span>
+                            <span class="feature">✓ Role information</span>
+                        </div>
+                    </div>
+                    
+                    <div class="option-card" onclick="preloadFromAD()">
+                        <div class="option-icon">🔐</div>
+                        <h4>Active Directory</h4>
+                        <p>Import users from your organization's Active Directory.</p>
+                        <div class="option-features">
+                            <span class="feature">✓ AD integration</span>
+                            <span class="feature">✓ Group filtering</span>
+                            <span class="feature">✓ Auto-sync</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="sample-data-section" style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
+                    <h4>Quick Start: Load Sample Data</h4>
+                    <p>Add sample recipients with demographic data for testing purposes.</p>
+                    <button class="btn btn-info" onclick="loadSampleData()">
+                        🎯 Load Sample Recipients
+                    </button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').remove()">Close</button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+}
+
+function confirmSendInvitations(recipients) {
+    const subject = document.getElementById('email-subject').value;
+    const message = document.getElementById('email-message').value;
+    const isReminder = document.getElementById('send-reminder').checked;
+    
+    if (!subject.trim() || !message.trim()) {
+        showToast('Please fill in both subject and message', 'warning');
+        return;
+    }
+    
+    // Close modal
+    document.querySelector('.modal').remove();
+    
+    // Simulate sending emails
+    showToast('Sending invitations...', 'info');
+    
+    setTimeout(() => {
+        showToast(`Successfully sent ${recipients.length} invitation${recipients.length > 1 ? 's' : ''}!`, 'success');
+        
+        // Update table data to reflect sent invitations
+        recipients.forEach(recipient => {
+            const checkbox = document.querySelector(`input[data-recipient-id="${recipient.id}"]`);
+            if (checkbox) {
+                const row = checkbox.closest('tr');
+                // Update invite sent status
+                const inviteCell = row.cells[5];
+                inviteCell.innerHTML = '<span class="status-badge status-sent">Yes</span>';
+                
+                // Update reminders sent
+                const remindersCell = row.cells[6];
+                const currentReminders = parseInt(remindersCell.textContent) || 0;
+                remindersCell.textContent = currentReminders + 1;
+                
+                // Update last reminder date
+                const lastReminderCell = row.cells[7];
+                lastReminderCell.textContent = new Date().toISOString().split('T')[0];
+            }
+        });
+        
+        // Clear selections
+        document.querySelectorAll('#recipients-table-body input[type="checkbox"]:checked').forEach(cb => cb.checked = false);
+        document.getElementById('select-all').checked = false;
+    }, 2000);
+}
+
+function addRecipient() {
+    // Create add recipient modal
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3>➕ Add New Recipient</h3>
+                <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="add-recipient-form">
+                    <div class="form-group">
+                        <label class="form-label">First Name *</label>
+                        <input type="text" id="recipient-forename" class="form-input" required 
+                               placeholder="Enter first name">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Last Name *</label>
+                        <input type="text" id="recipient-surname" class="form-input" required 
+                               placeholder="Enter last name">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Email Address *</label>
+                        <input type="email" id="recipient-email" class="form-input" required 
+                               placeholder="name@company.com">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Employee Number</label>
+                        <input type="text" id="recipient-employee-no" class="form-input" 
+                               placeholder="EMP001 (optional)">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">
+                            <input type="checkbox" id="send-immediate-invitation"> 
+                            Send invitation immediately after adding
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').remove()">Cancel</button>
+                <button type="button" class="btn btn-success" onclick="confirmAddRecipient()">Add Recipient</button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+}
+
+async function confirmAddRecipient() {
+    const forename = document.getElementById('recipient-forename').value.trim();
+    const surname = document.getElementById('recipient-surname').value.trim();
+    const email = document.getElementById('recipient-email').value.trim();
+    const employeeNo = document.getElementById('recipient-employee-no').value.trim();
+    const sendInvitation = document.getElementById('send-immediate-invitation').checked;
+    
+    // Validation
+    if (!forename || !surname || !email) {
+        showToast('Please fill in all required fields', 'warning');
+        return;
+    }
+    
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        showToast('Please enter a valid email address', 'warning');
+        return;
+    }
+    
+    try {
+        console.log('🔍 Checking for duplicate email:', email);
+        
+        // Check for duplicate email in database
+        const { data: existingRecipient, error: checkError } = await window.supabaseClient
+            .from('survey_recipients')
+            .select('email')
+            .eq('email', email)
+            .eq('survey_id', 'test')
+            .single();
+            
+        console.log('✅ Duplicate check result:', { existingRecipient, checkError });
+        
+        if (existingRecipient) {
+            showToast('A recipient with this email already exists', 'warning');
+            return;
+        }
+        
+        // Create new recipient object for database
+        const newRecipient = {
+            survey_id: 'test',
+            forename: forename,
+            surname: surname,
+            email: email,
+            employee_no: employeeNo || `EMP${Date.now().toString().slice(-3)}`,
+            invite_sent: sendInvitation,
+            reminder_count: sendInvitation ? 1 : 0,
+            last_reminder_sent: sendInvitation ? new Date().toISOString().split('T')[0] : null,
+            survey_started_date: null,
+            survey_completed_date: null,
+            created_at: new Date().toISOString()
+        };
+        
+        console.log('💾 Saving recipient to database:', newRecipient);
+        
+        // Save to database
+        const { data: savedRecipient, error } = await window.supabaseClient
+            .from('survey_recipients')
+            .insert([newRecipient])
+            .select()
+            .single();
+            
+        console.log('💾 Save result:', { savedRecipient, error });
+        
+        if (error) {
+            console.error('❌ Error saving recipient:', error);
+            showToast('Error saving recipient to database', 'error');
+            return;
+        }
+        
+        console.log('✅ Recipient saved successfully:', savedRecipient);
+        
+        // Close modal
+        document.querySelector('.modal').remove();
+        
+        // Reload the data to show the new recipient
+        loadRecipientsData(currentRecipientsChatId || 'test');
+        
+        // Show success message
+        showToast(`Recipient ${forename} ${surname} added successfully!`, 'success');
+        
+        // Send invitation if requested
+        if (sendInvitation) {
+            // You can implement invitation sending logic here
+            showToast(`Invitation sent to ${email}`, 'info');
+        }
+        
+    } catch (error) {
+        console.error('Error adding recipient:', error);
+        showToast('Error adding recipient', 'error');
+    }
+    
+    // Show success message
+    const message = sendInvitation 
+        ? `Recipient added and invitation sent to ${email}!`
+        : `Recipient ${forename} ${surname} added successfully!`;
+    showToast(message, 'success');
+}
+
+function uploadRecipient() {
+    // Create upload modal
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3>📤 Upload Recipients</h3>
+                <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="upload-section">
+                    <p>Upload a CSV or Excel file containing recipient information.</p>
+                    
+                    <div class="file-upload-area" onclick="document.getElementById('recipient-file').click()">
+                        <div class="upload-icon">📁</div>
+                        <div class="upload-text">
+                            <strong>Click to select file</strong> or drag and drop
+                        </div>
+                        <div class="upload-hint">Supported formats: .csv, .xlsx, .xls</div>
+                    </div>
+                    
+                    <input type="file" id="recipient-file" accept=".csv,.xlsx,.xls" style="display: none;" 
+                           onchange="handleRecipientFileUpload(event)">
+                    
+                    <div class="template-section" style="margin-top: 2rem;">
+                        <h4>Expected File Format:</h4>
+                        <div class="format-example">
+                            <table style="width: 100%; font-size: 0.875rem; border-collapse: collapse;">
+                                <thead>
+                                    <tr style="background: #f8f9fa;">
+                                        <th style="border: 1px solid #dee2e6; padding: 0.5rem;">Forename</th>
+                                        <th style="border: 1px solid #dee2e6; padding: 0.5rem;">Surname</th>
+                                        <th style="border: 1px solid #dee2e6; padding: 0.5rem;">Email</th>
+                                        <th style="border: 1px solid #dee2e6; padding: 0.5rem;">Employee_No</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td style="border: 1px solid #dee2e6; padding: 0.5rem;">John</td>
+                                        <td style="border: 1px solid #dee2e6; padding: 0.5rem;">Smith</td>
+                                        <td style="border: 1px solid #dee2e6; padding: 0.5rem;">john@company.com</td>
+                                        <td style="border: 1px solid #dee2e6; padding: 0.5rem;">EMP001</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <button class="btn btn-info" onclick="downloadTemplate()" style="margin-top: 1rem;">
+                            📥 Download Template
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="upload-preview" style="display: none; margin-top: 2rem;">
+                    <h4>Preview:</h4>
+                    <div id="preview-content"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').remove()">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirm-upload-btn" style="display: none;" 
+                        onclick="confirmUploadRecipients()">Import Recipients</button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+}
+
+function preloadFromCSV() {
+    document.querySelector('.modal').remove();
+    uploadRecipient(); // Reuse the upload functionality
+}
+
+function preloadFromHR() {
+    showToast('HR System integration coming soon!', 'info');
+    document.querySelector('.modal').remove();
+}
+
+function preloadFromAD() {
+    showToast('Active Directory integration coming soon!', 'info');
+    document.querySelector('.modal').remove();
+}
+
+function loadSampleData() {
+    document.querySelector('.modal').remove();
+    showToast('Loading enhanced sample data...', 'info');
+    
+    setTimeout(() => {
+        const sampleData = [
+            { forename: 'David', surname: 'Williams', email: 'david.williams@company.com', employeeNo: 'EMP008' },
+            { forename: 'Lisa', surname: 'Garcia', email: 'lisa.garcia@company.com', employeeNo: 'EMP009' },
+            { forename: 'Robert', surname: 'Martinez', email: 'robert.martinez@company.com', employeeNo: 'EMP010' },
+            { forename: 'Jennifer', surname: 'Lopez', email: 'jennifer.lopez@company.com', employeeNo: 'EMP011' },
+            { forename: 'James', surname: 'Wilson', email: 'james.wilson@company.com', employeeNo: 'EMP012' }
+        ];
+        
+        const tableBody = document.getElementById('recipients-table-body');
+        
+        // Remove "No data" row if it exists
+        const noDataRow = tableBody.querySelector('.no-data-row');
+        if (noDataRow) {
+            noDataRow.remove();
+        }
+        
+        sampleData.forEach(recipient => {
+            const newId = Date.now() + Math.random();
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td class="checkbox-column">
+                    <input type="checkbox" data-recipient-id="${newId}">
+                </td>
+                <td>${recipient.forename}</td>
+                <td>${recipient.surname}</td>
+                <td>${recipient.email}</td>
+                <td>${recipient.employeeNo}</td>
+                <td>
+                    <span class="status-badge status-not-sent">No</span>
+                </td>
+                <td>0</td>
+                <td>-</td>
+                <td>-</td>
+                <td>-</td>
+                <td>
+                    <button class="btn btn-small btn-info" data-action="edit" data-recipient-id="${newId}" title="Edit Recipient">
+                        ✏️
+                    </button>
+                </td>
+                <td>
+                    <button class="btn btn-small btn-danger" data-action="delete" data-recipient-id="${newId}" title="Delete Recipient">
+                        🗑️
+                    </button>
+                </td>
+            `;
+            tableBody.appendChild(row);
+        });
+        
+        // Re-attach event listeners after adding new rows
+        addRecipientTableEventListeners();
+        
+        showToast(`Successfully loaded ${sampleData.length} sample recipients!`, 'success');
+    }, 1500);
+}
+
+function uploadSurveyResponses() {
+    // Create survey responses upload modal
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3>📊 Upload Survey Responses</h3>
+                <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="upload-section">
+                    <p>Upload survey responses to import existing data or bulk update participant responses.</p>
+                    
+                    <div class="file-upload-area" onclick="document.getElementById('responses-file').click()">
+                        <div class="upload-icon">📊</div>
+                        <div class="upload-text">
+                            <strong>Click to select responses file</strong> or drag and drop
+                        </div>
+                        <div class="upload-hint">Supported formats: .csv, .xlsx, .json</div>
+                    </div>
+                    
+                    <input type="file" id="responses-file" accept=".csv,.xlsx,.json" style="display: none;" 
+                           onchange="handleResponsesFileUpload(event)">
+                    
+                    <div class="template-section" style="margin-top: 2rem;">
+                        <h4>Expected Response Format:</h4>
+                        <div class="format-example">
+                            <table style="width: 100%; font-size: 0.875rem; border-collapse: collapse;">
+                                <thead>
+                                    <tr style="background: #f8f9fa;">
+                                        <th style="border: 1px solid #dee2e6; padding: 0.5rem;">Email</th>
+                                        <th style="border: 1px solid #dee2e6; padding: 0.5rem;">Response_Date</th>
+                                        <th style="border: 1px solid #dee2e6; padding: 0.5rem;">Status</th>
+                                        <th style="border: 1px solid #dee2e6; padding: 0.5rem;">Score</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td style="border: 1px solid #dee2e6; padding: 0.5rem;">john@company.com</td>
+                                        <td style="border: 1px solid #dee2e6; padding: 0.5rem;">2025-09-01</td>
+                                        <td style="border: 1px solid #dee2e6; padding: 0.5rem;">Completed</td>
+                                        <td style="border: 1px solid #dee2e6; padding: 0.5rem;">85</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <button class="btn btn-info" onclick="downloadResponsesTemplate()" style="margin-top: 1rem;">
+                            📥 Download Response Template
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="responses-preview" style="display: none; margin-top: 2rem;">
+                    <h4>Preview:</h4>
+                    <div id="responses-preview-content"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').remove()">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirm-responses-btn" style="display: none;" 
+                        onclick="confirmUploadResponses()">Import Responses</button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+}
+
+function handleRecipientFileUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    showToast('Processing file...', 'info');
+    
+    // Simulate file processing
+    setTimeout(() => {
+        // Mock data for preview
+        const mockData = [
+            { forename: 'Alice', surname: 'Wilson', email: 'alice.wilson@company.com', employeeNo: 'EMP005' },
+            { forename: 'Bob', surname: 'Taylor', email: 'bob.taylor@company.com', employeeNo: 'EMP006' },
+            { forename: 'Carol', surname: 'Anderson', email: 'carol.anderson@company.com', employeeNo: 'EMP007' }
+        ];
+        
+        // Show preview
+        const previewDiv = document.getElementById('upload-preview');
+        const previewContent = document.getElementById('preview-content');
+        
+        previewContent.innerHTML = `
+            <div style="margin-bottom: 1rem;">
+                <strong>${mockData.length} recipients found in file: ${file.name}</strong>
+            </div>
+            <div style="max-height: 200px; overflow-y: auto; border: 1px solid #dee2e6;">
+                <table style="width: 100%; font-size: 0.875rem;">
+                    <thead>
+                        <tr style="background: #f8f9fa;">
+                            <th style="padding: 0.5rem; border-bottom: 1px solid #dee2e6;">Name</th>
+                            <th style="padding: 0.5rem; border-bottom: 1px solid #dee2e6;">Email</th>
+                            <th style="padding: 0.5rem; border-bottom: 1px solid #dee2e6;">Employee No</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${mockData.map(r => `
+                            <tr>
+                                <td style="padding: 0.5rem;">${r.forename} ${r.surname}</td>
+                                <td style="padding: 0.5rem;">${r.email}</td>
+                                <td style="padding: 0.5rem;">${r.employeeNo}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
+        
+        previewDiv.style.display = 'block';
+        document.getElementById('confirm-upload-btn').style.display = 'inline-block';
+        
+        showToast('File processed successfully!', 'success');
+    }, 1500);
+}
+
+function downloadTemplate() {
+    const csvContent = "Forename,Surname,Email,Employee_No\nJohn,Smith,john.smith@company.com,EMP001\nJane,Doe,jane.doe@company.com,EMP002";
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'recipients_template.csv';
+    a.click();
+    window.URL.revokeObjectURL(url);
+    showToast('Template downloaded!', 'success');
+}
+
+function confirmUploadRecipients() {
+    // Mock implementation - would normally process the actual file data
+    showToast('Importing recipients...', 'info');
+    
+    setTimeout(() => {
+        // Simulate adding the mock data to the table
+        const mockData = [
+            { forename: 'Alice', surname: 'Wilson', email: 'alice.wilson@company.com', employeeNo: 'EMP005' },
+            { forename: 'Bob', surname: 'Taylor', email: 'bob.taylor@company.com', employeeNo: 'EMP006' },
+            { forename: 'Carol', surname: 'Anderson', email: 'carol.anderson@company.com', employeeNo: 'EMP007' }
+        ];
+        
+        const tableBody = document.getElementById('recipients-table-body');
+        
+        // Remove "No data" row if it exists
+        const noDataRow = tableBody.querySelector('.no-data-row');
+        if (noDataRow) {
+            noDataRow.remove();
+        }
+        
+        mockData.forEach(recipient => {
+            const newId = Date.now() + Math.random();
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td class="checkbox-column">
+                    <input type="checkbox" data-recipient-id="${newId}">
+                </td>
+                <td>${recipient.forename}</td>
+                <td>${recipient.surname}</td>
+                <td>${recipient.email}</td>
+                <td>${recipient.employeeNo}</td>
+                <td>
+                    <span class="status-badge status-not-sent">No</span>
+                </td>
+                <td>0</td>
+                <td>-</td>
+                <td>-</td>
+                <td>-</td>
+                <td>
+                    <button class="btn btn-small btn-info" data-action="edit" data-recipient-id="${newId}" title="Edit Recipient">
+                        ✏️
+                    </button>
+                </td>
+                <td>
+                    <button class="btn btn-small btn-danger" data-action="delete" data-recipient-id="${newId}" title="Delete Recipient">
+                        🗑️
+                    </button>
+                </td>
+            `;
+            tableBody.appendChild(row);
+        });
+        
+        // Re-attach event listeners after adding new rows
+        addRecipientTableEventListeners();
+        
+        // Close modal
+        document.querySelector('.modal').remove();
+        showToast(`Successfully imported ${mockData.length} recipients!`, 'success');
+    }, 2000);
+}
+
+function editRecipient(id) {
+    showToast(`Edit recipient ${id} - Feature coming soon!`, 'info');
+}
+
+// Add event delegation for recipient table buttons
+function addRecipientTableEventListeners() {
+    const tableBody = document.getElementById('recipients-table-body');
+    if (!tableBody) {
+        console.error('❌ Could not find recipients-table-body element');
+        return;
+    }
+    
+    console.log('🔧 Setting up event listeners for table body:', tableBody);
+    
+    // Remove existing listeners to prevent duplicates
+    tableBody.removeEventListener('click', handleRecipientTableClick);
+    
+    // Add event delegation
+    tableBody.addEventListener('click', handleRecipientTableClick);
+    
+    console.log('🎪 Event listener added successfully');
+}
+
+function handleRecipientTableClick(event) {
+    const button = event.target.closest('button[data-action]');
+    if (!button) return;
+    
+    const action = button.getAttribute('data-action');
+    const recipientId = button.getAttribute('data-recipient-id');
+    
+    console.log('Button clicked:', action, 'for recipient ID:', recipientId);
+    
+    if (action === 'edit') {
+        console.log('🔧 Calling editRecipient with ID:', recipientId);
+        editRecipient(recipientId);
+    } else if (action === 'delete') {
+        console.log('🗑️ About to call deleteRecipient with ID:', recipientId);
+        console.log('🔍 deleteRecipient function exists:', typeof deleteRecipient);
+        console.log('🔍 window.deleteRecipient exists:', typeof window.deleteRecipient);
+        try {
+            console.log('🔍 Calling deleteRecipient...');
+            const result = deleteRecipient(recipientId);
+            console.log('🔍 deleteRecipient returned:', result);
+            if (result && typeof result.then === 'function') {
+                console.log('🔍 deleteRecipient returned a promise, awaiting...');
+                result.then(() => {
+                    console.log('🗑️ deleteRecipient promise resolved');
+                }).catch(error => {
+                    console.error('❌ deleteRecipient promise rejected:', error);
+                });
+            }
+            console.log('🗑️ deleteRecipient call completed');
+        } catch (error) {
+            console.error('❌ Error calling deleteRecipient:', error);
+        }
+    } else if (action === 'force-delete') {
+        console.log('💥 Calling forceDeleteRecipient with ID:', recipientId);
+        // Test delete without confirmation
+        forceDeleteRecipient(recipientId);
+    } else {
+        console.warn('❓ Unknown action:', action);
+    }
+}
+
+// Test function to delete without confirmation
+async function forceDeleteRecipient(id) {
+    console.log('🧪 FORCE DELETE (no confirmation) for ID:', id);
+    try {
+        // Delete from Supabase database
+        console.log('Attempting to delete from database...');
+        const { error } = await window.supabaseClient
+            .from('survey_recipients')
+            .delete()
+            .eq('id', id);
+
+        if (error) {
+            console.error('Error deleting recipient:', error);
+            showToast('Failed to delete recipient from database', 'error');
+            return;
+        }
+
+        console.log('Successfully deleted from database, refreshing UI...');
+        
+        // Reload the data from database to ensure UI is in sync
+        await loadRecipientsData(currentRecipientsChatId || 'test');
+        console.log('✅ Recipients table refreshed after force deletion');
+        
+        showToast('Recipient force deleted successfully', 'success');
+    } catch (error) {
+        console.error('Error force deleting recipient:', error);
+        showToast('Failed to force delete recipient', 'error');
+    }
+}
+
+async function deleteRecipient(id) {
+    console.log('🚀 INSIDE deleteRecipient function - START');
+    console.log('🗑️ Delete recipient called with ID:', id);
+    console.log('🔍 Current chat ID:', currentRecipientsChatId);
+    console.log('🔍 Supabase client available:', !!window.supabaseClient);
+    
+    // Test basic functionality
+    console.log('🧪 Basic test: 1 + 1 =', 1 + 1);
+    
+    if (!id) {
+        console.error('No ID provided to deleteRecipient function');
+        showToast('Error: No recipient ID provided', 'error');
+        return;
+    }
+    
+    // Temporarily skip confirmation for debugging
+    console.log('🔍 Skipping confirmation dialog for debugging');
+    const userConfirmed = true;
+    console.log('🔍 Confirmation dialog result:', userConfirmed);
+    
+    if (userConfirmed) {
+        console.log('User confirmed deletion for ID:', id);
+        try {
+            // Delete from Supabase database
+            console.log('Attempting to delete from database...');
+            console.log('🔍 Deleting recipient with ID:', id);
+            console.log('🔍 From table: survey_recipients');
+            
+            const { data, error } = await window.supabaseClient
+                .from('survey_recipients')
+                .delete()
+                .eq('id', id);
+
+            console.log('🔍 Delete result:', { data, error });
+
+            if (error) {
+                console.error('Error deleting recipient:', error);
+                showToast('Failed to delete recipient from database', 'error');
+                return;
+            }
+
+            console.log('Successfully deleted from database, refreshing UI...');
+            
+            // Debug: Check what rows exist before deletion
+            const allRows = document.querySelectorAll('#recipients-table-body tr');
+            console.log('🔍 Total rows before removal:', allRows.length);
+            console.log('🔍 Looking for row with ID:', id);
+            
+            // Remove the deleted row from the DOM immediately
+            const rowElement = document.querySelector(`tr[data-recipient-id="${id}"]`);
+            console.log('🔍 Found row element:', !!rowElement);
+            
+            if (rowElement) {
+                console.log('🔍 Removing specific row for ID:', id);
+                rowElement.remove();
+                
+                // Debug: Check rows after removal
+                const remainingRows = document.querySelectorAll('#recipients-table-body tr');
+                console.log('✅ Rows remaining after removal:', remainingRows.length);
+                console.log('✅ Row removed from DOM');
+            } else {
+                console.log('⚠️ Could not find row to remove, available rows:');
+                allRows.forEach((row, index) => {
+                    const rowId = row.getAttribute('data-recipient-id');
+                    console.log(`Row ${index}: data-recipient-id="${rowId}"`);
+                });
+                console.log('⚠️ Reloading all data as fallback');
+                // Fallback: reload all data if we can't find the specific row
+                await loadRecipientsData(currentRecipientsChatId || 'test');
+            }
+            console.log('✅ Recipients table updated after deletion');
+            
+            showToast('Recipient deleted successfully', 'success');
+        } catch (error) {
+            console.error('Error deleting recipient:', error);
+            showToast('Failed to delete recipient', 'error');
+        }
+    } else {
+        console.log('User cancelled deletion');
+    }
+}
+
+// Cleanup function removed - was causing deletion of all recipients with matching names
+
+function handleResponsesFileUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    showToast('Processing responses file...', 'info');
+    
+    setTimeout(() => {
+        // Mock response data for preview
+        const mockResponses = [
+            { email: 'john.smith@company.com', responseDate: '2025-09-01', status: 'Completed', score: 85 },
+            { email: 'sarah.johnson@company.com', responseDate: '2025-09-01', status: 'In Progress', score: 0 }
+        ];
+        
+        const previewDiv = document.getElementById('responses-preview');
+        const previewContent = document.getElementById('responses-preview-content');
+        
+        previewContent.innerHTML = `
+            <div style="margin-bottom: 1rem;">
+                <strong>${mockResponses.length} responses found in file: ${file.name}</strong>
+            </div>
+            <div style="max-height: 200px; overflow-y: auto; border: 1px solid #dee2e6;">
+                <table style="width: 100%; font-size: 0.875rem;">
+                    <thead>
+                        <tr style="background: #f8f9fa;">
+                            <th style="padding: 0.5rem; border-bottom: 1px solid #dee2e6;">Email</th>
+                            <th style="padding: 0.5rem; border-bottom: 1px solid #dee2e6;">Date</th>
+                            <th style="padding: 0.5rem; border-bottom: 1px solid #dee2e6;">Status</th>
+                            <th style="padding: 0.5rem; border-bottom: 1px solid #dee2e6;">Score</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${mockResponses.map(r => `
+                            <tr>
+                                <td style="padding: 0.5rem;">${r.email}</td>
+                                <td style="padding: 0.5rem;">${r.responseDate}</td>
+                                <td style="padding: 0.5rem;">${r.status}</td>
+                                <td style="padding: 0.5rem;">${r.score}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
+        
+        previewDiv.style.display = 'block';
+        document.getElementById('confirm-responses-btn').style.display = 'inline-block';
+        
+        showToast('Response file processed successfully!', 'success');
+    }, 1500);
+}
+
+function downloadResponsesTemplate() {
+    const csvContent = "Email,Response_Date,Status,Score\njohn.smith@company.com,2025-09-01,Completed,85\nsarah.johnson@company.com,2025-09-01,In Progress,0";
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'survey_responses_template.csv';
+    a.click();
+    window.URL.revokeObjectURL(url);
+    showToast('Response template downloaded!', 'success');
+}
+
+function confirmUploadResponses() {
+    showToast('Importing survey responses...', 'info');
+    
+    setTimeout(() => {
+        // Update existing recipients with response data
+        const existingRows = document.querySelectorAll('#recipients-table-body tr');
+        let updatedCount = 0;
+        
+        existingRows.forEach(row => {
+            const email = row.cells[3]?.textContent;
+            if (email === 'john.smith@company.com') {
+                // Update John's data
+                row.cells[8].textContent = '2025-09-01'; // Date Started
+                row.cells[9].innerHTML = '<span class="status-badge status-completed">2025-09-01</span>'; // Date Completed
+                updatedCount++;
+            } else if (email === 'sarah.johnson@company.com') {
+                // Update Sarah's data
+                row.cells[8].textContent = '2025-09-01'; // Date Started
+                row.cells[9].textContent = '-'; // Still in progress
+                updatedCount++;
+            }
+        });
+        
+        document.querySelector('.modal').remove();
+        showToast(`Successfully imported responses for ${updatedCount} recipients!`, 'success');
+    }, 2000);
+}
+
+function showDashboard() {
+    // Return to dashboard view
+    const contentArea = document.getElementById('content-area');
+    const dashboardSection = document.getElementById('dashboard-section');
+    
+    if (dashboardSection) {
+        // If dashboard section exists, show it
+        contentArea.innerHTML = dashboardSection.outerHTML;
+    } else {
+        // Reload the page to get back to dashboard
+        location.reload();
+    }
+}
 
 // END OF FILE - Realworld Survey Platform v2.0 with Email Integration

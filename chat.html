@@ -1156,16 +1156,22 @@
             participantId: chatState.participantId
         };
 
-        // Save to database
+        // Save to database using new chat response format
         try {
-            const responseData = {
-                survey_id: sessionConfig.id, // Using sessionId as survey identifier
-                respondent_email: chatState.participantId || 'anonymous',
-                responses: chatState.responses
+            const chatResponseData = {
+                sessionId: sessionConfig.id,
+                participantId: chatState.participantId || 'anonymous',
+                chatType: chatType,
+                messages: chatState.messages,
+                responses: chatState.responses,
+                sentiment: chatState.sentiment,
+                duration: Date.now() - chatState.startTime,
+                startTime: chatState.startTime,
+                completedAt: Date.now()
             };
-            
-            // Save survey response to database
-            const savedResponse = await saveSurveyResponse(responseData);
+
+            // Save chat response to database
+            const savedResponse = await saveChatResponse(chatResponseData);
             console.log('Chat response saved to database:', savedResponse);
         } catch (error) {
             console.error('Error saving chat response to database:', error);
@@ -1208,5 +1214,10 @@
         `;
     }
     </script>
+
+    <!-- Include Supabase client -->
+    <script src="lib/supabase.js"></script>
+    <!-- Include database functions -->
+    <script src="assets/js/database.js"></script>
 </body>
 </html>
