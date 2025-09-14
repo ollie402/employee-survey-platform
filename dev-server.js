@@ -74,7 +74,7 @@ app.post('/api/send-invitation', async (req, res) => {
 
   try {
     // Create email content
-    const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://www.rworldfeedback.com';
+    const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://www.rworldfeedback.co.uk';
     const subject = `Welcome to ${organizationName} - Realworld Survey Platform`;
     
     const htmlBody = `

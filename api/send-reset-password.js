@@ -20,8 +20,8 @@ export default async function handler(req, res) {
   const SMTP2GO_SENDER_EMAIL = process.env.SMTP2GO_SENDER_EMAIL;
   const SMTP2GO_SENDER_NAME = process.env.SMTP2GO_SENDER_NAME || 'Realworld';
   
-  // FIX: Use your public website URL instead of VERCEL_URL
-  const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://www.rworldfeedback.com';
+  // Use your Vercel production URL
+  const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://www.rworldfeedback.co.uk';
 
   // Generate a random reset token (like a temporary password)
   const resetToken = crypto.randomBytes(32).toString('hex');

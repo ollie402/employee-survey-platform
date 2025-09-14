@@ -2120,7 +2120,7 @@ async function generateChatLink(event) {
     });
     
     // Generate the link (assuming the chat page will be at chat.html)
-    const chatLink = 'https://rworldfeedback.com/chat.html?' + params.toString();
+    const chatLink = 'https://employee-survey-platform.surge.sh/chat.html?' + params.toString();
     
     // Store session data for email and database
     const chatSessionData = {
