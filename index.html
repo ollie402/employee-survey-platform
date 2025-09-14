@@ -2935,7 +2935,7 @@ function generateListeningChatLink(event) {
     });
     
     // Generate the original link
-    const originalLink = 'http://localhost:3001/chat.html?' + params.toString();
+    const originalLink = 'https://rworldfeedback.com/chat.html?' + params.toString();
     
     // Prepare chat data
     const chatData = {
@@ -3174,7 +3174,7 @@ function generateGuidedChatLink(event) {
     });
     
     // Generate the original link
-    const originalLink = 'http://localhost:3001/chat.html?' + params.toString();
+    const originalLink = 'https://rworldfeedback.com/chat.html?' + params.toString();
     
     // Prepare chat data
     const chatData = {
@@ -3469,7 +3469,7 @@ function generatePulseLink(event) {
     });
     
     // Generate the original link
-    const originalLink = 'http://localhost:3001/chat.html?' + params.toString();
+    const originalLink = 'https://rworldfeedback.com/chat.html?' + params.toString();
     
     // Prepare chat data
     const chatData = {
@@ -3638,7 +3638,7 @@ function generateContinuousChatLink(sessionName, welcomeMsg, template = null) {
     }
     
     // Generate the link
-    const chatLink = 'http://localhost:3001/chat.html?' + params.toString();
+    const chatLink = 'https://rworldfeedback.com/chat.html?' + params.toString();
     
     // Store session data with template
     const chatSessionData = {
@@ -3705,7 +3705,7 @@ async function generatePersonalChatLinks(sessionName, welcomeMsg, template = nul
             params.append('templateId', template.id);
         }
         
-        const link = 'http://localhost:3001/chat.html?' + params.toString();
+        const link = 'https://rworldfeedback.com/chat.html?' + params.toString();
         
         personalLinks.push({
             participant: participant,
@@ -6323,7 +6323,7 @@ function createCopiedChat(event, originalChatId) {
     
     // Create new chat data by copying from original
     const newChatId = originalChat.type + '_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-    const newLink = 'http://localhost:3001/chat.html?session=' + newChatId;
+    const newLink = 'https://rworldfeedback.com/chat.html?session=' + newChatId;
     
     const copiedChat = {
         id: newChatId,
@@ -7465,7 +7465,7 @@ async function confirmSendInvitations(recipients) {
         for (const recipient of recipients) {
             try {
                 // Generate survey link for this recipient - use explicit localhost URL
-                const surveyLink = `http://localhost:3001/chat.html?session=${encodeURIComponent(recipient.email)}&type=listening&name=${encodeURIComponent('Employee Feedback Session')}`;
+                const surveyLink = `https://rworldfeedback.com/chat.html?session=${encodeURIComponent(recipient.email)}&type=listening&name=${encodeURIComponent('Employee Feedback Session')}`;
 
                 // Personalize the message
                 const personalizedMessage = message
