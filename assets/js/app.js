@@ -2120,7 +2120,7 @@ async function generateChatLink(event) {
     });
     
     // Generate the link (assuming the chat page will be at chat.html)
-    const chatLink = window.location.origin + '/chat.html?' + params.toString();
+    const chatLink = 'http://localhost:3001/chat.html?' + params.toString();
     
     // Store session data for email and database
     const chatSessionData = {
