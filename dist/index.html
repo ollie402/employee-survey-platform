@@ -7088,14 +7088,28 @@ function sortRecipientsTable(column) {
 }
 
 function sendEmailInvitation() {
-    const selectedRecipients = document.querySelectorAll('#recipients-table-body input[type="checkbox"]:checked');
-    if (selectedRecipients.length === 0) {
-        showToast('Please select recipients to send invitations to', 'warning');
+    // Auto-select recipients who haven't completed the survey
+    const allRecipients = document.querySelectorAll('#recipients-table-body input[type="checkbox"]');
+    console.log('Found recipients:', allRecipients.length);
+
+    const nonResponders = Array.from(allRecipients).filter(checkbox => {
+        const row = checkbox.closest('tr');
+        // Check if "Date Survey Completed" column is empty (indicates no response)
+        const completedCell = row.cells[9]; // "Date Survey Completed" column
+        const completedText = completedCell ? completedCell.textContent.trim() : '';
+        console.log('Checking recipient:', row.cells[1].textContent, 'completion status:', completedText);
+        return completedText === '-' || completedText === '' || !completedText;
+    });
+
+    console.log('Non-responders found:', nonResponders.length);
+
+    if (nonResponders.length === 0) {
+        showToast('All recipients have already completed the survey!', 'info');
         return;
     }
 
-    // Get selected recipient details
-    const selectedDetails = Array.from(selectedRecipients).map(checkbox => {
+    // Get non-responder details
+    const selectedDetails = nonResponders.map(checkbox => {
         const row = checkbox.closest('tr');
         return {
             id: checkbox.dataset.recipientId,
@@ -7103,6 +7117,8 @@ function sendEmailInvitation() {
             email: row.cells[3].textContent
         };
     });
+
+    showToast(`Automatically selected ${nonResponders.length} recipients who haven't responded`, 'info');
 
     // Create email invitation modal
     const modal = document.createElement('div');
