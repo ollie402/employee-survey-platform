@@ -4217,9 +4217,12 @@ function sendEmailInvitation() {
     const selectedDetails = nonResponders.map(checkbox => {
         const row = checkbox.closest('tr');
         return {
-            id: checkbox.dataset.recipientId,
+            id: checkbox.dataset.id,
             name: `${row.cells[1].textContent} ${row.cells[2].textContent}`,
-            email: row.cells[3].textContent
+            email: row.cells[3].textContent,
+            forename: row.cells[1].textContent,
+            surname: row.cells[2].textContent,
+            reminder_count: parseInt(row.cells[6].textContent) || 0
         };
     });
 
@@ -4371,6 +4374,43 @@ async function confirmSendInvitations(recipients) {
         // Send emails to each recipient
         for (const recipient of recipients) {
             try {
+                // First check if recipient exists in database, if not create them
+                const { data: existingRecipient, error: checkError } = await window.supabaseClient
+                    .from('survey_recipients')
+                    .select('*')
+                    .eq('email', recipient.email)
+                    .eq('survey_id', currentRecipientsChatId || 'test')
+                    .single();
+
+                let recipientId = recipient.id;
+
+                if (checkError && checkError.code === 'PGRST116') {
+                    // Recipient doesn't exist, create them
+                    console.log(`Creating new recipient record for ${recipient.email}`);
+                    const { data: newRecipient, error: createError } = await window.supabaseClient
+                        .from('survey_recipients')
+                        .insert({
+                            survey_id: currentRecipientsChatId || 'test',
+                            forename: recipient.forename,
+                            surname: recipient.surname,
+                            email: recipient.email,
+                            employee_no: '', // Will be filled from table data if available
+                            invite_sent: false,
+                            reminder_count: 0
+                        })
+                        .select('*')
+                        .single();
+
+                    if (createError) {
+                        console.error('Error creating recipient:', createError);
+                        continue;
+                    }
+                    recipientId = newRecipient.id;
+                } else if (existingRecipient) {
+                    recipientId = existingRecipient.id;
+                    console.log(`Found existing recipient with ID: ${recipientId}`);
+                }
+
                 // Send email via API
                 const emailResponse = await fetch('/api/send-invitation', {
                     method: 'POST',
@@ -4391,6 +4431,8 @@ async function confirmSendInvitations(recipients) {
                     const currentDate = new Date().toISOString().split('T')[0];
                     const reminderCount = isReminder ? (recipient.reminder_count || 0) + 1 : 1;
 
+                    console.log(`Updating database for recipient ID: ${recipientId}, email: ${recipient.email}`);
+
                     const { data, error } = await window.supabaseClient
                         .from('survey_recipients')
                         .update({
@@ -4399,26 +4441,38 @@ async function confirmSendInvitations(recipients) {
                             last_reminder_sent: currentDate,
                             updated_at: new Date().toISOString()
                         })
-                        .eq('id', recipient.id);
+                        .eq('id', recipientId);
 
                     if (error) {
                         console.error('Error updating recipient database:', error);
                     } else {
-                        // Update UI table row immediately
-                        const checkbox = document.querySelector(`input[data-recipient-id="${recipient.id}"]`);
-                        if (checkbox) {
-                            const row = checkbox.closest('tr');
-                            // Update invite sent status
-                            const inviteCell = row.cells[5];
-                            inviteCell.innerHTML = '<span class="status-badge sent">YES</span>';
+                        console.log(`Database updated successfully for recipient ID: ${recipientId}`);
+                        // Update UI table row immediately - find by email since ID might have changed
+                        const rows = document.querySelectorAll('#recipients-table-body tr');
+                        let rowFound = false;
 
-                            // Update reminders sent
-                            const remindersCell = row.cells[6];
-                            remindersCell.textContent = reminderCount;
+                        rows.forEach(row => {
+                            const emailCell = row.cells[3];
+                            if (emailCell && emailCell.textContent.trim() === recipient.email) {
+                                console.log('Found row by email, updating UI:', row);
+                                // Update invite sent status
+                                const inviteCell = row.cells[5];
+                                inviteCell.innerHTML = '<span class="status-badge sent">YES</span>';
 
-                            // Update last reminder date
-                            const lastReminderCell = row.cells[7];
-                            lastReminderCell.textContent = currentDate;
+                                // Update reminders sent
+                                const remindersCell = row.cells[6];
+                                remindersCell.textContent = reminderCount;
+
+                                // Update last reminder date
+                                const lastReminderCell = row.cells[7];
+                                lastReminderCell.textContent = currentDate;
+
+                                rowFound = true;
+                            }
+                        });
+
+                        if (!rowFound) {
+                            console.error(`Could not find row for recipient email: ${recipient.email}`);
                         }
                     }
                 } else {
@@ -4431,9 +4485,13 @@ async function confirmSendInvitations(recipients) {
 
         showToast(`Successfully sent ${recipients.length} invitation${recipients.length > 1 ? 's' : ''}!`, 'success');
 
+        // Refresh the table to show updated data from database
+        await loadRecipientsData(currentRecipientsChatId || 'test');
+
         // Clear selections
         document.querySelectorAll('#recipients-table-body input[type="checkbox"]:checked').forEach(cb => cb.checked = false);
-        document.getElementById('select-all').checked = false;
+        const selectAllCheckbox = document.getElementById('select-all');
+        if (selectAllCheckbox) selectAllCheckbox.checked = false;
 
     } catch (error) {
         console.error('Error in bulk invitation sending:', error);
