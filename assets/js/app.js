@@ -5382,16 +5382,114 @@ async function testDatabaseConnection() {
     }
 }
 
+// Simple test function to update first recipient to TRUE
+async function testDatabaseUpdate() {
+    try {
+        console.log('Testing database update...');
+
+        // Get first recipient
+        const { data: recipients, error: selectError } = await window.supabaseClient
+            .from('survey_recipients')
+            .select('*')
+            .limit(1);
+
+        if (selectError) {
+            console.error('Error selecting recipients:', selectError);
+            return;
+        }
+
+        if (recipients && recipients.length > 0) {
+            const recipient = recipients[0];
+            console.log('Updating recipient:', recipient);
+
+            // Update invite_sent to true
+            const { data, error } = await window.supabaseClient
+                .from('survey_recipients')
+                .update({
+                    invite_sent: true,
+                    reminder_count: 1,
+                    last_reminder_sent: new Date().toISOString().split('T')[0]
+                })
+                .eq('id', recipient.id);
+
+            if (error) {
+                console.error('Error updating:', error);
+            } else {
+                console.log('✅ Update successful:', data);
+                // Refresh table
+                await manualRefresh();
+            }
+        }
+    } catch (error) {
+        console.error('Test update failed:', error);
+    }
+}
+
 // Manual refresh function for testing
 async function manualRefresh() {
     console.log('Manual refresh triggered...');
     await loadRecipientsData(currentRecipientsChatId || 'test');
 }
 
+// Direct test function for button click
+async function testDatabaseDirectUpdate() {
+    try {
+        console.log('🔧 Testing direct database update...');
+
+        // Get first recipient from current survey
+        const { data: recipients, error: selectError } = await window.supabaseClient
+            .from('survey_recipients')
+            .select('*')
+            .eq('survey_id', 'test')
+            .limit(1);
+
+        if (selectError) {
+            console.error('Error selecting recipients:', selectError);
+            showToast('❌ Error selecting recipients: ' + selectError.message, 'error');
+            return;
+        }
+
+        if (recipients && recipients.length > 0) {
+            const recipient = recipients[0];
+            console.log('Updating recipient:', recipient);
+            showToast(`🔧 Testing update for ${recipient.email}...`, 'info');
+
+            // Update invite_sent to true
+            const { data, error } = await window.supabaseClient
+                .from('survey_recipients')
+                .update({
+                    invite_sent: true,
+                    reminder_count: 1,
+                    last_reminder_sent: new Date().toISOString().split('T')[0],
+                    updated_at: new Date().toISOString()
+                })
+                .eq('id', recipient.id);
+
+            if (error) {
+                console.error('Error updating:', error);
+                showToast('❌ Update failed: ' + error.message, 'error');
+            } else {
+                console.log('✅ Update successful:', data);
+                showToast('✅ Database updated! Refreshing table...', 'success');
+
+                // Refresh table
+                await loadRecipientsData('test');
+            }
+        } else {
+            showToast('❌ No recipients found to test', 'warning');
+        }
+    } catch (error) {
+        console.error('Test update failed:', error);
+        showToast('❌ Test failed: ' + error.message, 'error');
+    }
+}
+
 // Make functions available globally for chat pages to call
 window.trackSurveyStarted = trackSurveyStarted;
 window.trackSurveyCompleted = trackSurveyCompleted;
 window.testDatabaseConnection = testDatabaseConnection;
+window.testDatabaseUpdate = testDatabaseUpdate;
+window.testDatabaseDirectUpdate = testDatabaseDirectUpdate;
 window.manualRefresh = manualRefresh;
 
 // END OF FILE - Realworld Survey Platform v2.0 with Email Integration
