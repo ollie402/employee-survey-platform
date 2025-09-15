@@ -4377,17 +4377,26 @@ async function confirmSendInvitations(recipients) {
         // Send emails to each recipient
         for (const recipient of recipients) {
             try {
-                // First check if recipient exists in database, if not create them
-                const { data: existingRecipient, error: checkError } = await window.supabaseClient
+                // Find existing recipient by email, or create if doesn't exist
+                console.log(`Looking for recipient: ${recipient.email} in survey: ${currentRecipientsChatId || 'test'}`);
+
+                const { data: existingRecipients, error: checkError } = await window.supabaseClient
                     .from('survey_recipients')
                     .select('*')
                     .eq('email', recipient.email)
-                    .eq('survey_id', currentRecipientsChatId || 'test')
-                    .single();
+                    .eq('survey_id', currentRecipientsChatId || 'test');
 
-                let recipientId = recipient.id;
+                let recipientRecord = null;
 
-                if (checkError && checkError.code === 'PGRST116') {
+                if (checkError) {
+                    console.error('Error checking for existing recipient:', checkError);
+                    continue;
+                }
+
+                if (existingRecipients && existingRecipients.length > 0) {
+                    recipientRecord = existingRecipients[0];
+                    console.log(`Found existing recipient:`, recipientRecord);
+                } else {
                     // Recipient doesn't exist, create them
                     console.log(`Creating new recipient record for ${recipient.email}`);
                     const { data: newRecipient, error: createError } = await window.supabaseClient
@@ -4408,10 +4417,8 @@ async function confirmSendInvitations(recipients) {
                         console.error('Error creating recipient:', createError);
                         continue;
                     }
-                    recipientId = newRecipient.id;
-                } else if (existingRecipient) {
-                    recipientId = existingRecipient.id;
-                    console.log(`Found existing recipient with ID: ${recipientId}`);
+                    recipientRecord = newRecipient;
+                    console.log(`Created new recipient:`, recipientRecord);
                 }
 
                 // Send email via API
@@ -4432,9 +4439,9 @@ async function confirmSendInvitations(recipients) {
                 if (emailResponse.ok) {
                     // Update database to reflect sent invitation
                     const currentDate = new Date().toISOString().split('T')[0];
-                    const reminderCount = isReminder ? (recipient.reminder_count || 0) + 1 : 1;
+                    const reminderCount = isReminder ? (recipientRecord.reminder_count || 0) + 1 : 1;
 
-                    console.log(`Updating database for recipient ID: ${recipientId}, email: ${recipient.email}`);
+                    console.log(`Updating database for recipient ID: ${recipientRecord.id}, email: ${recipient.email}`);
 
                     const { data, error } = await window.supabaseClient
                         .from('survey_recipients')
@@ -4444,12 +4451,14 @@ async function confirmSendInvitations(recipients) {
                             last_reminder_sent: currentDate,
                             updated_at: new Date().toISOString()
                         })
-                        .eq('id', recipientId);
+                        .eq('id', recipientRecord.id);
 
                     if (error) {
                         console.error('Error updating recipient database:', error);
                     } else {
-                        console.log(`Database updated successfully for recipient ID: ${recipientId}`);
+                        console.log(`✅ Database updated successfully for recipient ID: ${recipientRecord.id}, email: ${recipient.email}`);
+                        console.log('Update result:', data);
+
                         // Update UI table row immediately - find by email since ID might have changed
                         const rows = document.querySelectorAll('#recipients-table-body tr');
                         let rowFound = false;
