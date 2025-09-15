@@ -4351,49 +4351,94 @@ function preloadRecipients() {
     document.body.appendChild(modal);
 }
 
-function confirmSendInvitations(recipients) {
+async function confirmSendInvitations(recipients) {
     const subject = document.getElementById('email-subject').value;
     const message = document.getElementById('email-message').value;
     const isReminder = document.getElementById('send-reminder').checked;
-    
+
     if (!subject.trim() || !message.trim()) {
         showToast('Please fill in both subject and message', 'warning');
         return;
     }
-    
+
     // Close modal
     document.querySelector('.modal').remove();
-    
-    // Simulate sending emails
+
+    // Send actual emails and update database
     showToast('Sending invitations...', 'info');
-    
-    setTimeout(() => {
-        showToast(`Successfully sent ${recipients.length} invitation${recipients.length > 1 ? 's' : ''}!`, 'success');
-        
-        // Update table data to reflect sent invitations
-        recipients.forEach(recipient => {
-            const checkbox = document.querySelector(`input[data-recipient-id="${recipient.id}"]`);
-            if (checkbox) {
-                const row = checkbox.closest('tr');
-                // Update invite sent status
-                const inviteCell = row.cells[5];
-                inviteCell.innerHTML = '<span class="status-badge status-sent">Yes</span>';
-                
-                // Update reminders sent
-                const remindersCell = row.cells[6];
-                const currentReminders = parseInt(remindersCell.textContent) || 0;
-                remindersCell.textContent = currentReminders + 1;
-                
-                // Update last reminder date
-                const lastReminderCell = row.cells[7];
-                lastReminderCell.textContent = new Date().toISOString().split('T')[0];
+
+    try {
+        // Send emails to each recipient
+        for (const recipient of recipients) {
+            try {
+                // Send email via API
+                const emailResponse = await fetch('/api/send-invitation', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        userEmail: recipient.email,
+                        userName: `${recipient.forename} ${recipient.surname}`,
+                        subject: subject,
+                        message: message,
+                        isReminder: isReminder
+                    }),
+                });
+
+                if (emailResponse.ok) {
+                    // Update database to reflect sent invitation
+                    const currentDate = new Date().toISOString().split('T')[0];
+                    const reminderCount = isReminder ? (recipient.reminder_count || 0) + 1 : 1;
+
+                    const { data, error } = await window.supabaseClient
+                        .from('survey_recipients')
+                        .update({
+                            invite_sent: true,
+                            reminder_count: reminderCount,
+                            last_reminder_sent: currentDate,
+                            updated_at: new Date().toISOString()
+                        })
+                        .eq('id', recipient.id);
+
+                    if (error) {
+                        console.error('Error updating recipient database:', error);
+                    } else {
+                        // Update UI table row immediately
+                        const checkbox = document.querySelector(`input[data-recipient-id="${recipient.id}"]`);
+                        if (checkbox) {
+                            const row = checkbox.closest('tr');
+                            // Update invite sent status
+                            const inviteCell = row.cells[5];
+                            inviteCell.innerHTML = '<span class="status-badge sent">YES</span>';
+
+                            // Update reminders sent
+                            const remindersCell = row.cells[6];
+                            remindersCell.textContent = reminderCount;
+
+                            // Update last reminder date
+                            const lastReminderCell = row.cells[7];
+                            lastReminderCell.textContent = currentDate;
+                        }
+                    }
+                } else {
+                    console.error(`Failed to send email to ${recipient.email}`);
+                }
+            } catch (error) {
+                console.error(`Error sending invitation to ${recipient.email}:`, error);
             }
-        });
-        
+        }
+
+        showToast(`Successfully sent ${recipients.length} invitation${recipients.length > 1 ? 's' : ''}!`, 'success');
+
         // Clear selections
         document.querySelectorAll('#recipients-table-body input[type="checkbox"]:checked').forEach(cb => cb.checked = false);
         document.getElementById('select-all').checked = false;
-    }, 2000);
+
+    } catch (error) {
+        console.error('Error in bulk invitation sending:', error);
+        showToast('Error sending invitations. Please try again.', 'error');
+    }
 }
 
 function addRecipient() {
@@ -5162,7 +5207,7 @@ function showDashboard() {
     // Return to dashboard view
     const contentArea = document.getElementById('content-area');
     const dashboardSection = document.getElementById('dashboard-section');
-    
+
     if (dashboardSection) {
         // If dashboard section exists, show it
         contentArea.innerHTML = dashboardSection.outerHTML;
@@ -5171,5 +5216,82 @@ function showDashboard() {
         location.reload();
     }
 }
+
+// Survey Tracking Functions
+async function trackSurveyStarted(email, surveyId = 'test') {
+    try {
+        const currentDate = new Date().toISOString().split('T')[0];
+
+        const { data, error } = await window.supabaseClient
+            .from('survey_recipients')
+            .update({
+                survey_started_date: currentDate,
+                updated_at: new Date().toISOString()
+            })
+            .eq('email', email)
+            .eq('survey_id', surveyId);
+
+        if (error) {
+            console.error('Error tracking survey start:', error);
+        } else {
+            console.log(`Survey started tracked for ${email}`);
+            // Update UI if table is visible
+            updateRecipientTableUI(email, 'started', currentDate);
+        }
+    } catch (error) {
+        console.error('Error in trackSurveyStarted:', error);
+    }
+}
+
+async function trackSurveyCompleted(email, surveyId = 'test') {
+    try {
+        const currentDate = new Date().toISOString().split('T')[0];
+
+        const { data, error } = await window.supabaseClient
+            .from('survey_recipients')
+            .update({
+                survey_completed_date: currentDate,
+                updated_at: new Date().toISOString()
+            })
+            .eq('email', email)
+            .eq('survey_id', surveyId);
+
+        if (error) {
+            console.error('Error tracking survey completion:', error);
+        } else {
+            console.log(`Survey completion tracked for ${email}`);
+            // Update UI if table is visible
+            updateRecipientTableUI(email, 'completed', currentDate);
+        }
+    } catch (error) {
+        console.error('Error in trackSurveyCompleted:', error);
+    }
+}
+
+function updateRecipientTableUI(email, eventType, date) {
+    // Find the row for this email and update the appropriate column
+    const rows = document.querySelectorAll('#recipients-table-body tr');
+
+    rows.forEach(row => {
+        const emailCell = row.cells[3]; // Email is in column 3
+        if (emailCell && emailCell.textContent.trim() === email) {
+            if (eventType === 'started') {
+                const startedCell = row.cells[8]; // Survey Started is column 8
+                if (startedCell) {
+                    startedCell.textContent = date;
+                }
+            } else if (eventType === 'completed') {
+                const completedCell = row.cells[9]; // Survey Completed is column 9
+                if (completedCell) {
+                    completedCell.textContent = date;
+                }
+            }
+        }
+    });
+}
+
+// Make functions available globally for chat pages to call
+window.trackSurveyStarted = trackSurveyStarted;
+window.trackSurveyCompleted = trackSurveyCompleted;
 
 // END OF FILE - Realworld Survey Platform v2.0 with Email Integration
