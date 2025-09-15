@@ -4355,6 +4355,9 @@ function preloadRecipients() {
 }
 
 async function confirmSendInvitations(recipients) {
+    console.log('🚀 confirmSendInvitations called with recipients:', recipients);
+    console.log('📧 Current chat ID:', currentRecipientsChatId);
+
     const subject = document.getElementById('email-subject').value;
     const message = document.getElementById('email-message').value;
     const isReminder = document.getElementById('send-reminder').checked;
@@ -5348,8 +5351,38 @@ function updateRecipientTableUI(email, eventType, date) {
     });
 }
 
+// Debug function to test database connection
+async function testDatabaseConnection() {
+    try {
+        console.log('Testing Supabase connection...');
+        console.log('Supabase client:', window.supabaseClient);
+
+        // Test simple query
+        const { data, error } = await window.supabaseClient
+            .from('survey_recipients')
+            .select('*')
+            .limit(5);
+
+        if (error) {
+            console.error('Database connection error:', error);
+        } else {
+            console.log('Database connection successful. Found records:', data);
+        }
+    } catch (error) {
+        console.error('Database test failed:', error);
+    }
+}
+
+// Manual refresh function for testing
+async function manualRefresh() {
+    console.log('Manual refresh triggered...');
+    await loadRecipientsData(currentRecipientsChatId || 'test');
+}
+
 // Make functions available globally for chat pages to call
 window.trackSurveyStarted = trackSurveyStarted;
 window.trackSurveyCompleted = trackSurveyCompleted;
+window.testDatabaseConnection = testDatabaseConnection;
+window.manualRefresh = manualRefresh;
 
 // END OF FILE - Realworld Survey Platform v2.0 with Email Integration
