@@ -167,18 +167,32 @@ app.get('/api/test-email-config', (req, res) => {
   });
 });
 
+// Manually register our new chat API endpoints
+app.all('/api/chat-session', async (req, res) => {
+  try {
+    const module = await import('./api/chat-session.js');
+    await module.default(req, res);
+  } catch (error) {
+    console.error('Error in /api/chat-session:', error);
+    res.status(500).json({ error: 'Internal server error', message: error.message });
+  }
+});
+
+app.all('/api/chat-response', async (req, res) => {
+  try {
+    const module = await import('./api/chat-response.js');
+    await module.default(req, res);
+  } catch (error) {
+    console.error('Error in /api/chat-response:', error);
+    res.status(500).json({ error: 'Internal server error', message: error.message });
+  }
+});
+
+console.log('📡 Chat API endpoints registered: /api/chat-session, /api/chat-response');
+
 // Serve index.html for root
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
-});
-
-// Handle 404s
-app.use((req, res) => {
-  if (req.url.startsWith('/api/')) {
-    res.status(404).json({ error: `API endpoint ${req.url} not found` });
-  } else {
-    res.status(404).sendFile(path.join(__dirname, 'index.html'));
-  }
 });
 
 // Start server

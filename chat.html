@@ -529,9 +529,17 @@
         const topics = urlParams.get('topics');
         const questionsParam = urlParams.get('questions');
 
+        // Allow direct access for testing or when using API-generated sessions
         if (!sessionId) {
-            showError('Invalid session. Please check your link.');
-            return;
+            // Check if this is API-powered mode
+            if (typeof apiChatState !== 'undefined' && apiChatState.sessionId) {
+                sessionId = apiChatState.sessionId;
+                console.log('🔄 Using API-generated session:', sessionId);
+            } else {
+                // Generate a demo session for direct access
+                sessionId = 'demo_' + Math.random().toString(36).substr(2, 9);
+                console.log('🔄 Generated demo session for direct access:', sessionId);
+            }
         }
 
         // Create session configuration from URL parameters
@@ -1215,9 +1223,224 @@
     }
     </script>
 
+    <!-- Include config for API endpoints -->
+    <script src="assets/js/config.js"></script>
     <!-- Include Supabase client -->
     <script src="lib/supabase.js"></script>
     <!-- Include database functions -->
     <script src="assets/js/database.js"></script>
+
+    <!-- Real-time Chat API Integration -->
+    <script>
+        // Enhanced chat state with API integration
+        let apiChatState = {
+            sessionId: null,
+            participantId: null,
+            currentStep: 0,
+            isRealTime: false,
+            apiBaseUrl: null,
+            conversationComplete: false
+        };
+
+        // Initialize API integration when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeAPIChat();
+        });
+
+        // Initialize API-powered chat functionality
+        async function initializeAPIChat() {
+            // Get session ID from URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            apiChatState.sessionId = urlParams.get('session') || urlParams.get('id') || generateSessionId();
+            apiChatState.participantId = urlParams.get('participant') || generateParticipantId();
+
+            // If no session ID in URL, this is a direct access - allow API to generate demo session
+            if (!urlParams.get('session') && !urlParams.get('id')) {
+                console.log('🔄 Direct access detected, creating demo session:', apiChatState.sessionId);
+            }
+
+            // Set API base URL from config
+            apiChatState.apiBaseUrl = window.APP_CONFIG ? window.APP_CONFIG.API_BASE_URL : 'http://localhost:3001/api';
+
+            // Try to establish API connection
+            try {
+                const response = await fetch(`${apiChatState.apiBaseUrl}/chat-session?sessionId=${apiChatState.sessionId}&step=0`);
+                if (response.ok) {
+                    const data = await response.json();
+                    apiChatState.isRealTime = true;
+                    console.log('✅ Real-time chat API connected');
+
+                    // Start with API-powered conversation
+                    if (data.conversation && data.conversation.botMessage) {
+                        setTimeout(() => {
+                            addBotMessage(data.conversation.botMessage);
+                            updateInputPlaceholder(data.conversation.placeholder);
+                        }, 1000);
+                    }
+                } else {
+                    console.log('⚠️ API not available, using fallback chat');
+                    apiChatState.isRealTime = false;
+                }
+            } catch (error) {
+                console.log('⚠️ API connection failed, using fallback chat:', error.message);
+                apiChatState.isRealTime = false;
+            }
+        }
+
+        // Enhanced sendMessage function with API integration
+        const originalSendMessage = sendMessage;
+        sendMessage = async function() {
+            const input = document.getElementById('user-input');
+            const message = input.value.trim();
+
+            if (!message || apiChatState.conversationComplete) return;
+
+            // Add user message to UI
+            addUserMessage(message);
+            input.value = '';
+            input.style.height = 'auto';
+
+            // Show typing indicator
+            showTypingIndicator();
+
+            if (apiChatState.isRealTime) {
+                await handleRealTimeResponse(message);
+            } else {
+                // Fallback to original functionality
+                originalSendMessage();
+            }
+        };
+
+        // Handle response using real-time API
+        async function handleRealTimeResponse(userResponse) {
+            try {
+                // First, save the response
+                const responseData = {
+                    sessionId: apiChatState.sessionId,
+                    participantId: apiChatState.participantId,
+                    step: apiChatState.currentStep,
+                    response: userResponse,
+                    responseType: 'text',
+                    timestamp: new Date().toISOString()
+                };
+
+                // Save response to API
+                const saveResponse = await fetch(`${apiChatState.apiBaseUrl}/chat-response`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(responseData)
+                });
+
+                if (saveResponse.ok) {
+                    const saveData = await saveResponse.json();
+                    console.log('Response saved:', saveData);
+                }
+
+                // Get next conversation step
+                const nextStepResponse = await fetch(`${apiChatState.apiBaseUrl}/chat-session`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        sessionId: apiChatState.sessionId,
+                        step: apiChatState.currentStep,
+                        userResponse: userResponse,
+                        participantId: apiChatState.participantId
+                    })
+                });
+
+                if (nextStepResponse.ok) {
+                    const nextData = await nextStepResponse.json();
+
+                    setTimeout(() => {
+                        hideTypingIndicator();
+
+                        if (nextData.botResponse) {
+                            addBotMessage(nextData.botResponse);
+                        }
+
+                        if (nextData.isComplete) {
+                            apiChatState.conversationComplete = true;
+                            setTimeout(() => {
+                                showCompletionMessage();
+                            }, 2000);
+                        } else {
+                            apiChatState.currentStep = nextData.nextStep;
+
+                            // Update input placeholder if available
+                            if (nextData.conversation && nextData.conversation.placeholder) {
+                                updateInputPlaceholder(nextData.conversation.placeholder);
+                            }
+                        }
+                    }, 1500);
+                } else {
+                    throw new Error('Failed to get next conversation step');
+                }
+
+            } catch (error) {
+                console.error('Real-time chat error:', error);
+                hideTypingIndicator();
+
+                // Fallback to static response
+                setTimeout(() => {
+                    addBotMessage("Thank you for your response. Is there anything else you'd like to share?");
+                }, 1500);
+            }
+        }
+
+        // Update input placeholder
+        function updateInputPlaceholder(placeholder) {
+            const input = document.getElementById('user-input');
+            if (input && placeholder) {
+                input.placeholder = placeholder;
+            }
+        }
+
+        // Show completion message
+        function showCompletionMessage() {
+            addBotMessage("Thank you so much for taking the time to share your thoughts! Your feedback is invaluable and will help create a better workplace. Have a great day! 🌟");
+
+            // Disable input
+            const input = document.getElementById('user-input');
+            const sendButton = document.getElementById('send-button');
+            if (input) {
+                input.disabled = true;
+                input.placeholder = "Conversation completed - thank you!";
+            }
+            if (sendButton) {
+                sendButton.disabled = true;
+            }
+        }
+
+        // Generate session ID if not provided
+        function generateSessionId() {
+            return 'session_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
+        }
+
+        // Generate participant ID
+        function generateParticipantId() {
+            return 'participant_' + Math.random().toString(36).substr(2, 9);
+        }
+
+        // Add visual indicator for real-time mode
+        function addRealTimeIndicator() {
+            if (apiChatState.isRealTime) {
+                const indicator = document.createElement('div');
+                indicator.innerHTML = '🟢 Real-time';
+                indicator.style.cssText = `
+                    position: fixed; bottom: 10px; left: 10px; z-index: 1000;
+                    background: rgba(0,0,0,0.7); color: white; padding: 4px 8px;
+                    font-size: 12px; border-radius: 4px;
+                `;
+                document.body.appendChild(indicator);
+            }
+        }
+
+        // Call indicator after API initialization
+        setTimeout(addRealTimeIndicator, 2000);
+    </script>
 </body>
 </html>
