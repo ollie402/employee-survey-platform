@@ -513,21 +513,47 @@
     // Initialize on page load
     window.addEventListener('DOMContentLoaded', initializeChat);
 
+    // Failsafe: Force show chat after 5 seconds if still loading
+    setTimeout(() => {
+        const loadingScreen = document.getElementById('loading-screen');
+        const chatContainer = document.getElementById('chat-container');
+
+        if (loadingScreen && loadingScreen.style.display !== 'none') {
+            console.warn('⚠️ Failsafe triggered - forcing chat to show');
+            loadingScreen.style.display = 'none';
+            if (chatContainer) {
+                chatContainer.style.display = 'flex';
+            }
+
+            // Initialize if not already done
+            if (!isInitialized) {
+                console.log('🆘 Failsafe initialization');
+                initializeChat();
+            }
+        }
+    }, 5000);
+
     function initializeChat() {
+        console.log('🔄 initializeChat() called, isInitialized:', isInitialized);
+
         // Prevent double initialization
         if (isInitialized) {
             console.log('Chat already initialized, skipping...');
             return;
         }
-        
+
+        console.log('🚀 Starting chat initialization...');
+
         // Parse URL parameters
         const urlParams = new URLSearchParams(window.location.search);
-        const sessionId = urlParams.get('session');
+        let sessionId = urlParams.get('session');
         const typeParam = urlParams.get('type');
         const chatName = urlParams.get('name');
         const welcomeMsg = urlParams.get('welcome');
         const topics = urlParams.get('topics');
         const questionsParam = urlParams.get('questions');
+
+        console.log('📋 URL params:', { sessionId, typeParam, chatName, welcomeMsg, topics, questionsParam });
 
         // Allow direct access for testing or when using API-generated sessions
         if (!sessionId) {
@@ -561,15 +587,31 @@
         // Initialize based on chat type
         setupChatInterface();
 
+        console.log('🎨 Setting up UI elements...');
+
         // Hide loading screen and show chat
-        document.getElementById('loading-screen').style.display = 'none';
-        document.getElementById('chat-container').style.display = 'flex';
+        const loadingScreen = document.getElementById('loading-screen');
+        const chatContainer = document.getElementById('chat-container');
+
+        console.log('📱 Elements found:', { loadingScreen: !!loadingScreen, chatContainer: !!chatContainer });
+
+        if (loadingScreen) {
+            loadingScreen.style.display = 'none';
+            console.log('✅ Loading screen hidden');
+        }
+
+        if (chatContainer) {
+            chatContainer.style.display = 'flex';
+            console.log('✅ Chat container shown');
+        }
 
         // Start the appropriate chat flow
+        console.log('🎬 Starting chat flow...');
         startChat();
-        
+
         // Mark as initialized to prevent duplicates
         isInitialized = true;
+        console.log('✅ Chat initialization complete!');
     }
 
     function applyBranding() {
@@ -877,17 +919,9 @@
         // Simulate AI response
         setTimeout(() => {
             hideTypingIndicator();
-            
-            // Generate contextual response
-            const responses = [
-                "Thank you for sharing that. Can you tell me more?",
-                "I understand. What else would you like to add?",
-                "That's valuable feedback. Is there anything else on your mind?",
-                "I appreciate your input. How does that impact your work?",
-                "Interesting point. Could you elaborate on that?"
-            ];
-            
-            const response = responses[Math.floor(Math.random() * responses.length)];
+
+            // Generate contextual response based on message content
+            const response = generateContextualResponse(message);
             addBotMessage(response);
 
             // Check if conversation should end
@@ -897,6 +931,100 @@
                 }, 2000);
             }
         }, 1500);
+    }
+
+    function generateContextualResponse(message) {
+        const messageLower = message.toLowerCase();
+
+        // Detect management/supervisor related feedback
+        const managementKeywords = ['manager', 'supervisor', 'boss', 'management', 'lead', 'director'];
+        const negativeKeywords = ['bad', 'mean', 'terrible', 'awful', 'horrible', 'unfair', 'rude', 'disrespectful', 'difficult'];
+        const positiveKeywords = ['good', 'great', 'excellent', 'supportive', 'helpful', 'understanding', 'fair'];
+
+        const hasManagementMention = managementKeywords.some(keyword => messageLower.includes(keyword));
+        const hasNegativeWords = negativeKeywords.some(keyword => messageLower.includes(keyword));
+        const hasPositiveWords = positiveKeywords.some(keyword => messageLower.includes(keyword));
+
+        // Management-related responses
+        if (hasManagementMention && hasNegativeWords) {
+            const managementPrompts = [
+                "I hear that you're having challenges with your manager. Can you help me understand what specific behaviors or situations are causing difficulty? This can help identify areas for improvement.",
+                "It sounds like there are some concerns about your manager's approach. What specific examples can you share that might help us understand the situation better?",
+                "I understand you're experiencing difficulties with management. Could you describe particular instances or patterns that have been problematic? Your feedback can help create positive changes.",
+                "Thank you for sharing that feedback about your manager. What specific actions or communication styles would you find more supportive in your role?",
+                "I appreciate you being open about management concerns. Can you tell me more about what changes would help improve your working relationship?"
+            ];
+            return managementPrompts[Math.floor(Math.random() * managementPrompts.length)];
+        } else if (hasManagementMention && hasPositiveWords) {
+            const positiveManagementPrompts = [
+                "That's wonderful to hear about your manager! What specific qualities or actions make them effective? This helps us understand what good management looks like.",
+                "It's great that you have a positive relationship with your manager. What do they do that you find most supportive?",
+                "I'm glad to hear positive feedback about management. What aspects of their leadership style work well for you?"
+            ];
+            return positiveManagementPrompts[Math.floor(Math.random() * positiveManagementPrompts.length)];
+        }
+
+        // Work environment and culture
+        else if (messageLower.includes('culture') || messageLower.includes('environment') || messageLower.includes('workplace')) {
+            const culturePrompts = [
+                "Workplace culture is so important. Can you tell me more about what aspects of the culture you'd like to see improved?",
+                "I appreciate your thoughts on the work environment. What changes would make the biggest positive impact?",
+                "Thank you for sharing about the workplace culture. What elements would you add or change to make it better?"
+            ];
+            return culturePrompts[Math.floor(Math.random() * culturePrompts.length)];
+        }
+
+        // Workload and stress
+        else if (messageLower.includes('stress') || messageLower.includes('overwhelmed') || messageLower.includes('workload') || messageLower.includes('busy')) {
+            const workloadPrompts = [
+                "It sounds like workload might be a concern. Can you help me understand what would make your work more manageable?",
+                "I hear you about stress levels. What specific support or changes would help you feel more balanced?",
+                "Workload balance is important. What would need to change to help you feel more effective and less overwhelmed?"
+            ];
+            return workloadPrompts[Math.floor(Math.random() * workloadPrompts.length)];
+        }
+
+        // Communication issues
+        else if (messageLower.includes('communication') || messageLower.includes('meetings') || messageLower.includes('information')) {
+            const communicationPrompts = [
+                "Communication is key to a good work experience. What improvements would help you stay better informed and connected?",
+                "I appreciate your feedback about communication. What changes would make information sharing more effective?",
+                "Thank you for bringing up communication. What would better communication look like in your day-to-day work?"
+            ];
+            return communicationPrompts[Math.floor(Math.random() * communicationPrompts.length)];
+        }
+
+        // Generic negative feedback
+        else if (hasNegativeWords) {
+            const negativePrompts = [
+                "I can hear that something isn't working well for you. Could you help me understand the specific situation so we can identify ways to improve it?",
+                "It sounds like there are some challenges. What particular changes would make the biggest difference in your work experience?",
+                "I appreciate you sharing that concern. Can you tell me more about what's happening and what improvements you'd like to see?"
+            ];
+            return negativePrompts[Math.floor(Math.random() * negativePrompts.length)];
+        }
+
+        // Generic positive feedback
+        else if (hasPositiveWords) {
+            const positivePrompts = [
+                "That's great to hear! What specifically is working well? Understanding this helps us maintain and build on positive aspects.",
+                "I'm glad things are going well in that area. Can you tell me more about what makes it effective?",
+                "It's wonderful to hear positive feedback. What other aspects of your work experience are you satisfied with?"
+            ];
+            return positivePrompts[Math.floor(Math.random() * positivePrompts.length)];
+        }
+
+        // Default responses for neutral or unclear feedback
+        else {
+            const defaultPrompts = [
+                "Thank you for sharing that. Can you help me understand how this impacts your daily work experience?",
+                "I appreciate your input. What changes or improvements would make the biggest difference for you?",
+                "That's valuable feedback. Is there anything specific you'd like to see addressed or improved?",
+                "I understand. What aspects of your work experience would you most like to focus on?",
+                "Thank you for that perspective. What would make your work environment even better?"
+            ];
+            return defaultPrompts[Math.floor(Math.random() * defaultPrompts.length)];
+        }
     }
 
     function handleChatSurveyResponse(message) {
@@ -1223,6 +1351,8 @@
     }
     </script>
 
+    <!-- Include Supabase library from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- Include config for API endpoints -->
     <script src="assets/js/config.js"></script>
     <!-- Include Supabase client -->
@@ -1242,13 +1372,20 @@
             conversationComplete: false
         };
 
-        // Initialize API integration when page loads
+        // Initialize API integration when page loads - but only if chat hasn't already been initialized
         document.addEventListener('DOMContentLoaded', function() {
-            initializeAPIChat();
+            // Wait a moment to see if the main chat initializes first
+            setTimeout(() => {
+                if (!isInitialized) {
+                    initializeAPIChat();
+                }
+            }, 500);
         });
 
         // Initialize API-powered chat functionality
         async function initializeAPIChat() {
+            console.log('🔄 API Chat initialization started...');
+
             // Get session ID from URL parameters
             const urlParams = new URLSearchParams(window.location.search);
             apiChatState.sessionId = urlParams.get('session') || urlParams.get('id') || generateSessionId();
@@ -1262,13 +1399,25 @@
             // Set API base URL from config
             apiChatState.apiBaseUrl = window.APP_CONFIG ? window.APP_CONFIG.API_BASE_URL : 'http://localhost:3001/api';
 
-            // Try to establish API connection
+            // Try to establish API connection - but don't block the chat if it fails
             try {
-                const response = await fetch(`${apiChatState.apiBaseUrl}/chat-session?sessionId=${apiChatState.sessionId}&step=0`);
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 2000); // 2 second timeout
+
+                const response = await fetch(`${apiChatState.apiBaseUrl}/chat-session?sessionId=${apiChatState.sessionId}&step=0`, {
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+
                 if (response.ok) {
                     const data = await response.json();
                     apiChatState.isRealTime = true;
                     console.log('✅ Real-time chat API connected');
+
+                    // Initialize the main chat interface if not already done
+                    if (!isInitialized) {
+                        initializeChat();
+                    }
 
                     // Start with API-powered conversation
                     if (data.conversation && data.conversation.botMessage) {
@@ -1278,38 +1427,60 @@
                         }, 1000);
                     }
                 } else {
-                    console.log('⚠️ API not available, using fallback chat');
-                    apiChatState.isRealTime = false;
+                    throw new Error('API response not ok');
                 }
             } catch (error) {
                 console.log('⚠️ API connection failed, using fallback chat:', error.message);
                 apiChatState.isRealTime = false;
+
+                // Initialize the main chat interface if not already done
+                if (!isInitialized) {
+                    initializeChat();
+                }
             }
         }
 
         // Enhanced sendMessage function with API integration
-        const originalSendMessage = sendMessage;
-        sendMessage = async function() {
-            const input = document.getElementById('user-input');
-            const message = input.value.trim();
+        let originalSendMessage = null;
 
-            if (!message || apiChatState.conversationComplete) return;
-
-            // Add user message to UI
-            addUserMessage(message);
-            input.value = '';
-            input.style.height = 'auto';
-
-            // Show typing indicator
-            showTypingIndicator();
-
-            if (apiChatState.isRealTime) {
-                await handleRealTimeResponse(message);
-            } else {
-                // Fallback to original functionality
-                originalSendMessage();
+        // Store original sendMessage if it exists, otherwise create a fallback
+        function enhanceSendMessage() {
+            if (typeof sendMessage === 'function') {
+                originalSendMessage = sendMessage;
             }
-        };
+
+            window.sendMessage = async function() {
+                const input = document.getElementById('user-input');
+                const message = input.value.trim();
+
+                if (!message || apiChatState.conversationComplete) return;
+
+                // Add user message to UI
+                addUserMessage(message);
+                input.value = '';
+                input.style.height = 'auto';
+
+                // Show typing indicator
+                showTypingIndicator();
+
+                if (apiChatState.isRealTime) {
+                    await handleRealTimeResponse(message);
+                } else if (originalSendMessage) {
+                    // Fallback to original functionality
+                    originalSendMessage();
+                } else {
+                    // Basic fallback response
+                    setTimeout(() => {
+                        hideTypingIndicator();
+                        addBotMessage("Thank you for your message. Is there anything else you'd like to share?");
+                    }, 1500);
+                }
+            };
+        }
+
+        // Try to enhance sendMessage immediately, and also after initialization
+        enhanceSendMessage();
+        setTimeout(enhanceSendMessage, 1000);
 
         // Handle response using real-time API
         async function handleRealTimeResponse(userResponse) {
