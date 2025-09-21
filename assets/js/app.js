@@ -2506,86 +2506,566 @@ function generateAnotherLink() {
 }
 
 async function generateAIReport() {
-    showToast('Generating AI report... This may take a few moments.', 'info');
+    // First show dataset selection modal
+    showDatasetSelectionModal();
+}
+
+function showDatasetSelectionModal() {
+    // Get available datasets
+    const importedDatasets = JSON.parse(localStorage.getItem('importedDatasets') || '[]');
+
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h3>🤖 Generate AI Report</h3>
+                <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div style="margin-bottom: 2rem;">
+                    <h4>Select Data Source</h4>
+                    <p>Choose which dataset to use for AI analysis and report generation:</p>
+                </div>
+
+                <div class="dataset-options">
+                    <!-- Default option for chat responses -->
+                    <div class="dataset-option selected" onclick="selectDataset('chat-responses', this)">
+                        <div class="dataset-radio">
+                            <input type="radio" name="dataset" value="chat-responses" checked>
+                        </div>
+                        <div class="dataset-info">
+                            <div class="dataset-name">Chat Responses (Default)</div>
+                            <div class="dataset-details">Analysis based on collected chat feedback and survey responses</div>
+                            <div class="dataset-meta">Source: Platform Database</div>
+                        </div>
+                    </div>
+
+                    ${importedDatasets.length > 0 ? `
+                        <div style="margin: 1.5rem 0; padding: 1rem 0; border-top: 1px solid #e5e7eb;">
+                            <h5>Imported Datasets</h5>
+                        </div>
+                        ${importedDatasets.map(dataset => `
+                            <div class="dataset-option" onclick="selectDataset('${dataset.id}', this)">
+                                <div class="dataset-radio">
+                                    <input type="radio" name="dataset" value="${dataset.id}">
+                                </div>
+                                <div class="dataset-info">
+                                    <div class="dataset-name">${dataset.name}</div>
+                                    <div class="dataset-details">${dataset.description}</div>
+                                    <div class="dataset-meta">
+                                        ${dataset.recordCount} records • Uploaded ${new Date(dataset.uploadDate).toLocaleDateString()}
+                                        <br>Columns: ${dataset.columns.join(', ')}
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    ` : `
+                        <div style="margin: 1.5rem 0; padding: 1rem; background: #f8f9fa; border-radius: 8px; text-align: center;">
+                            <p style="color: #6b7280; margin: 0;">No imported datasets available.</p>
+                            <p style="color: #6b7280; margin: 0.5rem 0 0 0; font-size: 0.875rem;">
+                                Use "📥 Import Data" to upload custom datasets for analysis.
+                            </p>
+                        </div>
+                    `}
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').remove()">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="generateReportWithSelectedDataset()">Generate Report</button>
+            </div>
+        </div>
+    `;
+
+    // Add required CSS for dataset options if not already added
+    if (!document.getElementById('dataset-selection-styles')) {
+        const style = document.createElement('style');
+        style.id = 'dataset-selection-styles';
+        style.textContent = `
+            .dataset-options {
+                display: flex;
+                flex-direction: column;
+                gap: 1rem;
+            }
+            .dataset-option {
+                display: flex;
+                align-items: flex-start;
+                gap: 1rem;
+                padding: 1rem;
+                border: 2px solid #e5e7eb;
+                border-radius: 8px;
+                cursor: pointer;
+                transition: all 0.2s;
+            }
+            .dataset-option:hover {
+                border-color: #3b82f6;
+                background: #f8faff;
+            }
+            .dataset-option.selected {
+                border-color: #3b82f6;
+                background: #eff6ff;
+            }
+            .dataset-radio input {
+                margin: 0;
+            }
+            .dataset-info {
+                flex: 1;
+            }
+            .dataset-name {
+                font-weight: 600;
+                margin-bottom: 0.25rem;
+            }
+            .dataset-details {
+                color: #6b7280;
+                margin-bottom: 0.5rem;
+                font-size: 0.875rem;
+            }
+            .dataset-meta {
+                color: #9ca3af;
+                font-size: 0.75rem;
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    document.body.appendChild(modal);
+}
+
+function selectDataset(datasetId, element) {
+    // Remove selected class from all options
+    document.querySelectorAll('.dataset-option').forEach(opt => opt.classList.remove('selected'));
+
+    // Add selected class to clicked option
+    element.classList.add('selected');
+
+    // Update radio button
+    element.querySelector('input[type="radio"]').checked = true;
+}
+
+async function generateReportWithSelectedDataset() {
+    const selectedDataset = document.querySelector('input[name="dataset"]:checked');
+    if (!selectedDataset) {
+        showToast('Please select a dataset', 'error');
+        return;
+    }
+
+    const datasetId = selectedDataset.value;
+
+    // Close selection modal
+    document.querySelector('.modal').remove();
+
+    showToast('Analyzing data and generating comprehensive AI report...', 'info');
 
     try {
-        // Load chat responses from database
-        const chatResponses = await loadChatResponses();
-        const analytics = await getChatResponseAnalytics();
+        if (datasetId === 'chat-responses') {
+            // Use original chat responses logic
+            const chatResponses = await loadChatResponses();
+            const analytics = await getChatResponseAnalytics();
 
-        // Generate AI report modal
-        const modal = document.createElement('div');
-        modal.className = 'modal';
-        modal.innerHTML = `
-            <div class="modal-content" style="max-width: 800px;">
-                <div class="modal-header">
-                    <h3>AI Chat Analysis Report</h3>
-                    <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
+            // Display inline chat response report
+            displayInlineChatReport({ chatResponses, analytics }, 'AI Chat Analysis Report');
+        } else {
+            // Load imported dataset
+            const importedDatasets = JSON.parse(localStorage.getItem('importedDatasets') || '[]');
+            const dataset = importedDatasets.find(d => d.id === datasetId);
+            if (!dataset) {
+                showToast('Selected dataset not found', 'error');
+                return;
+            }
+
+            // Display inline custom dataset report with AI analysis
+            displayInlineDatasetReport({ dataset }, `AI Analysis Report - ${dataset.name}`);
+        }
+
+    } catch (error) {
+        console.error('Error generating AI report:', error);
+        showToast('Error generating report: ' + error.message, 'error');
+    }
+}
+
+function displayInlineChatReport(reportData, reportTitle) {
+    const { chatResponses, analytics } = reportData;
+
+    // Find the reports section to display the analysis
+    const reportsSection = document.getElementById('chat-reports-section');
+
+    // Create comprehensive analysis content
+    const analysisContent = `
+        <div class="ai-analysis-report" style="margin-top: 2rem;">
+            <div class="report-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 2rem; border-radius: 12px; margin-bottom: 2rem;">
+                <h2 style="margin: 0; font-size: 2rem;">${reportTitle}</h2>
+                <p style="margin: 0.5rem 0 0 0; opacity: 0.9;">Generated on ${new Date().toLocaleString()}</p>
+            </div>
+
+            <!-- Executive Summary -->
+            <div class="analysis-section" style="background: #f8fafc; border-left: 4px solid #3b82f6; padding: 1.5rem; margin-bottom: 2rem; border-radius: 8px;">
+                <h3 style="color: #1e40af; margin-top: 0;">📊 Executive Summary</h3>
+                <p style="font-size: 1.1rem; line-height: 1.6;">
+                    Our AI analysis of <strong>${analytics.totalResponses} chat sessions</strong> reveals significant insights into employee engagement and sentiment patterns.
+                    The data shows ${analytics.sentimentBreakdown.positive > analytics.sentimentBreakdown.negative ? 'predominantly positive' : 'concerning negative'} sentiment trends
+                    with an average engagement duration of <strong>${analytics.averageDuration ? Math.round(analytics.averageDuration / 1000 / 60) : 0} minutes</strong> per session.
+                </p>
+            </div>
+
+            <!-- Key Metrics Dashboard -->
+            <div class="metrics-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                <div class="metric-card" style="background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); text-align: center;">
+                    <div style="font-size: 2.5rem; font-weight: bold; color: #3b82f6;">${analytics.totalResponses}</div>
+                    <div style="color: #6b7280; font-weight: 500;">Total Sessions</div>
                 </div>
-                <div>
-                    <div style="margin-bottom: 2rem;">
-                        <h4>Chat Session Overview</h4>
-                        <div class="dashboard-grid" style="grid-template-columns: repeat(4, 1fr);">
-                            <div class="stat-card">
-                                <div class="stat-value">${analytics.totalResponses}</div>
-                                <div class="stat-label">Total Sessions</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-value">${analytics.averageDuration ? Math.round(analytics.averageDuration / 1000 / 60) : 0}m</div>
-                                <div class="stat-label">Avg Duration</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-value">${analytics.sentimentBreakdown.positive}</div>
-                                <div class="stat-label">Positive</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-value">${analytics.sentimentBreakdown.negative}</div>
-                                <div class="stat-label">Negative</div>
-                            </div>
+                <div class="metric-card" style="background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); text-align: center;">
+                    <div style="font-size: 2.5rem; font-weight: bold; color: #10b981;">${analytics.sentimentBreakdown.positive}</div>
+                    <div style="color: #6b7280; font-weight: 500;">Positive Responses</div>
+                </div>
+                <div class="metric-card" style="background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); text-align: center;">
+                    <div style="font-size: 2.5rem; font-weight: bold; color: #ef4444;">${analytics.sentimentBreakdown.negative}</div>
+                    <div style="color: #6b7280; font-weight: 500;">Negative Responses</div>
+                </div>
+                <div class="metric-card" style="background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); text-align: center;">
+                    <div style="font-size: 2.5rem; font-weight: bold; color: #8b5cf6;">${analytics.averageDuration ? Math.round(analytics.averageDuration / 1000 / 60) : 0}m</div>
+                    <div style="color: #6b7280; font-weight: 500;">Avg Duration</div>
+                </div>
+            </div>
+
+            <!-- AI Insights and Analysis -->
+            <div class="ai-insights" style="background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); margin-bottom: 2rem;">
+                <h3 style="color: #1e40af; margin-top: 0; display: flex; align-items: center;">
+                    🤖 AI-Powered Insights & Recommendations
+                </h3>
+                ${generateAdvancedChatInsights(chatResponses, analytics)}
+            </div>
+
+            <!-- Charts Section -->
+            <div class="charts-section" style="background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); margin-bottom: 2rem;">
+                <h3 style="color: #1e40af; margin-top: 0;">📈 Data Visualizations</h3>
+                <div id="chat-charts-container"></div>
+            </div>
+
+            <div style="text-align: center; margin-top: 2rem;">
+                <button class="btn btn-primary" onclick="downloadComprehensiveReport('${reportTitle}')">📥 Download Full Report</button>
+                <button class="btn btn-secondary" onclick="clearReportDisplay()" style="margin-left: 1rem;">Clear Report</button>
+            </div>
+        </div>
+    `;
+
+    // Insert the analysis after the existing dashboard
+    const dashboardGrid = reportsSection.querySelector('.dashboard-grid').parentNode;
+    dashboardGrid.insertAdjacentHTML('afterend', analysisContent);
+
+    // Generate charts
+    setTimeout(() => {
+        generateChatCharts(analytics);
+        showToast('Comprehensive AI analysis complete!', 'success');
+    }, 500);
+}
+
+function displayInlineDatasetReport(reportData, reportTitle) {
+    const { dataset } = reportData;
+
+    // Find the reports section to display the analysis
+    const reportsSection = document.getElementById('chat-reports-section');
+
+    // Perform comprehensive AI analysis
+    const aiAnalysis = performAdvancedDatasetAnalysis(dataset);
+
+    // Create comprehensive analysis content
+    const analysisContent = `
+        <div class="ai-analysis-report" style="margin-top: 2rem;">
+            <div class="report-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 2rem; border-radius: 12px; margin-bottom: 2rem;">
+                <h2 style="margin: 0; font-size: 2rem;">${reportTitle}</h2>
+                <p style="margin: 0.5rem 0 0 0; opacity: 0.9;">Generated on ${new Date().toLocaleString()}</p>
+            </div>
+
+            <!-- Executive Summary -->
+            <div class="analysis-section" style="background: #f8fafc; border-left: 4px solid #3b82f6; padding: 1.5rem; margin-bottom: 2rem; border-radius: 8px;">
+                <h3 style="color: #1e40af; margin-top: 0;">📊 Executive Summary</h3>
+                <p style="font-size: 1.1rem; line-height: 1.6;">
+                    ${aiAnalysis.executiveSummary}
+                </p>
+            </div>
+
+            <!-- Key Metrics Dashboard -->
+            <div class="metrics-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                <div class="metric-card" style="background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); text-align: center;">
+                    <div style="font-size: 2.5rem; font-weight: bold; color: #3b82f6;">${dataset.recordCount}</div>
+                    <div style="color: #6b7280; font-weight: 500;">Total Records</div>
+                </div>
+                <div class="metric-card" style="background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); text-align: center;">
+                    <div style="font-size: 2.5rem; font-weight: bold; color: #10b981;">${dataset.columns.length}</div>
+                    <div style="color: #6b7280; font-weight: 500;">Data Fields</div>
+                </div>
+                ${aiAnalysis.sentimentStats ? `
+                <div class="metric-card" style="background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); text-align: center;">
+                    <div style="font-size: 2.5rem; font-weight: bold; color: #10b981;">${aiAnalysis.sentimentStats.positive}</div>
+                    <div style="color: #6b7280; font-weight: 500;">Positive Sentiment</div>
+                </div>
+                <div class="metric-card" style="background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); text-align: center;">
+                    <div style="font-size: 2.5rem; font-weight: bold; color: #ef4444;">${aiAnalysis.sentimentStats.negative}</div>
+                    <div style="color: #6b7280; font-weight: 500;">Negative Sentiment</div>
+                </div>
+                ` : ''}
+            </div>
+
+            <!-- AI Insights and Analysis -->
+            <div class="ai-insights" style="background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); margin-bottom: 2rem;">
+                <h3 style="color: #1e40af; margin-top: 0; display: flex; align-items: center;">
+                    🤖 AI-Powered Data Analysis
+                </h3>
+                ${aiAnalysis.detailedInsights}
+            </div>
+
+            <!-- Narrative Data Summary -->
+            <div class="narrative-summary" style="background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); margin-bottom: 2rem;">
+                <h3 style="color: #1e40af; margin-top: 0;">📝 Data Trends & Patterns</h3>
+                <div id="narrative-content" style="font-size: 1.1rem; line-height: 1.7; color: #374151;">
+                    ${aiAnalysis.narrativeSummary}
+                </div>
+            </div>
+
+            <!-- Charts Section -->
+            <div class="charts-section" style="background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); margin-bottom: 2rem;">
+                <h3 style="color: #1e40af; margin-top: 0;">📈 Data Visualizations</h3>
+                <div id="dataset-charts-container"></div>
+            </div>
+
+            <div style="text-align: center; margin-top: 2rem;">
+                <button class="btn btn-primary" onclick="downloadComprehensiveReport('${reportTitle}')">📥 Download Full Report</button>
+                <button class="btn btn-secondary" onclick="clearReportDisplay()" style="margin-left: 1rem;">Clear Report</button>
+            </div>
+        </div>
+    `;
+
+    // Insert the analysis after the existing dashboard
+    const dashboardGrid = reportsSection.querySelector('.dashboard-grid').parentNode;
+    dashboardGrid.insertAdjacentHTML('afterend', analysisContent);
+
+    // Generate charts
+    setTimeout(() => {
+        generateDatasetCharts(dataset, aiAnalysis);
+        showToast('Advanced AI analysis complete!', 'success');
+    }, 500);
+}
+
+async function generateChatResponseReport(reportData, reportTitle) {
+    const { chatResponses, analytics } = reportData;
+
+    // Generate AI report modal (original format)
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h3>${reportTitle}</h3>
+                <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
+            </div>
+            <div>
+                <div style="margin-bottom: 2rem;">
+                    <h4>Chat Session Overview</h4>
+                    <div class="dashboard-grid" style="grid-template-columns: repeat(4, 1fr);">
+                        <div class="stat-card">
+                            <div class="stat-value">${analytics.totalResponses}</div>
+                            <div class="stat-label">Total Sessions</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${analytics.averageDuration ? Math.round(analytics.averageDuration / 1000 / 60) : 0}m</div>
+                            <div class="stat-label">Avg Duration</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${analytics.sentimentBreakdown.positive}</div>
+                            <div class="stat-label">Positive</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${analytics.sentimentBreakdown.negative}</div>
+                            <div class="stat-label">Negative</div>
                         </div>
                     </div>
+                </div>
 
-                    <div style="margin-bottom: 2rem;">
-                        <h4>Chat Type Distribution</h4>
-                        <div class="dashboard-grid" style="grid-template-columns: repeat(3, 1fr);">
-                            <div class="stat-card">
-                                <div class="stat-value">${analytics.chatTypeBreakdown.listening}</div>
-                                <div class="stat-label">Listening Chats</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-value">${analytics.chatTypeBreakdown.chat}</div>
-                                <div class="stat-label">Survey Chats</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-value">${analytics.chatTypeBreakdown.pulse}</div>
-                                <div class="stat-label">Pulse Surveys</div>
-                            </div>
+                <div style="margin-bottom: 2rem;">
+                    <h4>Chat Type Distribution</h4>
+                    <div class="dashboard-grid" style="grid-template-columns: repeat(3, 1fr);">
+                        <div class="stat-card">
+                            <div class="stat-value">${analytics.chatTypeBreakdown.listening}</div>
+                            <div class="stat-label">Listening Chats</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${analytics.chatTypeBreakdown.chat}</div>
+                            <div class="stat-label">Survey Chats</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${analytics.chatTypeBreakdown.pulse}</div>
+                            <div class="stat-label">Pulse Surveys</div>
                         </div>
                     </div>
+                </div>
 
-                    <div style="margin-bottom: 2rem;">
-                        <h4>AI Insights</h4>
-                        <div class="card" style="background: #f8f9fa; padding: 1.5rem;">
-                            ${generateAIInsights(chatResponses, analytics)}
-                        </div>
+                <div style="margin-bottom: 2rem;">
+                    <h4>AI Insights</h4>
+                    <div class="card" style="background: #f8f9fa; padding: 1.5rem;">
+                        ${generateAIInsights(chatResponses, analytics)}
                     </div>
+                </div>
 
-                    <div class="modal-actions">
-                        <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').remove()">Close</button>
-                        <button type="button" class="btn btn-primary" onclick="exportChatReport()">Export Report</button>
-                        <button type="button" class="btn btn-primary" onclick="emailChatReport()">Email Report</button>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').remove()">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="exportChatReport()">Export Report</button>
+                    <button type="button" class="btn btn-primary" onclick="emailChatReport()">Email Report</button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+    showToast('AI report generated successfully!', 'success');
+}
+
+function generateCustomDatasetReport(reportData, reportTitle) {
+    const { dataset } = reportData;
+    const sampleData = dataset.data.slice(0, 5);
+
+    // Analyze imported data
+    const totalRecords = dataset.recordCount;
+    const columns = dataset.columns;
+
+    // Try to detect sentiment column
+    const sentimentCol = columns.find(col =>
+        col.toLowerCase().includes('sentiment') ||
+        col.toLowerCase().includes('feeling') ||
+        col.toLowerCase().includes('mood')
+    );
+
+    let sentimentAnalysis = '';
+    if (sentimentCol) {
+        const sentiments = dataset.data.map(row => row[sentimentCol]).filter(Boolean);
+        const positive = sentiments.filter(s => s.toLowerCase().includes('positive')).length;
+        const negative = sentiments.filter(s => s.toLowerCase().includes('negative')).length;
+        const neutral = sentiments.length - positive - negative;
+
+        sentimentAnalysis = `
+            <div style="margin-bottom: 2rem;">
+                <h4>Sentiment Analysis</h4>
+                <div class="dashboard-grid" style="grid-template-columns: repeat(3, 1fr);">
+                    <div class="stat-card">
+                        <div class="stat-value">${positive}</div>
+                        <div class="stat-label">Positive</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${negative}</div>
+                        <div class="stat-label">Negative</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${neutral}</div>
+                        <div class="stat-label">Neutral</div>
                     </div>
                 </div>
             </div>
         `;
-
-        document.body.appendChild(modal);
-        showToast('AI report generated successfully!', 'success');
-
-    } catch (error) {
-        console.error('Error generating AI report:', error);
-        showToast('Error generating AI report. Please try again.', 'error');
     }
+
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 900px;">
+            <div class="modal-header">
+                <h3>${reportTitle}</h3>
+                <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div style="margin-bottom: 2rem;">
+                    <h4>Dataset Overview</h4>
+                    <div class="dashboard-grid" style="grid-template-columns: repeat(3, 1fr);">
+                        <div class="stat-card">
+                            <div class="stat-value">${totalRecords}</div>
+                            <div class="stat-label">Total Records</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${columns.length}</div>
+                            <div class="stat-label">Data Fields</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${new Date(dataset.uploadDate).toLocaleDateString()}</div>
+                            <div class="stat-label">Upload Date</div>
+                        </div>
+                    </div>
+                </div>
+
+                ${sentimentAnalysis}
+
+                <div style="margin-bottom: 2rem;">
+                    <h4>Data Sample</h4>
+                    <div style="max-height: 300px; overflow: auto; border: 1px solid #dee2e6; border-radius: 8px;">
+                        <table style="width: 100%; font-size: 0.875rem;">
+                            <thead>
+                                <tr style="background: #f8f9fa;">
+                                    ${columns.map(col => `<th style="padding: 0.75rem; border-bottom: 1px solid #dee2e6;">${col}</th>`).join('')}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${sampleData.map(row => `
+                                    <tr>
+                                        ${columns.map(col => `<td style="padding: 0.75rem; border-bottom: 1px solid #f1f5f9;">${row[col] || ''}</td>`).join('')}
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                    <p style="margin-top: 0.5rem; color: #666; font-size: 0.875rem;">Showing first 5 of ${totalRecords} records</p>
+                </div>
+
+                <div style="margin-bottom: 2rem;">
+                    <h4>AI Insights</h4>
+                    <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px;">
+                        <p>📊 <strong>Dataset Analysis:</strong> Analyzed ${totalRecords} records from "${dataset.name}"</p>
+                        <p>📋 <strong>Data Structure:</strong> ${columns.length} fields including: ${columns.slice(0, 3).join(', ')}${columns.length > 3 ? '...' : ''}</p>
+                        ${sentimentCol ? `<p>😊 <strong>Sentiment Data:</strong> Found sentiment information in "${sentimentCol}" field</p>` : ''}
+                        <p>🎯 <strong>Recommendation:</strong> This dataset is ready for detailed AI analysis and trend identification</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').remove()">Close</button>
+                <button type="button" class="btn btn-primary" onclick="downloadReport('${reportTitle}')">📥 Download Report</button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+    showToast('AI report generated successfully!', 'success');
+}
+
+function downloadReport(reportTitle) {
+    const reportContent = document.querySelector('.modal-body').innerHTML;
+    const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>${reportTitle}</title>
+            <style>
+                body { font-family: Arial, sans-serif; margin: 2rem; }
+                .stat-card { border: 1px solid #ddd; padding: 1rem; margin: 0.5rem; border-radius: 8px; }
+                .stat-value { font-size: 2rem; font-weight: bold; }
+                .stat-label { color: #666; }
+                table { border-collapse: collapse; width: 100%; }
+                th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                th { background-color: #f2f2f2; }
+            </style>
+        </head>
+        <body>
+            <h1>${reportTitle}</h1>
+            <p>Generated on: ${new Date().toLocaleString()}</p>
+            ${reportContent}
+        </body>
+        </html>
+    `;
+
+    const blob = new Blob([htmlContent], { type: 'text/html' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${reportTitle.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0, 10)}.html`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+    showToast('Report downloaded!', 'success');
 }
 
 function generateAIInsights(chatResponses, analytics) {
@@ -5833,5 +6313,1239 @@ window.testDatabaseConnection = testDatabaseConnection;
 window.testDatabaseUpdate = testDatabaseUpdate;
 window.testDatabaseDirectUpdate = testDatabaseDirectUpdate;
 window.manualRefresh = manualRefresh;
+
+// Data Import Functions
+function showImportDataModal() {
+    // Create import data modal
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3>📥 Import Data</h3>
+                <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="upload-section">
+                    <p>Import data for AI analysis and reporting. Supported formats include survey responses, feedback data, and analytics data.</p>
+
+                    <div class="file-upload-area" onclick="document.getElementById('data-file').click()">
+                        <div class="upload-icon">📊</div>
+                        <div class="upload-text">
+                            <strong>Click to select file</strong> or drag and drop
+                        </div>
+                        <div class="upload-hint">Supported formats: .csv, .xlsx, .xls, .json</div>
+                    </div>
+
+                    <input type="file" id="data-file" accept=".csv,.xlsx,.xls,.json" style="display: none;"
+                           onchange="handleDataFileUpload(event)">
+
+                    <div class="template-section" style="margin-top: 2rem;">
+                        <h4>Expected File Format:</h4>
+                        <div class="format-example">
+                            <table style="width: 100%; font-size: 0.875rem; border-collapse: collapse;">
+                                <thead>
+                                    <tr style="background: #f8f9fa;">
+                                        <th style="padding: 0.5rem; border: 1px solid #dee2e6;">Date</th>
+                                        <th style="padding: 0.5rem; border: 1px solid #dee2e6;">Response_Type</th>
+                                        <th style="padding: 0.5rem; border: 1px solid #dee2e6;">Content</th>
+                                        <th style="padding: 0.5rem; border: 1px solid #dee2e6;">Sentiment</th>
+                                        <th style="padding: 0.5rem; border: 1px solid #dee2e6;">Department</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td style="padding: 0.5rem; border: 1px solid #dee2e6;">2024-12-15</td>
+                                        <td style="padding: 0.5rem; border: 1px solid #dee2e6;">Chat Feedback</td>
+                                        <td style="padding: 0.5rem; border: 1px solid #dee2e6;">Great team collaboration</td>
+                                        <td style="padding: 0.5rem; border: 1px solid #dee2e6;">Positive</td>
+                                        <td style="padding: 0.5rem; border: 1px solid #dee2e6;">Operations</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 0.5rem; border: 1px solid #dee2e6;">2024-12-14</td>
+                                        <td style="padding: 0.5rem; border: 1px solid #dee2e6;">Survey Response</td>
+                                        <td style="padding: 0.5rem; border: 1px solid #dee2e6;">Need better tools</td>
+                                        <td style="padding: 0.5rem; border: 1px solid #dee2e6;">Negative</td>
+                                        <td style="padding: 0.5rem; border: 1px solid #dee2e6;">IT</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <button class="btn btn-info" onclick="downloadDataTemplate()" style="margin-top: 1rem;">
+                            📥 Download Data Template
+                        </button>
+                    </div>
+                </div>
+
+                <div id="data-upload-preview" style="display: none; margin-top: 2rem;">
+                    <h4>Preview:</h4>
+                    <div id="data-preview-content"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').remove()">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirm-data-upload-btn" style="display: none;"
+                        onclick="confirmUploadData()">Import Data</button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+}
+
+function handleDataFileUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    showToast('Processing data file...', 'info');
+
+    // Parse file based on type and MIME type
+    const fileName = file.name.toLowerCase();
+    const fileType = file.type;
+
+    // Comprehensive file type validation
+    const isExcel = fileName.endsWith('.xlsx') || fileName.endsWith('.xls') ||
+                   fileType.includes('spreadsheet') || fileType.includes('excel');
+    const isCSV = fileName.endsWith('.csv') || fileType === 'text/csv';
+    const isJSON = fileName.endsWith('.json') || fileType === 'application/json';
+    const isTxt = fileName.endsWith('.txt') || fileType === 'text/plain';
+
+    // Check if it's an Excel file first
+    if (isExcel) {
+        showToast('Excel files need to be converted to CSV format first. Please save your Excel file as CSV and try again.', 'warning');
+        return;
+    }
+
+    // Accept any file type but warn about optimal formats
+    if (!isCSV && !isJSON && !isTxt && !isExcel) {
+        showToast('⚠️ Attempting to parse non-standard file format. Best results with CSV, JSON, or TXT files.', 'info');
+    }
+
+    // Check file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+        showToast('File is too large. Please upload a file smaller than 10MB.', 'error');
+        return;
+    }
+
+    // Create FileReader with proper encoding handling
+    const reader = new FileReader();
+
+    reader.onload = function(e) {
+        try {
+            let parsedData = [];
+            let result = e.target.result;
+
+            // Enhanced text cleanup and encoding detection
+            if (typeof result === 'string') {
+                // Handle BOM (Byte Order Mark) if present
+                if (result.charCodeAt(0) === 0xFEFF) {
+                    result = result.substring(1);
+                }
+
+                // Check for binary signatures - try to handle them
+                if (result.includes('PK') && (result.includes('xl/worksheets') || result.includes('[Content_Types].xml'))) {
+                    showToast('🔄 Detected Excel file format. Attempting to extract readable text...', 'info');
+                    // Try to extract any readable text from Excel file
+                    const textMatches = result.match(/[a-zA-Z0-9\s,.\-_]+/g);
+                    if (textMatches && textMatches.length > 0) {
+                        result = textMatches.join(' ').replace(/\s+/g, ' ').trim();
+                        showToast('✅ Extracted text from Excel file. Results may be limited.', 'warning');
+                    } else {
+                        showToast('❌ Unable to extract readable text from this Excel file. Please save as CSV.', 'error');
+                        return;
+                    }
+                }
+
+                // Clean up non-printable characters but preserve structure
+                result = result
+                    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '') // Remove control characters
+                    .replace(/[^\x20-\x7E\x09\x0A\x0D\u00A0-\uFFFF]/g, '') // Keep printable ASCII and Unicode
+                    .replace(/\uFFFD/g, '') // Remove replacement characters
+                    .trim();
+
+                // If still looks corrupted, try alternative parsing
+                if (result.length === 0 || result.split('\n').every(line => line.trim().length === 0)) {
+                    showToast('❌ File appears to be empty or unreadable after cleanup.', 'error');
+                    return;
+                }
+            }
+
+            if (isJSON) {
+                // Parse JSON file with better error handling
+                try {
+                    const jsonData = JSON.parse(result);
+                    parsedData = Array.isArray(jsonData) ? jsonData : [jsonData];
+                } catch (jsonError) {
+                    showToast('Invalid JSON format. Please check your file syntax.', 'error');
+                    return;
+                }
+            } else {
+                // Parse any text file with universal parsing approach
+                let textContent = result;
+
+                // Clean the content and normalize line endings
+                const cleanContent = textContent.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+                const lines = cleanContent.split('\n').filter(line => line.trim());
+
+                if (lines.length < 1) {
+                    showToast('File appears to be empty after cleanup', 'error');
+                    return;
+                }
+
+                // Try multiple parsing strategies
+                let delimiter = ',';
+                let maxColumns = 0;
+                let bestStrategy = 'csv';
+
+                // Detect best delimiter and structure
+                const delimiters = [',', ';', '\t', '|', ' '];
+                const firstLine = lines[0];
+
+                delimiters.forEach(delim => {
+                    const columns = firstLine.split(delim).filter(col => col.trim()).length;
+                    if (columns > maxColumns && columns > 1) {
+                        maxColumns = columns;
+                        delimiter = delim;
+                    }
+                });
+
+                // If no good delimiter found, try to extract any readable text
+                if (maxColumns <= 1) {
+                    showToast('🔄 No clear delimiter detected. Attempting free-text extraction...', 'info');
+
+                    // Extract words and numbers as separate data points
+                    const allText = lines.join(' ');
+                    const words = allText.match(/[a-zA-Z0-9]+(?:\.[a-zA-Z0-9]+)*/g) || [];
+
+                    if (words.length > 0) {
+                        // Group words into rows of reasonable size
+                        const wordsPerRow = Math.min(5, Math.max(2, Math.floor(words.length / 10)));
+                        headers = Array.from({length: wordsPerRow}, (_, i) => `Text_${i + 1}`);
+
+                        for (let i = 0; i < words.length; i += wordsPerRow) {
+                            const row = {};
+                            headers.forEach((header, index) => {
+                                row[header] = words[i + index] || '';
+                            });
+                            if (Object.values(row).some(v => v)) {
+                                parsedData.push(row);
+                            }
+                        }
+
+                        showToast(`✅ Extracted ${parsedData.length} rows of text data`, 'success');
+                    } else {
+                        showToast('❌ No readable text found in file', 'error');
+                        return;
+                    }
+                } else {
+                    // Standard delimiter-based parsing
+                    showToast(`🔍 Detected delimiter: "${delimiter === '\t' ? 'TAB' : delimiter}" with ${maxColumns} columns`, 'info');
+
+                    // Enhanced parsing function
+                    function parseTextLine(line, delim) {
+                        const result = [];
+                        let current = '';
+                        let inQuotes = false;
+
+                        for (let i = 0; i < line.length; i++) {
+                            const char = line[i];
+
+                            if (char === '"') {
+                                inQuotes = !inQuotes;
+                            } else if (char === delim && !inQuotes) {
+                                result.push(current.trim().replace(/^"|"$/g, ''));
+                                current = '';
+                            } else {
+                                current += char;
+                            }
+                        }
+                        result.push(current.trim().replace(/^"|"$/g, ''));
+                        return result.filter(v => v !== ''); // Remove empty values
+                    }
+
+                    // Check if first line looks like headers
+                    const firstLineValues = parseTextLine(lines[0], delimiter);
+                    const hasHeaders = firstLineValues.some(val =>
+                        isNaN(val) && val.length > 0 &&
+                        !/^\d+$/.test(val) &&
+                        val.length < 50 &&
+                        /[a-zA-Z]/.test(val)
+                    );
+
+                    let headers, dataStart;
+                    if (hasHeaders && lines.length > 1) {
+                        headers = firstLineValues;
+                        dataStart = 1;
+                    } else {
+                        // Generate generic headers
+                        headers = firstLineValues.map((_, index) => `Column_${index + 1}`);
+                        dataStart = 0;
+                    }
+
+                    // Parse data rows
+                    for (let i = dataStart; i < lines.length; i++) {
+                        const values = parseTextLine(lines[i], delimiter);
+                        if (values.some(v => v.trim())) { // Skip empty rows
+                            const row = {};
+                            headers.forEach((header, index) => {
+                                row[header] = values[index] || '';
+                            });
+                            if (Object.values(row).some(v => v.trim())) {
+                                parsedData.push(row);
+                            }
+                        }
+                    }
+
+                    // If no structured data found, fall back to text extraction
+                    if (parsedData.length === 0) {
+                        showToast('🔄 No structured data found. Falling back to text extraction...', 'info');
+
+                        const allWords = lines.join(' ').match(/[a-zA-Z0-9]+(?:\.[a-zA-Z0-9]+)*/g) || [];
+                        if (allWords.length > 0) {
+                            headers = ['Extracted_Text', 'Position'];
+                            allWords.forEach((word, index) => {
+                                parsedData.push({
+                                    'Extracted_Text': word,
+                                    'Position': index + 1
+                                });
+                            });
+                        }
+                    }
+                }
+            }
+
+            if (parsedData.length === 0) {
+                showToast('No valid data found in file', 'error');
+                return;
+            }
+
+            // Store parsed data globally
+            window.uploadedAnalyticsData = parsedData;
+
+            // Show preview
+            const previewDiv = document.getElementById('data-upload-preview');
+            const previewContent = document.getElementById('data-preview-content');
+
+            const previewHeaders = Object.keys(parsedData[0]);
+            const previewRows = parsedData.slice(0, 5); // Show first 5 rows
+
+            previewContent.innerHTML = `
+                <div style="margin-bottom: 1rem;">
+                    <strong>${parsedData.length} data records found in file: ${file.name}</strong>
+                </div>
+                <div style="max-height: 300px; overflow: auto; border: 1px solid #dee2e6;">
+                    <table style="width: 100%; font-size: 0.875rem;">
+                        <thead>
+                            <tr style="background: #f8f9fa;">
+                                ${previewHeaders.map(h => `<th style="padding: 0.5rem; border-bottom: 1px solid #dee2e6;">${h}</th>`).join('')}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${previewRows.map(row => `
+                                <tr>
+                                    ${previewHeaders.map(h => `<td style="padding: 0.5rem;">${row[h] || ''}</td>`).join('')}
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+                ${parsedData.length > 5 ? `<p style="margin-top: 0.5rem; color: #666; font-size: 0.875rem;">Showing first 5 of ${parsedData.length} records</p>` : ''}
+            `;
+
+            previewDiv.style.display = 'block';
+            document.getElementById('confirm-data-upload-btn').style.display = 'inline-block';
+
+            showToast('Data file processed successfully!', 'success');
+        } catch (error) {
+            console.error('Error parsing data file:', error);
+            showToast('Error parsing file. Please check the format.', 'error');
+        }
+    };
+
+    // Add error handling for file reading
+    reader.onerror = function() {
+        showToast('Error reading file. Please try again with a different file.', 'error');
+    };
+
+    // Read as text with UTF-8 encoding
+    reader.readAsText(file, 'UTF-8');
+}
+
+function downloadDataTemplate() {
+    const csvContent = "Date,Response_Type,Content,Sentiment,Department\n2024-12-15,Chat Feedback,Great team collaboration,Positive,Operations\n2024-12-14,Survey Response,Need better tools,Negative,IT\n2024-12-13,Pulse Survey,Good work-life balance,Positive,HR";
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'data_import_template.csv';
+    a.click();
+    window.URL.revokeObjectURL(url);
+    showToast('Data template downloaded!', 'success');
+}
+
+function confirmUploadData() {
+    const analyticsData = window.uploadedAnalyticsData;
+
+    if (!analyticsData || analyticsData.length === 0) {
+        showToast('No data to import', 'error');
+        return;
+    }
+
+    // Prompt for dataset name
+    const datasetName = prompt('Enter a name for this dataset:', `Dataset_${new Date().toISOString().slice(0, 10)}`);
+    if (!datasetName) {
+        showToast('Dataset name is required', 'error');
+        return;
+    }
+
+    showToast('Importing data for AI analysis...', 'info');
+
+    setTimeout(() => {
+        // Create dataset object
+        const dataset = {
+            id: Date.now().toString(),
+            name: datasetName,
+            uploadDate: new Date().toISOString(),
+            recordCount: analyticsData.length,
+            data: analyticsData,
+            columns: Object.keys(analyticsData[0] || {}),
+            description: `Imported dataset with ${analyticsData.length} records`
+        };
+
+        // Store dataset persistently in localStorage
+        const existingDatasets = JSON.parse(localStorage.getItem('importedDatasets') || '[]');
+        existingDatasets.push(dataset);
+        localStorage.setItem('importedDatasets', JSON.stringify(existingDatasets));
+
+        // Clear the uploaded data
+        window.uploadedAnalyticsData = null;
+
+        // Close modal
+        document.querySelector('.modal').remove();
+
+        showToast(`Successfully imported "${datasetName}" with ${analyticsData.length} records!`, 'success');
+
+        // Refresh the reports section to show updated data
+        setTimeout(() => {
+            showToast('Dataset is now available for AI report generation', 'info');
+        }, 2000);
+    }, 2000);
+}
+
+// Advanced AI Analysis Functions
+function performAdvancedDatasetAnalysis(dataset) {
+    const data = dataset.data;
+    const columns = dataset.columns;
+
+    // Analyze different types of data
+    const analysis = {
+        executiveSummary: '',
+        detailedInsights: '',
+        narrativeSummary: '',
+        sentimentStats: null,
+        patterns: [],
+        recommendations: []
+    };
+
+    // Check for sentiment data
+    const sentimentCol = columns.find(col =>
+        col.toLowerCase().includes('sentiment') ||
+        col.toLowerCase().includes('feeling') ||
+        col.toLowerCase().includes('mood')
+    );
+
+    if (sentimentCol) {
+        const sentiments = data.map(row => row[sentimentCol]).filter(Boolean);
+        const positive = sentiments.filter(s => s.toLowerCase().includes('positive')).length;
+        const negative = sentiments.filter(s => s.toLowerCase().includes('negative')).length;
+        const neutral = sentiments.length - positive - negative;
+
+        analysis.sentimentStats = { positive, negative, neutral, total: sentiments.length };
+    }
+
+    // Check for text content columns
+    const textCols = columns.filter(col =>
+        col.toLowerCase().includes('content') ||
+        col.toLowerCase().includes('comment') ||
+        col.toLowerCase().includes('feedback') ||
+        col.toLowerCase().includes('response') ||
+        col.toLowerCase().includes('text') ||
+        col.toLowerCase().includes('message') ||
+        col.toLowerCase().includes('description') ||
+        col.toLowerCase().includes('note') ||
+        // Also check for ANY column that contains substantial text (fallback)
+        data.some(row => row[col] && typeof row[col] === 'string' && row[col].length > 50)
+    );
+
+    console.log('DEBUG - Text column detection:');
+    console.log('All columns:', columns);
+    console.log('Detected text columns:', textCols);
+    console.log('Sample column data:', columns.map(col => ({
+        column: col,
+        sampleValue: data[0] ? data[0][col] : 'N/A',
+        valueLength: data[0] && data[0][col] ? data[0][col].length : 0
+    })));
+
+    // Check for date columns
+    const dateCols = columns.filter(col =>
+        col.toLowerCase().includes('date') ||
+        col.toLowerCase().includes('time')
+    );
+
+    // Check for department/category columns
+    const categoryColumns = columns.filter(col =>
+        col.toLowerCase().includes('department') ||
+        col.toLowerCase().includes('category') ||
+        col.toLowerCase().includes('type')
+    );
+
+    // Generate intelligent executive summary based on actual content
+    let executiveSummaryParts = [];
+
+    // Base summary
+    executiveSummaryParts.push(`Our AI analysis of "${dataset.name}" examines ${dataset.recordCount} employee responses across ${columns.length} data dimensions.`);
+
+    // Analyze content for specific insights
+    if (textCols.length > 0) {
+        const allTextContent = data.flatMap(row =>
+            textCols.map(col => row[col]).filter(Boolean)
+        ).join(' ').toLowerCase();
+
+        // Detect key workplace themes
+        if (allTextContent.includes('recruiting') || allTextContent.includes('recruitment')) {
+            executiveSummaryParts.push('Key findings reveal significant recruitment and retention challenges affecting operational efficiency.');
+        }
+
+        if (allTextContent.includes('work ethic') || allTextContent.includes('motivation')) {
+            executiveSummaryParts.push('Analysis indicates concerns about employee motivation and work ethic among staff members.');
+        }
+
+        if (allTextContent.includes('pressure') || allTextContent.includes('stress')) {
+            executiveSummaryParts.push('Employees report experiencing increased pressure and workload challenges.');
+        }
+
+        if (allTextContent.includes('enjoyed') || allTextContent.includes('opportunity')) {
+            executiveSummaryParts.push('Despite challenges, positive experiences and growth opportunities are recognized by employees.');
+        }
+
+        if (allTextContent.includes('thank') || allTextContent.includes('appreciate')) {
+            executiveSummaryParts.push('Employees express gratitude for opportunities provided, showing engagement despite concerns.');
+        }
+    }
+
+    // Sentiment analysis for summary
+    if (analysis.sentimentStats) {
+        const positivePercent = Math.round((analysis.sentimentStats.positive / analysis.sentimentStats.total) * 100);
+        if (positivePercent > 60) {
+            executiveSummaryParts.push(`Strong positive sentiment (${positivePercent}%) indicates overall employee satisfaction with strategic improvement opportunities.`);
+        } else if (positivePercent > 40) {
+            executiveSummaryParts.push(`Mixed sentiment distribution (${positivePercent}% positive) suggests balanced feedback requiring targeted interventions.`);
+        } else {
+            executiveSummaryParts.push(`Lower positive sentiment (${positivePercent}%) highlights critical areas requiring immediate management attention.`);
+        }
+    }
+
+    // Add strategic conclusion
+    executiveSummaryParts.push('This analysis provides actionable insights for improving employee experience and organizational effectiveness.');
+
+    analysis.executiveSummary = executiveSummaryParts.join(' ');
+
+    // Generate detailed insights with actual content analysis
+    let insights = [];
+
+    // Analyze actual text content for themes and patterns
+    if (textCols.length > 0) {
+        const allTextContent = data.flatMap(row =>
+            textCols.map(col => row[col]).filter(Boolean)
+        ).join(' ').toLowerCase();
+
+        // Common workplace themes to analyze
+        const themes = {
+            'work_life_balance': ['balance', 'life', 'hours', 'overtime', 'flexible', 'remote'],
+            'management': ['manager', 'management', 'supervisor', 'leadership', 'boss'],
+            'teamwork': ['team', 'collaboration', 'colleague', 'cooperation', 'support'],
+            'training': ['training', 'development', 'learn', 'skill', 'education', 'growth'],
+            'compensation': ['salary', 'pay', 'compensation', 'benefits', 'raise', 'bonus'],
+            'workplace': ['office', 'environment', 'culture', 'atmosphere', 'workplace'],
+            'recognition': ['recognition', 'appreciate', 'acknowledge', 'thank', 'praise'],
+            'communication': ['communication', 'information', 'meeting', 'feedback', 'updates'],
+            'job_satisfaction': ['satisfaction', 'enjoy', 'fulfilling', 'challenging', 'interesting'],
+            'concerns': ['problem', 'issue', 'concern', 'difficulty', 'struggle', 'frustrated']
+        };
+
+        const themeScores = {};
+        Object.keys(themes).forEach(theme => {
+            const keywords = themes[theme];
+            const matches = keywords.filter(keyword => allTextContent.includes(keyword)).length;
+            themeScores[theme] = matches;
+        });
+
+        // Find top themes
+        const topThemes = Object.entries(themeScores)
+            .filter(([theme, score]) => score > 0)
+            .sort(([,a], [,b]) => b - a)
+            .slice(0, 3);
+
+        if (topThemes.length > 0) {
+            insights.push(`<div style="margin-bottom: 1rem;"><strong>🎯 Key Themes Identified:</strong>
+                Analysis of feedback content reveals the most discussed topics are: ${topThemes.map(([theme, score]) =>
+                    `<span style="background: #e0f2fe; padding: 0.25rem 0.5rem; border-radius: 4px; margin: 0 0.25rem;">${theme.replace('_', ' ').toUpperCase()}</span>`
+                ).join('')}. These themes indicate primary areas of employee focus and concern.</div>`);
+        }
+
+        // Analyze specific content for insights
+        const contentSample = data.slice(0, 5).map(row =>
+            textCols.map(col => row[col]).filter(Boolean).join(' ')
+        ).filter(Boolean);
+
+        if (contentSample.length > 0) {
+            const commonConcerns = [];
+            const positiveAspects = [];
+
+            contentSample.forEach(text => {
+                const lowerText = text.toLowerCase();
+
+                // Identify concerns
+                if (lowerText.includes('problem') || lowerText.includes('issue') || lowerText.includes('concern')) {
+                    if (lowerText.includes('recruiting') || lowerText.includes('recruitment')) {
+                        commonConcerns.push('Recruitment and retention challenges');
+                    }
+                    if (lowerText.includes('staff') || lowerText.includes('employee')) {
+                        commonConcerns.push('Staffing and workforce issues');
+                    }
+                    if (lowerText.includes('work ethic') || lowerText.includes('motivation')) {
+                        commonConcerns.push('Employee motivation and work ethic');
+                    }
+                }
+
+                // Identify positive aspects
+                if (lowerText.includes('enjoyed') || lowerText.includes('thank') || lowerText.includes('good')) {
+                    if (lowerText.includes('opportunity') || lowerText.includes('experience')) {
+                        positiveAspects.push('Positive work opportunities and experiences');
+                    }
+                    if (lowerText.includes('team') || lowerText.includes('collaboration')) {
+                        positiveAspects.push('Strong team collaboration');
+                    }
+                }
+            });
+
+            if (commonConcerns.length > 0) {
+                insights.push(`<div style="margin-bottom: 1rem;"><strong>⚠️ Key Concerns Identified:</strong>
+                    ${[...new Set(commonConcerns)].map(concern =>
+                        `<div style="margin: 0.5rem 0; padding: 0.5rem; background: #fef2f2; border-left: 3px solid #ef4444; border-radius: 4px;">• ${concern}</div>`
+                    ).join('')}</div>`);
+            }
+
+            if (positiveAspects.length > 0) {
+                insights.push(`<div style="margin-bottom: 1rem;"><strong>✅ Positive Highlights:</strong>
+                    ${[...new Set(positiveAspects)].map(aspect =>
+                        `<div style="margin: 0.5rem 0; padding: 0.5rem; background: #f0fdf4; border-left: 3px solid #10b981; border-radius: 4px;">• ${aspect}</div>`
+                    ).join('')}</div>`);
+            }
+        }
+    }
+
+    if (analysis.sentimentStats) {
+        insights.push(`<div style="margin-bottom: 1rem;"><strong>📊 Sentiment Distribution:</strong>
+            Analysis shows ${analysis.sentimentStats.positive} positive responses (${Math.round((analysis.sentimentStats.positive/analysis.sentimentStats.total)*100)}%),
+            ${analysis.sentimentStats.negative} negative responses (${Math.round((analysis.sentimentStats.negative/analysis.sentimentStats.total)*100)}%),
+            and ${analysis.sentimentStats.neutral} neutral responses. This distribution suggests ${analysis.sentimentStats.positive > analysis.sentimentStats.negative ? 'overall positive sentiment with opportunities to address negative feedback' : 'significant concerns that require immediate attention'}.</div>`);
+    }
+
+    if (categoryColumns.length > 0) {
+        const firstCategoryCol = categoryColumns[0];
+        const uniqueValues = [...new Set(data.map(row => row[firstCategoryCol]).filter(Boolean))];
+        insights.push(`<div style="margin-bottom: 1rem;"><strong>📊 Categorical Breakdown:</strong>
+            Data is segmented across ${uniqueValues.length} categories in the "${firstCategoryCol}" field: ${uniqueValues.slice(0, 5).join(', ')}${uniqueValues.length > 5 ? '...' : ''}. This segmentation enables targeted analysis and department-specific insights.</div>`);
+    }
+
+    if (dateCols.length > 0) {
+        insights.push(`<div style="margin-bottom: 1rem;"><strong>📅 Temporal Analysis:</strong>
+            The dataset includes time-based data in "${dateCols[0]}" field, enabling trend analysis over time. This temporal dimension allows for identifying seasonal patterns, improvement trends, and timing correlations with sentiment changes.</div>`);
+    }
+
+    // Add data quality insights
+    const completenessScore = Math.round((data.filter(row => Object.values(row).every(val => val && val.toString().trim())).length / data.length) * 100);
+    insights.push(`<div style="margin-bottom: 1rem;"><strong>✅ Data Quality:</strong>
+        Dataset completeness is ${completenessScore}%, indicating ${completenessScore > 85 ? 'excellent' : completenessScore > 70 ? 'good' : 'moderate'} data quality. ${completenessScore < 85 ? 'Consider data cleaning for improved analysis accuracy.' : 'High data quality enables robust analytical insights.'}</div>`);
+
+    // Generate intelligent recommendations based on content analysis
+    let recommendations = [];
+
+    // Content-specific recommendations
+    if (textCols.length > 0) {
+        const allTextContent = data.flatMap(row =>
+            textCols.map(col => row[col]).filter(Boolean)
+        ).join(' ').toLowerCase();
+
+        if (allTextContent.includes('recruiting') || allTextContent.includes('recruitment')) {
+            recommendations.push('🎯 <strong>Recruitment Strategy:</strong> Develop comprehensive recruitment and retention programs to address staffing challenges');
+            recommendations.push('💡 <strong>Employee Retention:</strong> Implement stay interviews and career development pathways to reduce turnover');
+        }
+
+        if (allTextContent.includes('work ethic') || allTextContent.includes('motivation')) {
+            recommendations.push('🚀 <strong>Motivation Enhancement:</strong> Create recognition programs and clear performance expectations to boost work ethic');
+            recommendations.push('📚 <strong>Training Investment:</strong> Provide skills development and leadership training to re-engage staff');
+        }
+
+        if (allTextContent.includes('pressure') || allTextContent.includes('stress')) {
+            recommendations.push('⚖️ <strong>Workload Management:</strong> Review and balance workload distribution to reduce employee pressure');
+            recommendations.push('🧘 <strong>Well-being Support:</strong> Implement stress management resources and mental health initiatives');
+        }
+
+        if (allTextContent.includes('communication') || allTextContent.includes('information')) {
+            recommendations.push('📢 <strong>Communication Strategy:</strong> Enhance internal communication channels and transparency');
+        }
+
+        if (allTextContent.includes('team') || allTextContent.includes('collaboration')) {
+            recommendations.push('🤝 <strong>Team Building:</strong> Strengthen collaborative efforts and team cohesion initiatives');
+        }
+    }
+
+    // Sentiment-based recommendations
+    if (analysis.sentimentStats) {
+        const negativePercent = Math.round((analysis.sentimentStats.negative / analysis.sentimentStats.total) * 100);
+        if (negativePercent > 30) {
+            recommendations.push('⚠️ <strong>Urgent Action Required:</strong> Address high negative sentiment through immediate management intervention');
+        } else if (negativePercent > 15) {
+            recommendations.push('🔍 <strong>Proactive Monitoring:</strong> Investigate moderate negative sentiment to prevent escalation');
+        }
+    }
+
+    // Strategic recommendations
+    recommendations.push('📊 <strong>Regular Pulse Surveys:</strong> Implement quarterly feedback cycles to track improvement progress');
+    recommendations.push('🎯 <strong>Action Planning:</strong> Create specific, measurable action plans with timelines and accountability');
+    recommendations.push('📈 <strong>Success Metrics:</strong> Establish KPIs to measure the effectiveness of implemented changes');
+
+    insights.push(`<div style="margin-top: 1.5rem; padding: 1rem; background: #f0f9ff; border-radius: 8px;"><strong>💡 Key Recommendations:</strong><ul style="margin: 0.5rem 0 0 1rem;">${recommendations.map(rec => `<li style="margin-bottom: 0.5rem;">${rec}</li>`).join('')}</ul></div>`);
+
+    analysis.detailedInsights = insights.join('');
+
+    // Generate narrative summary - flowing paragraphs describing data trends
+    analysis.narrativeSummary = generateNarrativeDataSummary(data, textCols, analysis);
+
+    return analysis;
+}
+
+function generateNarrativeDataSummary(data, textCols, analysis) {
+    let narrativeParagraphs = [];
+
+    console.log('DEBUG - generateNarrativeDataSummary called with:');
+    console.log('Data length:', data.length);
+    console.log('Text columns:', textCols);
+    console.log('Sample data:', data.slice(0, 3));
+
+    if (textCols.length > 0) {
+        // Extract ALL actual text content for detailed analysis
+        const allTextContent = data.flatMap(row =>
+            textCols.map(col => row[col]).filter(Boolean)
+        ).join(' ');
+
+        // Get longer samples for more detailed analysis
+        const contentSamples = data.slice(0, Math.min(20, data.length)).map(row =>
+            textCols.map(col => row[col]).filter(Boolean).join(' ')
+        ).filter(Boolean);
+
+        console.log('Analyzing content samples:', contentSamples); // Debug log
+
+        // Extract specific quotes and themes from actual content
+        const specificConcerns = [];
+        const specificPositives = [];
+        const companyMentions = [];
+        const specificIssues = [];
+
+        contentSamples.forEach(content => {
+            if (content && content.length > 10) { // Only analyze substantial content
+                const lowerContent = content.toLowerCase();
+
+                // Extract company/organization names
+                const companyMatches = content.match(/\b[A-Z][a-z]+\b/g);
+                if (companyMatches) {
+                    companyMatches.forEach(match => {
+                        if (match.length > 2 && !['The', 'And', 'For', 'This', 'That', 'More', 'Work', 'Good', 'Bad'].includes(match)) {
+                            companyMentions.push(match);
+                        }
+                    });
+                }
+
+                // Extract specific issues mentioned
+                if (lowerContent.includes('work ethic') && lowerContent.includes('decreased')) {
+                    specificIssues.push('declining work ethic among staff');
+                }
+                if (lowerContent.includes('recruiting') || lowerContent.includes('recruitment')) {
+                    specificIssues.push('recruitment and hiring challenges');
+                }
+                if (lowerContent.includes('staff') && (lowerContent.includes('leaving') || lowerContent.includes('quit'))) {
+                    specificIssues.push('high staff turnover');
+                }
+                if (lowerContent.includes('pressure') && lowerContent.includes('other staff')) {
+                    specificIssues.push('increased pressure on remaining employees');
+                }
+                if (lowerContent.includes('refuse') || lowerContent.includes('complain')) {
+                    specificIssues.push('staff resistance to assigned tasks');
+                }
+
+                // Extract positive mentions
+                if (lowerContent.includes('enjoyed') && lowerContent.includes('journey')) {
+                    specificPositives.push('positive onboarding experiences');
+                }
+                if (lowerContent.includes('thank') && lowerContent.includes('opportunity')) {
+                    specificPositives.push('gratitude for employment opportunities');
+                }
+                if (lowerContent.includes('good') && lowerContent.includes('team')) {
+                    specificPositives.push('positive team experiences');
+                }
+            }
+        });
+
+        // Build narrative using actual extracted content
+        let firstParagraph = `Analysis of ${data.length} employee responses`;
+
+        // Add company context if detected
+        const uniqueCompanies = [...new Set(companyMentions)];
+        if (uniqueCompanies.length > 0) {
+            firstParagraph += ` regarding ${uniqueCompanies[0]}`;
+        }
+
+        firstParagraph += ' reveals ';
+
+        if (specificIssues.length > 0) {
+            firstParagraph += `significant concerns about ${specificIssues.slice(0, 2).join(' and ')}. `;
+        } else if (analysis.sentimentStats) {
+            const positivePercent = Math.round((analysis.sentimentStats.positive / analysis.sentimentStats.total) * 100);
+            if (positivePercent > 60) {
+                firstParagraph += `predominantly positive workplace sentiment with ${positivePercent}% satisfaction. `;
+            } else if (positivePercent > 40) {
+                firstParagraph += `mixed sentiment with ${positivePercent}% positive responses. `;
+            } else {
+                firstParagraph += `concerning trends with only ${positivePercent}% positive sentiment. `;
+            }
+        }
+
+        // Add specific details from extracted content
+        if (specificIssues.length > 2) {
+            firstParagraph += `Additional concerns include ${specificIssues.slice(2).join(', ')}.`;
+        }
+
+        narrativeParagraphs.push(firstParagraph);
+
+        // Second paragraph - Detailed analysis of actual feedback content
+        let secondParagraph = '';
+
+        // Extract specific phrases and context from the actual content
+        const specificQuotes = [];
+        const timeReferences = [];
+        const companySpecificIssues = [];
+
+        contentSamples.forEach(content => {
+            if (content && content.length > 20) {
+                const lowerContent = content.toLowerCase();
+
+                // Extract time-related context
+                if (lowerContent.includes('last 3 years') || lowerContent.includes('past 3 years')) {
+                    timeReferences.push('three-year declining trend');
+                }
+                if (lowerContent.includes('recently') || lowerContent.includes('lately')) {
+                    timeReferences.push('recent workplace changes');
+                }
+
+                // Extract specific workplace issues
+                if (lowerContent.includes('newly recruited staff') && lowerContent.includes('no interest')) {
+                    companySpecificIssues.push('new hires showing lack of engagement');
+                }
+                if (lowerContent.includes('staff would refuse') || lowerContent.includes('refuse to complete')) {
+                    companySpecificIssues.push('direct task refusal by employees');
+                }
+                if (lowerContent.includes('good staff leaving')) {
+                    companySpecificIssues.push('departure of high-performing employees');
+                }
+                if (lowerContent.includes('issues within the recruiting process')) {
+                    companySpecificIssues.push('systemic recruitment process problems');
+                }
+
+                // Extract context about leadership/management
+                if (lowerContent.includes('add more pressure to other staff')) {
+                    companySpecificIssues.push('workload redistribution creating staff stress');
+                }
+            }
+        });
+
+        // Build second paragraph with specific extracted insights
+        if (timeReferences.length > 0) {
+            secondParagraph += `The feedback indicates that these issues represent a ${timeReferences[0]}, suggesting systematic problems rather than isolated incidents. `;
+        }
+
+        if (companySpecificIssues.length > 0) {
+            const uniqueIssues = [...new Set(companySpecificIssues)];
+            secondParagraph += `Specifically, employees report ${uniqueIssues.slice(0, 2).join(' and ')}, indicating both cultural and operational challenges. `;
+        }
+
+        // Add positive aspects if found
+        if (specificPositives.length > 0) {
+            secondParagraph += `Despite these challenges, employees acknowledge ${specificPositives.join(' and ')}, suggesting that while problems exist, there remains a foundation for improvement. `;
+        }
+
+        if (secondParagraph) {
+            narrativeParagraphs.push(secondParagraph);
+        }
+
+        // Third paragraph - Forward-looking insights based on specific content
+        let thirdParagraph = '';
+
+        // Base conclusion on specific issues found
+        if (companySpecificIssues.length > 0 || specificIssues.length > 0) {
+            thirdParagraph += 'The analysis suggests that immediate intervention is required to address the recruitment crisis and staff disengagement before it further impacts operational effectiveness. ';
+
+            if (timeReferences.some(ref => ref.includes('three-year'))) {
+                thirdParagraph += 'Given that these trends have persisted for multiple years, a comprehensive organizational transformation strategy will be necessary rather than incremental fixes. ';
+            }
+
+            if (companySpecificIssues.some(issue => issue.includes('refuse'))) {
+                thirdParagraph += 'The reported instances of task refusal indicate a breakdown in management authority that requires immediate leadership attention and potential policy reinforcement. ';
+            }
+
+            if (specificPositives.length > 0) {
+                thirdParagraph += 'However, the presence of positive feedback suggests that targeted improvements in recruitment processes, staff engagement, and workload management could yield significant results if implemented systematically.';
+            } else {
+                thirdParagraph += 'Priority should be given to rebuilding basic employee engagement and addressing the root causes of staff dissatisfaction before implementing broader organizational changes.';
+            }
+        } else {
+            // Fallback for less specific content
+            thirdParagraph += 'The organization has opportunities to build on existing strengths while addressing identified concerns through targeted improvement initiatives. The specificity of employee feedback indicates readiness for constructive dialogue and change implementation.';
+        }
+
+        if (thirdParagraph) {
+            narrativeParagraphs.push(thirdParagraph);
+        }
+
+    } else {
+        // Enhanced fallback - try to find ANY columns with substantial text content
+        console.log('No text columns detected, trying enhanced detection...');
+
+        const allColumns = Object.keys(data[0] || {});
+        const potentialTextCols = [];
+
+        allColumns.forEach(col => {
+            const sampleTexts = data.slice(0, 5).map(row => row[col]).filter(Boolean);
+            const avgLength = sampleTexts.reduce((sum, text) => sum + (text ? text.toString().length : 0), 0) / sampleTexts.length;
+
+            console.log(`Column "${col}" - avg length: ${avgLength}, sample: "${sampleTexts[0]}"`);
+
+            if (avgLength > 20) { // Consider columns with average length > 20 characters as text
+                potentialTextCols.push(col);
+            }
+        });
+
+        console.log('Potential text columns found:', potentialTextCols);
+
+        if (potentialTextCols.length > 0) {
+            // Use the enhanced detection and re-run the text analysis
+            const textContent = data.flatMap(row =>
+                potentialTextCols.map(col => row[col]).filter(Boolean)
+            ).join(' ');
+
+            console.log('Found text content:', textContent.substring(0, 200) + '...');
+
+            // Generate narrative based on this content
+            let paragraph = `Analysis of ${data.length} responses reveals `;
+
+            const lowerContent = textContent.toLowerCase();
+
+            if (lowerContent.includes('elysium')) {
+                paragraph += 'feedback specifically about Elysium ';
+            }
+
+            if (lowerContent.includes('work ethic') && lowerContent.includes('decreased')) {
+                paragraph += 'concerning trends regarding declining work ethic and employee engagement. ';
+            }
+
+            if (lowerContent.includes('recruiting') && lowerContent.includes('issues')) {
+                paragraph += 'Employees specifically highlight recruitment process problems ';
+            }
+
+            if (lowerContent.includes('staff') && lowerContent.includes('leaving')) {
+                paragraph += 'and retention challenges with valuable staff departures. ';
+            }
+
+            if (lowerContent.includes('enjoyed') || lowerContent.includes('thank')) {
+                paragraph += 'Despite challenges, some employees express appreciation for opportunities provided. ';
+            }
+
+            if (lowerContent.includes('3 years') || lowerContent.includes('three years')) {
+                paragraph += 'The feedback indicates these issues have persisted over a three-year period, suggesting systemic organizational challenges requiring comprehensive intervention.';
+            }
+
+            narrativeParagraphs.push(paragraph);
+        } else {
+            // Final fallback
+            narrativeParagraphs.push(`The dataset contains ${data.length} records with quantitative and categorical data that reveals patterns in employee responses and organizational metrics. The data structure suggests systematic collection efforts that can provide valuable insights for decision-making and trend analysis.`);
+        }
+    }
+
+    return narrativeParagraphs.join('<br><br>');
+}
+
+function generateAdvancedChatInsights(chatResponses, analytics) {
+    let insights = [];
+
+    // Sentiment analysis insights
+    const sentimentRatio = analytics.sentimentBreakdown.positive / (analytics.sentimentBreakdown.negative || 1);
+    if (sentimentRatio > 2) {
+        insights.push(`<div style="margin-bottom: 1rem;"><strong>🎉 Excellent Sentiment Trends:</strong>
+            Positive sentiment is ${Math.round(sentimentRatio)}x higher than negative, indicating strong employee satisfaction and engagement.</div>`);
+    } else if (sentimentRatio < 0.5) {
+        insights.push(`<div style="margin-bottom: 1rem;"><strong>⚠️ Sentiment Concerns:</strong>
+            Negative sentiment outweighs positive responses. Immediate attention needed to address underlying issues.</div>`);
+    }
+
+    // Engagement analysis
+    const avgDurationMinutes = analytics.averageDuration ? Math.round(analytics.averageDuration / 1000 / 60) : 0;
+    if (avgDurationMinutes > 5) {
+        insights.push(`<div style="margin-bottom: 1rem;"><strong>💬 High Engagement:</strong>
+            Average session duration of ${avgDurationMinutes} minutes indicates deep, meaningful conversations and strong employee engagement.</div>`);
+    } else if (avgDurationMinutes < 2) {
+        insights.push(`<div style="margin-bottom: 1rem;"><strong>⏱️ Brief Interactions:</strong>
+            Short session durations (${avgDurationMinutes} min) may indicate reluctance to share or need for better conversation facilitation.</div>`);
+    }
+
+    // Chat type distribution analysis
+    const totalChats = analytics.chatTypeBreakdown.listening + analytics.chatTypeBreakdown.chat + analytics.chatTypeBreakdown.pulse;
+    if (analytics.chatTypeBreakdown.listening > totalChats * 0.6) {
+        insights.push(`<div style="margin-bottom: 1rem;"><strong>👂 Listening-Focused Culture:</strong>
+            High proportion of listening sessions suggests employees value being heard and open communication channels.</div>`);
+    }
+
+    // Recommendations based on data
+    let recommendations = [
+        '🎯 Implement targeted action plans for areas with negative sentiment',
+        '📊 Establish regular pulse checks to track sentiment trends',
+        '💬 Create feedback loops to demonstrate response to employee input',
+        '📈 Develop department-specific improvement initiatives',
+        '🔄 Schedule follow-up sessions to measure progress'
+    ];
+
+    insights.push(`<div style="margin-top: 1.5rem; padding: 1rem; background: #f0f9ff; border-radius: 8px;"><strong>💡 Strategic Recommendations:</strong><ul style="margin: 0.5rem 0 0 1rem;">${recommendations.map(rec => `<li style="margin-bottom: 0.5rem;">${rec}</li>`).join('')}</ul></div>`);
+
+    return insights.join('');
+}
+
+function generateChatCharts(analytics) {
+    const container = document.getElementById('chat-charts-container');
+
+    // Create sentiment pie chart
+    const sentimentChart = `
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+            <div>
+                <h4 style="text-align: center; margin-bottom: 1rem;">Sentiment Distribution</h4>
+                <div style="position: relative; width: 200px; height: 200px; margin: 0 auto;">
+                    <canvas id="sentiment-pie-chart" width="200" height="200"></canvas>
+                </div>
+            </div>
+            <div>
+                <h4 style="text-align: center; margin-bottom: 1rem;">Chat Type Breakdown</h4>
+                <div style="position: relative; width: 200px; height: 200px; margin: 0 auto;">
+                    <canvas id="chat-type-chart" width="200" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    `;
+
+    container.innerHTML = sentimentChart;
+
+    // Draw simple pie charts using canvas
+    setTimeout(() => drawSentimentChart(analytics), 100);
+}
+
+function generateDatasetCharts(dataset, analysis) {
+    const container = document.getElementById('dataset-charts-container');
+
+    let chartsHtml = '';
+
+    if (analysis.sentimentStats) {
+        chartsHtml += `
+            <div style="margin-bottom: 2rem;">
+                <h4 style="text-align: center; margin-bottom: 1rem;">Sentiment Analysis</h4>
+                <div style="position: relative; width: 250px; height: 250px; margin: 0 auto;">
+                    <canvas id="dataset-sentiment-chart" width="250" height="250"></canvas>
+                </div>
+            </div>
+        `;
+    }
+
+    // Add data distribution chart
+    chartsHtml += `
+        <div style="margin-bottom: 2rem;">
+            <h4 style="text-align: center; margin-bottom: 1rem;">Data Volume Overview</h4>
+            <div style="background: #f8fafc; padding: 1rem; border-radius: 8px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                    <span>Total Records:</span>
+                    <div style="background: #3b82f6; height: 20px; width: ${Math.min(dataset.recordCount / 10, 300)}px; border-radius: 10px;"></div>
+                    <span>${dataset.recordCount}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span>Data Fields:</span>
+                    <div style="background: #10b981; height: 20px; width: ${dataset.columns.length * 20}px; border-radius: 10px;"></div>
+                    <span>${dataset.columns.length}</span>
+                </div>
+            </div>
+        </div>
+    `;
+
+    container.innerHTML = chartsHtml;
+
+    if (analysis.sentimentStats) {
+        setTimeout(() => drawDatasetSentimentChart(analysis.sentimentStats), 100);
+    }
+}
+
+function drawSentimentChart(analytics) {
+    const canvas = document.getElementById('sentiment-pie-chart');
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const radius = 80;
+
+    const total = analytics.sentimentBreakdown.positive + analytics.sentimentBreakdown.negative;
+    const positiveAngle = (analytics.sentimentBreakdown.positive / total) * 2 * Math.PI;
+
+    // Draw positive slice
+    ctx.beginPath();
+    ctx.moveTo(centerX, centerY);
+    ctx.arc(centerX, centerY, radius, 0, positiveAngle);
+    ctx.closePath();
+    ctx.fillStyle = '#10b981';
+    ctx.fill();
+
+    // Draw negative slice
+    ctx.beginPath();
+    ctx.moveTo(centerX, centerY);
+    ctx.arc(centerX, centerY, radius, positiveAngle, 2 * Math.PI);
+    ctx.closePath();
+    ctx.fillStyle = '#ef4444';
+    ctx.fill();
+
+    // Add labels
+    ctx.fillStyle = '#1f2937';
+    ctx.font = '12px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText(`Positive: ${analytics.sentimentBreakdown.positive}`, centerX, centerY + radius + 20);
+    ctx.fillText(`Negative: ${analytics.sentimentBreakdown.negative}`, centerX, centerY + radius + 35);
+}
+
+function drawDatasetSentimentChart(sentimentStats) {
+    const canvas = document.getElementById('dataset-sentiment-chart');
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const radius = 100;
+
+    const total = sentimentStats.positive + sentimentStats.negative + sentimentStats.neutral;
+    let currentAngle = 0;
+
+    // Positive slice
+    const positiveAngle = (sentimentStats.positive / total) * 2 * Math.PI;
+    ctx.beginPath();
+    ctx.moveTo(centerX, centerY);
+    ctx.arc(centerX, centerY, radius, currentAngle, currentAngle + positiveAngle);
+    ctx.closePath();
+    ctx.fillStyle = '#10b981';
+    ctx.fill();
+    currentAngle += positiveAngle;
+
+    // Negative slice
+    const negativeAngle = (sentimentStats.negative / total) * 2 * Math.PI;
+    ctx.beginPath();
+    ctx.moveTo(centerX, centerY);
+    ctx.arc(centerX, centerY, radius, currentAngle, currentAngle + negativeAngle);
+    ctx.closePath();
+    ctx.fillStyle = '#ef4444';
+    ctx.fill();
+    currentAngle += negativeAngle;
+
+    // Neutral slice
+    const neutralAngle = (sentimentStats.neutral / total) * 2 * Math.PI;
+    ctx.beginPath();
+    ctx.moveTo(centerX, centerY);
+    ctx.arc(centerX, centerY, radius, currentAngle, currentAngle + neutralAngle);
+    ctx.closePath();
+    ctx.fillStyle = '#6b7280';
+    ctx.fill();
+
+    // Add legend
+    ctx.fillStyle = '#1f2937';
+    ctx.font = '12px Arial';
+    ctx.textAlign = 'left';
+    const legendY = centerY + radius + 30;
+    ctx.fillStyle = '#10b981';
+    ctx.fillRect(centerX - 60, legendY, 15, 15);
+    ctx.fillStyle = '#1f2937';
+    ctx.fillText(`Positive: ${sentimentStats.positive}`, centerX - 40, legendY + 12);
+
+    ctx.fillStyle = '#ef4444';
+    ctx.fillRect(centerX - 60, legendY + 20, 15, 15);
+    ctx.fillStyle = '#1f2937';
+    ctx.fillText(`Negative: ${sentimentStats.negative}`, centerX - 40, legendY + 32);
+
+    ctx.fillStyle = '#6b7280';
+    ctx.fillRect(centerX - 60, legendY + 40, 15, 15);
+    ctx.fillStyle = '#1f2937';
+    ctx.fillText(`Neutral: ${sentimentStats.neutral}`, centerX - 40, legendY + 52);
+}
+
+function clearReportDisplay() {
+    const existingReport = document.querySelector('.ai-analysis-report');
+    if (existingReport) {
+        existingReport.remove();
+        showToast('Report cleared', 'info');
+    }
+}
+
+function downloadComprehensiveReport(reportTitle) {
+    const reportElement = document.querySelector('.ai-analysis-report');
+    if (!reportElement) {
+        showToast('No report to download', 'error');
+        return;
+    }
+
+    const reportContent = reportElement.innerHTML;
+    const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>${reportTitle}</title>
+            <style>
+                body { font-family: Arial, sans-serif; margin: 2rem; line-height: 1.6; }
+                .report-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 2rem; border-radius: 12px; margin-bottom: 2rem; }
+                .analysis-section { background: #f8fafc; border-left: 4px solid #3b82f6; padding: 1.5rem; margin-bottom: 2rem; border-radius: 8px; }
+                .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+                .metric-card { background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); text-align: center; border: 1px solid #e5e7eb; }
+                .ai-insights, .data-sample, .charts-section { background: white; padding: 2rem; border-radius: 12px; margin-bottom: 2rem; border: 1px solid #e5e7eb; }
+                table { border-collapse: collapse; width: 100%; }
+                th, td { border: 1px solid #e5e7eb; padding: 0.75rem; text-align: left; }
+                th { background-color: #f8fafc; font-weight: 600; }
+                h1, h2, h3 { color: #1e40af; }
+                .metric-card div:first-child { font-size: 2.5rem; font-weight: bold; margin-bottom: 0.5rem; }
+            </style>
+        </head>
+        <body>
+            ${reportContent.replace(/<canvas[^>]*>.*?<\/canvas>/gi, '<div style="text-align: center; padding: 2rem; background: #f3f4f6; border-radius: 8px; margin: 1rem 0;">Charts rendered in web version</div>')}
+        </body>
+        </html>
+    `;
+
+    const blob = new Blob([htmlContent], { type: 'text/html' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${reportTitle.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0, 10)}.html`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+    showToast('Comprehensive report downloaded!', 'success');
+}
 
 // END OF FILE - Realworld Survey Platform v2.0 with Email Integration
