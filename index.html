@@ -2914,16 +2914,16 @@ function selectAccessType(element, type) {
     radio.checked = true;
     
     // Show/hide email invites field based on access type
-    const emailInvitesGroup = document.getElementById('email-invites-group');
+    const emailInvitesGroup = document.getElementById('email-invites-group') || document.getElementById('listening-email-invites-group');
     if (type === 'closed') {
-        emailInvitesGroup.style.display = 'block';
+        if (emailInvitesGroup) emailInvitesGroup.style.display = 'block';
         // Make email field required for closed access
         const emailField = document.getElementById('listening-email-invites') || document.getElementById('chat-email-invites') || document.getElementById('pulse-email-invites');
         if (emailField) {
             emailField.required = true;
         }
     } else {
-        emailInvitesGroup.style.display = 'none';
+        if (emailInvitesGroup) emailInvitesGroup.style.display = 'none';
         // Remove required for open access
         const emailField = document.getElementById('listening-email-invites') || document.getElementById('chat-email-invites') || document.getElementById('pulse-email-invites');
         if (emailField) {
@@ -2983,11 +2983,37 @@ function showListeningSetup() {
                     
                     <div class="form-group">
                         <label class="form-label">Welcome Messages</label>
-                        <textarea id="listening-welcome-msg" class="form-input" rows="4" 
+                        <textarea id="listening-welcome-msg" class="form-input" rows="4"
                                   placeholder="Enter welcome messages that users will see when they start the chat...">Hi! Thanks for taking the time to share your feedback with us. Please feel free to tell us about your experience or any suggestions you might have.</textarea>
                         <small class="form-help">This message will appear when users first open the chat</small>
                     </div>
-                    
+
+                    <div class="form-group">
+                        <label class="form-label">Access Type</label>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                            <div class="access-type-option" onclick="selectAccessType(this, 'open')" style="padding: 1rem; border: 2px solid var(--border-color); border-radius: 8px; cursor: pointer; transition: all 0.2s; text-align: center;">
+                                <input type="radio" name="listeningAccessType" value="open" style="display: none;" checked>
+                                <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">🌍</div>
+                                <h6 style="margin: 0;">Open Access</h6>
+                                <small style="color: var(--text-secondary);">Anyone with the link can access</small>
+                            </div>
+
+                            <div class="access-type-option" onclick="selectAccessType(this, 'closed')" style="padding: 1rem; border: 2px solid var(--border-color); border-radius: 8px; cursor: pointer; transition: all 0.2s; text-align: center;">
+                                <input type="radio" name="listeningAccessType" value="closed" style="display: none;">
+                                <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">🔒</div>
+                                <h6 style="margin: 0;">Invite Only</h6>
+                                <small style="color: var(--text-secondary);">Only invited emails can access</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group" id="listening-email-invites-group" style="display: none;">
+                        <label class="form-label">Email Invitations</label>
+                        <textarea id="listening-email-invites" class="form-input" rows="3"
+                                  placeholder="Enter email addresses separated by commas or new lines&#10;e.g., john@company.com, sarah@company.com"></textarea>
+                        <small class="form-help">Only these email addresses will be able to access the chat</small>
+                    </div>
+
                     <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
                         <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').remove()">Cancel</button>
                         <button type="submit" class="btn btn-primary">Generate Link</button>
@@ -3010,17 +3036,25 @@ function generateListeningChatLink(event) {
     
     const chatName = document.getElementById('listening-chat-name').value;
     const welcomeMsg = document.getElementById('listening-welcome-msg').value;
-    
+    const accessType = document.querySelector('input[name="listeningAccessType"]:checked').value;
+    const emailInvites = document.getElementById('listening-email-invites').value;
+
     // Generate unique session ID for listening chat
     const sessionId = 'listening_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-    
+
     // Create URL parameters
     const params = new URLSearchParams({
         session: sessionId,
         type: 'listening',
         name: chatName,
-        welcome: welcomeMsg
+        welcome: welcomeMsg,
+        access: accessType
     });
+
+    // Add email invites if access type is closed
+    if (accessType === 'closed' && emailInvites.trim()) {
+        params.set('emails', emailInvites);
+    }
     
     // Generate the original link
     const originalLink = 'https://employee-survey-platform.surge.sh/chat.html?' + params.toString();
@@ -3031,6 +3065,8 @@ function generateListeningChatLink(event) {
         name: chatName,
         type: 'listening',
         welcome: welcomeMsg,
+        access: accessType,
+        emails: accessType === 'closed' ? emailInvites : '',
         link: originalLink,
         created: new Date().toISOString()
     };
