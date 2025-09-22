@@ -504,6 +504,10 @@
         </div>
     </div>
 
+    <!-- Include Supabase client -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="lib/supabase.js"></script>
+
     <script>
         // Pulse Survey Configuration
         const surveyConfig = {
@@ -633,6 +637,15 @@
 
         // Initialize survey
         function initializeSurvey() {
+            // Get user email from URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const userEmail = urlParams.get('email');
+
+            if (userEmail && window.trackSurveyStarted) {
+                // Track survey started
+                window.trackSurveyStarted(userEmail);
+            }
+
             showWelcomeMessage();
             setTimeout(() => {
                 presentQuestion(0);
@@ -1049,17 +1062,25 @@
         function completeSurvey() {
             surveyState.isComplete = true;
             surveyState.completionTime = Date.now();
-            
+
+            // Track survey completion
+            const urlParams = new URLSearchParams(window.location.search);
+            const userEmail = urlParams.get('email');
+
+            if (userEmail && window.trackSurveyCompleted) {
+                window.trackSurveyCompleted(userEmail);
+            }
+
             showTyping();
             setTimeout(() => {
                 hideTyping();
                 addMessage("That's all the questions! Thank you so much for your time and feedback.", 'bot');
-                
+
                 setTimeout(() => {
                     showCompletionScreen();
                 }, 2000);
             }, 1500);
-            
+
             // Save survey data
             saveSurveyData();
         }
@@ -1133,10 +1154,61 @@
         // Auto-save functionality
         setInterval(() => {
             if (surveyConfig.autoSave && !surveyState.isComplete && Object.keys(surveyState.responses).length > 0) {
-                localStorage.setItem(`pulse_survey_draft_${surveyConfig.surveyId}`, 
+                localStorage.setItem(`pulse_survey_draft_${surveyConfig.surveyId}`,
                     JSON.stringify(surveyState));
             }
         }, 30000); // Every 30 seconds
+
+        // Survey tracking functions
+        async function trackSurveyStarted(email, surveyId = 'test') {
+            try {
+                const currentDate = new Date().toISOString().split('T')[0];
+
+                const { data, error } = await window.supabaseClient
+                    .from('survey_recipients')
+                    .update({
+                        survey_started_date: currentDate,
+                        updated_at: new Date().toISOString()
+                    })
+                    .eq('email', email)
+                    .eq('survey_id', surveyId);
+
+                if (error) {
+                    console.error('Error tracking survey start:', error);
+                } else {
+                    console.log(`Survey started tracked for ${email}`);
+                }
+            } catch (error) {
+                console.error('Error in trackSurveyStarted:', error);
+            }
+        }
+
+        async function trackSurveyCompleted(email, surveyId = 'test') {
+            try {
+                const currentDate = new Date().toISOString().split('T')[0];
+
+                const { data, error } = await window.supabaseClient
+                    .from('survey_recipients')
+                    .update({
+                        survey_completed_date: currentDate,
+                        updated_at: new Date().toISOString()
+                    })
+                    .eq('email', email)
+                    .eq('survey_id', surveyId);
+
+                if (error) {
+                    console.error('Error tracking survey completion:', error);
+                } else {
+                    console.log(`Survey completion tracked for ${email}`);
+                }
+            } catch (error) {
+                console.error('Error in trackSurveyCompleted:', error);
+            }
+        }
+
+        // Make functions available globally
+        window.trackSurveyStarted = trackSurveyStarted;
+        window.trackSurveyCompleted = trackSurveyCompleted;
 
         // Initialize on load
         window.addEventListener('load', () => {
