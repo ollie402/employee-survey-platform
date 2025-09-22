@@ -21,8 +21,9 @@ function copyFile(src, dest) {
 
 console.log('🚀 Building project...\n');
 
-// Copy HTML file
+// Copy HTML files
 copyFile('index.html', 'dist/index.html');
+copyFile('chat.html', 'dist/chat.html');
 
 // Copy CSS files
 if (fs.existsSync('assets/css')) {

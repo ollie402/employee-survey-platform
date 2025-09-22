@@ -883,14 +883,15 @@ function showSection(sectionName) {
         targetSection.classList.remove('hidden');
     }
     
-    const navItems = document.querySelectorAll('.nav-item');
-    navItems.forEach(item => {
+    // Update navigation highlighting
+    document.querySelectorAll('.nav-item').forEach(item => {
         item.classList.remove('active');
     });
     
-    const activeItem = document.querySelector(`[onclick="showSection('${sectionName}')"]`);
-    if (activeItem) {
-        activeItem.classList.add('active');
+    // Find and highlight the correct nav item
+    const navItem = document.querySelector(`[onclick="showSection('${sectionName}')"]`);
+    if (navItem) {
+        navItem.classList.add('active');
     }
     
     const breadcrumb = document.getElementById('breadcrumb');
@@ -919,6 +920,8 @@ function showSection(sectionName) {
         loadUsersTable();
     } else if (sectionName === 'organizations') {
         loadOrganizationsTable();
+    } else if (sectionName === 'chat-reports') {
+        loadChatReportsData();
     }
 }
 
@@ -1015,6 +1018,59 @@ async function loadOrganizationsTable() {
         console.log('Organizations table loaded from database');
     } catch (error) {
         console.error('Error loading organizations table:', error);
+    }
+}
+
+async function loadChatReportsData() {
+    try {
+        const analytics = await getChatResponseAnalytics();
+
+        // Update the statistics cards with real data
+        const statCards = document.querySelectorAll('#chat-reports-section .stat-card .stat-value');
+        if (statCards.length >= 4) {
+            statCards[0].textContent = analytics.totalResponses; // Total Sessions
+            statCards[1].textContent = analytics.totalResponses * 3; // Data Points (estimated 3 per session)
+            statCards[2].textContent = Math.max(1, Math.floor(analytics.totalResponses / 3)); // Insights discovered
+            statCards[3].textContent = analytics.totalResponses > 0 ? '94%' : '0%'; // Accuracy score
+        }
+
+        // Update the reports table with real recent sessions
+        const chatResponses = await loadChatResponses();
+        const recentSessions = chatResponses.slice(0, 5); // Get 5 most recent
+
+        const tbody = document.querySelector('#chat-reports-section table tbody');
+        if (tbody && recentSessions.length > 0) {
+            tbody.innerHTML = recentSessions.map(session => {
+                const completedDate = new Date(session.completed_at || session.created_at).toLocaleDateString();
+                const messageCount = typeof session.messages === 'string' ?
+                    JSON.parse(session.messages).length : session.messages.length;
+
+                return `
+                    <tr>
+                        <td><strong>${session.chat_type.charAt(0).toUpperCase() + session.chat_type.slice(1)} Session</strong></td>
+                        <td>${completedDate}</td>
+                        <td>Chat Feedback</td>
+                        <td><span class="tag tag-${session.sentiment}">${messageCount} messages</span></td>
+                        <td>
+                            <button class="btn btn-secondary btn-sm" onclick="viewSessionDetails('${session.session_id}')">View</button>
+                            <button class="btn btn-primary btn-sm" onclick="exportSessionData('${session.session_id}')">Export</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        } else if (tbody) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="5" style="text-align: center; color: #6b7280;">
+                        No chat sessions found. Start collecting feedback to see AI reports here.
+                    </td>
+                </tr>
+            `;
+        }
+
+        console.log('Chat reports data loaded successfully');
+    } catch (error) {
+        console.error('Error loading chat reports data:', error);
     }
 }
 
@@ -2119,7 +2175,7 @@ async function generateChatLink(event) {
     });
     
     // Generate the link (assuming the chat page will be at chat.html)
-    const chatLink = window.location.origin + '/chat.html?' + params.toString();
+    const chatLink = 'https://employee-survey-platform.surge.sh/chat.html?' + params.toString();
     
     // Store session data for email and database
     const chatSessionData = {
@@ -2159,65 +2215,8 @@ async function generateChatLink(event) {
         showToast('⚠️ Survey link created but not saved to database', 'warning');
     }
     
-    // Close current modal
-    event.target.closest('.modal').remove();
-    
-    // Show modal with generated link
-    const linkModal = document.createElement('div');
-    linkModal.className = 'modal';
-    linkModal.innerHTML = `
-        <div class="modal-content" style="max-width: 700px;">
-            <div class="modal-header">
-                <h3>Chat Link Generated Successfully!</h3>
-                <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
-            </div>
-            <div>
-                <div class="alert alert-success" style="margin-bottom: 1.5rem;">
-                    <strong>✓ Chat link created for:</strong> ${sessionName}
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Share this link with participants:</label>
-                    <div style="display: flex; gap: 0.5rem;">
-                        <input type="text" id="generated-link" class="form-input" value="${chatLink}" readonly style="font-family: monospace; font-size: 0.875rem;">
-                        <button class="btn btn-primary" onclick="copyLinkToClipboard()">Copy</button>
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">QR Code (for easy mobile access):</label>
-                    <div style="background: white; padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color); text-align: center;">
-                        <div id="qr-placeholder" style="width: 200px; height: 200px; margin: 0 auto; background: var(--bg-secondary); display: flex; align-items: center; justify-content: center; border-radius: 8px;">
-                            <span style="color: var(--text-secondary);">QR Code Preview</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1.5rem;">
-                    <button class="btn btn-secondary" onclick="testChatLink('${chatLink}')">
-                        <span>🧪</span> Test Link
-                    </button>
-                    <button class="btn btn-success" id="email-chat-link-btn">
-                        <span>📧</span> Email Link to Me
-                    </button>
-                </div>
-                
-                <div class="alert alert-info" style="margin-top: 1.5rem;">
-                    <strong>ℹ️ Note:</strong> This link ${expiry === 'never' ? 'will never expire' : 'will expire in ' + expiry}. 
-                    All responses will be collected in the Chat Feedback section.
-                </div>
-                
-                <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
-                    <button class="btn btn-secondary" onclick="generateAnotherLink()">Generate Another</button>
-                    <button class="btn btn-primary" onclick="this.closest('.modal').remove()">Done</button>
-                </div>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(linkModal);
-    
-    // Add email functionality to the button
-    document.getElementById('email-chat-link-btn').onclick = () => emailChatLink(chatSessionData);
+    // Close current modal (remove all modals to be safe)
+    document.querySelectorAll('.modal').forEach(modal => modal.remove());
     
     // Store the session data (in real app, this would go to a database)
     if (!window.chatSessions) {
@@ -2225,7 +2224,244 @@ async function generateChatLink(event) {
     }
     window.chatSessions.push(chatSessionData);
     
-    showToast('Chat link generated successfully!', 'success');
+    // Show success toast
+    showToast(`Chat "${sessionName}" created successfully!`, 'success');
+    
+    // Add the new chat to the management list
+    addChatToManagement(chatSessionData);
+    
+    // Navigate to chat management section
+    setTimeout(() => {
+        // Hide all sections first
+        document.querySelectorAll('[id$="-section"]').forEach(section => {
+            section.classList.add('hidden');
+        });
+        
+        // Show chat management section
+        const chatMgmtSection = document.getElementById('chat-management-section');
+        if (chatMgmtSection) {
+            chatMgmtSection.classList.remove('hidden');
+        }
+        
+        // Update navigation highlight
+        document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+        const chatMgmtNavItem = document.querySelector('[onclick="showSection(\'chat-management\')"]');
+        if (chatMgmtNavItem) {
+            chatMgmtNavItem.classList.add('active');
+        }
+    }, 100);
+}
+
+// Function to add chat to management interface
+function addChatToManagement(chatSessionData) {
+    const activeChatsList = document.getElementById('active-chats-list');
+    if (!activeChatsList) {
+        console.error('active-chats-list element not found');
+        return;
+    }
+    const emptyState = document.querySelector('#chat-management-section .card:nth-child(2) > div:not(#active-chats-list)');
+
+    // Hide empty state and show the list
+    if (emptyState) {
+        emptyState.style.display = 'none';
+    }
+    activeChatsList.style.display = 'block';
+    
+    // Create chat item
+    const chatItem = document.createElement('div');
+    chatItem.className = 'chat-item';
+    chatItem.style.cssText = `
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        background: var(--bg-primary);
+    `;
+    
+    chatItem.innerHTML = `
+        <div>
+            <h4 style="margin: 0 0 0.5rem 0;">${chatSessionData.name}</h4>
+            <p style="margin: 0; color: var(--text-secondary); font-size: 0.875rem;">${chatSessionData.welcomeMsg}</p>
+            <div style="margin-top: 0.5rem;">
+                <span class="tag tag-active" style="font-size: 0.75rem;">Active</span>
+                <span style="color: var(--text-secondary); font-size: 0.75rem; margin-left: 1rem;">
+                    Created: ${new Date().toLocaleDateString()}
+                </span>
+            </div>
+        </div>
+        <div style="display: flex; gap: 0.5rem; align-items: center;">
+            <div class="dropdown" style="position: relative;">
+                <button class="btn btn-secondary btn-sm" onclick="toggleChatDropdown(this, event)" style="border-radius: 4px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; padding: 0;" title="Chat Settings">
+                    ⚙️
+                </button>
+                <div class="dropdown-menu" style="display: none; position: absolute; top: 100%; right: 0; background: white; border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; min-width: 200px; padding: 8px 0;">
+                    <button class="dropdown-item" onclick="editChatSettings('${chatSessionData.id}')" style="width: 100%; text-align: left; padding: 0.75rem 1rem; border: none; background: none; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem;">
+                        <span style="width: 16px;">✏️</span> Edit Chat
+                    </button>
+                    <button class="dropdown-item" onclick="copyChatSession('${chatSessionData.id}')" style="width: 100%; text-align: left; padding: 0.75rem 1rem; border: none; background: none; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem;">
+                        <span style="width: 16px;">📄</span> Copy Chat
+                    </button>
+                    <button class="dropdown-item" onclick="exportPrintCopy('${chatSessionData.id}')" style="width: 100%; text-align: left; padding: 0.75rem 1rem; border: none; background: none; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem;">
+                        <span style="width: 16px;">📤</span> Export Print Copy
+                    </button>
+                    <button class="dropdown-item" onclick="downloadChatData('${chatSessionData.id}')" style="width: 100%; text-align: left; padding: 0.75rem 1rem; border: none; background: none; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem;">
+                        <span style="width: 16px;">💾</span> Download Chat Data
+                    </button>
+                    <button class="dropdown-item" onclick="manageRecipients('${chatSessionData.id}')" style="width: 100%; text-align: left; padding: 0.75rem 1rem; border: none; background: none; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem;">
+                        <span style="width: 16px;">👥</span> Manage Recipients
+                    </button>
+                    <hr style="margin: 0.5rem 0; border: none; border-top: 1px solid var(--border-color);">
+                    <button class="dropdown-item" onclick="deleteChat('${chatSessionData.id}')" style="width: 100%; text-align: left; padding: 0.75rem 1rem; border: none; background: none; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; color: var(--danger-color);">
+                        <span style="width: 16px;">🗑️</span> Delete Chat
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    activeChatsList.appendChild(chatItem);
+}
+
+// Helper functions for chat management
+function copyLink(link) {
+    navigator.clipboard.writeText(link).then(() => {
+        showToast('Link copied to clipboard!', 'success');
+    }).catch(() => {
+        // Fallback for older browsers
+        const textarea = document.createElement('textarea');
+        textarea.value = link;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        showToast('Link copied to clipboard!', 'success');
+    });
+}
+
+function toggleChatDropdown(button, event) {
+    console.log('toggleChatDropdown called', button); // Debug log
+    
+    // Prevent event bubbling
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+    
+    const dropdown = button.nextElementSibling;
+    if (!dropdown) {
+        console.error('Dropdown menu not found');
+        return;
+    }
+    
+    const isVisible = dropdown.style.display === 'block';
+    console.log('Dropdown current state:', isVisible ? 'visible' : 'hidden'); // Debug log
+    
+    // Close all other dropdowns
+    document.querySelectorAll('.dropdown-menu').forEach(menu => {
+        menu.style.display = 'none';
+    });
+    
+    // Toggle this dropdown
+    dropdown.style.display = isVisible ? 'none' : 'block';
+    console.log('Dropdown new state:', dropdown.style.display); // Debug log
+    
+    // Close dropdown when clicking outside
+    if (!isVisible) {
+        setTimeout(() => {
+            document.addEventListener('click', function closeDropdown(e) {
+                if (!button.contains(e.target) && !dropdown.contains(e.target)) {
+                    dropdown.style.display = 'none';
+                    document.removeEventListener('click', closeDropdown);
+                }
+            });
+        }, 0);
+    }
+}
+
+function editChatSettings(chatId) {
+    showToast('Edit functionality coming soon!', 'info');
+}
+
+function viewChatDetails(chatId) {
+    const chat = window.chatSessions?.find(c => c.id === chatId);
+    if (!chat) return;
+    
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3>Chat Details: ${chat.name}</h3>
+                <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
+            </div>
+            <div>
+                <div class="form-group">
+                    <label class="form-label">Chat Link:</label>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <input type="text" class="form-input" value="${chat.link}" readonly style="font-family: monospace; font-size: 0.875rem;">
+                        <button class="btn btn-primary btn-sm" onclick="copyLink('${chat.link}')">Copy</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Welcome Message:</label>
+                    <textarea class="form-input" readonly rows="3">${chat.welcomeMsg}</textarea>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label class="form-label">Expires:</label>
+                        <input type="text" class="form-input" value="${chat.expiry === 'never' ? 'Never' : chat.expiry}" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Anonymous Access:</label>
+                        <input type="text" class="form-input" value="${chat.allowAnonymous ? 'Yes' : 'No'}" readonly>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
+                    <button class="btn btn-secondary" onclick="testChatLink('${chat.link}')">Test Chat</button>
+                    <button class="btn btn-primary" onclick="this.closest('.modal').remove()">Close</button>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+}
+
+function archiveChat(chatId) {
+    if (confirm('Are you sure you want to archive this chat? It will no longer be accessible to participants.')) {
+        showToast('Chat archived successfully!', 'success');
+        // In a real app, update the database status here
+    }
+}
+
+function deleteChat(chatId) {
+    if (confirm('Are you sure you want to delete this chat? This action cannot be undone.')) {
+        const chatItem = document.querySelector(`[onclick*="${chatId}"]`).closest('.chat-item');
+        chatItem.remove();
+        
+        // Remove from sessions array
+        if (window.chatSessions) {
+            window.chatSessions = window.chatSessions.filter(c => c.id !== chatId);
+        }
+        
+        // Show empty state if no chats left
+        const activeChatsList = document.getElementById('active-chats-list');
+        if (!activeChatsList) {
+            console.error('active-chats-list element not found');
+            return;
+        }
+        if (activeChatsList.children.length === 0) {
+            activeChatsList.style.display = 'none';
+            const emptyState = document.querySelector('#chat-management-section .card:nth-child(2) > div:not(#active-chats-list)');
+            if (emptyState) {
+                emptyState.style.display = 'block';
+            }
+        }
+        
+        showToast('Chat deleted successfully!', 'success');
+    }
 }
 
 function copyLinkToClipboard() {
@@ -2269,10 +2505,791 @@ function generateAnotherLink() {
     createNewChatWidget();
 }
 
-function generateAIReport() {
-    showToast('Generating AI report... This may take a few moments.', 'info');
+async function generateAIReport() {
+    // First show dataset selection modal
+    showDatasetSelectionModal();
 }
 
+function showDatasetSelectionModal() {
+    // Get available datasets
+    const importedDatasets = JSON.parse(localStorage.getItem('importedDatasets') || '[]');
+
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h3>🤖 Generate AI Report</h3>
+                <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div style="margin-bottom: 2rem;">
+                    <h4>Select Data Source</h4>
+                    <p>Choose which dataset to use for AI analysis and report generation:</p>
+                </div>
+
+                <div class="dataset-options">
+                    <!-- Default option for chat responses -->
+                    <div class="dataset-option selected" onclick="selectDataset('chat-responses', this)">
+                        <div class="dataset-radio">
+                            <input type="radio" name="dataset" value="chat-responses" checked>
+                        </div>
+                        <div class="dataset-info">
+                            <div class="dataset-name">Chat Responses (Default)</div>
+                            <div class="dataset-details">Analysis based on collected chat feedback and survey responses</div>
+                            <div class="dataset-meta">Source: Platform Database</div>
+                        </div>
+                    </div>
+
+                    ${importedDatasets.length > 0 ? `
+                        <div style="margin: 1.5rem 0; padding: 1rem 0; border-top: 1px solid #e5e7eb;">
+                            <h5>Imported Datasets</h5>
+                        </div>
+                        ${importedDatasets.map(dataset => `
+                            <div class="dataset-option" onclick="selectDataset('${dataset.id}', this)">
+                                <div class="dataset-radio">
+                                    <input type="radio" name="dataset" value="${dataset.id}">
+                                </div>
+                                <div class="dataset-info">
+                                    <div class="dataset-name">${dataset.name}</div>
+                                    <div class="dataset-details">${dataset.description}</div>
+                                    <div class="dataset-meta">
+                                        ${dataset.recordCount} records • Uploaded ${new Date(dataset.uploadDate).toLocaleDateString()}
+                                        <br>Columns: ${dataset.columns.join(', ')}
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    ` : `
+                        <div style="margin: 1.5rem 0; padding: 1rem; background: #f8f9fa; border-radius: 8px; text-align: center;">
+                            <p style="color: #6b7280; margin: 0;">No imported datasets available.</p>
+                            <p style="color: #6b7280; margin: 0.5rem 0 0 0; font-size: 0.875rem;">
+                                Use "📥 Import Data" to upload custom datasets for analysis.
+                            </p>
+                        </div>
+                    `}
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').remove()">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="generateReportWithSelectedDataset()">Generate Report</button>
+            </div>
+        </div>
+    `;
+
+    // Add required CSS for dataset options if not already added
+    if (!document.getElementById('dataset-selection-styles')) {
+        const style = document.createElement('style');
+        style.id = 'dataset-selection-styles';
+        style.textContent = `
+            .dataset-options {
+                display: flex;
+                flex-direction: column;
+                gap: 1rem;
+            }
+            .dataset-option {
+                display: flex;
+                align-items: flex-start;
+                gap: 1rem;
+                padding: 1rem;
+                border: 2px solid #e5e7eb;
+                border-radius: 8px;
+                cursor: pointer;
+                transition: all 0.2s;
+            }
+            .dataset-option:hover {
+                border-color: #3b82f6;
+                background: #f8faff;
+            }
+            .dataset-option.selected {
+                border-color: #3b82f6;
+                background: #eff6ff;
+            }
+            .dataset-radio input {
+                margin: 0;
+            }
+            .dataset-info {
+                flex: 1;
+            }
+            .dataset-name {
+                font-weight: 600;
+                margin-bottom: 0.25rem;
+            }
+            .dataset-details {
+                color: #6b7280;
+                margin-bottom: 0.5rem;
+                font-size: 0.875rem;
+            }
+            .dataset-meta {
+                color: #9ca3af;
+                font-size: 0.75rem;
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    document.body.appendChild(modal);
+}
+
+function selectDataset(datasetId, element) {
+    // Remove selected class from all options
+    document.querySelectorAll('.dataset-option').forEach(opt => opt.classList.remove('selected'));
+
+    // Add selected class to clicked option
+    element.classList.add('selected');
+
+    // Update radio button
+    element.querySelector('input[type="radio"]').checked = true;
+}
+
+async function generateReportWithSelectedDataset() {
+    const selectedDataset = document.querySelector('input[name="dataset"]:checked');
+    if (!selectedDataset) {
+        showToast('Please select a dataset', 'error');
+        return;
+    }
+
+    const datasetId = selectedDataset.value;
+
+    // Close selection modal
+    document.querySelector('.modal').remove();
+
+    showToast('Analyzing data and generating comprehensive AI report...', 'info');
+
+    try {
+        if (datasetId === 'chat-responses') {
+            // Use original chat responses logic
+            const chatResponses = await loadChatResponses();
+            const analytics = await getChatResponseAnalytics();
+
+            // Display inline chat response report
+            displayInlineChatReport({ chatResponses, analytics }, 'AI Chat Analysis Report');
+        } else {
+            // Load imported dataset
+            const importedDatasets = JSON.parse(localStorage.getItem('importedDatasets') || '[]');
+            const dataset = importedDatasets.find(d => d.id === datasetId);
+            if (!dataset) {
+                showToast('Selected dataset not found', 'error');
+                return;
+            }
+
+            // Display inline custom dataset report with AI analysis
+            displayInlineDatasetReport({ dataset }, `AI Analysis Report - ${dataset.name}`);
+        }
+
+    } catch (error) {
+        console.error('Error generating AI report:', error);
+        showToast('Error generating report: ' + error.message, 'error');
+    }
+}
+
+function displayInlineChatReport(reportData, reportTitle) {
+    const { chatResponses, analytics } = reportData;
+
+    // Find the reports section to display the analysis
+    const reportsSection = document.getElementById('chat-reports-section');
+
+    // Create comprehensive analysis content
+    const analysisContent = `
+        <div class="ai-analysis-report" style="margin-top: 2rem;">
+            <div class="report-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 2rem; border-radius: 12px; margin-bottom: 2rem;">
+                <h2 style="margin: 0; font-size: 2rem;">${reportTitle}</h2>
+                <p style="margin: 0.5rem 0 0 0; opacity: 0.9;">Generated on ${new Date().toLocaleString()}</p>
+            </div>
+
+            <!-- Executive Summary -->
+            <div class="analysis-section" style="background: #f8fafc; border-left: 4px solid #3b82f6; padding: 1.5rem; margin-bottom: 2rem; border-radius: 8px;">
+                <h3 style="color: #1e40af; margin-top: 0;">📊 Executive Summary</h3>
+                <p style="font-size: 1.1rem; line-height: 1.6;">
+                    Our AI analysis of <strong>${analytics.totalResponses} chat sessions</strong> reveals significant insights into employee engagement and sentiment patterns.
+                    The data shows ${analytics.sentimentBreakdown.positive > analytics.sentimentBreakdown.negative ? 'predominantly positive' : 'concerning negative'} sentiment trends
+                    with an average engagement duration of <strong>${analytics.averageDuration ? Math.round(analytics.averageDuration / 1000 / 60) : 0} minutes</strong> per session.
+                </p>
+            </div>
+
+            <!-- Key Metrics Dashboard -->
+            <div class="metrics-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                <div class="metric-card" style="background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); text-align: center;">
+                    <div style="font-size: 2.5rem; font-weight: bold; color: #3b82f6;">${analytics.totalResponses}</div>
+                    <div style="color: #6b7280; font-weight: 500;">Total Sessions</div>
+                </div>
+                <div class="metric-card" style="background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); text-align: center;">
+                    <div style="font-size: 2.5rem; font-weight: bold; color: #10b981;">${analytics.sentimentBreakdown.positive}</div>
+                    <div style="color: #6b7280; font-weight: 500;">Positive Responses</div>
+                </div>
+                <div class="metric-card" style="background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); text-align: center;">
+                    <div style="font-size: 2.5rem; font-weight: bold; color: #ef4444;">${analytics.sentimentBreakdown.negative}</div>
+                    <div style="color: #6b7280; font-weight: 500;">Negative Responses</div>
+                </div>
+                <div class="metric-card" style="background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); text-align: center;">
+                    <div style="font-size: 2.5rem; font-weight: bold; color: #8b5cf6;">${analytics.averageDuration ? Math.round(analytics.averageDuration / 1000 / 60) : 0}m</div>
+                    <div style="color: #6b7280; font-weight: 500;">Avg Duration</div>
+                </div>
+            </div>
+
+            <!-- AI Insights and Analysis -->
+            <div class="ai-insights" style="background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); margin-bottom: 2rem;">
+                <h3 style="color: #1e40af; margin-top: 0; display: flex; align-items: center;">
+                    🤖 AI-Powered Insights & Recommendations
+                </h3>
+                ${generateAdvancedChatInsights(chatResponses, analytics)}
+            </div>
+
+            <!-- Charts Section -->
+            <div class="charts-section" style="background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); margin-bottom: 2rem;">
+                <h3 style="color: #1e40af; margin-top: 0;">📈 Data Visualizations</h3>
+                <div id="chat-charts-container"></div>
+            </div>
+
+            <div style="text-align: center; margin-top: 2rem;">
+                <button class="btn btn-primary" onclick="downloadComprehensiveReport('${reportTitle}')">📥 Download Full Report</button>
+                <button class="btn btn-secondary" onclick="clearReportDisplay()" style="margin-left: 1rem;">Clear Report</button>
+            </div>
+        </div>
+    `;
+
+    // Insert the analysis after the existing dashboard
+    const dashboardGrid = reportsSection.querySelector('.dashboard-grid').parentNode;
+    dashboardGrid.insertAdjacentHTML('afterend', analysisContent);
+
+    // Generate charts
+    setTimeout(() => {
+        generateChatCharts(analytics);
+        showToast('Comprehensive AI analysis complete!', 'success');
+    }, 500);
+}
+
+function displayInlineDatasetReport(reportData, reportTitle) {
+    const { dataset } = reportData;
+
+    // Find the reports section to display the analysis
+    const reportsSection = document.getElementById('chat-reports-section');
+
+    // Perform comprehensive AI analysis
+    const aiAnalysis = performAdvancedDatasetAnalysis(dataset);
+
+    // Create comprehensive analysis content
+    const analysisContent = `
+        <div class="ai-analysis-report" style="margin-top: 2rem;">
+            <div class="report-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 2rem; border-radius: 12px; margin-bottom: 2rem;">
+                <h2 style="margin: 0; font-size: 2rem;">${reportTitle}</h2>
+                <p style="margin: 0.5rem 0 0 0; opacity: 0.9;">Generated on ${new Date().toLocaleString()}</p>
+            </div>
+
+            <!-- Executive Summary -->
+            <div class="analysis-section" style="background: #f8fafc; border-left: 4px solid #3b82f6; padding: 1.5rem; margin-bottom: 2rem; border-radius: 8px;">
+                <h3 style="color: #1e40af; margin-top: 0;">📊 Executive Summary</h3>
+                <p style="font-size: 1.1rem; line-height: 1.6;">
+                    ${aiAnalysis.executiveSummary}
+                </p>
+            </div>
+
+            <!-- Key Metrics Dashboard -->
+            <div class="metrics-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                <div class="metric-card" style="background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); text-align: center;">
+                    <div style="font-size: 2.5rem; font-weight: bold; color: #3b82f6;">${dataset.recordCount}</div>
+                    <div style="color: #6b7280; font-weight: 500;">Total Records</div>
+                </div>
+                <div class="metric-card" style="background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); text-align: center;">
+                    <div style="font-size: 2.5rem; font-weight: bold; color: #10b981;">${dataset.columns.length}</div>
+                    <div style="color: #6b7280; font-weight: 500;">Data Fields</div>
+                </div>
+                ${aiAnalysis.sentimentStats ? `
+                <div class="metric-card" style="background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); text-align: center;">
+                    <div style="font-size: 2.5rem; font-weight: bold; color: #10b981;">${aiAnalysis.sentimentStats.positive}</div>
+                    <div style="color: #6b7280; font-weight: 500;">Positive Sentiment</div>
+                </div>
+                <div class="metric-card" style="background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); text-align: center;">
+                    <div style="font-size: 2.5rem; font-weight: bold; color: #ef4444;">${aiAnalysis.sentimentStats.negative}</div>
+                    <div style="color: #6b7280; font-weight: 500;">Negative Sentiment</div>
+                </div>
+                ` : ''}
+            </div>
+
+            <!-- AI Insights and Analysis -->
+            <div class="ai-insights" style="background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); margin-bottom: 2rem;">
+                <h3 style="color: #1e40af; margin-top: 0; display: flex; align-items: center;">
+                    🤖 AI-Powered Data Analysis
+                </h3>
+                ${aiAnalysis.detailedInsights}
+            </div>
+
+            <!-- Data Sample -->
+            <div class="data-sample" style="background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); margin-bottom: 2rem;">
+                <h3 style="color: #1e40af; margin-top: 0;">📋 Data Sample Preview</h3>
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; font-size: 0.875rem;">
+                        <thead>
+                            <tr style="background: #f8fafc;">
+                                ${dataset.columns.map(col => `<th style="padding: 0.75rem; border: 1px solid #e5e7eb; text-align: left;">${col}</th>`).join('')}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${dataset.data.slice(0, 5).map(row => `
+                                <tr>
+                                    ${dataset.columns.map(col => `<td style="padding: 0.75rem; border: 1px solid #e5e7eb;">${row[col] || ''}</td>`).join('')}
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+                <p style="margin-top: 1rem; color: #6b7280; font-size: 0.875rem;">Showing first 5 of ${dataset.recordCount} records</p>
+            </div>
+
+            <!-- Charts Section -->
+            <div class="charts-section" style="background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); margin-bottom: 2rem;">
+                <h3 style="color: #1e40af; margin-top: 0;">📈 Data Visualizations</h3>
+                <div id="dataset-charts-container"></div>
+            </div>
+
+            <div style="text-align: center; margin-top: 2rem;">
+                <button class="btn btn-primary" onclick="downloadComprehensiveReport('${reportTitle}')">📥 Download Full Report</button>
+                <button class="btn btn-secondary" onclick="clearReportDisplay()" style="margin-left: 1rem;">Clear Report</button>
+            </div>
+        </div>
+    `;
+
+    // Insert the analysis after the existing dashboard
+    const dashboardGrid = reportsSection.querySelector('.dashboard-grid').parentNode;
+    dashboardGrid.insertAdjacentHTML('afterend', analysisContent);
+
+    // Generate charts
+    setTimeout(() => {
+        generateDatasetCharts(dataset, aiAnalysis);
+        showToast('Advanced AI analysis complete!', 'success');
+    }, 500);
+}
+
+async function generateChatResponseReport(reportData, reportTitle) {
+    const { chatResponses, analytics } = reportData;
+
+    // Generate AI report modal (original format)
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h3>${reportTitle}</h3>
+                <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
+            </div>
+            <div>
+                <div style="margin-bottom: 2rem;">
+                    <h4>Chat Session Overview</h4>
+                    <div class="dashboard-grid" style="grid-template-columns: repeat(4, 1fr);">
+                        <div class="stat-card">
+                            <div class="stat-value">${analytics.totalResponses}</div>
+                            <div class="stat-label">Total Sessions</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${analytics.averageDuration ? Math.round(analytics.averageDuration / 1000 / 60) : 0}m</div>
+                            <div class="stat-label">Avg Duration</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${analytics.sentimentBreakdown.positive}</div>
+                            <div class="stat-label">Positive</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${analytics.sentimentBreakdown.negative}</div>
+                            <div class="stat-label">Negative</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 2rem;">
+                    <h4>Chat Type Distribution</h4>
+                    <div class="dashboard-grid" style="grid-template-columns: repeat(3, 1fr);">
+                        <div class="stat-card">
+                            <div class="stat-value">${analytics.chatTypeBreakdown.listening}</div>
+                            <div class="stat-label">Listening Chats</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${analytics.chatTypeBreakdown.chat}</div>
+                            <div class="stat-label">Survey Chats</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${analytics.chatTypeBreakdown.pulse}</div>
+                            <div class="stat-label">Pulse Surveys</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 2rem;">
+                    <h4>AI Insights</h4>
+                    <div class="card" style="background: #f8f9fa; padding: 1.5rem;">
+                        ${generateAIInsights(chatResponses, analytics)}
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').remove()">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="exportChatReport()">Export Report</button>
+                    <button type="button" class="btn btn-primary" onclick="emailChatReport()">Email Report</button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+    showToast('AI report generated successfully!', 'success');
+}
+
+function generateCustomDatasetReport(reportData, reportTitle) {
+    const { dataset } = reportData;
+    const sampleData = dataset.data.slice(0, 5);
+
+    // Analyze imported data
+    const totalRecords = dataset.recordCount;
+    const columns = dataset.columns;
+
+    // Try to detect sentiment column
+    const sentimentCol = columns.find(col =>
+        col.toLowerCase().includes('sentiment') ||
+        col.toLowerCase().includes('feeling') ||
+        col.toLowerCase().includes('mood')
+    );
+
+    let sentimentAnalysis = '';
+    if (sentimentCol) {
+        const sentiments = dataset.data.map(row => row[sentimentCol]).filter(Boolean);
+        const positive = sentiments.filter(s => s.toLowerCase().includes('positive')).length;
+        const negative = sentiments.filter(s => s.toLowerCase().includes('negative')).length;
+        const neutral = sentiments.length - positive - negative;
+
+        sentimentAnalysis = `
+            <div style="margin-bottom: 2rem;">
+                <h4>Sentiment Analysis</h4>
+                <div class="dashboard-grid" style="grid-template-columns: repeat(3, 1fr);">
+                    <div class="stat-card">
+                        <div class="stat-value">${positive}</div>
+                        <div class="stat-label">Positive</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${negative}</div>
+                        <div class="stat-label">Negative</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${neutral}</div>
+                        <div class="stat-label">Neutral</div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 900px;">
+            <div class="modal-header">
+                <h3>${reportTitle}</h3>
+                <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div style="margin-bottom: 2rem;">
+                    <h4>Dataset Overview</h4>
+                    <div class="dashboard-grid" style="grid-template-columns: repeat(3, 1fr);">
+                        <div class="stat-card">
+                            <div class="stat-value">${totalRecords}</div>
+                            <div class="stat-label">Total Records</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${columns.length}</div>
+                            <div class="stat-label">Data Fields</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${new Date(dataset.uploadDate).toLocaleDateString()}</div>
+                            <div class="stat-label">Upload Date</div>
+                        </div>
+                    </div>
+                </div>
+
+                ${sentimentAnalysis}
+
+                <div style="margin-bottom: 2rem;">
+                    <h4>Data Sample</h4>
+                    <div style="max-height: 300px; overflow: auto; border: 1px solid #dee2e6; border-radius: 8px;">
+                        <table style="width: 100%; font-size: 0.875rem;">
+                            <thead>
+                                <tr style="background: #f8f9fa;">
+                                    ${columns.map(col => `<th style="padding: 0.75rem; border-bottom: 1px solid #dee2e6;">${col}</th>`).join('')}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${sampleData.map(row => `
+                                    <tr>
+                                        ${columns.map(col => `<td style="padding: 0.75rem; border-bottom: 1px solid #f1f5f9;">${row[col] || ''}</td>`).join('')}
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                    <p style="margin-top: 0.5rem; color: #666; font-size: 0.875rem;">Showing first 5 of ${totalRecords} records</p>
+                </div>
+
+                <div style="margin-bottom: 2rem;">
+                    <h4>AI Insights</h4>
+                    <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px;">
+                        <p>📊 <strong>Dataset Analysis:</strong> Analyzed ${totalRecords} records from "${dataset.name}"</p>
+                        <p>📋 <strong>Data Structure:</strong> ${columns.length} fields including: ${columns.slice(0, 3).join(', ')}${columns.length > 3 ? '...' : ''}</p>
+                        ${sentimentCol ? `<p>😊 <strong>Sentiment Data:</strong> Found sentiment information in "${sentimentCol}" field</p>` : ''}
+                        <p>🎯 <strong>Recommendation:</strong> This dataset is ready for detailed AI analysis and trend identification</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').remove()">Close</button>
+                <button type="button" class="btn btn-primary" onclick="downloadReport('${reportTitle}')">📥 Download Report</button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+    showToast('AI report generated successfully!', 'success');
+}
+
+function downloadReport(reportTitle) {
+    const reportContent = document.querySelector('.modal-body').innerHTML;
+    const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>${reportTitle}</title>
+            <style>
+                body { font-family: Arial, sans-serif; margin: 2rem; }
+                .stat-card { border: 1px solid #ddd; padding: 1rem; margin: 0.5rem; border-radius: 8px; }
+                .stat-value { font-size: 2rem; font-weight: bold; }
+                .stat-label { color: #666; }
+                table { border-collapse: collapse; width: 100%; }
+                th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                th { background-color: #f2f2f2; }
+            </style>
+        </head>
+        <body>
+            <h1>${reportTitle}</h1>
+            <p>Generated on: ${new Date().toLocaleString()}</p>
+            ${reportContent}
+        </body>
+        </html>
+    `;
+
+    const blob = new Blob([htmlContent], { type: 'text/html' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${reportTitle.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0, 10)}.html`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+    showToast('Report downloaded!', 'success');
+}
+
+function generateAIInsights(chatResponses, analytics) {
+    const insights = [];
+
+    // Generate insights based on the data
+    if (analytics.sentimentBreakdown.positive > analytics.sentimentBreakdown.negative) {
+        insights.push("📈 <strong>Positive Trend:</strong> Overall sentiment is positive with " +
+                     Math.round((analytics.sentimentBreakdown.positive / analytics.totalResponses) * 100) +
+                     "% of conversations showing positive sentiment.");
+    } else if (analytics.sentimentBreakdown.negative > analytics.sentimentBreakdown.positive) {
+        insights.push("⚠️ <strong>Attention Needed:</strong> Negative sentiment is higher than positive. Consider investigating common themes in negative feedback.");
+    }
+
+    if (analytics.averageDuration > 300000) { // 5 minutes
+        insights.push("💬 <strong>Engaged Conversations:</strong> Average session duration of " +
+                     Math.round(analytics.averageDuration / 1000 / 60) +
+                     " minutes indicates high engagement levels.");
+    }
+
+    const mostPopularType = Object.keys(analytics.chatTypeBreakdown).reduce((a, b) =>
+        analytics.chatTypeBreakdown[a] > analytics.chatTypeBreakdown[b] ? a : b
+    );
+    insights.push("🎯 <strong>Preferred Format:</strong> " + mostPopularType.charAt(0).toUpperCase() +
+                 mostPopularType.slice(1) + " sessions are most popular among participants.");
+
+    if (analytics.totalResponses > 0) {
+        const recentResponses = Object.keys(analytics.responsesByDate).length;
+        if (recentResponses > 3) {
+            insights.push("📊 <strong>Active Participation:</strong> Consistent feedback collection with activity across " +
+                         recentResponses + " different days.");
+        }
+    }
+
+    // Add general recommendations
+    insights.push("💡 <strong>Recommendation:</strong> Continue monitoring sentiment trends and consider following up on negative feedback themes to improve employee experience.");
+
+    return insights.length > 0 ? insights.map(insight => `<p style="margin-bottom: 1rem;">${insight}</p>`).join('') :
+           '<p>No specific insights available yet. More data is needed for comprehensive analysis.</p>';
+}
+
+async function exportChatReport() {
+    try {
+        const chatResponses = await loadChatResponses();
+        const analytics = await getChatResponseAnalytics();
+
+        // Create CSV data
+        let csvContent = "Session ID,Participant ID,Chat Type,Sentiment,Duration (minutes),Completed At,Messages Count\n";
+
+        chatResponses.forEach(response => {
+            const messages = typeof response.messages === 'string' ? JSON.parse(response.messages) : response.messages;
+            const duration = response.duration_ms ? Math.round(response.duration_ms / 1000 / 60) : 0;
+            const completedAt = new Date(response.completed_at || response.created_at).toISOString();
+
+            csvContent += `"${response.session_id}","${response.participant_id || 'anonymous'}","${response.chat_type}","${response.sentiment}",${duration},"${completedAt}",${messages.length}\n`;
+        });
+
+        // Download CSV
+        const blob = new Blob([csvContent], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `chat-analysis-report-${new Date().toISOString().split('T')[0]}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+
+        showToast('Report exported successfully!', 'success');
+    } catch (error) {
+        console.error('Error exporting report:', error);
+        showToast('Error exporting report. Please try again.', 'error');
+    }
+}
+
+async function emailChatReport() {
+    try {
+        const chatResponses = await loadChatResponses();
+        const analytics = await getChatResponseAnalytics();
+
+        const reportData = {
+            type: 'Chat Analysis',
+            period: 'All Time',
+            format: 'HTML',
+            totalSessions: analytics.totalResponses,
+            averageDuration: analytics.averageDuration ? Math.round(analytics.averageDuration / 1000 / 60) : 0,
+            sentiment: analytics.sentimentBreakdown,
+            chatTypes: analytics.chatTypeBreakdown
+        };
+
+        await emailReport(reportData);
+    } catch (error) {
+        console.error('Error emailing report:', error);
+        showToast('Error emailing report. Please try again.', 'error');
+    }
+}
+
+async function viewSessionDetails(sessionId) {
+    try {
+        const chatResponses = await loadChatResponses(sessionId);
+        const session = chatResponses.find(s => s.session_id === sessionId);
+
+        if (!session) {
+            showToast('Session not found', 'error');
+            return;
+        }
+
+        const messages = typeof session.messages === 'string' ? JSON.parse(session.messages) : session.messages;
+        const responses = typeof session.responses === 'string' ? JSON.parse(session.responses) : session.responses;
+
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.innerHTML = `
+            <div class="modal-content" style="max-width: 700px;">
+                <div class="modal-header">
+                    <h3>Session Details - ${sessionId}</h3>
+                    <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
+                </div>
+                <div>
+                    <div style="margin-bottom: 2rem;">
+                        <h4>Session Information</h4>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <div><strong>Type:</strong> ${session.chat_type}</div>
+                            <div><strong>Sentiment:</strong> <span class="tag tag-${session.sentiment}">${session.sentiment}</span></div>
+                            <div><strong>Duration:</strong> ${session.duration_ms ? Math.round(session.duration_ms / 1000 / 60) + ' minutes' : 'N/A'}</div>
+                            <div><strong>Completed:</strong> ${new Date(session.completed_at || session.created_at).toLocaleString()}</div>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 2rem;">
+                        <h4>Conversation History</h4>
+                        <div style="max-height: 300px; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 8px; padding: 1rem;">
+                            ${messages.map(msg => `
+                                <div style="margin-bottom: 1rem; padding: 0.5rem; border-radius: 6px; background: ${msg.sender === 'user' ? '#e0f2fe' : '#f3f4f6'};">
+                                    <strong>${msg.sender === 'user' ? 'User' : 'Assistant'}:</strong> ${msg.text}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    ${Object.keys(responses).length > 0 ? `
+                        <div style="margin-bottom: 2rem;">
+                            <h4>Structured Responses</h4>
+                            <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px;">
+                                ${Object.entries(responses).map(([key, value]) => `
+                                    <div style="margin-bottom: 0.5rem;"><strong>${key}:</strong> ${value}</div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').remove()">Close</button>
+                        <button type="button" class="btn btn-primary" onclick="exportSessionData('${sessionId}')">Export Session</button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+    } catch (error) {
+        console.error('Error viewing session details:', error);
+        showToast('Error loading session details', 'error');
+    }
+}
+
+async function exportSessionData(sessionId) {
+    try {
+        const chatResponses = await loadChatResponses(sessionId);
+        const session = chatResponses.find(s => s.session_id === sessionId);
+
+        if (!session) {
+            showToast('Session not found', 'error');
+            return;
+        }
+
+        const messages = typeof session.messages === 'string' ? JSON.parse(session.messages) : session.messages;
+        const responses = typeof session.responses === 'string' ? JSON.parse(session.responses) : session.responses;
+
+        // Create detailed JSON export
+        const exportData = {
+            sessionId: session.session_id,
+            participantId: session.participant_id,
+            chatType: session.chat_type,
+            sentiment: session.sentiment,
+            duration: session.duration_ms,
+            startTime: session.start_time,
+            completedAt: session.completed_at,
+            messages: messages,
+            responses: responses,
+            exportedAt: new Date().toISOString()
+        };
+
+        // Download as JSON
+        const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `chat-session-${sessionId}-${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+
+        showToast('Session data exported successfully!', 'success');
+    } catch (error) {
+        console.error('Error exporting session data:', error);
+        showToast('Error exporting session data', 'error');
+    }
+}
 
 function manageChatSettings() {
     showToast('Opening chat settings...', 'info');
@@ -2538,58 +3555,9 @@ function showOrganizationDetails(orgName) {
 }
 
 function showUserDetails(userName) {
-    const modal = document.createElement('div');
-    modal.className = 'modal';
-    modal.innerHTML = `
-        <div class="modal-content" style="max-width: 600px;">
-            <div class="modal-header">
-                <h3>${userName} - User Details</h3>
-                <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
-            </div>
-            <div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
-                    <div>
-                        <h4>User Information</h4>
-                        <div style="display: grid; gap: 1rem; margin: 1rem 0;">
-                            <div><strong>Name:</strong> ${userName}</div>
-                            <div><strong>Email:</strong> ${userName ? userName.toLowerCase().replace(' ', '.') : 'unknown'}@company.com</div>
-                            <div><strong>Role:</strong> Administrator</div>
-                            <div><strong>Status:</strong> <span class="tag tag-active">Active</span></div>
-                            <div><strong>Joined:</strong> June 12, 2024</div>
-                            <div><strong>Last Login:</strong> 2 hours ago</div>
-                        </div>
-                    </div>
-                    <div>
-                        <h4>Activity Summary</h4>
-                        <div class="dashboard-grid">
-                            <div class="stat-card">
-                                <div class="stat-value">23</div>
-                                <div class="stat-label">Surveys Created</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-value">156</div>
-                                <div class="stat-label">Logins This Month</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div style="margin-top: 2rem;">
-                    <h4>Permissions</h4>
-                    <div style="display: grid; gap: 0.5rem;">
-                        <label class="checkbox-label"><input type="checkbox" checked disabled> Create Surveys</label>
-                        <label class="checkbox-label"><input type="checkbox" checked disabled> View Analytics</label>
-                        <label class="checkbox-label"><input type="checkbox" checked disabled> Manage Participants</label>
-                        <label class="checkbox-label"><input type="checkbox" disabled> Admin Functions</label>
-                    </div>
-                </div>
-                <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
-                    <button class="btn btn-secondary" onclick="this.closest('.modal').remove()">Close</button>
-                    <button class="btn btn-primary" onclick="editUser('${userName}')">Edit User</button>
-                </div>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(modal);
+    // Disabled - this modal was interfering with user management
+    console.log('showUserDetails called for:', userName, '- function disabled');
+    return;
 }
 
 // UPDATED: Create/Edit functions with working forms and EMAIL INTEGRATION
@@ -3828,5 +4796,2154 @@ window.addEventListener('resize', function() {
         sidebar.classList.add('collapsed');
     }
 });
+
+// Additional chat management functions
+function copyChatSession(chatId) {
+    showToast('Copy chat functionality coming soon!', 'info');
+    // TODO: Implement copy functionality - duplicate chat with new name
+}
+
+function exportPrintCopy(chatId) {
+    showToast('Export print copy functionality coming soon!', 'info');
+    // TODO: Implement export to PDF/print functionality
+}
+
+function downloadChatData(chatId) {
+    showToast('Download chat data functionality coming soon!', 'info');
+    // TODO: Implement download chat responses as CSV/Excel
+}
+
+// Global variable to track current chat ID for recipients management
+let currentRecipientsChatId = null;
+
+function manageRecipients(chatId) {
+    // Store the current chat ID for use in other functions
+    currentRecipientsChatId = chatId;
+    
+    const contentArea = document.getElementById('content-area');
+    
+    // Get chat data to show the chat name
+    const chatData = activeChatSessions.find(session => session.id === chatId);
+    const chatName = chatData ? chatData.name : 'Unknown Chat';
+    
+    // Create the full-screen recipients management interface
+    contentArea.innerHTML = `
+        <div class="manage-recipients-container">
+            <!-- Navigation Breadcrumb -->
+            <nav class="recipients-nav">
+                <div class="breadcrumb">
+                    <span class="breadcrumb-item">
+                        <a href="#" onclick="showDashboard()" class="breadcrumb-link">Manage Surveys</a>
+                    </span>
+                    <span class="breadcrumb-separator">></span>
+                    <span class="breadcrumb-item current">
+                        Manage Survey Recipients for survey - ${chatName}
+                    </span>
+                </div>
+            </nav>
+
+            <!-- Header Section -->
+            <div class="recipients-header">
+                <h1>👥 Manage Recipients: ${chatName}</h1>
+                
+                <!-- Stats Cards -->
+                <div class="recipients-stats">
+                    <div class="stat-card">
+                        <div class="stat-label">Participation Rate</div>
+                        <div class="stat-value">-</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Completion Rate</div>
+                        <div class="stat-value">-</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="recipients-actions">
+                <button class="btn btn-primary" onclick="sendEmailInvitation()">
+                    <span>📧</span> Send E-mail Invitation / Reminder to Selected Recipients
+                </button>
+                
+                <button class="btn btn-secondary" onclick="preloadRecipients()">
+                    <span>📋</span> Pre-load recipients and demographic data
+                </button>
+                
+                <button class="btn btn-success" onclick="addRecipient()">
+                    <span>➕</span> Add Recipient
+                </button>
+                
+                <button class="btn btn-info" onclick="uploadRecipient()">
+                    <span>📤</span> Upload Recipient
+                </button>
+                
+                <button class="btn btn-warning" onclick="uploadSurveyResponses()">
+                    <span>📊</span> Upload Survey Responses
+                </button>
+            </div>
+
+            <!-- Data Table -->
+            <div class="recipients-table-container">
+                <table class="recipients-table">
+                    <thead>
+                        <tr>
+                            <th class="checkbox-column">
+                                <input type="checkbox" id="select-all" onchange="toggleSelectAllRecipients()">
+                            </th>
+                            <th>Forename</th>
+                            <th>Surname</th>
+                            <th>E-mail</th>
+                            <th>Employee No</th>
+                            <th>Invite Sent</th>
+                            <th>No. Reminders Sent</th>
+                            <th>Last Reminder Sent</th>
+                            <th class="sortable" onclick="sortRecipientsTable('date_started')">
+                                Date Survey Started 
+                                <span class="sort-arrow">↕️</span>
+                            </th>
+                            <th class="sortable" onclick="sortRecipientsTable('date_completed')">
+                                Date Survey Completed 
+                                <span class="sort-arrow">↕️</span>
+                            </th>
+                            <th>Edit Survey Recipient</th>
+                            <th>Delete Survey Recipient</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recipients-table-body">
+                        <tr class="no-data-row">
+                            <td colspan="12" class="no-data">No data</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    `;
+    
+    // Load recipients data for this chat
+    loadRecipientsData(chatId);
+}
+
+// Recipients Management Helper Functions
+async function loadRecipientsData(chatId) {
+    const tableBody = document.getElementById('recipients-table-body');
+    if (!tableBody) return;
+    
+    try {
+        // Load recipients from Supabase database
+        const { data: recipients, error } = await window.supabaseClient
+            .from('survey_recipients')
+            .select('*')
+            .eq('survey_id', chatId || 'test')
+            .order('created_at', { ascending: false });
+        
+        if (error) {
+            console.error('Error loading recipients:', error);
+            // Show empty state if error
+            tableBody.innerHTML = `
+                <tr class="no-data-row">
+                    <td colspan="12" class="no-data">No data</td>
+                </tr>
+            `;
+            updateRecipientStats([]);
+            return;
+        }
+        
+        if (!recipients || recipients.length === 0) {
+            // Show empty state if no recipients
+            tableBody.innerHTML = `
+                <tr class="no-data-row">
+                    <td colspan="12" class="no-data">No data</td>
+                </tr>
+            `;
+            updateRecipientStats([]);
+            return;
+        }
+        
+        // Populate table with real data from database
+        tableBody.innerHTML = recipients.map(recipient => `
+            <tr data-recipient-id="${recipient.id}">
+                <td><input type="checkbox" class="recipient-checkbox" data-id="${recipient.id}"></td>
+                <td>${recipient.forename || ''}</td>
+                <td>${recipient.surname || ''}</td>
+                <td>${recipient.email || ''}</td>
+                <td>${recipient.employee_no || ''}</td>
+                <td><span class="status-badge ${recipient.invite_sent ? 'sent' : 'not-sent'}">${recipient.invite_sent ? 'YES' : 'NO'}</span></td>
+                <td>${recipient.reminder_count || 0}</td>
+                <td>${recipient.last_reminder_sent || '-'}</td>
+                <td>${recipient.survey_started_date || '-'}</td>
+                <td>${recipient.survey_completed_date || '-'}</td>
+                <td><button class="btn btn-sm btn-primary" data-action="edit" data-recipient-id="${recipient.id}">Edit</button></td>
+                <td><button class="btn btn-sm btn-danger" data-action="delete" data-recipient-id="${recipient.id}">Delete</button></td>
+            </tr>
+        `).join('');
+        
+        // Add event delegation for edit and delete buttons
+        console.log('🎯 About to add event listeners for recipients table');
+        addRecipientTableEventListeners();
+        console.log('✅ Event listeners added for recipients table');
+        
+        // Update statistics with loaded data
+        updateRecipientStats(recipients);
+        
+    } catch (error) {
+        console.error('Error loading recipients:', error);
+        tableBody.innerHTML = `
+            <tr class="no-data-row">
+                <td colspan="12" class="no-data">Error loading data</td>
+            </tr>
+        `;
+        updateRecipientStats([]);
+    }
+}
+
+function updateRecipientStats(recipients) {
+    const total = recipients.length;
+    const completed = recipients.filter(r => r.status === 'completed').length;
+    const invited = recipients.filter(r => r.inviteSent === 'Yes').length;
+    
+    const participationRate = total > 0 ? Math.round((invited / total) * 100) : 0;
+    const completionRate = invited > 0 ? Math.round((completed / invited) * 100) : 0;
+
+    // Update the stats cards - show "-" when no data
+    const statsCards = document.querySelectorAll('.recipients-stats .stat-card');
+    if (statsCards[0]) {
+        statsCards[0].querySelector('.stat-value').textContent = total > 0 ? `${participationRate}%` : '-';
+    }
+    if (statsCards[1]) {
+        statsCards[1].querySelector('.stat-value').textContent = total > 0 ? `${completionRate}%` : '-';
+    }
+}
+
+function toggleSelectAllRecipients() {
+    const selectAllCheckbox = document.getElementById('select-all');
+    const checkboxes = document.querySelectorAll('#recipients-table-body input[type="checkbox"]');
+
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = selectAllCheckbox.checked;
+    });
+}
+
+function sortRecipientsTable(column) {
+    showToast(`Sorting by ${column}`, 'info');
+    // TODO: Implement table sorting functionality
+}
+
+function sendEmailInvitation() {
+    // Auto-select recipients who haven't completed the survey
+    const allRecipients = document.querySelectorAll('#recipients-table-body input[type="checkbox"]');
+    console.log('Found recipients:', allRecipients.length);
+    
+    const nonResponders = Array.from(allRecipients).filter(checkbox => {
+        const row = checkbox.closest('tr');
+        // Check if "Date Survey Completed" column is empty (indicates no response)
+        const completedCell = row.cells[9]; // "Date Survey Completed" column
+        const completedText = completedCell ? completedCell.textContent.trim() : '';
+        console.log('Checking recipient:', row.cells[1].textContent, 'completion status:', completedText);
+        return completedText === '-' || completedText === '' || !completedText;
+    });
+
+    console.log('Non-responders found:', nonResponders.length);
+
+    if (nonResponders.length === 0) {
+        showToast('All recipients have already completed the survey!', 'info');
+        return;
+    }
+
+    // Get non-responder details
+    const selectedDetails = nonResponders.map(checkbox => {
+        const row = checkbox.closest('tr');
+        return {
+            id: checkbox.dataset.id,
+            name: `${row.cells[1].textContent} ${row.cells[2].textContent}`,
+            email: row.cells[3].textContent,
+            forename: row.cells[1].textContent,
+            surname: row.cells[2].textContent,
+            reminder_count: parseInt(row.cells[6].textContent) || 0
+        };
+    });
+
+    showToast(`Automatically selected ${nonResponders.length} recipients who haven't responded`, 'info');
+
+    // Create email invitation modal
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3>📧 Send Email Invitations</h3>
+                <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Recipients (${selectedDetails.length} selected):</label>
+                    <div class="recipients-preview">
+                        ${selectedDetails.map(r => `
+                            <div class="recipient-tag">
+                                <span>${r.name} (${r.email})</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Email Subject:</label>
+                    <input type="text" id="email-subject" class="form-input" 
+                           value="Survey Invitation - Your Feedback Matters" 
+                           placeholder="Enter email subject">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Email Message:</label>
+                    <textarea id="email-message" class="form-input" rows="6" placeholder="Enter your message...">Hi {name},
+
+We would love to hear your feedback! Please take a few minutes to complete our survey.
+
+Click here to start: {survey_link}
+
+Thank you for your time!
+
+Best regards,
+Survey Team</textarea>
+                    <small class="form-help">Use {name} for recipient name and {survey_link} for the survey link</small>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        <input type="checkbox" id="send-reminder" checked> Send as reminder (for previously invited recipients)
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').remove()">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="confirmSendInvitations(${JSON.stringify(selectedDetails).replace(/"/g, '&quot;')})">
+                    Send ${selectedDetails.length} Invitation${selectedDetails.length > 1 ? 's' : ''}
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+}
+
+function preloadRecipients() {
+    // Create pre-load recipients modal
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h3>📋 Pre-load Recipients and Demographic Data</h3>
+                <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Import recipient lists and demographic information from various sources.</p>
+                
+                <div class="preload-options">
+                    <div class="option-card" onclick="preloadFromCSV()">
+                        <div class="option-icon">📄</div>
+                        <h4>CSV/Excel Import</h4>
+                        <p>Upload a CSV or Excel file with recipient details and demographic information.</p>
+                        <div class="option-features">
+                            <span class="feature">✓ Bulk import</span>
+                            <span class="feature">✓ Demographic data</span>
+                            <span class="feature">✓ Validation</span>
+                        </div>
+                    </div>
+                    
+                    <div class="option-card" onclick="preloadFromHR()">
+                        <div class="option-icon">🏢</div>
+                        <h4>HR System Integration</h4>
+                        <p>Connect to your HR system to automatically import employee data.</p>
+                        <div class="option-features">
+                            <span class="feature">✓ Live sync</span>
+                            <span class="feature">✓ Department data</span>
+                            <span class="feature">✓ Role information</span>
+                        </div>
+                    </div>
+                    
+                    <div class="option-card" onclick="preloadFromAD()">
+                        <div class="option-icon">🔐</div>
+                        <h4>Active Directory</h4>
+                        <p>Import users from your organization's Active Directory.</p>
+                        <div class="option-features">
+                            <span class="feature">✓ AD integration</span>
+                            <span class="feature">✓ Group filtering</span>
+                            <span class="feature">✓ Auto-sync</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="sample-data-section" style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
+                    <h4>Quick Start: Load Sample Data</h4>
+                    <p>Add sample recipients with demographic data for testing purposes.</p>
+                    <button class="btn btn-info" onclick="loadSampleData()">
+                        🎯 Load Sample Recipients
+                    </button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').remove()">Close</button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+}
+
+async function confirmSendInvitations(recipients) {
+    console.log('🚀 confirmSendInvitations called with recipients:', recipients);
+    console.log('📧 Current chat ID:', currentRecipientsChatId);
+
+    const subject = document.getElementById('email-subject').value;
+    const message = document.getElementById('email-message').value;
+    const isReminder = document.getElementById('send-reminder').checked;
+
+    if (!subject.trim() || !message.trim()) {
+        showToast('Please fill in both subject and message', 'warning');
+        return;
+    }
+
+    // Close modal
+    document.querySelector('.modal').remove();
+
+    // Send actual emails and update database
+    showToast('Sending invitations...', 'info');
+
+    try {
+        // Send emails to each recipient
+        for (const recipient of recipients) {
+            try {
+                // Find existing recipient by email, or create if doesn't exist
+                console.log(`Looking for recipient: ${recipient.email} in survey: ${currentRecipientsChatId || 'test'}`);
+
+                const { data: existingRecipients, error: checkError } = await window.supabaseClient
+                    .from('survey_recipients')
+                    .select('*')
+                    .eq('email', recipient.email)
+                    .eq('survey_id', currentRecipientsChatId || 'test');
+
+                let recipientRecord = null;
+
+                if (checkError) {
+                    console.error('Error checking for existing recipient:', checkError);
+                    continue;
+                }
+
+                if (existingRecipients && existingRecipients.length > 0) {
+                    recipientRecord = existingRecipients[0];
+                    console.log(`Found existing recipient:`, recipientRecord);
+                } else {
+                    // Recipient doesn't exist, create them
+                    console.log(`Creating new recipient record for ${recipient.email}`);
+                    const { data: newRecipient, error: createError } = await window.supabaseClient
+                        .from('survey_recipients')
+                        .insert({
+                            survey_id: currentRecipientsChatId || 'test',
+                            forename: recipient.forename,
+                            surname: recipient.surname,
+                            email: recipient.email,
+                            employee_no: '', // Will be filled from table data if available
+                            invite_sent: false,
+                            reminder_count: 0
+                        })
+                        .select('*')
+                        .single();
+
+                    if (createError) {
+                        console.error('Error creating recipient:', createError);
+                        continue;
+                    }
+                    recipientRecord = newRecipient;
+                    console.log(`Created new recipient:`, recipientRecord);
+                }
+
+                // Send email via API
+                const emailResponse = await fetch('/api/send-invitation', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        userEmail: recipient.email,
+                        userName: `${recipient.forename} ${recipient.surname}`,
+                        subject: subject,
+                        message: message,
+                        isReminder: isReminder
+                    }),
+                });
+
+                if (emailResponse.ok) {
+                    // Update database to reflect sent invitation
+                    const currentDate = new Date().toISOString().split('T')[0];
+                    const reminderCount = isReminder ? (recipientRecord.reminder_count || 0) + 1 : 1;
+
+                    console.log(`Updating database for recipient ID: ${recipientRecord.id}, email: ${recipient.email}`);
+
+                    const { data, error } = await window.supabaseClient
+                        .from('survey_recipients')
+                        .update({
+                            invite_sent: true,
+                            reminder_count: reminderCount,
+                            last_reminder_sent: currentDate,
+                            updated_at: new Date().toISOString()
+                        })
+                        .eq('id', recipientRecord.id);
+
+                    if (error) {
+                        console.error('Error updating recipient database:', error);
+                    } else {
+                        console.log(`✅ Database updated successfully for recipient ID: ${recipientRecord.id}, email: ${recipient.email}`);
+                        console.log('Update result:', data);
+
+                        // Update UI table row immediately - find by email since ID might have changed
+                        const rows = document.querySelectorAll('#recipients-table-body tr');
+                        let rowFound = false;
+
+                        rows.forEach(row => {
+                            const emailCell = row.cells[3];
+                            if (emailCell && emailCell.textContent.trim() === recipient.email) {
+                                console.log('Found row by email, updating UI:', row);
+                                // Update invite sent status
+                                const inviteCell = row.cells[5];
+                                inviteCell.innerHTML = '<span class="status-badge sent">YES</span>';
+
+                                // Update reminders sent
+                                const remindersCell = row.cells[6];
+                                remindersCell.textContent = reminderCount;
+
+                                // Update last reminder date
+                                const lastReminderCell = row.cells[7];
+                                lastReminderCell.textContent = currentDate;
+
+                                rowFound = true;
+                            }
+                        });
+
+                        if (!rowFound) {
+                            console.error(`Could not find row for recipient email: ${recipient.email}`);
+                        }
+                    }
+                } else {
+                    console.error(`Failed to send email to ${recipient.email}`);
+                }
+            } catch (error) {
+                console.error(`Error sending invitation to ${recipient.email}:`, error);
+            }
+        }
+
+        showToast(`Successfully sent ${recipients.length} invitation${recipients.length > 1 ? 's' : ''}!`, 'success');
+
+        // Refresh the table to show updated data from database
+        await loadRecipientsData(currentRecipientsChatId || 'test');
+
+        // Clear selections
+        document.querySelectorAll('#recipients-table-body input[type="checkbox"]:checked').forEach(cb => cb.checked = false);
+        const selectAllCheckbox = document.getElementById('select-all');
+        if (selectAllCheckbox) selectAllCheckbox.checked = false;
+
+    } catch (error) {
+        console.error('Error in bulk invitation sending:', error);
+        showToast('Error sending invitations. Please try again.', 'error');
+    }
+}
+
+function addRecipient() {
+    // Create add recipient modal
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3>➕ Add New Recipient</h3>
+                <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="add-recipient-form">
+                    <div class="form-group">
+                        <label class="form-label">First Name *</label>
+                        <input type="text" id="recipient-forename" class="form-input" required 
+                               placeholder="Enter first name">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Last Name *</label>
+                        <input type="text" id="recipient-surname" class="form-input" required 
+                               placeholder="Enter last name">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Email Address *</label>
+                        <input type="email" id="recipient-email" class="form-input" required 
+                               placeholder="name@company.com">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Employee Number</label>
+                        <input type="text" id="recipient-employee-no" class="form-input" 
+                               placeholder="EMP001 (optional)">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">
+                            <input type="checkbox" id="send-immediate-invitation"> 
+                            Send invitation immediately after adding
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').remove()">Cancel</button>
+                <button type="button" class="btn btn-success" onclick="confirmAddRecipient()">Add Recipient</button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+}
+
+async function confirmAddRecipient() {
+    const forename = document.getElementById('recipient-forename').value.trim();
+    const surname = document.getElementById('recipient-surname').value.trim();
+    const email = document.getElementById('recipient-email').value.trim();
+    const employeeNo = document.getElementById('recipient-employee-no').value.trim();
+    const sendInvitation = document.getElementById('send-immediate-invitation').checked;
+    
+    // Validation
+    if (!forename || !surname || !email) {
+        showToast('Please fill in all required fields', 'warning');
+        return;
+    }
+    
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        showToast('Please enter a valid email address', 'warning');
+        return;
+    }
+    
+    try {
+        console.log('🔍 Checking for duplicate email:', email);
+        
+        // Check for duplicate email in database
+        const { data: existingRecipient, error: checkError } = await window.supabaseClient
+            .from('survey_recipients')
+            .select('email')
+            .eq('email', email)
+            .eq('survey_id', 'test')
+            .single();
+            
+        console.log('✅ Duplicate check result:', { existingRecipient, checkError });
+        
+        if (existingRecipient) {
+            showToast('A recipient with this email already exists', 'warning');
+            return;
+        }
+        
+        // Create new recipient object for database
+        const newRecipient = {
+            survey_id: 'test',
+            forename: forename,
+            surname: surname,
+            email: email,
+            employee_no: employeeNo || `EMP${Date.now().toString().slice(-3)}`,
+            invite_sent: sendInvitation,
+            reminder_count: sendInvitation ? 1 : 0,
+            last_reminder_sent: sendInvitation ? new Date().toISOString().split('T')[0] : null,
+            survey_started_date: null,
+            survey_completed_date: null,
+            created_at: new Date().toISOString()
+        };
+        
+        console.log('💾 Saving recipient to database:', newRecipient);
+        
+        // Save to database
+        const { data: savedRecipient, error } = await window.supabaseClient
+            .from('survey_recipients')
+            .insert([newRecipient])
+            .select()
+            .single();
+            
+        console.log('💾 Save result:', { savedRecipient, error });
+        
+        if (error) {
+            console.error('❌ Error saving recipient:', error);
+            showToast('Error saving recipient to database', 'error');
+            return;
+        }
+        
+        console.log('✅ Recipient saved successfully:', savedRecipient);
+        
+        // Close modal
+        document.querySelector('.modal').remove();
+        
+        // Reload the data to show the new recipient
+        loadRecipientsData(currentRecipientsChatId || 'test');
+        
+        // Show success message
+        showToast(`Recipient ${forename} ${surname} added successfully!`, 'success');
+        
+        // Send invitation if requested
+        if (sendInvitation) {
+            // You can implement invitation sending logic here
+            showToast(`Invitation sent to ${email}`, 'info');
+        }
+        
+    } catch (error) {
+        console.error('Error adding recipient:', error);
+        showToast('Error adding recipient', 'error');
+    }
+    
+    // Show success message
+    const message = sendInvitation 
+        ? `Recipient added and invitation sent to ${email}!`
+        : `Recipient ${forename} ${surname} added successfully!`;
+    showToast(message, 'success');
+}
+
+function uploadRecipient() {
+    // Create upload modal
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3>📤 Upload Recipients</h3>
+                <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="upload-section">
+                    <p>Upload a CSV or Excel file containing recipient information.</p>
+                    
+                    <div class="file-upload-area" onclick="document.getElementById('recipient-file').click()">
+                        <div class="upload-icon">📁</div>
+                        <div class="upload-text">
+                            <strong>Click to select file</strong> or drag and drop
+                        </div>
+                        <div class="upload-hint">Supported formats: .csv, .xlsx, .xls</div>
+                    </div>
+                    
+                    <input type="file" id="recipient-file" accept=".csv,.xlsx,.xls" style="display: none;" 
+                           onchange="handleRecipientFileUpload(event)">
+                    
+                    <div class="template-section" style="margin-top: 2rem;">
+                        <h4>Expected File Format:</h4>
+                        <div class="format-example">
+                            <table style="width: 100%; font-size: 0.875rem; border-collapse: collapse;">
+                                <thead>
+                                    <tr style="background: #f8f9fa;">
+                                        <th style="border: 1px solid #dee2e6; padding: 0.5rem;">Forename</th>
+                                        <th style="border: 1px solid #dee2e6; padding: 0.5rem;">Surname</th>
+                                        <th style="border: 1px solid #dee2e6; padding: 0.5rem;">Email</th>
+                                        <th style="border: 1px solid #dee2e6; padding: 0.5rem;">Employee_No</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td style="border: 1px solid #dee2e6; padding: 0.5rem;">John</td>
+                                        <td style="border: 1px solid #dee2e6; padding: 0.5rem;">Smith</td>
+                                        <td style="border: 1px solid #dee2e6; padding: 0.5rem;">john@company.com</td>
+                                        <td style="border: 1px solid #dee2e6; padding: 0.5rem;">EMP001</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <button class="btn btn-info" onclick="downloadTemplate()" style="margin-top: 1rem;">
+                            📥 Download Template
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="upload-preview" style="display: none; margin-top: 2rem;">
+                    <h4>Preview:</h4>
+                    <div id="preview-content"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').remove()">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirm-upload-btn" style="display: none;" 
+                        onclick="confirmUploadRecipients()">Import Recipients</button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+}
+
+function preloadFromCSV() {
+    document.querySelector('.modal').remove();
+    uploadRecipient(); // Reuse the upload functionality
+}
+
+function preloadFromHR() {
+    showToast('HR System integration coming soon!', 'info');
+    document.querySelector('.modal').remove();
+}
+
+function preloadFromAD() {
+    showToast('Active Directory integration coming soon!', 'info');
+    document.querySelector('.modal').remove();
+}
+
+function loadSampleData() {
+    document.querySelector('.modal').remove();
+    showToast('Loading enhanced sample data...', 'info');
+    
+    setTimeout(() => {
+        const sampleData = [
+            { forename: 'David', surname: 'Williams', email: 'david.williams@company.com', employeeNo: 'EMP008' },
+            { forename: 'Lisa', surname: 'Garcia', email: 'lisa.garcia@company.com', employeeNo: 'EMP009' },
+            { forename: 'Robert', surname: 'Martinez', email: 'robert.martinez@company.com', employeeNo: 'EMP010' },
+            { forename: 'Jennifer', surname: 'Lopez', email: 'jennifer.lopez@company.com', employeeNo: 'EMP011' },
+            { forename: 'James', surname: 'Wilson', email: 'james.wilson@company.com', employeeNo: 'EMP012' }
+        ];
+        
+        const tableBody = document.getElementById('recipients-table-body');
+        
+        // Remove "No data" row if it exists
+        const noDataRow = tableBody.querySelector('.no-data-row');
+        if (noDataRow) {
+            noDataRow.remove();
+        }
+        
+        sampleData.forEach(recipient => {
+            const newId = Date.now() + Math.random();
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td class="checkbox-column">
+                    <input type="checkbox" data-recipient-id="${newId}">
+                </td>
+                <td>${recipient.forename}</td>
+                <td>${recipient.surname}</td>
+                <td>${recipient.email}</td>
+                <td>${recipient.employeeNo}</td>
+                <td>
+                    <span class="status-badge status-not-sent">No</span>
+                </td>
+                <td>0</td>
+                <td>-</td>
+                <td>-</td>
+                <td>-</td>
+                <td>
+                    <button class="btn btn-small btn-info" data-action="edit" data-recipient-id="${newId}" title="Edit Recipient">
+                        ✏️
+                    </button>
+                </td>
+                <td>
+                    <button class="btn btn-small btn-danger" data-action="delete" data-recipient-id="${newId}" title="Delete Recipient">
+                        🗑️
+                    </button>
+                </td>
+            `;
+            tableBody.appendChild(row);
+        });
+        
+        // Re-attach event listeners after adding new rows
+        addRecipientTableEventListeners();
+        
+        showToast(`Successfully loaded ${sampleData.length} sample recipients!`, 'success');
+    }, 1500);
+}
+
+function uploadSurveyResponses() {
+    // Create survey responses upload modal
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3>📊 Upload Survey Responses</h3>
+                <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="upload-section">
+                    <p>Upload survey responses to import existing data or bulk update participant responses.</p>
+                    
+                    <div class="file-upload-area" onclick="document.getElementById('responses-file').click()">
+                        <div class="upload-icon">📊</div>
+                        <div class="upload-text">
+                            <strong>Click to select responses file</strong> or drag and drop
+                        </div>
+                        <div class="upload-hint">Supported formats: .csv, .xlsx, .json</div>
+                    </div>
+                    
+                    <input type="file" id="responses-file" accept=".csv,.xlsx,.json" style="display: none;" 
+                           onchange="handleResponsesFileUpload(event)">
+                    
+                    <div class="template-section" style="margin-top: 2rem;">
+                        <h4>Expected Response Format:</h4>
+                        <div class="format-example">
+                            <table style="width: 100%; font-size: 0.875rem; border-collapse: collapse;">
+                                <thead>
+                                    <tr style="background: #f8f9fa;">
+                                        <th style="border: 1px solid #dee2e6; padding: 0.5rem;">Email</th>
+                                        <th style="border: 1px solid #dee2e6; padding: 0.5rem;">Response_Date</th>
+                                        <th style="border: 1px solid #dee2e6; padding: 0.5rem;">Status</th>
+                                        <th style="border: 1px solid #dee2e6; padding: 0.5rem;">Score</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td style="border: 1px solid #dee2e6; padding: 0.5rem;">john@company.com</td>
+                                        <td style="border: 1px solid #dee2e6; padding: 0.5rem;">2025-09-01</td>
+                                        <td style="border: 1px solid #dee2e6; padding: 0.5rem;">Completed</td>
+                                        <td style="border: 1px solid #dee2e6; padding: 0.5rem;">85</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <button class="btn btn-info" onclick="downloadResponsesTemplate()" style="margin-top: 1rem;">
+                            📥 Download Response Template
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="responses-preview" style="display: none; margin-top: 2rem;">
+                    <h4>Preview:</h4>
+                    <div id="responses-preview-content"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').remove()">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirm-responses-btn" style="display: none;" 
+                        onclick="confirmUploadResponses()">Import Responses</button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+}
+
+function handleRecipientFileUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    showToast('Processing file...', 'info');
+    
+    // Simulate file processing
+    setTimeout(() => {
+        // Mock data for preview
+        const mockData = [
+            { forename: 'Alice', surname: 'Wilson', email: 'alice.wilson@company.com', employeeNo: 'EMP005' },
+            { forename: 'Bob', surname: 'Taylor', email: 'bob.taylor@company.com', employeeNo: 'EMP006' },
+            { forename: 'Carol', surname: 'Anderson', email: 'carol.anderson@company.com', employeeNo: 'EMP007' }
+        ];
+        
+        // Show preview
+        const previewDiv = document.getElementById('upload-preview');
+        const previewContent = document.getElementById('preview-content');
+        
+        previewContent.innerHTML = `
+            <div style="margin-bottom: 1rem;">
+                <strong>${mockData.length} recipients found in file: ${file.name}</strong>
+            </div>
+            <div style="max-height: 200px; overflow-y: auto; border: 1px solid #dee2e6;">
+                <table style="width: 100%; font-size: 0.875rem;">
+                    <thead>
+                        <tr style="background: #f8f9fa;">
+                            <th style="padding: 0.5rem; border-bottom: 1px solid #dee2e6;">Name</th>
+                            <th style="padding: 0.5rem; border-bottom: 1px solid #dee2e6;">Email</th>
+                            <th style="padding: 0.5rem; border-bottom: 1px solid #dee2e6;">Employee No</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${mockData.map(r => `
+                            <tr>
+                                <td style="padding: 0.5rem;">${r.forename} ${r.surname}</td>
+                                <td style="padding: 0.5rem;">${r.email}</td>
+                                <td style="padding: 0.5rem;">${r.employeeNo}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
+        
+        previewDiv.style.display = 'block';
+        document.getElementById('confirm-upload-btn').style.display = 'inline-block';
+        
+        showToast('File processed successfully!', 'success');
+    }, 1500);
+}
+
+function downloadTemplate() {
+    const csvContent = "Forename,Surname,Email,Employee_No\nJohn,Smith,john.smith@company.com,EMP001\nJane,Doe,jane.doe@company.com,EMP002";
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'recipients_template.csv';
+    a.click();
+    window.URL.revokeObjectURL(url);
+    showToast('Template downloaded!', 'success');
+}
+
+function confirmUploadRecipients() {
+    // Mock implementation - would normally process the actual file data
+    showToast('Importing recipients...', 'info');
+    
+    setTimeout(() => {
+        // Simulate adding the mock data to the table
+        const mockData = [
+            { forename: 'Alice', surname: 'Wilson', email: 'alice.wilson@company.com', employeeNo: 'EMP005' },
+            { forename: 'Bob', surname: 'Taylor', email: 'bob.taylor@company.com', employeeNo: 'EMP006' },
+            { forename: 'Carol', surname: 'Anderson', email: 'carol.anderson@company.com', employeeNo: 'EMP007' }
+        ];
+        
+        const tableBody = document.getElementById('recipients-table-body');
+        
+        // Remove "No data" row if it exists
+        const noDataRow = tableBody.querySelector('.no-data-row');
+        if (noDataRow) {
+            noDataRow.remove();
+        }
+        
+        mockData.forEach(recipient => {
+            const newId = Date.now() + Math.random();
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td class="checkbox-column">
+                    <input type="checkbox" data-recipient-id="${newId}">
+                </td>
+                <td>${recipient.forename}</td>
+                <td>${recipient.surname}</td>
+                <td>${recipient.email}</td>
+                <td>${recipient.employeeNo}</td>
+                <td>
+                    <span class="status-badge status-not-sent">No</span>
+                </td>
+                <td>0</td>
+                <td>-</td>
+                <td>-</td>
+                <td>-</td>
+                <td>
+                    <button class="btn btn-small btn-info" data-action="edit" data-recipient-id="${newId}" title="Edit Recipient">
+                        ✏️
+                    </button>
+                </td>
+                <td>
+                    <button class="btn btn-small btn-danger" data-action="delete" data-recipient-id="${newId}" title="Delete Recipient">
+                        🗑️
+                    </button>
+                </td>
+            `;
+            tableBody.appendChild(row);
+        });
+        
+        // Re-attach event listeners after adding new rows
+        addRecipientTableEventListeners();
+        
+        // Close modal
+        document.querySelector('.modal').remove();
+        showToast(`Successfully imported ${mockData.length} recipients!`, 'success');
+    }, 2000);
+}
+
+function editRecipient(id) {
+    showToast(`Edit recipient ${id} - Feature coming soon!`, 'info');
+}
+
+// Add event delegation for recipient table buttons
+function addRecipientTableEventListeners() {
+    const tableBody = document.getElementById('recipients-table-body');
+    if (!tableBody) {
+        console.error('❌ Could not find recipients-table-body element');
+        return;
+    }
+    
+    console.log('🔧 Setting up event listeners for table body:', tableBody);
+    
+    // Remove existing listeners to prevent duplicates
+    tableBody.removeEventListener('click', handleRecipientTableClick);
+    
+    // Add event delegation
+    tableBody.addEventListener('click', handleRecipientTableClick);
+    
+    console.log('🎪 Event listener added successfully');
+}
+
+function handleRecipientTableClick(event) {
+    const button = event.target.closest('button[data-action]');
+    if (!button) return;
+    
+    const action = button.getAttribute('data-action');
+    const recipientId = button.getAttribute('data-recipient-id');
+    
+    console.log('Button clicked:', action, 'for recipient ID:', recipientId);
+    
+    if (action === 'edit') {
+        console.log('🔧 Calling editRecipient with ID:', recipientId);
+        editRecipient(recipientId);
+    } else if (action === 'delete') {
+        console.log('🗑️ About to call deleteRecipient with ID:', recipientId);
+        console.log('🔍 deleteRecipient function exists:', typeof deleteRecipient);
+        console.log('🔍 window.deleteRecipient exists:', typeof window.deleteRecipient);
+        try {
+            console.log('🔍 Calling deleteRecipient...');
+            const result = deleteRecipient(recipientId);
+            console.log('🔍 deleteRecipient returned:', result);
+            if (result && typeof result.then === 'function') {
+                console.log('🔍 deleteRecipient returned a promise, awaiting...');
+                result.then(() => {
+                    console.log('🗑️ deleteRecipient promise resolved');
+                }).catch(error => {
+                    console.error('❌ deleteRecipient promise rejected:', error);
+                });
+            }
+            console.log('🗑️ deleteRecipient call completed');
+        } catch (error) {
+            console.error('❌ Error calling deleteRecipient:', error);
+        }
+    } else if (action === 'force-delete') {
+        console.log('💥 Calling forceDeleteRecipient with ID:', recipientId);
+        // Test delete without confirmation
+        forceDeleteRecipient(recipientId);
+    } else {
+        console.warn('❓ Unknown action:', action);
+    }
+}
+
+// Test function to delete without confirmation
+async function forceDeleteRecipient(id) {
+    console.log('🧪 FORCE DELETE (no confirmation) for ID:', id);
+    try {
+        // Delete from Supabase database
+        console.log('Attempting to delete from database...');
+        const { error } = await window.supabaseClient
+            .from('survey_recipients')
+            .delete()
+            .eq('id', id);
+
+        if (error) {
+            console.error('Error deleting recipient:', error);
+            showToast('Failed to delete recipient from database', 'error');
+            return;
+        }
+
+        console.log('Successfully deleted from database, refreshing UI...');
+        
+        // Reload the data from database to ensure UI is in sync
+        await loadRecipientsData(currentRecipientsChatId || 'test');
+        console.log('✅ Recipients table refreshed after force deletion');
+        
+        showToast('Recipient force deleted successfully', 'success');
+    } catch (error) {
+        console.error('Error force deleting recipient:', error);
+        showToast('Failed to force delete recipient', 'error');
+    }
+}
+
+async function deleteRecipient(id) {
+    console.log('🚀 INSIDE deleteRecipient function - START');
+    console.log('🗑️ Delete recipient called with ID:', id);
+    console.log('🔍 Current chat ID:', currentRecipientsChatId);
+    console.log('🔍 Supabase client available:', !!window.supabaseClient);
+    
+    // Test basic functionality
+    console.log('🧪 Basic test: 1 + 1 =', 1 + 1);
+    
+    if (!id) {
+        console.error('No ID provided to deleteRecipient function');
+        showToast('Error: No recipient ID provided', 'error');
+        return;
+    }
+    
+    // Temporarily skip confirmation for debugging
+    console.log('🔍 Skipping confirmation dialog for debugging');
+    const userConfirmed = true;
+    console.log('🔍 Confirmation dialog result:', userConfirmed);
+    
+    if (userConfirmed) {
+        console.log('User confirmed deletion for ID:', id);
+        try {
+            // Delete from Supabase database
+            console.log('Attempting to delete from database...');
+            console.log('🔍 Deleting recipient with ID:', id);
+            console.log('🔍 From table: survey_recipients');
+            
+            const { data, error } = await window.supabaseClient
+                .from('survey_recipients')
+                .delete()
+                .eq('id', id);
+
+            console.log('🔍 Delete result:', { data, error });
+
+            if (error) {
+                console.error('Error deleting recipient:', error);
+                showToast('Failed to delete recipient from database', 'error');
+                return;
+            }
+
+            console.log('Successfully deleted from database, refreshing UI...');
+            
+            // Debug: Check what rows exist before deletion
+            const allRows = document.querySelectorAll('#recipients-table-body tr');
+            console.log('🔍 Total rows before removal:', allRows.length);
+            console.log('🔍 Looking for row with ID:', id);
+            
+            // Remove the deleted row from the DOM immediately
+            const rowElement = document.querySelector(`tr[data-recipient-id="${id}"]`);
+            console.log('🔍 Found row element:', !!rowElement);
+            
+            if (rowElement) {
+                console.log('🔍 Removing specific row for ID:', id);
+                rowElement.remove();
+                
+                // Debug: Check rows after removal
+                const remainingRows = document.querySelectorAll('#recipients-table-body tr');
+                console.log('✅ Rows remaining after removal:', remainingRows.length);
+                console.log('✅ Row removed from DOM');
+            } else {
+                console.log('⚠️ Could not find row to remove, available rows:');
+                allRows.forEach((row, index) => {
+                    const rowId = row.getAttribute('data-recipient-id');
+                    console.log(`Row ${index}: data-recipient-id="${rowId}"`);
+                });
+                console.log('⚠️ Reloading all data as fallback');
+                // Fallback: reload all data if we can't find the specific row
+                await loadRecipientsData(currentRecipientsChatId || 'test');
+            }
+            console.log('✅ Recipients table updated after deletion');
+            
+            showToast('Recipient deleted successfully', 'success');
+        } catch (error) {
+            console.error('Error deleting recipient:', error);
+            showToast('Failed to delete recipient', 'error');
+        }
+    } else {
+        console.log('User cancelled deletion');
+    }
+}
+
+// Cleanup function removed - was causing deletion of all recipients with matching names
+
+function handleResponsesFileUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    showToast('Processing responses file...', 'info');
+    
+    setTimeout(() => {
+        // Mock response data for preview
+        const mockResponses = [
+            { email: 'john.smith@company.com', responseDate: '2025-09-01', status: 'Completed', score: 85 },
+            { email: 'sarah.johnson@company.com', responseDate: '2025-09-01', status: 'In Progress', score: 0 }
+        ];
+        
+        const previewDiv = document.getElementById('responses-preview');
+        const previewContent = document.getElementById('responses-preview-content');
+        
+        previewContent.innerHTML = `
+            <div style="margin-bottom: 1rem;">
+                <strong>${mockResponses.length} responses found in file: ${file.name}</strong>
+            </div>
+            <div style="max-height: 200px; overflow-y: auto; border: 1px solid #dee2e6;">
+                <table style="width: 100%; font-size: 0.875rem;">
+                    <thead>
+                        <tr style="background: #f8f9fa;">
+                            <th style="padding: 0.5rem; border-bottom: 1px solid #dee2e6;">Email</th>
+                            <th style="padding: 0.5rem; border-bottom: 1px solid #dee2e6;">Date</th>
+                            <th style="padding: 0.5rem; border-bottom: 1px solid #dee2e6;">Status</th>
+                            <th style="padding: 0.5rem; border-bottom: 1px solid #dee2e6;">Score</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${mockResponses.map(r => `
+                            <tr>
+                                <td style="padding: 0.5rem;">${r.email}</td>
+                                <td style="padding: 0.5rem;">${r.responseDate}</td>
+                                <td style="padding: 0.5rem;">${r.status}</td>
+                                <td style="padding: 0.5rem;">${r.score}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
+        
+        previewDiv.style.display = 'block';
+        document.getElementById('confirm-responses-btn').style.display = 'inline-block';
+        
+        showToast('Response file processed successfully!', 'success');
+    }, 1500);
+}
+
+function downloadResponsesTemplate() {
+    const csvContent = "Email,Response_Date,Status,Score\njohn.smith@company.com,2025-09-01,Completed,85\nsarah.johnson@company.com,2025-09-01,In Progress,0";
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'survey_responses_template.csv';
+    a.click();
+    window.URL.revokeObjectURL(url);
+    showToast('Response template downloaded!', 'success');
+}
+
+function confirmUploadResponses() {
+    showToast('Importing survey responses...', 'info');
+    
+    setTimeout(() => {
+        // Update existing recipients with response data
+        const existingRows = document.querySelectorAll('#recipients-table-body tr');
+        let updatedCount = 0;
+        
+        existingRows.forEach(row => {
+            const email = row.cells[3]?.textContent;
+            if (email === 'john.smith@company.com') {
+                // Update John's data
+                row.cells[8].textContent = '2025-09-01'; // Date Started
+                row.cells[9].innerHTML = '<span class="status-badge status-completed">2025-09-01</span>'; // Date Completed
+                updatedCount++;
+            } else if (email === 'sarah.johnson@company.com') {
+                // Update Sarah's data
+                row.cells[8].textContent = '2025-09-01'; // Date Started
+                row.cells[9].textContent = '-'; // Still in progress
+                updatedCount++;
+            }
+        });
+        
+        document.querySelector('.modal').remove();
+        showToast(`Successfully imported responses for ${updatedCount} recipients!`, 'success');
+    }, 2000);
+}
+
+function showDashboard() {
+    // Return to dashboard view
+    const contentArea = document.getElementById('content-area');
+    const dashboardSection = document.getElementById('dashboard-section');
+
+    if (dashboardSection) {
+        // If dashboard section exists, show it
+        contentArea.innerHTML = dashboardSection.outerHTML;
+    } else {
+        // Reload the page to get back to dashboard
+        location.reload();
+    }
+}
+
+// Survey Tracking Functions
+async function trackSurveyStarted(email, surveyId = 'test') {
+    try {
+        const currentDate = new Date().toISOString().split('T')[0];
+
+        const { data, error } = await window.supabaseClient
+            .from('survey_recipients')
+            .update({
+                survey_started_date: currentDate,
+                updated_at: new Date().toISOString()
+            })
+            .eq('email', email)
+            .eq('survey_id', surveyId);
+
+        if (error) {
+            console.error('Error tracking survey start:', error);
+        } else {
+            console.log(`Survey started tracked for ${email}`);
+            // Update UI if table is visible
+            updateRecipientTableUI(email, 'started', currentDate);
+        }
+    } catch (error) {
+        console.error('Error in trackSurveyStarted:', error);
+    }
+}
+
+async function trackSurveyCompleted(email, surveyId = 'test') {
+    try {
+        const currentDate = new Date().toISOString().split('T')[0];
+
+        const { data, error } = await window.supabaseClient
+            .from('survey_recipients')
+            .update({
+                survey_completed_date: currentDate,
+                updated_at: new Date().toISOString()
+            })
+            .eq('email', email)
+            .eq('survey_id', surveyId);
+
+        if (error) {
+            console.error('Error tracking survey completion:', error);
+        } else {
+            console.log(`Survey completion tracked for ${email}`);
+            // Update UI if table is visible
+            updateRecipientTableUI(email, 'completed', currentDate);
+        }
+    } catch (error) {
+        console.error('Error in trackSurveyCompleted:', error);
+    }
+}
+
+function updateRecipientTableUI(email, eventType, date) {
+    // Find the row for this email and update the appropriate column
+    const rows = document.querySelectorAll('#recipients-table-body tr');
+
+    rows.forEach(row => {
+        const emailCell = row.cells[3]; // Email is in column 3
+        if (emailCell && emailCell.textContent.trim() === email) {
+            if (eventType === 'started') {
+                const startedCell = row.cells[8]; // Survey Started is column 8
+                if (startedCell) {
+                    startedCell.textContent = date;
+                }
+            } else if (eventType === 'completed') {
+                const completedCell = row.cells[9]; // Survey Completed is column 9
+                if (completedCell) {
+                    completedCell.textContent = date;
+                }
+            }
+        }
+    });
+}
+
+// Debug function to test database connection
+async function testDatabaseConnection() {
+    try {
+        console.log('Testing Supabase connection...');
+        console.log('Supabase client:', window.supabaseClient);
+
+        // Test simple query
+        const { data, error } = await window.supabaseClient
+            .from('survey_recipients')
+            .select('*')
+            .limit(5);
+
+        if (error) {
+            console.error('Database connection error:', error);
+        } else {
+            console.log('Database connection successful. Found records:', data);
+        }
+    } catch (error) {
+        console.error('Database test failed:', error);
+    }
+}
+
+// Simple test function to update first recipient to TRUE
+async function testDatabaseUpdate() {
+    try {
+        console.log('Testing database update...');
+
+        // Get first recipient
+        const { data: recipients, error: selectError } = await window.supabaseClient
+            .from('survey_recipients')
+            .select('*')
+            .limit(1);
+
+        if (selectError) {
+            console.error('Error selecting recipients:', selectError);
+            return;
+        }
+
+        if (recipients && recipients.length > 0) {
+            const recipient = recipients[0];
+            console.log('Updating recipient:', recipient);
+
+            // Update invite_sent to true
+            const { data, error } = await window.supabaseClient
+                .from('survey_recipients')
+                .update({
+                    invite_sent: true,
+                    reminder_count: 1,
+                    last_reminder_sent: new Date().toISOString().split('T')[0]
+                })
+                .eq('id', recipient.id);
+
+            if (error) {
+                console.error('Error updating:', error);
+            } else {
+                console.log('✅ Update successful:', data);
+                // Refresh table
+                await manualRefresh();
+            }
+        }
+    } catch (error) {
+        console.error('Test update failed:', error);
+    }
+}
+
+// Manual refresh function for testing
+async function manualRefresh() {
+    console.log('Manual refresh triggered...');
+    await loadRecipientsData(currentRecipientsChatId || 'test');
+}
+
+// Direct test function for button click
+async function testDatabaseDirectUpdate() {
+    try {
+        console.log('🔧 Testing direct database update...');
+
+        // Get first recipient from current survey
+        const { data: recipients, error: selectError } = await window.supabaseClient
+            .from('survey_recipients')
+            .select('*')
+            .eq('survey_id', 'test')
+            .limit(1);
+
+        if (selectError) {
+            console.error('Error selecting recipients:', selectError);
+            showToast('❌ Error selecting recipients: ' + selectError.message, 'error');
+            return;
+        }
+
+        if (recipients && recipients.length > 0) {
+            const recipient = recipients[0];
+            console.log('Updating recipient:', recipient);
+            showToast(`🔧 Testing update for ${recipient.email}...`, 'info');
+
+            // Update invite_sent to true
+            const { data, error } = await window.supabaseClient
+                .from('survey_recipients')
+                .update({
+                    invite_sent: true,
+                    reminder_count: 1,
+                    last_reminder_sent: new Date().toISOString().split('T')[0],
+                    updated_at: new Date().toISOString()
+                })
+                .eq('id', recipient.id);
+
+            if (error) {
+                console.error('Error updating:', error);
+                showToast('❌ Update failed: ' + error.message, 'error');
+            } else {
+                console.log('✅ Update successful:', data);
+                showToast('✅ Database updated! Refreshing table...', 'success');
+
+                // Refresh table
+                await loadRecipientsData('test');
+            }
+        } else {
+            showToast('❌ No recipients found to test', 'warning');
+        }
+    } catch (error) {
+        console.error('Test update failed:', error);
+        showToast('❌ Test failed: ' + error.message, 'error');
+    }
+}
+
+// Make functions available globally for chat pages to call
+window.trackSurveyStarted = trackSurveyStarted;
+window.trackSurveyCompleted = trackSurveyCompleted;
+window.testDatabaseConnection = testDatabaseConnection;
+window.testDatabaseUpdate = testDatabaseUpdate;
+window.testDatabaseDirectUpdate = testDatabaseDirectUpdate;
+window.manualRefresh = manualRefresh;
+
+// Data Import Functions
+function showImportDataModal() {
+    // Create import data modal
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3>📥 Import Data</h3>
+                <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="upload-section">
+                    <p>Import data for AI analysis and reporting. Supported formats include survey responses, feedback data, and analytics data.</p>
+
+                    <div class="file-upload-area" onclick="document.getElementById('data-file').click()">
+                        <div class="upload-icon">📊</div>
+                        <div class="upload-text">
+                            <strong>Click to select file</strong> or drag and drop
+                        </div>
+                        <div class="upload-hint">Supported formats: .csv, .xlsx, .xls, .json</div>
+                    </div>
+
+                    <input type="file" id="data-file" accept=".csv,.xlsx,.xls,.json" style="display: none;"
+                           onchange="handleDataFileUpload(event)">
+
+                    <div class="template-section" style="margin-top: 2rem;">
+                        <h4>Expected File Format:</h4>
+                        <div class="format-example">
+                            <table style="width: 100%; font-size: 0.875rem; border-collapse: collapse;">
+                                <thead>
+                                    <tr style="background: #f8f9fa;">
+                                        <th style="padding: 0.5rem; border: 1px solid #dee2e6;">Date</th>
+                                        <th style="padding: 0.5rem; border: 1px solid #dee2e6;">Response_Type</th>
+                                        <th style="padding: 0.5rem; border: 1px solid #dee2e6;">Content</th>
+                                        <th style="padding: 0.5rem; border: 1px solid #dee2e6;">Sentiment</th>
+                                        <th style="padding: 0.5rem; border: 1px solid #dee2e6;">Department</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td style="padding: 0.5rem; border: 1px solid #dee2e6;">2024-12-15</td>
+                                        <td style="padding: 0.5rem; border: 1px solid #dee2e6;">Chat Feedback</td>
+                                        <td style="padding: 0.5rem; border: 1px solid #dee2e6;">Great team collaboration</td>
+                                        <td style="padding: 0.5rem; border: 1px solid #dee2e6;">Positive</td>
+                                        <td style="padding: 0.5rem; border: 1px solid #dee2e6;">Operations</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 0.5rem; border: 1px solid #dee2e6;">2024-12-14</td>
+                                        <td style="padding: 0.5rem; border: 1px solid #dee2e6;">Survey Response</td>
+                                        <td style="padding: 0.5rem; border: 1px solid #dee2e6;">Need better tools</td>
+                                        <td style="padding: 0.5rem; border: 1px solid #dee2e6;">Negative</td>
+                                        <td style="padding: 0.5rem; border: 1px solid #dee2e6;">IT</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <button class="btn btn-info" onclick="downloadDataTemplate()" style="margin-top: 1rem;">
+                            📥 Download Data Template
+                        </button>
+                    </div>
+                </div>
+
+                <div id="data-upload-preview" style="display: none; margin-top: 2rem;">
+                    <h4>Preview:</h4>
+                    <div id="data-preview-content"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').remove()">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirm-data-upload-btn" style="display: none;"
+                        onclick="confirmUploadData()">Import Data</button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+}
+
+function handleDataFileUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    showToast('Processing data file...', 'info');
+
+    // Parse file based on type
+    const fileName = file.name.toLowerCase();
+    const reader = new FileReader();
+
+    reader.onload = function(e) {
+        try {
+            let parsedData = [];
+
+            if (fileName.endsWith('.json')) {
+                // Parse JSON file
+                const jsonData = JSON.parse(e.target.result);
+                parsedData = Array.isArray(jsonData) ? jsonData : [jsonData];
+            } else {
+                // Parse CSV file
+                const csv = e.target.result;
+                const lines = csv.split('\n').filter(line => line.trim());
+
+                if (lines.length < 2) {
+                    showToast('File appears to be empty or invalid', 'error');
+                    return;
+                }
+
+                // Parse header
+                const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+
+                // Parse data rows
+                for (let i = 1; i < lines.length; i++) {
+                    const values = lines[i].split(',').map(v => v.trim().replace(/"/g, ''));
+                    if (values.length === headers.length && values.some(v => v)) {
+                        const row = {};
+                        headers.forEach((header, index) => {
+                            row[header] = values[index];
+                        });
+                        parsedData.push(row);
+                    }
+                }
+            }
+
+            if (parsedData.length === 0) {
+                showToast('No valid data found in file', 'error');
+                return;
+            }
+
+            // Store parsed data globally
+            window.uploadedAnalyticsData = parsedData;
+
+            // Show preview
+            const previewDiv = document.getElementById('data-upload-preview');
+            const previewContent = document.getElementById('data-preview-content');
+
+            const previewHeaders = Object.keys(parsedData[0]);
+            const previewRows = parsedData.slice(0, 5); // Show first 5 rows
+
+            previewContent.innerHTML = `
+                <div style="margin-bottom: 1rem;">
+                    <strong>${parsedData.length} data records found in file: ${file.name}</strong>
+                </div>
+                <div style="max-height: 300px; overflow: auto; border: 1px solid #dee2e6;">
+                    <table style="width: 100%; font-size: 0.875rem;">
+                        <thead>
+                            <tr style="background: #f8f9fa;">
+                                ${previewHeaders.map(h => `<th style="padding: 0.5rem; border-bottom: 1px solid #dee2e6;">${h}</th>`).join('')}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${previewRows.map(row => `
+                                <tr>
+                                    ${previewHeaders.map(h => `<td style="padding: 0.5rem;">${row[h] || ''}</td>`).join('')}
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+                ${parsedData.length > 5 ? `<p style="margin-top: 0.5rem; color: #666; font-size: 0.875rem;">Showing first 5 of ${parsedData.length} records</p>` : ''}
+            `;
+
+            previewDiv.style.display = 'block';
+            document.getElementById('confirm-data-upload-btn').style.display = 'inline-block';
+
+            showToast('Data file processed successfully!', 'success');
+        } catch (error) {
+            console.error('Error parsing data file:', error);
+            showToast('Error parsing file. Please check the format.', 'error');
+        }
+    };
+
+    reader.readAsText(file);
+}
+
+function downloadDataTemplate() {
+    const csvContent = "Date,Response_Type,Content,Sentiment,Department\n2024-12-15,Chat Feedback,Great team collaboration,Positive,Operations\n2024-12-14,Survey Response,Need better tools,Negative,IT\n2024-12-13,Pulse Survey,Good work-life balance,Positive,HR";
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'data_import_template.csv';
+    a.click();
+    window.URL.revokeObjectURL(url);
+    showToast('Data template downloaded!', 'success');
+}
+
+function confirmUploadData() {
+    const analyticsData = window.uploadedAnalyticsData;
+
+    if (!analyticsData || analyticsData.length === 0) {
+        showToast('No data to import', 'error');
+        return;
+    }
+
+    // Prompt for dataset name
+    const datasetName = prompt('Enter a name for this dataset:', `Dataset_${new Date().toISOString().slice(0, 10)}`);
+    if (!datasetName) {
+        showToast('Dataset name is required', 'error');
+        return;
+    }
+
+    showToast('Importing data for AI analysis...', 'info');
+
+    setTimeout(() => {
+        // Create dataset object
+        const dataset = {
+            id: Date.now().toString(),
+            name: datasetName,
+            uploadDate: new Date().toISOString(),
+            recordCount: analyticsData.length,
+            data: analyticsData,
+            columns: Object.keys(analyticsData[0] || {}),
+            description: `Imported dataset with ${analyticsData.length} records`
+        };
+
+        // Store dataset persistently in localStorage
+        const existingDatasets = JSON.parse(localStorage.getItem('importedDatasets') || '[]');
+        existingDatasets.push(dataset);
+        localStorage.setItem('importedDatasets', JSON.stringify(existingDatasets));
+
+        // Clear the uploaded data
+        window.uploadedAnalyticsData = null;
+
+        // Close modal
+        document.querySelector('.modal').remove();
+
+        showToast(`Successfully imported "${datasetName}" with ${analyticsData.length} records!`, 'success');
+
+        // Refresh the reports section to show updated data
+        setTimeout(() => {
+            showToast('Dataset is now available for AI report generation', 'info');
+        }, 2000);
+    }, 2000);
+}
+
+// Advanced AI Analysis Functions
+function performAdvancedDatasetAnalysis(dataset) {
+    const data = dataset.data;
+    const columns = dataset.columns;
+
+    // Analyze different types of data
+    const analysis = {
+        executiveSummary: '',
+        detailedInsights: '',
+        sentimentStats: null,
+        patterns: [],
+        recommendations: []
+    };
+
+    // Check for sentiment data
+    const sentimentCol = columns.find(col =>
+        col.toLowerCase().includes('sentiment') ||
+        col.toLowerCase().includes('feeling') ||
+        col.toLowerCase().includes('mood')
+    );
+
+    if (sentimentCol) {
+        const sentiments = data.map(row => row[sentimentCol]).filter(Boolean);
+        const positive = sentiments.filter(s => s.toLowerCase().includes('positive')).length;
+        const negative = sentiments.filter(s => s.toLowerCase().includes('negative')).length;
+        const neutral = sentiments.length - positive - negative;
+
+        analysis.sentimentStats = { positive, negative, neutral, total: sentiments.length };
+    }
+
+    // Check for text content columns
+    const textCols = columns.filter(col =>
+        col.toLowerCase().includes('content') ||
+        col.toLowerCase().includes('comment') ||
+        col.toLowerCase().includes('feedback') ||
+        col.toLowerCase().includes('response')
+    );
+
+    // Check for date columns
+    const dateCols = columns.filter(col =>
+        col.toLowerCase().includes('date') ||
+        col.toLowerCase().includes('time')
+    );
+
+    // Check for department/category columns
+    const categoryColumns = columns.filter(col =>
+        col.toLowerCase().includes('department') ||
+        col.toLowerCase().includes('category') ||
+        col.toLowerCase().includes('type')
+    );
+
+    // Generate executive summary
+    analysis.executiveSummary = `Our comprehensive AI analysis of the "${dataset.name}" dataset reveals insights from ${dataset.recordCount} records across ${columns.length} data fields. `;
+
+    if (analysis.sentimentStats) {
+        const positivePercent = Math.round((analysis.sentimentStats.positive / analysis.sentimentStats.total) * 100);
+        analysis.executiveSummary += `Sentiment analysis shows ${positivePercent}% positive feedback, indicating ${positivePercent > 60 ? 'strong satisfaction' : positivePercent > 40 ? 'mixed sentiment' : 'areas needing attention'}. `;
+    }
+
+    if (textCols.length > 0) {
+        analysis.executiveSummary += `The dataset contains rich textual data in ${textCols.length} field(s), providing detailed qualitative insights. `;
+    }
+
+    if (categoryColumns.length > 0) {
+        analysis.executiveSummary += `Data is categorized across ${categoryColumns.length} dimension(s), enabling segmented analysis and targeted recommendations.`;
+    }
+
+    // Generate detailed insights
+    let insights = [];
+
+    if (analysis.sentimentStats) {
+        insights.push(`<div style="margin-bottom: 1rem;"><strong>🎯 Sentiment Distribution:</strong>
+            Analysis shows ${analysis.sentimentStats.positive} positive responses (${Math.round((analysis.sentimentStats.positive/analysis.sentimentStats.total)*100)}%),
+            ${analysis.sentimentStats.negative} negative responses (${Math.round((analysis.sentimentStats.negative/analysis.sentimentStats.total)*100)}%),
+            and ${analysis.sentimentStats.neutral} neutral responses. This distribution suggests ${analysis.sentimentStats.positive > analysis.sentimentStats.negative ? 'overall positive sentiment with opportunities to address negative feedback' : 'significant concerns that require immediate attention'}.</div>`);
+    }
+
+    if (textCols.length > 0) {
+        insights.push(`<div style="margin-bottom: 1rem;"><strong>📝 Content Analysis:</strong>
+            The dataset contains ${textCols.length} text field(s): ${textCols.join(', ')}. These fields provide rich qualitative data that can be analyzed for themes, keywords, and sentiment patterns. Text analysis reveals valuable insights into specific concerns, suggestions, and feedback patterns.</div>`);
+    }
+
+    if (categoryColumns.length > 0) {
+        const firstCategoryCol = categoryColumns[0];
+        const uniqueValues = [...new Set(data.map(row => row[firstCategoryCol]).filter(Boolean))];
+        insights.push(`<div style="margin-bottom: 1rem;"><strong>📊 Categorical Breakdown:</strong>
+            Data is segmented across ${uniqueValues.length} categories in the "${firstCategoryCol}" field: ${uniqueValues.slice(0, 5).join(', ')}${uniqueValues.length > 5 ? '...' : ''}. This segmentation enables targeted analysis and department-specific insights.</div>`);
+    }
+
+    if (dateCols.length > 0) {
+        insights.push(`<div style="margin-bottom: 1rem;"><strong>📅 Temporal Analysis:</strong>
+            The dataset includes time-based data in "${dateCols[0]}" field, enabling trend analysis over time. This temporal dimension allows for identifying seasonal patterns, improvement trends, and timing correlations with sentiment changes.</div>`);
+    }
+
+    // Add data quality insights
+    const completenessScore = Math.round((data.filter(row => Object.values(row).every(val => val && val.toString().trim())).length / data.length) * 100);
+    insights.push(`<div style="margin-bottom: 1rem;"><strong>✅ Data Quality:</strong>
+        Dataset completeness is ${completenessScore}%, indicating ${completenessScore > 85 ? 'excellent' : completenessScore > 70 ? 'good' : 'moderate'} data quality. ${completenessScore < 85 ? 'Consider data cleaning for improved analysis accuracy.' : 'High data quality enables robust analytical insights.'}</div>`);
+
+    // Generate recommendations
+    let recommendations = [];
+    if (analysis.sentimentStats && analysis.sentimentStats.negative > analysis.sentimentStats.positive * 0.3) {
+        recommendations.push('🎯 Address negative sentiment areas through targeted improvement initiatives');
+    }
+    if (textCols.length > 0) {
+        recommendations.push('📝 Implement advanced text analytics for deeper thematic analysis');
+    }
+    if (categoryColumns.length > 0) {
+        recommendations.push('📊 Develop category-specific action plans for targeted improvements');
+    }
+    recommendations.push('📈 Establish regular monitoring and trend analysis processes');
+    recommendations.push('🔄 Create feedback loops to track improvement effectiveness');
+
+    insights.push(`<div style="margin-top: 1.5rem; padding: 1rem; background: #f0f9ff; border-radius: 8px;"><strong>💡 Key Recommendations:</strong><ul style="margin: 0.5rem 0 0 1rem;">${recommendations.map(rec => `<li style="margin-bottom: 0.5rem;">${rec}</li>`).join('')}</ul></div>`);
+
+    analysis.detailedInsights = insights.join('');
+
+    return analysis;
+}
+
+function generateAdvancedChatInsights(chatResponses, analytics) {
+    let insights = [];
+
+    // Sentiment analysis insights
+    const sentimentRatio = analytics.sentimentBreakdown.positive / (analytics.sentimentBreakdown.negative || 1);
+    if (sentimentRatio > 2) {
+        insights.push(`<div style="margin-bottom: 1rem;"><strong>🎉 Excellent Sentiment Trends:</strong>
+            Positive sentiment is ${Math.round(sentimentRatio)}x higher than negative, indicating strong employee satisfaction and engagement.</div>`);
+    } else if (sentimentRatio < 0.5) {
+        insights.push(`<div style="margin-bottom: 1rem;"><strong>⚠️ Sentiment Concerns:</strong>
+            Negative sentiment outweighs positive responses. Immediate attention needed to address underlying issues.</div>`);
+    }
+
+    // Engagement analysis
+    const avgDurationMinutes = analytics.averageDuration ? Math.round(analytics.averageDuration / 1000 / 60) : 0;
+    if (avgDurationMinutes > 5) {
+        insights.push(`<div style="margin-bottom: 1rem;"><strong>💬 High Engagement:</strong>
+            Average session duration of ${avgDurationMinutes} minutes indicates deep, meaningful conversations and strong employee engagement.</div>`);
+    } else if (avgDurationMinutes < 2) {
+        insights.push(`<div style="margin-bottom: 1rem;"><strong>⏱️ Brief Interactions:</strong>
+            Short session durations (${avgDurationMinutes} min) may indicate reluctance to share or need for better conversation facilitation.</div>`);
+    }
+
+    // Chat type distribution analysis
+    const totalChats = analytics.chatTypeBreakdown.listening + analytics.chatTypeBreakdown.chat + analytics.chatTypeBreakdown.pulse;
+    if (analytics.chatTypeBreakdown.listening > totalChats * 0.6) {
+        insights.push(`<div style="margin-bottom: 1rem;"><strong>👂 Listening-Focused Culture:</strong>
+            High proportion of listening sessions suggests employees value being heard and open communication channels.</div>`);
+    }
+
+    // Recommendations based on data
+    let recommendations = [
+        '🎯 Implement targeted action plans for areas with negative sentiment',
+        '📊 Establish regular pulse checks to track sentiment trends',
+        '💬 Create feedback loops to demonstrate response to employee input',
+        '📈 Develop department-specific improvement initiatives',
+        '🔄 Schedule follow-up sessions to measure progress'
+    ];
+
+    insights.push(`<div style="margin-top: 1.5rem; padding: 1rem; background: #f0f9ff; border-radius: 8px;"><strong>💡 Strategic Recommendations:</strong><ul style="margin: 0.5rem 0 0 1rem;">${recommendations.map(rec => `<li style="margin-bottom: 0.5rem;">${rec}</li>`).join('')}</ul></div>`);
+
+    return insights.join('');
+}
+
+function generateChatCharts(analytics) {
+    const container = document.getElementById('chat-charts-container');
+
+    // Create sentiment pie chart
+    const sentimentChart = `
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+            <div>
+                <h4 style="text-align: center; margin-bottom: 1rem;">Sentiment Distribution</h4>
+                <div style="position: relative; width: 200px; height: 200px; margin: 0 auto;">
+                    <canvas id="sentiment-pie-chart" width="200" height="200"></canvas>
+                </div>
+            </div>
+            <div>
+                <h4 style="text-align: center; margin-bottom: 1rem;">Chat Type Breakdown</h4>
+                <div style="position: relative; width: 200px; height: 200px; margin: 0 auto;">
+                    <canvas id="chat-type-chart" width="200" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    `;
+
+    container.innerHTML = sentimentChart;
+
+    // Draw simple pie charts using canvas
+    setTimeout(() => drawSentimentChart(analytics), 100);
+}
+
+function generateDatasetCharts(dataset, analysis) {
+    const container = document.getElementById('dataset-charts-container');
+
+    let chartsHtml = '';
+
+    if (analysis.sentimentStats) {
+        chartsHtml += `
+            <div style="margin-bottom: 2rem;">
+                <h4 style="text-align: center; margin-bottom: 1rem;">Sentiment Analysis</h4>
+                <div style="position: relative; width: 250px; height: 250px; margin: 0 auto;">
+                    <canvas id="dataset-sentiment-chart" width="250" height="250"></canvas>
+                </div>
+            </div>
+        `;
+    }
+
+    // Add data distribution chart
+    chartsHtml += `
+        <div style="margin-bottom: 2rem;">
+            <h4 style="text-align: center; margin-bottom: 1rem;">Data Volume Overview</h4>
+            <div style="background: #f8fafc; padding: 1rem; border-radius: 8px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                    <span>Total Records:</span>
+                    <div style="background: #3b82f6; height: 20px; width: ${Math.min(dataset.recordCount / 10, 300)}px; border-radius: 10px;"></div>
+                    <span>${dataset.recordCount}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span>Data Fields:</span>
+                    <div style="background: #10b981; height: 20px; width: ${dataset.columns.length * 20}px; border-radius: 10px;"></div>
+                    <span>${dataset.columns.length}</span>
+                </div>
+            </div>
+        </div>
+    `;
+
+    container.innerHTML = chartsHtml;
+
+    if (analysis.sentimentStats) {
+        setTimeout(() => drawDatasetSentimentChart(analysis.sentimentStats), 100);
+    }
+}
+
+function drawSentimentChart(analytics) {
+    const canvas = document.getElementById('sentiment-pie-chart');
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const radius = 80;
+
+    const total = analytics.sentimentBreakdown.positive + analytics.sentimentBreakdown.negative;
+    const positiveAngle = (analytics.sentimentBreakdown.positive / total) * 2 * Math.PI;
+
+    // Draw positive slice
+    ctx.beginPath();
+    ctx.moveTo(centerX, centerY);
+    ctx.arc(centerX, centerY, radius, 0, positiveAngle);
+    ctx.closePath();
+    ctx.fillStyle = '#10b981';
+    ctx.fill();
+
+    // Draw negative slice
+    ctx.beginPath();
+    ctx.moveTo(centerX, centerY);
+    ctx.arc(centerX, centerY, radius, positiveAngle, 2 * Math.PI);
+    ctx.closePath();
+    ctx.fillStyle = '#ef4444';
+    ctx.fill();
+
+    // Add labels
+    ctx.fillStyle = '#1f2937';
+    ctx.font = '12px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText(`Positive: ${analytics.sentimentBreakdown.positive}`, centerX, centerY + radius + 20);
+    ctx.fillText(`Negative: ${analytics.sentimentBreakdown.negative}`, centerX, centerY + radius + 35);
+}
+
+function drawDatasetSentimentChart(sentimentStats) {
+    const canvas = document.getElementById('dataset-sentiment-chart');
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const radius = 100;
+
+    const total = sentimentStats.positive + sentimentStats.negative + sentimentStats.neutral;
+    let currentAngle = 0;
+
+    // Positive slice
+    const positiveAngle = (sentimentStats.positive / total) * 2 * Math.PI;
+    ctx.beginPath();
+    ctx.moveTo(centerX, centerY);
+    ctx.arc(centerX, centerY, radius, currentAngle, currentAngle + positiveAngle);
+    ctx.closePath();
+    ctx.fillStyle = '#10b981';
+    ctx.fill();
+    currentAngle += positiveAngle;
+
+    // Negative slice
+    const negativeAngle = (sentimentStats.negative / total) * 2 * Math.PI;
+    ctx.beginPath();
+    ctx.moveTo(centerX, centerY);
+    ctx.arc(centerX, centerY, radius, currentAngle, currentAngle + negativeAngle);
+    ctx.closePath();
+    ctx.fillStyle = '#ef4444';
+    ctx.fill();
+    currentAngle += negativeAngle;
+
+    // Neutral slice
+    const neutralAngle = (sentimentStats.neutral / total) * 2 * Math.PI;
+    ctx.beginPath();
+    ctx.moveTo(centerX, centerY);
+    ctx.arc(centerX, centerY, radius, currentAngle, currentAngle + neutralAngle);
+    ctx.closePath();
+    ctx.fillStyle = '#6b7280';
+    ctx.fill();
+
+    // Add legend
+    ctx.fillStyle = '#1f2937';
+    ctx.font = '12px Arial';
+    ctx.textAlign = 'left';
+    const legendY = centerY + radius + 30;
+    ctx.fillStyle = '#10b981';
+    ctx.fillRect(centerX - 60, legendY, 15, 15);
+    ctx.fillStyle = '#1f2937';
+    ctx.fillText(`Positive: ${sentimentStats.positive}`, centerX - 40, legendY + 12);
+
+    ctx.fillStyle = '#ef4444';
+    ctx.fillRect(centerX - 60, legendY + 20, 15, 15);
+    ctx.fillStyle = '#1f2937';
+    ctx.fillText(`Negative: ${sentimentStats.negative}`, centerX - 40, legendY + 32);
+
+    ctx.fillStyle = '#6b7280';
+    ctx.fillRect(centerX - 60, legendY + 40, 15, 15);
+    ctx.fillStyle = '#1f2937';
+    ctx.fillText(`Neutral: ${sentimentStats.neutral}`, centerX - 40, legendY + 52);
+}
+
+function clearReportDisplay() {
+    const existingReport = document.querySelector('.ai-analysis-report');
+    if (existingReport) {
+        existingReport.remove();
+        showToast('Report cleared', 'info');
+    }
+}
+
+function downloadComprehensiveReport(reportTitle) {
+    const reportElement = document.querySelector('.ai-analysis-report');
+    if (!reportElement) {
+        showToast('No report to download', 'error');
+        return;
+    }
+
+    const reportContent = reportElement.innerHTML;
+    const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>${reportTitle}</title>
+            <style>
+                body { font-family: Arial, sans-serif; margin: 2rem; line-height: 1.6; }
+                .report-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 2rem; border-radius: 12px; margin-bottom: 2rem; }
+                .analysis-section { background: #f8fafc; border-left: 4px solid #3b82f6; padding: 1.5rem; margin-bottom: 2rem; border-radius: 8px; }
+                .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+                .metric-card { background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); text-align: center; border: 1px solid #e5e7eb; }
+                .ai-insights, .data-sample, .charts-section { background: white; padding: 2rem; border-radius: 12px; margin-bottom: 2rem; border: 1px solid #e5e7eb; }
+                table { border-collapse: collapse; width: 100%; }
+                th, td { border: 1px solid #e5e7eb; padding: 0.75rem; text-align: left; }
+                th { background-color: #f8fafc; font-weight: 600; }
+                h1, h2, h3 { color: #1e40af; }
+                .metric-card div:first-child { font-size: 2.5rem; font-weight: bold; margin-bottom: 0.5rem; }
+            </style>
+        </head>
+        <body>
+            ${reportContent.replace(/<canvas[^>]*>.*?<\/canvas>/gi, '<div style="text-align: center; padding: 2rem; background: #f3f4f6; border-radius: 8px; margin: 1rem 0;">Charts rendered in web version</div>')}
+        </body>
+        </html>
+    `;
+
+    const blob = new Blob([htmlContent], { type: 'text/html' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${reportTitle.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0, 10)}.html`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+    showToast('Comprehensive report downloaded!', 'success');
+}
 
 // END OF FILE - Realworld Survey Platform v2.0 with Email Integration

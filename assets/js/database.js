@@ -606,23 +606,188 @@ function generateShortUrl(chatName, originalUrl, chatData) {
     const slug = generateSlug(chatName);
     // Use HTTP for development, HTTPS for production domains
     let origin = window.location.origin;
-    
+
     // Check if this is a development environment
-    const isDevelopment = origin.includes('localhost') || 
-                         origin.includes('127.0.0.1') || 
-                         origin.includes(':3000') || 
+    const isDevelopment = origin.includes('localhost') ||
+                         origin.includes('127.0.0.1') ||
+                         origin.includes(':3000') ||
                          origin.includes(':5500') ||
                          origin.includes(':8080');
-    
+
     // Only use HTTPS if not in development
     if (!isDevelopment && origin.startsWith('http://')) {
         origin = origin.replace('http://', 'https://');
     }
-    
+
     const shortUrl = `${origin}/?chat=${slug}`;
-    
+
     // Save the mapping
     saveUrlMapping(slug, originalUrl, chatData);
-    
+
     return shortUrl;
+}
+
+// =====================================================
+// CHAT RESPONSE DATABASE FUNCTIONS
+// =====================================================
+
+async function loadChatResponses(sessionId = null) {
+    try {
+        let query = window.supabaseClient
+            .from('chat_responses')
+            .select('*')
+            .order('completed_at', { ascending: false });
+
+        if (sessionId) {
+            query = query.eq('session_id', sessionId);
+        }
+
+        const { data, error } = await query;
+
+        if (error) {
+            console.error('Error loading chat responses:', error);
+
+            // If table doesn't exist, provide helpful message
+            if (error.code === '42P01') {
+                console.warn('Chat responses table does not exist. Please run create_chat_responses_table.sql in your Supabase dashboard.');
+                return loadChatResponsesFromLocalStorage(sessionId);
+            }
+
+            return [];
+        }
+
+        return data || [];
+    } catch (error) {
+        console.error('Chat responses database error:', error);
+        return loadChatResponsesFromLocalStorage(sessionId);
+    }
+}
+
+async function saveChatResponse(chatData) {
+    try {
+        const responseToSave = {
+            session_id: chatData.sessionId,
+            participant_id: chatData.participantId || 'anonymous',
+            chat_type: chatData.chatType || 'listening',
+            messages: JSON.stringify(chatData.messages || []),
+            responses: JSON.stringify(chatData.responses || {}),
+            sentiment: chatData.sentiment || 'neutral',
+            duration_ms: chatData.duration || null,
+            start_time: chatData.startTime ? new Date(chatData.startTime).toISOString() : null,
+            completed_at: chatData.completedAt ? new Date(chatData.completedAt).toISOString() : new Date().toISOString()
+        };
+
+        const { data, error } = await window.supabaseClient
+            .from('chat_responses')
+            .insert([responseToSave])
+            .select();
+
+        if (error) {
+            console.error('Error saving chat response:', error);
+
+            if (error.code === '42P01') {
+                console.warn('Chat responses table does not exist. Saving to localStorage. Please run create_chat_responses_table.sql in your Supabase dashboard.');
+                saveChatResponseToLocalStorage(chatData);
+                return { ...chatData, stored_in: 'localStorage' };
+            }
+
+            // Try saving to localStorage as fallback
+            saveChatResponseToLocalStorage(chatData);
+            throw error;
+        }
+
+        console.log('✅ Chat response saved successfully to database:', data[0]);
+        return data ? data[0] : null;
+    } catch (error) {
+        console.error('Chat response save error:', error);
+        // Always fallback to localStorage
+        saveChatResponseToLocalStorage(chatData);
+        return { ...chatData, stored_in: 'localStorage' };
+    }
+}
+
+function saveChatResponseToLocalStorage(chatData) {
+    try {
+        const existingResponses = JSON.parse(localStorage.getItem('chatResponses') || '[]');
+        const responseToSave = {
+            ...chatData,
+            id: Date.now(), // Simple ID for localStorage
+            stored_at: new Date().toISOString()
+        };
+        existingResponses.unshift(responseToSave); // Add to beginning of array
+        localStorage.setItem('chatResponses', JSON.stringify(existingResponses));
+        console.log('Chat response saved to localStorage as fallback');
+    } catch (error) {
+        console.error('Error saving chat response to localStorage:', error);
+    }
+}
+
+function loadChatResponsesFromLocalStorage(sessionId = null) {
+    try {
+        const responses = JSON.parse(localStorage.getItem('chatResponses') || '[]');
+        if (sessionId) {
+            return responses.filter(response => response.sessionId === sessionId);
+        }
+        return responses;
+    } catch (error) {
+        console.error('Error loading chat responses from localStorage:', error);
+        return [];
+    }
+}
+
+async function getChatResponseAnalytics(sessionId = null) {
+    try {
+        const responses = await loadChatResponses(sessionId);
+
+        const analytics = {
+            totalResponses: responses.length,
+            sentimentBreakdown: {
+                positive: 0,
+                neutral: 0,
+                negative: 0
+            },
+            averageDuration: 0,
+            chatTypeBreakdown: {
+                listening: 0,
+                chat: 0,
+                pulse: 0
+            },
+            responsesByDate: {}
+        };
+
+        let totalDuration = 0;
+        let durationCount = 0;
+
+        responses.forEach(response => {
+            // Sentiment analysis
+            if (response.sentiment) {
+                analytics.sentimentBreakdown[response.sentiment]++;
+            }
+
+            // Duration calculation
+            if (response.duration_ms) {
+                totalDuration += response.duration_ms;
+                durationCount++;
+            }
+
+            // Chat type breakdown
+            if (response.chat_type) {
+                analytics.chatTypeBreakdown[response.chat_type]++;
+            }
+
+            // Responses by date
+            const date = new Date(response.completed_at || response.created_at).toDateString();
+            analytics.responsesByDate[date] = (analytics.responsesByDate[date] || 0) + 1;
+        });
+
+        // Calculate average duration
+        if (durationCount > 0) {
+            analytics.averageDuration = Math.round(totalDuration / durationCount);
+        }
+
+        return analytics;
+    } catch (error) {
+        console.error('Error calculating chat response analytics:', error);
+        return null;
+    }
 }
