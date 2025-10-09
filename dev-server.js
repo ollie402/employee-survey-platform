@@ -188,7 +188,17 @@ app.all('/api/chat-response', async (req, res) => {
   }
 });
 
-console.log('📡 Chat API endpoints registered: /api/chat-session, /api/chat-response');
+app.all('/api/generate-ai-report', async (req, res) => {
+  try {
+    const module = await import('./api/generate-ai-report.js');
+    await module.default(req, res);
+  } catch (error) {
+    console.error('Error in /api/generate-ai-report:', error);
+    res.status(500).json({ error: 'Internal server error', message: error.message });
+  }
+});
+
+console.log('📡 API endpoints registered: /api/chat-session, /api/chat-response, /api/generate-ai-report');
 
 // Serve index.html for root
 app.get('/', (req, res) => {
