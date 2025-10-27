@@ -108,7 +108,9 @@ function addAdvancedAnalyticsUI() {
                     <!-- Score Overview by Category -->
                     <div style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 2rem;">
                         <h3 style="margin-top: 0;">Score Overview by Category</h3>
-                        <canvas id="category-chart" width="800" height="300"></canvas>
+                        <div style="height: 350px; position: relative;">
+                            <canvas id="category-chart"></canvas>
+                        </div>
                     </div>
 
                     <!-- Bottom Charts Row -->
@@ -116,14 +118,77 @@ function addAdvancedAnalyticsUI() {
                         <!-- Sentiment Distribution -->
                         <div style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
                             <h3 style="margin-top: 0;">Sentiment Distribution</h3>
-                            <canvas id="sentiment-chart" width="300" height="300"></canvas>
+                            <div style="height: 300px; position: relative; display: flex; justify-content: center; align-items: center;">
+                                <canvas id="sentiment-chart"></canvas>
+                            </div>
                         </div>
 
                         <!-- Response Breakdown -->
                         <div style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
                             <h3 style="margin-top: 0;">Response Breakdown</h3>
-                            <canvas id="response-chart" width="300" height="300"></canvas>
+                            <div style="height: 300px; position: relative;">
+                                <canvas id="response-chart"></canvas>
+                            </div>
                         </div>
+                    </div>
+
+                    <!-- Detailed Metrics Table -->
+                    <div style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-top: 2rem;">
+                        <h3 style="margin-top: 0;">Detailed Metrics</h3>
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background: #f8f9fa; border-bottom: 2px solid #dee2e6;">
+                                    <th style="padding: 1rem; text-align: left; font-weight: 600;">Question</th>
+                                    <th style="padding: 1rem; text-align: center; font-weight: 600;">Score</th>
+                                    <th style="padding: 1rem; text-align: center; font-weight: 600;">Responses</th>
+                                    <th style="padding: 1rem; text-align: center; font-weight: 600;">Positive %</th>
+                                    <th style="padding: 1rem; text-align: center; font-weight: 600;">Neutral %</th>
+                                    <th style="padding: 1rem; text-align: center; font-weight: 600;">Negative %</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr style="border-bottom: 1px solid #dee2e6;">
+                                    <td style="padding: 1rem;">Product Quality</td>
+                                    <td style="padding: 1rem; text-align: center; color: #27ae60; font-weight: 600;">4.5</td>
+                                    <td style="padding: 1rem; text-align: center;">450</td>
+                                    <td style="padding: 1rem; text-align: center; color: #27ae60;">85%</td>
+                                    <td style="padding: 1rem; text-align: center; color: #f39c12;">10%</td>
+                                    <td style="padding: 1rem; text-align: center; color: #e74c3c;">5%</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid #dee2e6;">
+                                    <td style="padding: 1rem;">Customer Service</td>
+                                    <td style="padding: 1rem; text-align: center; color: #27ae60; font-weight: 600;">4.2</td>
+                                    <td style="padding: 1rem; text-align: center;">450</td>
+                                    <td style="padding: 1rem; text-align: center; color: #27ae60;">78%</td>
+                                    <td style="padding: 1rem; text-align: center; color: #f39c12;">15%</td>
+                                    <td style="padding: 1rem; text-align: center; color: #e74c3c;">7%</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid #dee2e6;">
+                                    <td style="padding: 1rem;">Delivery Speed</td>
+                                    <td style="padding: 1rem; text-align: center; color: #f39c12; font-weight: 600;">3.8</td>
+                                    <td style="padding: 1rem; text-align: center;">450</td>
+                                    <td style="padding: 1rem; text-align: center; color: #27ae60;">68%</td>
+                                    <td style="padding: 1rem; text-align: center; color: #f39c12;">20%</td>
+                                    <td style="padding: 1rem; text-align: center; color: #e74c3c;">12%</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid #dee2e6;">
+                                    <td style="padding: 1rem;">Value for Money</td>
+                                    <td style="padding: 1rem; text-align: center; color: #27ae60; font-weight: 600;">4.0</td>
+                                    <td style="padding: 1rem; text-align: center;">450</td>
+                                    <td style="padding: 1rem; text-align: center; color: #27ae60;">72%</td>
+                                    <td style="padding: 1rem; text-align: center; color: #f39c12;">18%</td>
+                                    <td style="padding: 1rem; text-align: center; color: #e74c3c;">10%</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 1rem;">Website Experience</td>
+                                    <td style="padding: 1rem; text-align: center; color: #27ae60; font-weight: 600;">4.3</td>
+                                    <td style="padding: 1rem; text-align: center;">450</td>
+                                    <td style="padding: 1rem; text-align: center; color: #27ae60;">80%</td>
+                                    <td style="padding: 1rem; text-align: center; color: #f39c12;">14%</td>
+                                    <td style="padding: 1rem; text-align: center; color: #e74c3c;">6%</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -157,10 +222,15 @@ function loadAnalyticsData() {
 }
 
 function renderCharts() {
+    // Destroy existing charts if they exist
+    if (window.categoryChart) window.categoryChart.destroy();
+    if (window.sentimentChartInstance) window.sentimentChartInstance.destroy();
+    if (window.responseChartInstance) window.responseChartInstance.destroy();
+
     // Category Bar Chart
     const categoryCtx = document.getElementById('category-chart');
     if (categoryCtx) {
-        new Chart(categoryCtx, {
+        window.categoryChart = new Chart(categoryCtx, {
             type: 'bar',
             data: {
                 labels: ['Product Quality', 'Customer Service', 'Delivery Speed', 'Value for Money', 'Website Experience'],
@@ -174,6 +244,12 @@ function renderCharts() {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    }
+                },
                 scales: {
                     y: {
                         beginAtZero: true,
@@ -187,7 +263,7 @@ function renderCharts() {
     // Sentiment Pie Chart
     const sentimentCtx = document.getElementById('sentiment-chart');
     if (sentimentCtx) {
-        new Chart(sentimentCtx, {
+        window.sentimentChartInstance = new Chart(sentimentCtx, {
             type: 'pie',
             data: {
                 labels: ['Positive', 'Neutral', 'Negative'],
@@ -198,7 +274,12 @@ function renderCharts() {
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: false
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
             }
         });
     }
@@ -206,24 +287,24 @@ function renderCharts() {
     // Response Breakdown Stacked Bar Chart
     const responseCtx = document.getElementById('response-chart');
     if (responseCtx) {
-        new Chart(responseCtx, {
+        window.responseChartInstance = new Chart(responseCtx, {
             type: 'bar',
             data: {
-                labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                labels: ['Product Quality', 'Customer Service', 'Delivery Speed', 'Value for Money', 'Website Experience'],
                 datasets: [
                     {
                         label: 'Positive %',
-                        data: [70, 68, 72, 65],
+                        data: [85, 78, 68, 72, 80],
                         backgroundColor: '#27ae60'
                     },
                     {
                         label: 'Neutral %',
-                        data: [22, 24, 20, 28],
+                        data: [10, 15, 20, 18, 14],
                         backgroundColor: '#f39c12'
                     },
                     {
                         label: 'Negative %',
-                        data: [8, 8, 8, 7],
+                        data: [5, 7, 12, 10, 6],
                         backgroundColor: '#e74c3c'
                     }
                 ]
@@ -231,6 +312,11 @@ function renderCharts() {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top'
+                    }
+                },
                 scales: {
                     x: {
                         stacked: true

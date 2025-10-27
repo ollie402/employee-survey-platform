@@ -1,24 +1,23 @@
 // deploy.js - Debug Version with Visible Output
-const { exec } = require('child_process');
-const fs = require('fs');
-const path = require('path');
+import { exec } from 'child_process';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // Get environment from command line (test or live)
 const environment = process.argv[2] || 'test';
 
 console.log(`🚀 Starting deployment to ${environment} environment...`);
 
-// Check if config.js exists
-let config;
-try {
-    config = require('./config');
-} catch (e) {
-    // Config doesn't exist yet, use defaults
-    config = {
-        environment: environment,
-        get: (key, defaultValue) => process.env[key] || defaultValue
-    };
-}
+// Config defaults
+const config = {
+    environment: environment,
+    get: (key, defaultValue) => process.env[key] || defaultValue
+};
 
 // Deployment configuration for Vercel
 const deployConfig = {
@@ -48,17 +47,18 @@ async function deploy() {
     if (deployment.requireConfirmation) {
         console.log('⚠️  WARNING: Deploying to PRODUCTION!');
         console.log('This will update your LIVE website.');
-        
-        const readline = require('readline').createInterface({
+
+        const { createInterface } = await import('readline');
+        const readline = createInterface({
             input: process.stdin,
             output: process.stdout
         });
-        
+
         const answer = await new Promise(resolve => {
             readline.question('Type "deploy" to continue: ', resolve);
         });
         readline.close();
-        
+
         if (answer !== 'deploy') {
             console.log('❌ Deployment cancelled');
             process.exit(0);
