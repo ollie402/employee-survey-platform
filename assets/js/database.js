@@ -185,64 +185,38 @@ async function loadUsers() {
 
 async function saveUser(userData) {
     try {
-        // Prepare user data with only essential columns
         const userToSave = {
             name: userData.name || `${userData.firstName} ${userData.lastName}`,
             email: userData.email
-            // Start with minimal data - add more columns as your table structure allows
         };
-        
-        // Add optional fields only if they're provided
+
+        // Add auth_id if provided (links to Supabase Auth)
+        if (userData.auth_id) {
+            userToSave.auth_id = userData.auth_id;
+        }
+
         if (userData.organization_id) {
             userToSave.organization_id = userData.organization_id;
         }
-        
+
         if (userData.access || userData.role) {
             userToSave.role = userData.access || userData.role || 'user';
         }
-        
+
         if (userData.status) {
             userToSave.status = userData.status;
         }
-        
+
         const { data, error } = await window.supabaseClient
             .from('users')
             .insert([userToSave])
             .select();
-        
+
         if (error) {
             console.error('Error saving user:', error);
-            
-            // Handle table doesn't exist error
-            if (error.code === '42P01') {
-                console.error('Users table does not exist. Please create it in your Supabase dashboard.');
-                throw new Error('Users table not found. Please create the table in Supabase dashboard.');
-            }
-            
-            // Handle column doesn't exist error - try with minimal data
-            if (error.message && error.message.includes('could not find') && error.message.includes('column')) {
-                console.warn('Some columns missing, trying with basic fields only...');
-                const basicUserData = {
-                    name: userData.name || `${userData.firstName} ${userData.lastName}`,
-                    email: userData.email
-                };
-                
-                const { data: basicData, error: basicError } = await window.supabaseClient
-                    .from('users')
-                    .insert([basicUserData])
-                    .select();
-                
-                if (basicError) {
-                    throw basicError;
-                }
-                
-                console.log('User saved with basic fields only. Consider adding missing columns to your database.');
-                return basicData ? basicData[0] : null;
-            }
-            
             throw error;
         }
-        
+
         return data ? data[0] : null;
     } catch (error) {
         console.error('User save error:', error);

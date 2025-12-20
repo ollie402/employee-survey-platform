@@ -744,48 +744,68 @@ function fillCredentials(email, password) {
     }, 1000);
 }
 
-document.getElementById('login-form').addEventListener('submit', function(e) {
+document.getElementById('login-form').addEventListener('submit', async function(e) {
     e.preventDefault();
-    
+
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
-    
-    let userType = null;
-    for (const [key, user] of Object.entries(users)) {
-        if (user.email === email) {
-            userType = key;
-            break;
-        }
-    }
-    
-    if (userType) {
-        handleLogin(userType);
-    } else {
-        showToast('Invalid credentials. Please use the demo accounts provided.', 'error');
-    }
-});
-
-function handleLogin(userType) {
     const loginBtn = document.getElementById('login-btn');
-    
+
     loginBtn.classList.add('loading');
     loginBtn.disabled = true;
-    
-    setTimeout(() => {
-        currentUser = users[userType];
-        
+
+    try {
+        // Real Supabase authentication
+        const { data: authData, error: authError } = await window.supabaseClient.auth.signInWithPassword({
+            email: email,
+            password: password
+        });
+
+        if (authError) {
+            throw authError;
+        }
+
+        // Get user details from our users table
+        const { data: userData, error: userError } = await window.supabaseClient
+            .from('users')
+            .select('*, organizations(*)')
+            .eq('auth_id', authData.user.id)
+            .single();
+
+        if (userError || !userData) {
+            // User exists in Auth but not in users table - shouldn't happen but handle it
+            console.error('User not found in users table:', userError);
+            throw new Error('Account not properly configured. Please contact support.');
+        }
+
+        // Set current user with data from database
+        currentUser = {
+            id: userData.id,
+            auth_id: authData.user.id,
+            name: userData.name,
+            email: userData.email,
+            organization: userData.organizations?.name || 'Unknown',
+            organization_id: userData.organization_id,
+            role: userData.role,
+            access: userData.role
+        };
+
         // Apply organization-specific branding
         applyOrganizationBranding(currentUser);
-        
+
         updateUserInterface();
         showApplication();
-        
+
+        showToast(`Welcome back, ${currentUser.name}!`, 'success');
+
+    } catch (error) {
+        console.error('Login error:', error);
+        showToast(error.message || 'Invalid credentials. Please try again.', 'error');
+    } finally {
         loginBtn.classList.remove('loading');
         loginBtn.disabled = false;
-        
-        showToast(`Welcome back, ${currentUser.name}!`, 'success');
-    }, 1500);
-}
+    }
+});
 
 // Apply organization branding on login
 function applyOrganizationBranding(user) {
@@ -4066,11 +4086,10 @@ async function showCreateUserModal() {
     document.body.appendChild(modal);
 }
 
-// UPDATED: Create User function with email integration
+// UPDATED: Create User function with Supabase Auth integration
 async function createUser(event) {
     event.preventDefault();
-    
-    // Get the form data
+
     const formData = new FormData(event.target);
     const userData = {
         firstName: formData.get('firstName'),
@@ -4082,12 +4101,46 @@ async function createUser(event) {
         sendInvite: formData.get('sendInvite') === 'on'
     };
 
+    // Generate a temporary password (user will reset via email)
+    const tempPassword = crypto.randomUUID().slice(0, 16);
+
     try {
-        // Save user to database
-        const savedUser = await saveUser(userData);
+        // Step 1: Create user in Supabase Auth
+        const { data: authData, error: authError } = await window.supabaseClient.auth.signUp({
+            email: userData.email,
+            password: tempPassword,
+            options: {
+                emailRedirectTo: window.location.origin + '/login'
+            }
+        });
+
+        if (authError) {
+            throw new Error(`Auth error: ${authError.message}`);
+        }
+
+        if (!authData.user) {
+            throw new Error('Failed to create authentication account');
+        }
+
+        console.log('Created Supabase Auth user:', authData.user.id);
+
+        // Step 2: Look up organization ID
+        const { data: orgData } = await window.supabaseClient
+            .from('organizations')
+            .select('id')
+            .eq('name', userData.organization)
+            .single();
+
+        // Step 3: Save user to our users table with auth_id link
+        const savedUser = await saveUser({
+            ...userData,
+            auth_id: authData.user.id,
+            organization_id: orgData?.id || null
+        });
+
         console.log('User saved to database:', savedUser);
-        
-        // Add to users table (UI update)
+
+        // Update UI table
         const table = document.querySelector('#users-table tbody');
         const newRow = document.createElement('tr');
         newRow.innerHTML = `
@@ -4106,18 +4159,21 @@ async function createUser(event) {
         `;
         newRow.onclick = () => showUserDetails(savedUser?.id || userData.name);
         table.appendChild(newRow);
-    } catch (error) {
-        console.error('Error saving user to database:', error);
-        showToast(`❌ Failed to create user: ${error.message}`, 'error');
+
+        // Close modal and show success
         event.target.closest('.modal').remove();
-        return;
+        showToast(`✅ User ${userData.name} created successfully! They will receive an email to set their password.`, 'success');
+
+    } catch (error) {
+        console.error('Error creating user:', error);
+        showToast(`❌ Failed to create user: ${error.message}`, 'error');
     }
-    
-    // NEW: Send invitation email if checkbox was checked
+
+    // Send invitation email if checkbox was checked (keep existing email logic after this)
     if (userData.sendInvite) {
         try {
             console.log('Sending invitation email to:', userData.email);
-            
+
             const emailResponse = await fetch('/api/send-invitation', {
                 method: 'POST',
                 headers: {
@@ -4127,21 +4183,20 @@ async function createUser(event) {
                     userEmail: userData.email,
                     userName: userData.name,
                     organizationName: userData.organization,
-                    temporaryPassword: 'Welcome123!' // In real app, generate random password
+                    temporaryPassword: tempPassword
                 }),
             });
 
             if (emailResponse.ok) {
-                showToast(`✅ User created and invitation email sent to ${userData.email}!`, 'success');
+                console.log('Invitation email sent successfully');
             } else {
-                showToast(`⚠️ User created but email failed. Use "Resend Invite" button.`, 'warning');
+                console.warn('Email send failed, but user was created');
             }
         } catch (error) {
             console.error('Failed to send invitation:', error);
-            showToast(`⚠️ User created but email failed. Use "Resend Invite" button.`, 'warning');
         }
     } else {
-        showToast(`✅ User "${userData.name}" created successfully!`, 'success');
+        console.log('User created without invitation email');
     }
     
     // Close the modal
