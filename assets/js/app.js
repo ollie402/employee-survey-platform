@@ -717,6 +717,39 @@ function resetBranding() {
 
 // BRANDING FUNCTIONALITY - NEW FUNCTIONS END HERE
 
+// Helper functions for user interface based on role
+function getSectionsForRole(role) {
+    // Super admin gets all navigation sections
+    if (role === 'super_admin' || role === 'org_admin') {
+        return [
+            'master-admin-section',
+            'start-listening-section'
+        ];
+    }
+    // Standard user gets limited sections
+    return ['start-listening-section'];
+}
+
+function getBadgeForRole(role) {
+    const badges = {
+        'super_admin': 'Super Admin',
+        'org_admin': 'Org Admin',
+        'survey_creator': 'Creator',
+        'survey_respondent': 'User'
+    };
+    return badges[role] || 'User';
+}
+
+function getBadgeClassForRole(role) {
+    const classes = {
+        'super_admin': 'badge-admin',
+        'org_admin': 'badge-admin',
+        'survey_creator': 'badge-creator',
+        'survey_respondent': 'badge-user'
+    };
+    return classes[role] || 'badge-user';
+}
+
 // Login functionality
 function quickLogin(userType) {
     const user = users[userType];
@@ -782,12 +815,18 @@ document.getElementById('login-form').addEventListener('submit', async function(
         currentUser = {
             id: userData.id,
             auth_id: authData.user.id,
-            name: userData.name,
+            name: `${userData.first_name} ${userData.last_name}`,
+            firstName: userData.first_name,
+            lastName: userData.last_name,
             email: userData.email,
             organization: userData.organizations?.name || 'Unknown',
             organization_id: userData.organization_id,
             role: userData.role,
-            access: userData.role
+            access: userData.role,
+            sections: getSectionsForRole(userData.role),
+            badge: getBadgeForRole(userData.role),
+            badgeClass: getBadgeClassForRole(userData.role),
+            avatar: userData.first_name ? userData.first_name.charAt(0).toUpperCase() : '?'
         };
 
         // Apply organization-specific branding
