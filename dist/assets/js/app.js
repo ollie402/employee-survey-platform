@@ -717,6 +717,39 @@ function resetBranding() {
 
 // BRANDING FUNCTIONALITY - NEW FUNCTIONS END HERE
 
+// Helper functions for user interface based on role
+function getSectionsForRole(role) {
+    // Super admin gets all navigation sections
+    if (role === 'super_admin' || role === 'org_admin') {
+        return [
+            'master-admin-section',
+            'start-listening-section'
+        ];
+    }
+    // Standard user gets limited sections
+    return ['start-listening-section'];
+}
+
+function getBadgeForRole(role) {
+    const badges = {
+        'super_admin': 'Super Admin',
+        'org_admin': 'Org Admin',
+        'survey_creator': 'Creator',
+        'survey_respondent': 'User'
+    };
+    return badges[role] || 'User';
+}
+
+function getBadgeClassForRole(role) {
+    const classes = {
+        'super_admin': 'badge-admin',
+        'org_admin': 'badge-admin',
+        'survey_creator': 'badge-creator',
+        'survey_respondent': 'badge-user'
+    };
+    return classes[role] || 'badge-user';
+}
+
 // Login functionality
 function quickLogin(userType) {
     const user = users[userType];
@@ -744,48 +777,74 @@ function fillCredentials(email, password) {
     }, 1000);
 }
 
-document.getElementById('login-form').addEventListener('submit', function(e) {
+document.getElementById('login-form').addEventListener('submit', async function(e) {
     e.preventDefault();
-    
+
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
-    
-    let userType = null;
-    for (const [key, user] of Object.entries(users)) {
-        if (user.email === email) {
-            userType = key;
-            break;
-        }
-    }
-    
-    if (userType) {
-        handleLogin(userType);
-    } else {
-        showToast('Invalid credentials. Please use the demo accounts provided.', 'error');
-    }
-});
-
-function handleLogin(userType) {
     const loginBtn = document.getElementById('login-btn');
-    
+
     loginBtn.classList.add('loading');
     loginBtn.disabled = true;
-    
-    setTimeout(() => {
-        currentUser = users[userType];
-        
+
+    try {
+        // Real Supabase authentication
+        const { data: authData, error: authError } = await window.supabaseClient.auth.signInWithPassword({
+            email: email,
+            password: password
+        });
+
+        if (authError) {
+            throw authError;
+        }
+
+        // Get user details from our users table
+        const { data: userData, error: userError } = await window.supabaseClient
+            .from('users')
+            .select('*, organizations(*)')
+            .eq('auth_id', authData.user.id)
+            .single();
+
+        if (userError || !userData) {
+            // User exists in Auth but not in users table - shouldn't happen but handle it
+            console.error('User not found in users table:', userError);
+            throw new Error('Account not properly configured. Please contact support.');
+        }
+
+        // Set current user with data from database
+        currentUser = {
+            id: userData.id,
+            auth_id: authData.user.id,
+            name: `${userData.first_name} ${userData.last_name}`,
+            firstName: userData.first_name,
+            lastName: userData.last_name,
+            email: userData.email,
+            organization: userData.organizations?.name || 'Unknown',
+            organization_id: userData.organization_id,
+            role: userData.role,
+            access: userData.role,
+            sections: getSectionsForRole(userData.role),
+            badge: getBadgeForRole(userData.role),
+            badgeClass: getBadgeClassForRole(userData.role),
+            avatar: userData.first_name ? userData.first_name.charAt(0).toUpperCase() : '?'
+        };
+
         // Apply organization-specific branding
         applyOrganizationBranding(currentUser);
-        
+
         updateUserInterface();
         showApplication();
-        
+
+        showToast(`Welcome back, ${currentUser.name}!`, 'success');
+
+    } catch (error) {
+        console.error('Login error:', error);
+        showToast(error.message || 'Invalid credentials. Please try again.', 'error');
+    } finally {
         loginBtn.classList.remove('loading');
         loginBtn.disabled = false;
-        
-        showToast(`Welcome back, ${currentUser.name}!`, 'success');
-    }, 1500);
-}
+    }
+});
 
 // Apply organization branding on login
 function applyOrganizationBranding(user) {
@@ -4041,12 +4100,13 @@ async function showCreateUserModal() {
                         </select>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Access Level</label>
-                        <select name="access" class="form-select" required>
-                            <option value="">Select Access</option>
-                            <option value="Start Listening">Start Listening</option>
-                            <option value="Keep Listening">Keep Listening</option>
-                            <option value="Start + Keep Listening">Start + Keep Listening</option>
+                        <label class="form-label">Role</label>
+                        <select name="role" class="form-select" required>
+                            <option value="">Select Role</option>
+                            <option value="viewer">Viewer</option>
+                            <option value="survey_admin">Survey Admin</option>
+                            <option value="org_admin">Organization Admin</option>
+                            <option value="super_admin">Super Admin</option>
                         </select>
                     </div>
                 </div>
@@ -4066,11 +4126,10 @@ async function showCreateUserModal() {
     document.body.appendChild(modal);
 }
 
-// UPDATED: Create User function with email integration
+// UPDATED: Create User function with Supabase Auth integration
 async function createUser(event) {
     event.preventDefault();
-    
-    // Get the form data
+
     const formData = new FormData(event.target);
     const userData = {
         firstName: formData.get('firstName'),
@@ -4078,16 +4137,50 @@ async function createUser(event) {
         name: `${formData.get('firstName')} ${formData.get('lastName')}`,
         email: formData.get('email'),
         organization: formData.get('organization'),
-        access: formData.get('access'),
+        role: formData.get('role'),
         sendInvite: formData.get('sendInvite') === 'on'
     };
 
+    // Generate a temporary password (user will reset via email)
+    const tempPassword = crypto.randomUUID().slice(0, 16);
+
     try {
-        // Save user to database
-        const savedUser = await saveUser(userData);
+        // Step 1: Create user in Supabase Auth
+        const { data: authData, error: authError } = await window.supabaseClient.auth.signUp({
+            email: userData.email,
+            password: tempPassword,
+            options: {
+                emailRedirectTo: window.location.origin + '/login'
+            }
+        });
+
+        if (authError) {
+            throw new Error(`Auth error: ${authError.message}`);
+        }
+
+        if (!authData.user) {
+            throw new Error('Failed to create authentication account');
+        }
+
+        console.log('Created Supabase Auth user:', authData.user.id);
+
+        // Step 2: Look up organization ID
+        const { data: orgData } = await window.supabaseClient
+            .from('organizations')
+            .select('id')
+            .eq('name', userData.organization)
+            .single();
+
+        // Step 3: Save user to our users table with auth_id link
+        const savedUser = await saveUser({
+            ...userData,
+            auth_id: authData.user.id,
+            organization_id: orgData?.id || null
+        });
+
         console.log('User saved to database:', savedUser);
-        
-        // Add to users table (UI update)
+
+        // Update UI table
         const table = document.querySelector('#users-table tbody');
         const newRow = document.createElement('tr');
         newRow.innerHTML = `
@@ -4106,18 +4199,21 @@ async function createUser(event) {
         `;
         newRow.onclick = () => showUserDetails(savedUser?.id || userData.name);
         table.appendChild(newRow);
-    } catch (error) {
-        console.error('Error saving user to database:', error);
-        showToast(`❌ Failed to create user: ${error.message}`, 'error');
+
+        // Close modal and show success
         event.target.closest('.modal').remove();
-        return;
+        showToast(`✅ User ${userData.name} created successfully! They will receive an email to set their password.`, 'success');
+
+    } catch (error) {
+        console.error('Error creating user:', error);
+        showToast(`❌ Failed to create user: ${error.message}`, 'error');
     }
-    
-    // NEW: Send invitation email if checkbox was checked
+
+    // Send invitation email if checkbox was checked (keep existing email logic after this)
     if (userData.sendInvite) {
         try {
             console.log('Sending invitation email to:', userData.email);
-            
+
             const emailResponse = await fetch('/api/send-invitation', {
                 method: 'POST',
                 headers: {
@@ -4127,21 +4223,20 @@ async function createUser(event) {
                     userEmail: userData.email,
                     userName: userData.name,
                     organizationName: userData.organization,
-                    temporaryPassword: 'Welcome123!' // In real app, generate random password
+                    temporaryPassword: tempPassword
                 }),
             });
 
             if (emailResponse.ok) {
-                showToast(`✅ User created and invitation email sent to ${userData.email}!`, 'success');
+                console.log('Invitation email sent successfully');
             } else {
-                showToast(`⚠️ User created but email failed. Use "Resend Invite" button.`, 'warning');
+                console.warn('Email send failed, but user was created');
             }
         } catch (error) {
             console.error('Failed to send invitation:', error);
-            showToast(`⚠️ User created but email failed. Use "Resend Invite" button.`, 'warning');
         }
     } else {
-        showToast(`✅ User "${userData.name}" created successfully!`, 'success');
+        console.log('User created without invitation email');
     }
     
     // Close the modal
@@ -4288,19 +4383,20 @@ function handleEditUser(userName) {
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                     <div class="form-group">
-                        <label class="form-label">Access Level</label>
-                        <select name="access" class="form-select">
-                            <option value="Start Listening">Start Listening</option>
-                            <option value="Keep Listening">Keep Listening</option>
-                            <option value="Start + Keep Listening" selected>Start + Keep Listening</option>
+                        <label class="form-label">Role</label>
+                        <select name="role" class="form-select">
+                            <option value="">Select Role</option>
+                            <option value="viewer">Viewer</option>
+                            <option value="survey_admin">Survey Admin</option>
+                            <option value="org_admin">Organization Admin</option>
+                            <option value="super_admin">Super Admin</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Status</label>
-                        <select name="status" class="form-select">
-                            <option value="Active" selected>Active</option>
-                            <option value="Inactive">Inactive</option>
-                            <option value="Pending">Pending</option>
+                        <label class="form-label">Active</label>
+                        <select name="is_active" class="form-select">
+                            <option value="true" selected>Yes</option>
+                            <option value="false">No</option>
                         </select>
                     </div>
                 </div>
