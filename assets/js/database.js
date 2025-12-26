@@ -38,7 +38,8 @@ async function saveOrganization(orgData) {
     try {
         // First try with just the absolutely essential field - name
         const minimalOrgData = {
-            name: orgData.name
+            name: orgData.name,
+            slug: generateSlug(orgData.name)
         };
         
         // Try to add description if provided
@@ -66,7 +67,8 @@ async function saveOrganization(orgData) {
             if (error.message && error.message.includes("could not find") && error.message.includes("description")) {
                 console.warn('Description column missing, trying with just name...');
                 const nameOnlyData = {
-                    name: orgData.name
+                    name: orgData.name,
+                    slug: generateSlug(orgData.name)
                 };
                 
                 const { data: nameData, error: nameError } = await window.supabaseClient
@@ -185,8 +187,20 @@ async function loadUsers() {
 
 async function saveUser(userData) {
     try {
+        // Split name into first and last name
+        let firstName, lastName;
+        if (userData.firstName && userData.lastName) {
+            firstName = userData.firstName;
+            lastName = userData.lastName;
+        } else if (userData.name) {
+            const nameParts = userData.name.trim().split(' ');
+            firstName = nameParts[0] || '';
+            lastName = nameParts.slice(1).join(' ') || '';
+        }
+
         const userToSave = {
-            name: userData.name || `${userData.firstName} ${userData.lastName}`,
+            first_name: firstName,
+            last_name: lastName,
             email: userData.email
         };
 
@@ -199,13 +213,12 @@ async function saveUser(userData) {
             userToSave.organization_id = userData.organization_id;
         }
 
-        if (userData.access || userData.role) {
-            userToSave.role = userData.access || userData.role || 'user';
-        }
+        userToSave.role = userData.role || 'viewer';
 
-        if (userData.status) {
-            userToSave.status = userData.status;
-        }
+        userToSave.is_active = true;
+
+        console.log('DEBUG - userToSave object being sent to database:', JSON.stringify(userToSave, null, 2));
+        console.log('DEBUG - role value:', userToSave.role);
 
         const { data, error } = await window.supabaseClient
             .from('users')

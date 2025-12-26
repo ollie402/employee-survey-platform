@@ -4100,12 +4100,13 @@ async function showCreateUserModal() {
                         </select>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Access Level</label>
-                        <select name="access" class="form-select" required>
-                            <option value="">Select Access</option>
-                            <option value="Start Listening">Start Listening</option>
-                            <option value="Keep Listening">Keep Listening</option>
-                            <option value="Start + Keep Listening">Start + Keep Listening</option>
+                        <label class="form-label">Role</label>
+                        <select name="role" class="form-select" required>
+                            <option value="">Select Role</option>
+                            <option value="viewer">Viewer</option>
+                            <option value="survey_admin">Survey Admin</option>
+                            <option value="org_admin">Organization Admin</option>
+                            <option value="super_admin">Super Admin</option>
                         </select>
                     </div>
                 </div>
@@ -4136,7 +4137,7 @@ async function createUser(event) {
         name: `${formData.get('firstName')} ${formData.get('lastName')}`,
         email: formData.get('email'),
         organization: formData.get('organization'),
-        access: formData.get('access'),
+        role: formData.get('role'),
         sendInvite: formData.get('sendInvite') === 'on'
     };
 
@@ -4382,19 +4383,20 @@ function handleEditUser(userName) {
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                     <div class="form-group">
-                        <label class="form-label">Access Level</label>
-                        <select name="access" class="form-select">
-                            <option value="Start Listening">Start Listening</option>
-                            <option value="Keep Listening">Keep Listening</option>
-                            <option value="Start + Keep Listening" selected>Start + Keep Listening</option>
+                        <label class="form-label">Role</label>
+                        <select name="role" class="form-select">
+                            <option value="">Select Role</option>
+                            <option value="viewer">Viewer</option>
+                            <option value="survey_admin">Survey Admin</option>
+                            <option value="org_admin">Organization Admin</option>
+                            <option value="super_admin">Super Admin</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Status</label>
-                        <select name="status" class="form-select">
-                            <option value="Active" selected>Active</option>
-                            <option value="Inactive">Inactive</option>
-                            <option value="Pending">Pending</option>
+                        <label class="form-label">Active</label>
+                        <select name="is_active" class="form-select">
+                            <option value="true" selected>Yes</option>
+                            <option value="false">No</option>
                         </select>
                     </div>
                 </div>
