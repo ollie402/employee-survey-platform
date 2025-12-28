@@ -761,6 +761,29 @@ function quickLogin(userType) {
     }
 }
 
+// Handle demo login (for quick login buttons)
+function handleLogin(userType) {
+    const loginBtn = document.getElementById('login-btn');
+
+    if (loginBtn) {
+        loginBtn.classList.add('loading');
+        loginBtn.disabled = true;
+    }
+
+    setTimeout(() => {
+        currentUser = users[userType];
+        updateUserInterface();
+        showApplication();
+
+        if (loginBtn) {
+            loginBtn.classList.remove('loading');
+            loginBtn.disabled = false;
+        }
+
+        showToast(`Welcome back, ${currentUser.name}!`, 'success');
+    }, 500);
+}
+
 function fillCredentials(email, password) {
     document.getElementById('email').value = email;
     document.getElementById('password').value = password;
@@ -916,8 +939,12 @@ function updateUserInterface() {
     document.getElementById('user-avatar').textContent = currentUser.avatar;
     
     const allSections = document.querySelectorAll('.nav-section');
+    console.log('updateUserInterface - currentUser.sections:', currentUser.sections);
+    console.log('updateUserInterface - nav-sections found:', allSections.length);
+
     allSections.forEach(section => {
-        if (currentUser.sections.includes(section.id)) {
+        console.log('Nav section:', section.id, 'included:', currentUser.sections?.includes(section.id));
+        if (currentUser.sections && currentUser.sections.includes(section.id)) {
             section.style.display = 'block';
         } else {
             section.style.display = 'none';
@@ -926,13 +953,45 @@ function updateUserInterface() {
 }
 
 function showApplication() {
+    // Hide auth wizard header if visible
+    const authHeader = document.getElementById('auth-header');
+    if (authHeader) {
+        authHeader.classList.add('hidden');
+    }
+
+    // Hide any auth wizard pages
+    document.querySelectorAll('.auth-page').forEach(page => {
+        page.classList.add('hidden');
+    });
+
     document.getElementById('login-container').classList.add('hidden');
     document.getElementById('app-container').classList.remove('hidden');
+
+    // Ensure sidebar is visible on desktop
+    const sidebar = document.getElementById('sidebar');
+    console.log('showApplication called, sidebar element:', sidebar);
+
+    if (sidebar) {
+        // Remove any classes that might hide the sidebar
+        sidebar.classList.remove('collapsed');
+        sidebar.classList.remove('open');
+        sidebar.classList.remove('hidden');
+
+        // Force sidebar to be visible on desktop
+        if (window.innerWidth > 768) {
+            sidebar.style.transform = 'translateX(0)';
+            sidebar.style.display = 'block';
+            sidebar.style.width = '280px';
+            sidebar.style.position = 'relative';
+            console.log('Sidebar forced visible, classes:', sidebar.className);
+        }
+    }
 }
 
 // Navigation functionality
 function showSection(sectionName) {
-    const sections = document.querySelectorAll('[id$="-section"]');
+    // Only select main content sections, NOT sidebar nav-sections
+    const sections = document.querySelectorAll('.main-content [id$="-section"]');
     sections.forEach(section => {
         section.classList.add('hidden');
     });
@@ -1135,7 +1194,13 @@ async function loadChatReportsData() {
 
 function toggleSidebar() {
     const sidebar = document.getElementById('sidebar');
-    sidebar.classList.toggle('collapsed');
+    // On mobile (768px or less), use 'open' class
+    // On desktop, use 'collapsed' class
+    if (window.innerWidth <= 768) {
+        sidebar.classList.toggle('open');
+    } else {
+        sidebar.classList.toggle('collapsed');
+    }
 }
 
 function toggleUserMenu() {
@@ -8246,7 +8311,13 @@ document.addEventListener('click', function(event) {
 window.addEventListener('resize', function() {
     const sidebar = document.getElementById('sidebar');
     if (window.innerWidth <= 768) {
-        sidebar.classList.add('collapsed');
+        // Going to mobile: close sidebar (remove open class)
+        sidebar.classList.remove('open');
+        sidebar.classList.remove('collapsed');
+    } else {
+        // Going to desktop: ensure sidebar is visible
+        sidebar.classList.remove('collapsed');
+        sidebar.classList.remove('open');
     }
 });
 

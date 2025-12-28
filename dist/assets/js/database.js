@@ -217,6 +217,9 @@ async function saveUser(userData) {
 
         userToSave.is_active = true;
 
+        console.log('DEBUG - userToSave object being sent to database:', JSON.stringify(userToSave, null, 2));
+        console.log('DEBUG - role value:', userToSave.role);
+
         const { data, error } = await window.supabaseClient
             .from('users')
             .insert([userToSave])
