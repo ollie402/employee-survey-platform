@@ -3820,10 +3820,42 @@
 
                         <!-- Responses Tab -->
                         <div id="chat-editor-tab-responses" class="chat-editor-tab-content" style="display: none;">
-                            <div style="background: white; border-radius: 12px; padding: 32px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); text-align: center;">
-                                <div style="font-size: 48px; margin-bottom: 16px;">📭</div>
-                                <h3 style="color: #1e293b; margin-bottom: 8px;">No responses yet</h3>
-                                <p style="color: #64748b;">Responses will appear here once people start using your chat.</p>
+                            <div class="responses-tab-content">
+                                <!-- Empty state - show when no responses -->
+                                <div class="responses-empty-state" id="responsesEmptyState">
+                                    <div class="empty-state-icon">📭</div>
+                                    <h3>No responses yet</h3>
+                                    <p>Responses will appear here once people start using your chat.</p>
+                                </div>
+
+                                <!-- Responses table - show when there are responses -->
+                                <div class="responses-table-container" id="responsesTableContainer" style="display: none;">
+                                    <div class="responses-table-header">
+                                        <h3>Responses (<span id="responseCount">0</span>)</h3>
+                                        <button class="btn-export-responses" id="exportResponsesBtn">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                                <polyline points="7 10 12 15 17 10"></polyline>
+                                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                                            </svg>
+                                            Export CSV
+                                        </button>
+                                    </div>
+                                    <table class="responses-table">
+                                        <thead>
+                                            <tr>
+                                                <th class="col-response">Response</th>
+                                                <th class="col-participant" id="participantColumn">Participant</th>
+                                                <th class="col-date">Date Submitted</th>
+                                                <th class="col-status">Status</th>
+                                                <th class="col-actions">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="responsesTableBody">
+                                            <!-- Rows will be inserted here by JavaScript -->
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
 
@@ -11081,8 +11113,9 @@ function openChatEditor(chatId = null) {
         successPanel.style.display = 'none';
     }
 
-    // Clear the editing ID
+    // Clear the editing ID and chat object
     window.currentEditingChatId = null;
+    window.currentEditingChat = null;
 
     // Reset form for new chat or load existing
     if (!chatId) {
@@ -11117,8 +11150,9 @@ async function loadChatIntoEditor(chatId) {
             return;
         }
 
-        // Store the current chat ID for saving updates later
+        // Store the current chat ID and full chat object for saving updates later
         window.currentEditingChatId = chatId;
+        window.currentEditingChat = chat;
 
         // Populate form fields
         const chatEditorName = document.getElementById('chat-editor-name');
@@ -11183,6 +11217,11 @@ function showChatEditorTab(tabName) {
     if (activeTab) {
         activeTab.style.color = '#3b82f6';
         activeTab.style.borderBottomColor = '#3b82f6';
+    }
+
+    // Load responses when Responses tab is clicked
+    if (tabName === 'responses' && window.currentEditingChatId) {
+        loadChatResponses(window.currentEditingChatId);
     }
 }
 
@@ -11558,6 +11597,200 @@ function initSaveChatButton() {
 
 // Initialize save button when DOM is ready
 document.addEventListener('DOMContentLoaded', initSaveChatButton);
+
+// ============================================
+// CHAT RESPONSES FUNCTIONS
+// ============================================
+
+// Load responses for the current chat
+async function loadChatResponses(chatId) {
+    if (!chatId) {
+        console.log('No chat ID provided for loading responses');
+        return;
+    }
+
+    try {
+        const { data: responses, error } = await window.supabaseClient
+            .from('chat_responses')
+            .select('*')
+            .eq('chat_id', chatId)
+            .order('submitted_at', { ascending: false });
+
+        if (error) throw error;
+
+        displayResponses(responses);
+
+    } catch (error) {
+        console.error('Error loading responses:', error);
+    }
+}
+
+// Display responses in the table
+function displayResponses(responses) {
+    const emptyState = document.getElementById('responsesEmptyState');
+    const tableContainer = document.getElementById('responsesTableContainer');
+    const tableBody = document.getElementById('responsesTableBody');
+    const responseCount = document.getElementById('responseCount');
+
+    if (!emptyState || !tableContainer || !tableBody) {
+        console.log('Response elements not found');
+        return;
+    }
+
+    if (!responses || responses.length === 0) {
+        emptyState.style.display = 'block';
+        tableContainer.style.display = 'none';
+        return;
+    }
+
+    emptyState.style.display = 'none';
+    tableContainer.style.display = 'block';
+    if (responseCount) {
+        responseCount.textContent = responses.length;
+    }
+
+    // Check if current chat is invite_only to show/hide participant column
+    const participantColumnHeader = document.getElementById('participantColumn');
+    const chat = window.currentEditingChat;
+    const showParticipant = chat && chat.access_type === 'invite_only';
+
+    if (participantColumnHeader) {
+        participantColumnHeader.style.display = showParticipant ? '' : 'none';
+    }
+
+    tableBody.innerHTML = responses.map(response => `
+        <tr data-response-id="${response.id}">
+            <td>
+                <div class="response-text">${escapeHtmlForResponses(response.response_text || '')}</div>
+            </td>
+            <td class="col-participant" style="${showParticipant ? '' : 'display: none;'}">
+                <div class="participant-info">
+                    ${response.participant_name ? escapeHtmlForResponses(response.participant_name) : 'Anonymous'}
+                </div>
+                ${response.participant_email ? `<div class="participant-email">${escapeHtmlForResponses(response.participant_email)}</div>` : ''}
+            </td>
+            <td>
+                <div class="date-submitted">${formatResponseDate(response.submitted_at)}</div>
+            </td>
+            <td>
+                ${!response.is_read ? '<span class="status-badge new">New</span>' : ''}
+            </td>
+            <td>
+                <div class="action-buttons">
+                    ${!response.is_read ? `<button class="btn-action" onclick="markResponseAsRead('${response.id}')">Mark Read</button>` : ''}
+                    <button class="btn-action delete" onclick="deleteResponse('${response.id}')">Delete</button>
+                </div>
+            </td>
+        </tr>
+    `).join('');
+}
+
+// Format date for display
+function formatResponseDate(dateString) {
+    if (!dateString) return 'Unknown';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+    });
+}
+
+// Escape HTML to prevent XSS
+function escapeHtmlForResponses(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Mark response as read
+async function markResponseAsRead(responseId) {
+    try {
+        const { error } = await window.supabaseClient
+            .from('chat_responses')
+            .update({ is_read: true })
+            .eq('id', responseId);
+
+        if (error) throw error;
+
+        // Reload responses
+        if (window.currentEditingChatId) {
+            loadChatResponses(window.currentEditingChatId);
+        }
+    } catch (error) {
+        console.error('Error marking response as read:', error);
+        alert('Failed to update response');
+    }
+}
+
+// Delete response
+async function deleteResponse(responseId) {
+    if (!confirm('Are you sure you want to delete this response?')) return;
+
+    try {
+        const { error } = await window.supabaseClient
+            .from('chat_responses')
+            .delete()
+            .eq('id', responseId);
+
+        if (error) throw error;
+
+        // Reload responses
+        if (window.currentEditingChatId) {
+            loadChatResponses(window.currentEditingChatId);
+        }
+    } catch (error) {
+        console.error('Error deleting response:', error);
+        alert('Failed to delete response');
+    }
+}
+
+// Export responses to CSV
+function exportResponsesToCSV() {
+    const table = document.querySelector('.responses-table');
+    if (!table) return;
+
+    let csv = [];
+    const rows = table.querySelectorAll('tr');
+
+    rows.forEach(row => {
+        const cols = row.querySelectorAll('th, td');
+        const rowData = [];
+        cols.forEach(col => {
+            // Skip hidden columns
+            if (col.style.display === 'none') return;
+            let text = col.textContent.trim().replace(/"/g, '""');
+            rowData.push(`"${text}"`);
+        });
+        if (rowData.length > 0) {
+            csv.push(rowData.join(','));
+        }
+    });
+
+    const csvContent = csv.join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `responses-${window.currentEditingChatId || 'export'}-${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+// Initialize export button
+function initExportResponsesButton() {
+    const exportBtn = document.getElementById('exportResponsesBtn');
+    if (exportBtn) {
+        exportBtn.addEventListener('click', exportResponsesToCSV);
+    }
+}
+
+// Initialize export button when DOM is ready
+document.addEventListener('DOMContentLoaded', initExportResponsesButton);
 
 function sbCreateNewSurvey() {
     sbCurrentSurvey = sbCreateDefaultSurvey();
