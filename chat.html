@@ -505,6 +505,78 @@
                 padding: 2rem;
             }
         }
+
+        /* Submit Chat Area */
+        .chat-submit-area {
+            padding: 16px 24px;
+            text-align: center;
+            background: #f8f9fa;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .btn-submit-chat {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 32px;
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-submit-chat:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+        }
+
+        .btn-submit-chat:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .submit-hint {
+            margin: 8px 0 0 0;
+            font-size: 0.85rem;
+            color: #6b7280;
+        }
+
+        .chat-submitted-message {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 60px 24px;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+        }
+
+        .chat-submitted-message h2 {
+            color: #166534;
+            margin: 0 0 8px 0;
+            font-size: 1.75rem;
+        }
+
+        .chat-submitted-message p {
+            color: #6b7280;
+            margin: 0;
+            font-size: 1rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .btn-submit-chat .spinner {
+            animation: spin 1s linear infinite;
+        }
     </style>
 </head>
 <body>
@@ -564,6 +636,17 @@
                 <button class="nav-button prev" id="prev-button" onclick="previousQuestion()" disabled>Previous</button>
                 <button class="nav-button next" id="next-button" onclick="nextQuestion()">Next</button>
             </div>
+        </div>
+
+        <!-- Submit Chat Area -->
+        <div class="chat-submit-area" id="chat-submit-area" style="display: none;">
+            <button id="submitChatBtn" class="btn-submit-chat" onclick="submitChat()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                Submit Feedback
+            </button>
+            <p class="submit-hint">Click when you're done to complete your feedback session</p>
         </div>
     </div>
 
@@ -887,7 +970,13 @@
 
     function setupListeningInterface() {
         document.getElementById('input-area').style.display = 'block';
-        
+
+        // Show submit area for listening chats
+        const submitArea = document.getElementById('chat-submit-area');
+        if (submitArea) {
+            submitArea.style.display = 'block';
+        }
+
         // Setup textarea auto-resize
         const textarea = document.getElementById('user-input');
         textarea.addEventListener('input', function() {
@@ -906,6 +995,12 @@
 
     function setupChatSurveyInterface() {
         document.getElementById('input-area').style.display = 'block';
+
+        // Show submit area for chat surveys
+        const submitArea = document.getElementById('chat-submit-area');
+        if (submitArea) {
+            submitArea.style.display = 'block';
+        }
         
         // Similar to listening but with structured questions
         const textarea = document.getElementById('user-input');
@@ -1505,13 +1600,70 @@
     }
 
     function showTypingIndicator() {
-        document.getElementById('typing-indicator').classList.add('show');
+        const typingIndicator = document.getElementById('typing-indicator');
         const container = document.getElementById('chat-messages');
-        container.scrollTop = container.scrollHeight;
+        if (typingIndicator) {
+            typingIndicator.classList.add('show');
+            typingIndicator.style.display = 'flex';
+        }
+        if (container) {
+            container.scrollTop = container.scrollHeight;
+        }
     }
 
     function hideTypingIndicator() {
-        document.getElementById('typing-indicator').classList.remove('show');
+        const typingIndicator = document.getElementById('typing-indicator');
+        if (typingIndicator) {
+            typingIndicator.classList.remove('show');
+            typingIndicator.style.display = 'none';
+        }
+    }
+
+    // Submit chat / finalize session
+    async function submitChat() {
+        const submitBtn = document.getElementById('submitChatBtn');
+
+        if (!submitBtn) return;
+
+        // Check if there are any user messages
+        const userMessages = document.querySelectorAll('.chat-bubble.user');
+        if (userMessages.length === 0) {
+            alert('Please send at least one message before submitting.');
+            return;
+        }
+
+        // Disable button and show loading
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="spinner">
+                <circle cx="12" cy="12" r="10"></circle>
+            </svg>
+            Submitting...
+        `;
+
+        // Small delay for UX
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        // Show success message
+        showSubmitSuccess();
+    }
+
+    function showSubmitSuccess() {
+        const chatContainer = document.getElementById('chat-container');
+
+        if (chatContainer) {
+            chatContainer.innerHTML = `
+                <div class="chat-submitted-message">
+                    <div style="font-size: 3rem; margin-bottom: 16px;">✅</div>
+                    <h2>Thank you for your feedback!</h2>
+                    <p>Your responses have been submitted successfully.</p>
+                    <p style="margin-top: 16px; font-size: 0.9rem; color: #9ca3af;">You can close this window now.</p>
+                </div>
+            `;
+        }
+
+        // Clear the session so if they come back they get a new session
+        sessionStorage.removeItem('chat_session_id');
     }
 
     async function endConversation() {
