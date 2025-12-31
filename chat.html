@@ -634,6 +634,57 @@
         }
     }
 
+    // Generate or retrieve session ID for grouping messages
+    function getOrCreateSessionId() {
+        let sessionId = sessionStorage.getItem('chat_session_id');
+        if (!sessionId) {
+            sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
+            sessionStorage.setItem('chat_session_id', sessionId);
+        }
+        return sessionId;
+    }
+
+    // Save response to database
+    async function saveResponseToDatabase(messageText) {
+        const chat = window.currentChat;
+
+        if (!chat || !chat.id) {
+            console.error('No chat loaded - cannot save response');
+            return false;
+        }
+
+        if (!window.supabaseClient) {
+            console.error('Supabase client not available');
+            return false;
+        }
+
+        const sessionId = getOrCreateSessionId();
+
+        try {
+            const { data, error } = await window.supabaseClient
+                .from('chat_responses')
+                .insert({
+                    chat_id: chat.id,
+                    session_id: sessionId,
+                    response_text: messageText,
+                    participant_name: null,
+                    participant_email: null,
+                    is_read: false
+                })
+                .select()
+                .single();
+
+            if (error) throw error;
+
+            console.log('Response saved to database:', data);
+            return true;
+
+        } catch (error) {
+            console.error('Error saving response to database:', error);
+            return false;
+        }
+    }
+
     // Show error message when chat cannot be loaded
     function showChatError(message) {
         const loadingScreen = document.getElementById('loading-screen');
@@ -1091,8 +1142,11 @@
     }
 
     function handleListeningResponse(message) {
-        // Store response
+        // Store response locally
         chatState.responses[`response_${Date.now()}`] = message;
+
+        // Save response to database
+        saveResponseToDatabase(message);
 
         // Simulate AI response
         setTimeout(() => {
@@ -1212,6 +1266,9 @@
             chatState.responses[question.id] = message;
             chatState.currentQuestionIndex++;
         }
+
+        // Save response to database
+        saveResponseToDatabase(message);
 
         // Show typing and ask next question
         setTimeout(() => {
