@@ -519,17 +519,21 @@
 
     // Load chat data from database using slug
     async function loadChatFromSlug(slug) {
-        // Wait for Supabase to be ready
+        // Wait for Supabase to be ready (up to 5 seconds)
         let attempts = 0;
-        while (!window.supabaseClient && attempts < 10) {
+        const maxAttempts = 50;
+        while (!window.supabaseClient && attempts < maxAttempts) {
+            console.log('Waiting for Supabase client... attempt', attempts + 1);
             await new Promise(resolve => setTimeout(resolve, 100));
             attempts++;
         }
 
         if (!window.supabaseClient) {
-            console.error('Supabase client not available');
+            console.error('Supabase client not available after', maxAttempts, 'attempts');
             return null;
         }
+
+        console.log('Supabase client is ready');
 
         try {
             const { data: chat, error } = await window.supabaseClient
@@ -1454,11 +1458,11 @@
     <!-- Include Supabase library from CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- Include config for API endpoints -->
-    <script src="assets/js/config.js"></script>
+    <script src="/assets/js/config.js"></script>
     <!-- Include Supabase client -->
-    <script src="lib/supabase.js"></script>
+    <script src="/lib/supabase.js"></script>
     <!-- Include database functions -->
-    <script src="assets/js/database.js"></script>
+    <script src="/assets/js/database.js"></script>
 
     <!-- Real-time Chat API Integration -->
     <script>
