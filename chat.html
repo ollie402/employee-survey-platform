@@ -654,6 +654,7 @@
     // Global Variables
     let sessionConfig = null;
     let chatType = 'listening';
+    let userMessageCount = 0;  // Track number of user messages sent
     let chatState = {
         messages: [],
         responses: {},
@@ -1181,6 +1182,7 @@
         messageDiv.innerHTML = `<div class="message-content">${text}</div>`;
         messagesContainer.appendChild(messageDiv);
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        userMessageCount++;  // Track message count for submit validation
     }
 
     function addBotMessage(text) {
@@ -1202,6 +1204,7 @@
         messageDiv.innerHTML = `<div class="message-bubble">${text}</div>`;
         messagesContainer.appendChild(messageDiv);
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        userMessageCount++;  // Track message count for submit validation
 
         // Add to state
         chatState.messages.push({ sender: 'user', text: text, timestamp: Date.now() });
@@ -1625,11 +1628,14 @@
 
         if (!submitBtn) return;
 
-        // Check if there are any user messages
-        const userMessages = document.querySelectorAll('.chat-bubble.user');
-        if (userMessages.length === 0) {
-            alert('Please send at least one message before submitting.');
-            return;
+        // Check if there are any user messages using counter first, then DOM fallback
+        if (userMessageCount === 0) {
+            // Fallback: check DOM with correct selector (.message.user)
+            const userMessages = document.querySelectorAll('.message.user');
+            if (userMessages.length === 0) {
+                alert('Please send at least one message before submitting.');
+                return;
+            }
         }
 
         // Disable button and show loading
