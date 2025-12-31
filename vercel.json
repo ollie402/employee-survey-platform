@@ -4,5 +4,11 @@
     "api/*.js": {
       "maxDuration": 10
     }
-  }
+  },
+  "rewrites": [
+    {
+      "source": "/chat/:slug",
+      "destination": "/chat.html"
+    }
+  ]
 }

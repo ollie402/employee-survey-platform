@@ -509,12 +509,78 @@
 
     // Prevent double initialization
     let isInitialized = false;
-    
+
+    // Get slug from URL path (e.g., /chat/abc123xyz -> abc123xyz)
+    function getChatSlugFromURL() {
+        const path = window.location.pathname;
+        const matches = path.match(/\/chat\/([a-zA-Z0-9]+)/);
+        return matches ? matches[1] : null;
+    }
+
+    // Load chat data from database using slug
+    async function loadChatFromSlug(slug) {
+        // Wait for Supabase to be ready
+        let attempts = 0;
+        while (!window.supabaseClient && attempts < 10) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+            attempts++;
+        }
+
+        if (!window.supabaseClient) {
+            console.error('Supabase client not available');
+            return null;
+        }
+
+        try {
+            const { data: chat, error } = await window.supabaseClient
+                .from('listening_chats')
+                .select('*')
+                .eq('slug', slug)
+                .eq('is_active', true)
+                .single();
+
+            if (error || !chat) {
+                console.error('Chat not found or not active:', error);
+                return null;
+            }
+
+            // Store chat data for later use
+            window.currentChat = chat;
+            console.log('Chat loaded from database:', chat.name);
+
+            return chat;
+
+        } catch (error) {
+            console.error('Error loading chat:', error);
+            return null;
+        }
+    }
+
+    // Show error message when chat cannot be loaded
+    function showChatError(message) {
+        const loadingScreen = document.getElementById('loading-screen');
+        const chatContainer = document.getElementById('chat-container');
+
+        if (loadingScreen) loadingScreen.style.display = 'none';
+        if (chatContainer) chatContainer.style.display = 'flex';
+
+        document.getElementById('chat-title').textContent = 'Chat Unavailable';
+        document.getElementById('chat-subtitle').textContent = message;
+
+        const inputArea = document.getElementById('input-area');
+        const userInput = document.getElementById('user-input');
+        const sendButton = document.getElementById('send-button');
+
+        if (inputArea) inputArea.style.display = 'none';
+        if (userInput) userInput.disabled = true;
+        if (sendButton) sendButton.disabled = true;
+    }
+
     // Initialize on page load
     window.addEventListener('DOMContentLoaded', initializeChat);
 
-    // Failsafe: Force show chat after 5 seconds if still loading
-    setTimeout(() => {
+    // Failsafe: Force show chat after 8 seconds if still loading (increased for async db load)
+    setTimeout(async () => {
         const loadingScreen = document.getElementById('loading-screen');
         const chatContainer = document.getElementById('chat-container');
 
@@ -528,12 +594,12 @@
             // Initialize if not already done
             if (!isInitialized) {
                 console.log('🆘 Failsafe initialization');
-                initializeChat();
+                await initializeChat();
             }
         }
-    }, 5000);
+    }, 8000);
 
-    function initializeChat() {
+    async function initializeChat() {
         console.log('🔄 initializeChat() called, isInitialized:', isInitialized);
 
         // Prevent double initialization
@@ -544,42 +610,76 @@
 
         console.log('🚀 Starting chat initialization...');
 
-        // Parse URL parameters
-        const urlParams = new URLSearchParams(window.location.search);
-        let sessionId = urlParams.get('session');
-        const typeParam = urlParams.get('type');
-        const chatName = urlParams.get('name');
-        const welcomeMsg = urlParams.get('welcome');
-        const topics = urlParams.get('topics');
-        const questionsParam = urlParams.get('questions');
+        // First, check if there's a slug in the URL path (e.g., /chat/abc123xyz)
+        const slug = getChatSlugFromURL();
 
-        console.log('📋 URL params:', { sessionId, typeParam, chatName, welcomeMsg, topics, questionsParam });
+        if (slug) {
+            console.log('🔗 Found slug in URL path:', slug);
 
-        // Allow direct access for testing or when using API-generated sessions
-        if (!sessionId) {
-            // Check if this is API-powered mode
-            if (typeof apiChatState !== 'undefined' && apiChatState.sessionId) {
-                sessionId = apiChatState.sessionId;
-                console.log('🔄 Using API-generated session:', sessionId);
+            // Load chat from database
+            const chat = await loadChatFromSlug(slug);
+
+            if (chat) {
+                // Create session configuration from database chat
+                sessionConfig = {
+                    id: chat.id,
+                    type: 'listening',
+                    name: chat.name || 'Feedback Session',
+                    welcomeMessage: chat.welcome_message || 'Welcome to this feedback session!',
+                    topics: null,
+                    questions: null,
+                    slug: chat.slug,
+                    organizationId: chat.organization_id
+                };
+
+                chatType = 'listening';
+                chatState.participantId = 'participant_' + Math.random().toString(36).substr(2, 9);
+
+                console.log('✅ Chat loaded from database:', sessionConfig.name);
             } else {
-                // Generate a demo session for direct access
-                sessionId = 'demo_' + Math.random().toString(36).substr(2, 9);
-                console.log('🔄 Generated demo session for direct access:', sessionId);
+                // Chat not found - show error
+                showChatError('This chat link is no longer active or does not exist.');
+                isInitialized = true;
+                return;
             }
-        }
+        } else {
+            // Fallback to URL parameters (legacy mode)
+            const urlParams = new URLSearchParams(window.location.search);
+            let sessionId = urlParams.get('session');
+            const typeParam = urlParams.get('type');
+            const chatName = urlParams.get('name');
+            const welcomeMsg = urlParams.get('welcome');
+            const topics = urlParams.get('topics');
+            const questionsParam = urlParams.get('questions');
 
-        // Create session configuration from URL parameters
-        sessionConfig = {
-            id: sessionId,
-            type: typeParam || 'listening',
-            name: chatName || 'Feedback Session',
-            welcomeMessage: welcomeMsg || 'Welcome to this feedback session!',
-            topics: topics ? topics.split(',').map(t => t.trim()) : null,
-            questions: questionsParam ? JSON.parse(decodeURIComponent(questionsParam)) : null
-        };
-        
-        chatType = sessionConfig.type;
-        chatState.participantId = sessionId;
+            console.log('📋 URL params:', { sessionId, typeParam, chatName, welcomeMsg, topics, questionsParam });
+
+            // Allow direct access for testing or when using API-generated sessions
+            if (!sessionId) {
+                // Check if this is API-powered mode
+                if (typeof apiChatState !== 'undefined' && apiChatState.sessionId) {
+                    sessionId = apiChatState.sessionId;
+                    console.log('🔄 Using API-generated session:', sessionId);
+                } else {
+                    // Generate a demo session for direct access
+                    sessionId = 'demo_' + Math.random().toString(36).substr(2, 9);
+                    console.log('🔄 Generated demo session for direct access:', sessionId);
+                }
+            }
+
+            // Create session configuration from URL parameters
+            sessionConfig = {
+                id: sessionId,
+                type: typeParam || 'listening',
+                name: chatName || 'Feedback Session',
+                welcomeMessage: welcomeMsg || 'Welcome to this feedback session!',
+                topics: topics ? topics.split(',').map(t => t.trim()) : null,
+                questions: questionsParam ? JSON.parse(decodeURIComponent(questionsParam)) : null
+            };
+
+            chatType = sessionConfig.type;
+            chatState.participantId = sessionId;
+        }
 
         // Apply organization branding if available
         applyBranding();

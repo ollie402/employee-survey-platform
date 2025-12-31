@@ -3696,26 +3696,7 @@
                                     <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                                     <span>Blank</span>
                                 </div>
-                                <!-- Example Chat Card -->
-                                <div class="chat-card" onclick="openChatEditor('chat-1')">
-                                    <div class="chat-card-header"></div>
-                                    <div class="chat-card-body">
-                                        <div class="chat-card-title">Team Feedback Chat</div>
-                                        <div class="chat-card-meta">
-                                            <span>Opened Dec 29, 2025</span>
-                                        </div>
-                                        <div class="chat-card-actions">
-                                            <button class="chat-card-action" onclick="event.stopPropagation(); copyChatLink('chat-1')">
-                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
-                                                Copy link
-                                            </button>
-                                            <button class="chat-card-action" onclick="event.stopPropagation(); deleteChat('chat-1')">
-                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                                                Delete
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
+                                <!-- Chat cards will be loaded dynamically from database -->
                             </div>
                         </main>
                     </div>
@@ -3754,37 +3735,86 @@
 
                         <!-- Setup Tab -->
                         <div id="chat-editor-tab-setup" class="chat-editor-tab-content">
-                            <div style="max-width: 900px; background: white; border-radius: 12px; padding: 32px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);">
+                            <div class="chat-editor-setup-content">
+                                <!-- Left side: Form -->
+                                <div class="chat-editor-form" style="max-width: 500px; background: white; border-radius: 12px; padding: 32px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);">
 
-                                <div style="margin-bottom: 24px;">
-                                    <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #1e293b;">Chat Name</label>
-                                    <input type="text" id="chat-setup-name" placeholder="e.g., General Feedback, Customer Insights" style="width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
-                                </div>
+                                    <div style="margin-bottom: 24px;">
+                                        <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #1e293b;">Chat Name</label>
+                                        <input type="text" id="chat-setup-name" placeholder="e.g., General Feedback, Customer Insights" style="width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+                                    </div>
 
-                                <div style="margin-bottom: 24px;">
-                                    <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #1e293b;">Welcome Message</label>
-                                    <textarea id="chat-setup-welcome" rows="4" placeholder="Hi! Thanks for taking the time to share your feedback with us." style="width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; resize: vertical; box-sizing: border-box;">Hi! Thanks for taking the time to share your feedback with us. Please feel free to tell us about your experience or any suggestions you might have.</textarea>
-                                    <p style="color: #94a3b8; font-size: 12px; margin-top: 4px;">This message will appear when users first open the chat</p>
-                                </div>
+                                    <div style="margin-bottom: 24px;">
+                                        <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #1e293b;">Welcome Message</label>
+                                        <textarea id="chat-setup-welcome" rows="4" placeholder="Hi! Thanks for taking the time to share your feedback with us." style="width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; resize: vertical; box-sizing: border-box;">Hi! Thanks for taking the time to share your feedback with us. Please feel free to tell us about your experience or any suggestions you might have.</textarea>
+                                        <p style="color: #94a3b8; font-size: 12px; margin-top: 4px;">This message will appear when users first open the chat</p>
+                                    </div>
 
-                                <div style="margin-bottom: 24px;">
-                                    <label style="display: block; font-weight: 600; margin-bottom: 12px; color: #1e293b;">Access Type</label>
-                                    <div style="display: flex; gap: 16px;">
-                                        <div onclick="selectAccessType('open')" id="access-type-open" style="flex: 1; padding: 20px; border: 2px solid #3b82f6; border-radius: 12px; cursor: pointer; text-align: center; background: #eff6ff;">
-                                            <div style="font-size: 32px; margin-bottom: 8px;">🌐</div>
-                                            <div style="font-weight: 600; color: #1e293b;">Open Access</div>
-                                            <div style="font-size: 12px; color: #64748b;">Anyone with the link can access</div>
+                                    <div style="margin-bottom: 24px;">
+                                        <label style="display: block; font-weight: 600; margin-bottom: 12px; color: #1e293b;">Access Type</label>
+                                        <div style="display: flex; gap: 16px;">
+                                            <div onclick="selectAccessType('open')" id="access-type-open" style="flex: 1; padding: 20px; border: 2px solid #3b82f6; border-radius: 12px; cursor: pointer; text-align: center; background: #eff6ff;">
+                                                <div style="font-size: 32px; margin-bottom: 8px;">🌐</div>
+                                                <div style="font-weight: 600; color: #1e293b;">Open Access</div>
+                                                <div style="font-size: 12px; color: #64748b;">Anyone with the link can access</div>
+                                            </div>
+                                            <div onclick="selectAccessType('invite')" id="access-type-invite" style="flex: 1; padding: 20px; border: 2px solid #e2e8f0; border-radius: 12px; cursor: pointer; text-align: center;">
+                                                <div style="font-size: 32px; margin-bottom: 8px;">🔒</div>
+                                                <div style="font-weight: 600; color: #1e293b;">Invite Only</div>
+                                                <div style="font-size: 12px; color: #64748b;">Only invited emails can access</div>
+                                            </div>
                                         </div>
-                                        <div onclick="selectAccessType('invite')" id="access-type-invite" style="flex: 1; padding: 20px; border: 2px solid #e2e8f0; border-radius: 12px; cursor: pointer; text-align: center;">
-                                            <div style="font-size: 32px; margin-bottom: 8px;">🔒</div>
-                                            <div style="font-weight: 600; color: #1e293b;">Invite Only</div>
-                                            <div style="font-size: 12px; color: #64748b;">Only invited emails can access</div>
+                                    </div>
+
+                                    <div class="chat-editor-buttons">
+                                        <button onclick="generateChatLink()" class="btn-generate-link">Generate Link</button>
+                                        <button type="button" id="saveChatBtn" class="btn-save-chat">Save</button>
+                                    </div>
+
+                                </div>
+
+                                <!-- Right side: Success Panel -->
+                                <div id="chat-success-panel" class="chat-success-panel" style="display: none;">
+                                    <div class="chat-success-card">
+                                        <div class="chat-success-header">
+                                            <span class="party-emoji">🎉</span>
+                                            <h2>Listening Chat Created!</h2>
+                                            <button class="chat-success-close-x" id="closeSuccessPanelX">&times;</button>
+                                        </div>
+
+                                        <div class="chat-success-ready">
+                                            <span class="green-check">✓</span>
+                                            <span>"<span id="successChatName">Untitled Chat</span>" is ready!</span>
+                                        </div>
+                                        <p class="chat-success-subtitle">Your listening chat has been created and is ready to collect feedback.</p>
+
+                                        <div class="chat-link-section">
+                                            <label class="chat-link-label">Your Chat Link</label>
+                                            <div class="chat-link-input-group">
+                                                <input type="text" id="generatedChatLink" class="chat-link-input" readonly>
+                                                <button id="copyLinkBtn" class="copy-link-btn">Copy Link</button>
+                                            </div>
+                                            <p class="chat-link-helper">Share this link with your audience to start collecting feedback.</p>
+                                        </div>
+
+                                        <div class="next-steps-box">
+                                            <div class="next-steps-header">
+                                                <span>💡</span>
+                                                <strong>Next Steps:</strong>
+                                            </div>
+                                            <ul class="next-steps-list">
+                                                <li>Copy and share the link with your audience</li>
+                                                <li>Monitor responses in the Active Chats section</li>
+                                                <li>View analytics and insights as feedback comes in</li>
+                                            </ul>
+                                        </div>
+
+                                        <div class="chat-success-buttons">
+                                            <button id="closeSuccessPanel" class="btn-close-panel">Close</button>
+                                            <button id="testChatBtn" class="btn-test-chat">Test Chat</button>
                                         </div>
                                     </div>
                                 </div>
-
-                                <button onclick="generateChatLink()" style="width: 100%; background: #3b82f6; color: white; border: none; padding: 14px 24px; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 8px;">Generate Link</button>
-
                             </div>
                         </div>
 
@@ -9265,6 +9295,18 @@ function showSection(sectionName) {
             }
         }, 100);
     }
+
+    // Load listening chats when showing listen section
+    if (sectionName === 'listen' && typeof renderChatCards === 'function') {
+        setTimeout(() => {
+            try {
+                console.log('💬 Loading listening chats...');
+                renderChatCards();
+            } catch (error) {
+                console.error('Error loading listening chats:', error);
+            }
+        }, 100);
+    }
 }
 
 // Helper function to update navigation highlighting
@@ -11033,20 +11075,88 @@ function sbRenderDashboard() {
 
 // Open chat editor (called when clicking Blank or existing chat)
 function openChatEditor(chatId = null) {
-    // Reset form for new chat
+    // Hide success panel initially
+    const successPanel = document.getElementById('chat-success-panel');
+    if (successPanel) {
+        successPanel.style.display = 'none';
+    }
+
+    // Clear the editing ID
+    window.currentEditingChatId = null;
+
+    // Reset form for new chat or load existing
     if (!chatId) {
+        // New chat - reset form
         document.getElementById('chat-editor-name').value = '';
         document.getElementById('chat-setup-name').value = '';
         document.getElementById('chat-setup-welcome').value = 'Hi! Thanks for taking the time to share your feedback with us. Please feel free to tell us about your experience or any suggestions you might have.';
         selectAccessType('open');
     } else {
-        // Load existing chat data
-        document.getElementById('chat-editor-name').value = 'Team Feedback Chat';
-        document.getElementById('chat-setup-name').value = 'Team Feedback Chat';
+        // Existing chat - load from database
+        loadChatIntoEditor(chatId);
     }
 
     showSection('chat-editor');
     showChatEditorTab('setup');
+}
+
+// Load existing chat data into the editor
+async function loadChatIntoEditor(chatId) {
+    try {
+        // Fetch chat from database
+        const { data: chat, error } = await window.supabaseClient
+            .from('listening_chats')
+            .select('*')
+            .eq('id', chatId)
+            .single();
+
+        if (error) throw error;
+
+        if (!chat) {
+            console.error('Chat not found');
+            return;
+        }
+
+        // Store the current chat ID for saving updates later
+        window.currentEditingChatId = chatId;
+
+        // Populate form fields
+        const chatEditorName = document.getElementById('chat-editor-name');
+        const chatSetupName = document.getElementById('chat-setup-name');
+        const chatSetupWelcome = document.getElementById('chat-setup-welcome');
+
+        if (chatEditorName) chatEditorName.value = chat.name || '';
+        if (chatSetupName) chatSetupName.value = chat.name || '';
+        if (chatSetupWelcome) chatSetupWelcome.value = chat.welcome_message || '';
+
+        // Set access type selection
+        if (chat.access_type === 'invite_only') {
+            selectAccessType('invite');
+        } else {
+            selectAccessType('open');
+        }
+
+        // Show the success panel on the right with existing link
+        const successPanel = document.getElementById('chat-success-panel');
+        const successChatName = document.getElementById('successChatName');
+        const generatedChatLink = document.getElementById('generatedChatLink');
+
+        if (successPanel) {
+            successPanel.style.display = 'block';
+        }
+        if (successChatName) {
+            successChatName.textContent = chat.name || 'Untitled Chat';
+        }
+        if (generatedChatLink) {
+            generatedChatLink.value = 'https://rworldfeedback.co.uk/chat/' + chat.slug;
+        }
+
+        console.log('Loaded chat into editor:', chat.name);
+
+    } catch (error) {
+        console.error('Error loading chat:', error);
+        alert('Failed to load chat: ' + error.message);
+    }
 }
 
 // Show Chat Editor tab
@@ -11094,27 +11204,360 @@ function selectAccessType(type) {
     }
 }
 
-// Generate chat link (placeholder)
-function generateChatLink() {
-    const chatName = document.getElementById('chat-setup-name').value || 'Untitled Chat';
-    alert('Chat "' + chatName + '" link generated! (Functionality to be connected)');
+// Generate unique ID for chat link
+function generateUniqueId() {
+    return Math.random().toString(36).substring(2, 10);
 }
 
-function copyChatLink(chatId) {
-    const link = window.location.origin + '/chat/' + chatId;
+// Generate chat link and show success panel
+function generateChatLink() {
+    const chatName = document.getElementById('chat-setup-name').value || 'Untitled Chat';
+    const successPanel = document.getElementById('chat-success-panel');
+    const successChatName = document.getElementById('successChatName');
+    const generatedChatLink = document.getElementById('generatedChatLink');
+
+    // Generate unique ID and create link
+    const uniqueId = generateUniqueId();
+    const chatLink = 'https://rworldfeedback.co.uk/chat/' + uniqueId;
+
+    // Update success panel content
+    successChatName.textContent = chatName;
+    generatedChatLink.value = chatLink;
+
+    // Show success panel
+    successPanel.style.display = 'block';
+}
+
+// Initialize chat success panel event listeners
+function initChatSuccessPanel() {
+    const copyLinkBtn = document.getElementById('copyLinkBtn');
+    const closeSuccessPanel = document.getElementById('closeSuccessPanel');
+    const closeSuccessPanelX = document.getElementById('closeSuccessPanelX');
+    const testChatBtn = document.getElementById('testChatBtn');
+    const successPanel = document.getElementById('chat-success-panel');
+    const generatedChatLink = document.getElementById('generatedChatLink');
+
+    // Copy Link button handler
+    if (copyLinkBtn) {
+        copyLinkBtn.addEventListener('click', function() {
+            const link = generatedChatLink.value;
+            navigator.clipboard.writeText(link).then(function() {
+                // Show feedback
+                const originalText = copyLinkBtn.textContent;
+                copyLinkBtn.textContent = 'Copied!';
+                copyLinkBtn.style.background = '#22c55e';
+                setTimeout(function() {
+                    copyLinkBtn.textContent = originalText;
+                    copyLinkBtn.style.background = '#3b82f6';
+                }, 2000);
+            });
+        });
+    }
+
+    // Close button handler
+    if (closeSuccessPanel) {
+        closeSuccessPanel.addEventListener('click', function() {
+            successPanel.style.display = 'none';
+        });
+    }
+
+    // Close X button handler
+    if (closeSuccessPanelX) {
+        closeSuccessPanelX.addEventListener('click', function() {
+            successPanel.style.display = 'none';
+        });
+    }
+
+    // Test Chat button handler
+    if (testChatBtn) {
+        testChatBtn.addEventListener('click', function() {
+            const link = generatedChatLink.value;
+            window.open(link, '_blank');
+        });
+    }
+}
+
+// Initialize chat success panel when DOM is ready
+document.addEventListener('DOMContentLoaded', initChatSuccessPanel);
+
+// Copy chat link to clipboard (for slug-based links)
+function copyChatLink(slug) {
+    const link = 'https://rworldfeedback.co.uk/chat/' + slug;
     navigator.clipboard.writeText(link).then(() => {
-        alert('Chat link copied to clipboard!');
+        // Show brief feedback
+        const btn = document.querySelector(`.chat-card[data-chat-slug="${slug}"] .chat-card-action`);
+        if (btn) {
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Copied!';
+            setTimeout(() => { btn.innerHTML = originalText; }, 2000);
+        }
     }).catch(() => {
         alert('Failed to copy link');
     });
 }
 
+// Legacy deleteChat function (placeholder for non-database chats)
 function deleteChat(chatId) {
     if (confirm('Are you sure you want to delete this chat?')) {
         console.log('Deleting chat:', chatId);
         alert('Delete chat functionality coming soon!');
     }
 }
+
+// ============================================
+// LISTENING CHATS DATABASE FUNCTIONS
+// ============================================
+
+// Generate unique slug for chat
+function generateSlug() {
+    return Math.random().toString(36).substring(2, 10) + Math.random().toString(36).substring(2, 4);
+}
+
+// Get current access type selection
+function getSelectedAccessType() {
+    const openCard = document.getElementById('access-type-open');
+    if (openCard && openCard.style.borderColor === 'rgb(59, 130, 246)') {
+        return 'open';
+    }
+    return 'invite_only';
+}
+
+// Save chat to database (handles both new and existing chats)
+async function saveListeningChat() {
+    const saveChatBtn = document.getElementById('saveChatBtn');
+
+    // Get form values
+    const chatNameInput = document.getElementById('chat-setup-name');
+    const welcomeMessageInput = document.getElementById('chat-setup-welcome');
+
+    const chatName = chatNameInput?.value?.trim() || 'Untitled Chat';
+    const welcomeMessage = welcomeMessageInput?.value?.trim() || 'Hi! Thanks for taking the time to share your feedback with us. Please feel free to tell us about your experience or any suggestions you might have.';
+
+    // Determine access type
+    const accessType = getSelectedAccessType();
+
+    // Disable button and show loading state
+    saveChatBtn.disabled = true;
+    saveChatBtn.textContent = 'Saving...';
+
+    try {
+        // Check if we're updating an existing chat or creating a new one
+        const isUpdating = window.currentEditingChatId !== null && window.currentEditingChatId !== undefined;
+
+        if (isUpdating) {
+            // UPDATE existing chat
+            const { data: chatData, error: chatError } = await window.supabaseClient
+                .from('listening_chats')
+                .update({
+                    name: chatName,
+                    welcome_message: welcomeMessage,
+                    access_type: accessType
+                })
+                .eq('id', window.currentEditingChatId)
+                .select()
+                .single();
+
+            if (chatError) {
+                throw chatError;
+            }
+
+            console.log('Chat updated successfully:', chatData);
+
+        } else {
+            // INSERT new chat
+            // Get current user's organization_id and user id
+            const { data: { user } } = await window.supabaseClient.auth.getUser();
+
+            if (!user) {
+                throw new Error('Not authenticated');
+            }
+
+            // Get user's organization_id from users table
+            const { data: userData, error: userError } = await window.supabaseClient
+                .from('users')
+                .select('id, organization_id')
+                .eq('auth_id', user.id)
+                .single();
+
+            if (userError || !userData) {
+                throw new Error('Could not get user data');
+            }
+
+            // Generate unique slug for new chat
+            const slug = generateSlug();
+
+            const { data: chatData, error: chatError } = await window.supabaseClient
+                .from('listening_chats')
+                .insert({
+                    organization_id: userData.organization_id,
+                    created_by: userData.id,
+                    name: chatName,
+                    welcome_message: welcomeMessage,
+                    access_type: accessType,
+                    slug: slug,
+                    is_active: true
+                })
+                .select()
+                .single();
+
+            if (chatError) {
+                throw chatError;
+            }
+
+            console.log('Chat created successfully:', chatData);
+        }
+
+        // Navigate back to the chats list page
+        showSection('listen');
+
+    } catch (error) {
+        console.error('Error saving chat:', error);
+        alert('Failed to save chat: ' + error.message);
+    } finally {
+        saveChatBtn.disabled = false;
+        saveChatBtn.textContent = 'Save';
+    }
+}
+
+// Load listening chats from database
+async function loadListeningChats() {
+    try {
+        const { data: { user } } = await window.supabaseClient.auth.getUser();
+
+        if (!user) {
+            console.log('Not authenticated');
+            return [];
+        }
+
+        const { data: chats, error } = await window.supabaseClient
+            .from('listening_chats')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            throw error;
+        }
+
+        return chats || [];
+
+    } catch (error) {
+        console.error('Error loading chats:', error);
+        return [];
+    }
+}
+
+// Format date for display
+function formatChatDate(dateString) {
+    const date = new Date(dateString);
+    const options = { year: 'numeric', month: 'short', day: 'numeric' };
+    return date.toLocaleDateString('en-US', options);
+}
+
+// Generate chat card HTML
+function createChatCardHTML(chat) {
+    return `
+        <div class="chat-card" data-chat-id="${chat.id}" data-chat-slug="${chat.slug}" onclick="openChatEditor('${chat.id}')">
+            <div class="chat-card-header"></div>
+            <div class="chat-card-body">
+                <div class="chat-card-title">${chat.name}</div>
+                <div class="chat-card-meta">
+                    <span>Opened ${formatChatDate(chat.created_at)}</span>
+                </div>
+                <div class="chat-card-actions">
+                    <button class="chat-card-action" onclick="event.stopPropagation(); copyChatLink('${chat.slug}')">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                        </svg>
+                        Copy link
+                    </button>
+                    <button class="chat-card-action" onclick="event.stopPropagation(); deleteListeningChat('${chat.id}')">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 6h18"></path>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path>
+                            <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        </svg>
+                        Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// Render all chat cards
+async function renderChatCards() {
+    const chats = await loadListeningChats();
+    const chatsGrid = document.getElementById('chats-grid');
+
+    if (!chatsGrid) {
+        console.error('Chats grid container not found');
+        return;
+    }
+
+    // Keep the "New Chat" card, clear the rest
+    const newChatCard = chatsGrid.querySelector('.new-chat-card');
+    chatsGrid.innerHTML = '';
+
+    // Re-add new chat card first
+    if (newChatCard) {
+        chatsGrid.appendChild(newChatCard);
+    } else {
+        // Create new chat card if it doesn't exist
+        chatsGrid.innerHTML = `
+            <div class="new-chat-card" onclick="openChatEditor()">
+                <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                <span>Blank</span>
+            </div>
+        `;
+    }
+
+    // Add chat cards from database
+    chats.forEach(chat => {
+        chatsGrid.insertAdjacentHTML('beforeend', createChatCardHTML(chat));
+    });
+}
+
+// Delete a listening chat from database
+async function deleteListeningChat(chatId) {
+    if (!confirm('Are you sure you want to delete this chat? This cannot be undone.')) {
+        return;
+    }
+
+    try {
+        const { error } = await window.supabaseClient
+            .from('listening_chats')
+            .delete()
+            .eq('id', chatId);
+
+        if (error) {
+            throw error;
+        }
+
+        // Remove card from UI
+        const card = document.querySelector(`.chat-card[data-chat-id="${chatId}"]`);
+        if (card) {
+            card.remove();
+        }
+
+        console.log('Chat deleted successfully');
+
+    } catch (error) {
+        console.error('Error deleting chat:', error);
+        alert('Failed to delete chat: ' + error.message);
+    }
+}
+
+// Initialize save chat button event listener
+function initSaveChatButton() {
+    const saveChatBtn = document.getElementById('saveChatBtn');
+    if (saveChatBtn) {
+        saveChatBtn.addEventListener('click', saveListeningChat);
+    }
+}
+
+// Initialize save button when DOM is ready
+document.addEventListener('DOMContentLoaded', initSaveChatButton);
 
 function sbCreateNewSurvey() {
     sbCurrentSurvey = sbCreateDefaultSurvey();
