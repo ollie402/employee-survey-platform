@@ -2594,12 +2594,7 @@
    CHAT TILES GRID
    ============================================ */
 
-.chats-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    padding: 20px 0;
-}
+/* Note: .chats-grid styles are defined in the CHAT GRID STACKED CARDS section below */
 
 .new-chat-card {
     width: 200px;
@@ -2700,6 +2695,129 @@
 
 .chat-card-action svg {
     flex-shrink: 0;
+}
+
+/* ============================================
+   CHAT GRID STACKED CARDS
+   ============================================ */
+
+.chats-grid-container {
+    padding: 0;
+}
+
+.chats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+    max-width: 1200px;
+    padding: 20px 0;
+}
+
+/* Stacked cards effect */
+.chat-stack {
+    position: relative;
+    min-width: 200px;
+    height: 160px;
+    cursor: pointer;
+}
+
+.stack-card {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.stack-card.stack-3 {
+    top: 8px;
+    left: 8px;
+    z-index: 1;
+}
+
+.stack-card.stack-2 {
+    top: 4px;
+    left: 4px;
+    z-index: 2;
+}
+
+.stack-card.stack-1 {
+    top: 0;
+    left: 0;
+    z-index: 3;
+}
+
+.stack-top {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    z-index: 4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.stack-top:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.stack-count {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #3b82f6;
+}
+
+/* Expanded overflow section */
+.chats-overflow-expanded {
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.overflow-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.overflow-header span {
+    font-weight: 600;
+    color: #374151;
+}
+
+.btn-show-less {
+    padding: 8px 16px;
+    background: #f3f4f6;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    color: #374151;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-show-less:hover {
+    background: #e5e7eb;
+}
+
+.overflow-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: 8px;
 }
 
 /* ============================================

@@ -3682,21 +3682,38 @@
                 <!-- Listen Section (Chats) -->
                 <div id="listen-section" class="hidden">
                     <div class="chats-container">
-                        <header class="chat-dashboard-header">
-                            <div class="chat-dashboard-header-content">
-                                <div class="chat-logo">💬</div>
-                                <span class="chat-dashboard-title">Chats</span>
-                            </div>
-                        </header>
                         <main class="chat-dashboard-main">
                             <h1 class="chat-dashboard-section-title">Recent chats</h1>
-                            <div class="chats-grid" id="chats-grid">
-                                <!-- New Chat Card -->
-                                <div class="new-chat-card" onclick="openChatEditor()">
-                                    <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                                    <span>Blank</span>
+                            <div class="chats-grid-container">
+                                <div class="chats-grid" id="chats-grid">
+                                    <!-- New Chat Card -->
+                                    <div class="new-chat-card" onclick="openChatEditor()">
+                                        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                        <span>Blank</span>
+                                    </div>
+                                    <!-- Chat cards will be loaded dynamically from database -->
+
+                                    <!-- Stacked overflow (only shown when needed) -->
+                                    <div class="chat-stack" id="chatStack" style="display: none;">
+                                        <div class="stack-card stack-3"></div>
+                                        <div class="stack-card stack-2"></div>
+                                        <div class="stack-card stack-1"></div>
+                                        <div class="stack-top">
+                                            <span class="stack-count">+5 more</span>
+                                        </div>
+                                    </div>
                                 </div>
-                                <!-- Chat cards will be loaded dynamically from database -->
+
+                                <!-- Expanded overflow section (hidden by default) -->
+                                <div class="chats-overflow-expanded" id="chatsOverflowExpanded" style="display: none;">
+                                    <div class="overflow-header">
+                                        <span>All chats</span>
+                                        <button class="btn-show-less" id="showLessBtn">Show less</button>
+                                    </div>
+                                    <div class="overflow-grid" id="overflowGrid">
+                                        <!-- Hidden tiles appear here when expanded -->
+                                    </div>
+                                </div>
                             </div>
                         </main>
                     </div>
@@ -11524,38 +11541,124 @@ function createChatCardHTML(chat) {
     `;
 }
 
-// Render all chat cards
+// Maximum visible tiles before stacking (not counting blank card)
+const MAX_VISIBLE_TILES = 8;
+
+// Store overflow chats for expansion
+window.overflowChats = [];
+
+// Render all chat cards with stacking for overflow
 async function renderChatCards() {
     const chats = await loadListeningChats();
     const chatsGrid = document.getElementById('chats-grid');
+    const stack = document.getElementById('chatStack');
+    const overflowExpanded = document.getElementById('chatsOverflowExpanded');
+    const overflowGrid = document.getElementById('overflowGrid');
 
     if (!chatsGrid) {
         console.error('Chats grid container not found');
         return;
     }
 
-    // Keep the "New Chat" card, clear the rest
-    const newChatCard = chatsGrid.querySelector('.new-chat-card');
-    chatsGrid.innerHTML = '';
+    // Clear existing chat cards (but keep structure)
+    const existingCards = chatsGrid.querySelectorAll('.chat-card');
+    existingCards.forEach(card => card.remove());
 
-    // Re-add new chat card first
-    if (newChatCard) {
-        chatsGrid.appendChild(newChatCard);
-    } else {
-        // Create new chat card if it doesn't exist
-        chatsGrid.innerHTML = `
+    // Reset stack and overflow
+    if (stack) stack.style.display = 'none';
+    if (overflowExpanded) overflowExpanded.style.display = 'none';
+    if (overflowGrid) overflowGrid.innerHTML = '';
+    window.overflowChats = [];
+
+    // Ensure new chat card exists
+    let newChatCard = chatsGrid.querySelector('.new-chat-card');
+    if (!newChatCard) {
+        const newChatHTML = `
             <div class="new-chat-card" onclick="openChatEditor()">
                 <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                 <span>Blank</span>
             </div>
         `;
+        chatsGrid.insertAdjacentHTML('afterbegin', newChatHTML);
+        newChatCard = chatsGrid.querySelector('.new-chat-card');
     }
 
-    // Add chat cards from database
-    chats.forEach(chat => {
-        chatsGrid.insertAdjacentHTML('beforeend', createChatCardHTML(chat));
+    if (!chats || chats.length === 0) {
+        return;
+    }
+
+    // Split chats into visible and overflow
+    const visibleChats = chats.slice(0, MAX_VISIBLE_TILES);
+    const overflowChatsData = chats.slice(MAX_VISIBLE_TILES);
+
+    // Render visible tiles (insert before the stack element)
+    visibleChats.forEach(chat => {
+        const cardHTML = createChatCardHTML(chat);
+        if (stack) {
+            stack.insertAdjacentHTML('beforebegin', cardHTML);
+        } else {
+            chatsGrid.insertAdjacentHTML('beforeend', cardHTML);
+        }
     });
+
+    // Show stack if there are overflow chats
+    if (overflowChatsData.length > 0 && stack) {
+        stack.style.display = 'block';
+        const stackCount = stack.querySelector('.stack-count');
+        if (stackCount) {
+            stackCount.textContent = `+${overflowChatsData.length} more`;
+        }
+        window.overflowChats = overflowChatsData;
+    }
 }
+
+// Handle stack click to expand
+function expandChatStack() {
+    const stack = document.getElementById('chatStack');
+    const overflowExpanded = document.getElementById('chatsOverflowExpanded');
+    const overflowGrid = document.getElementById('overflowGrid');
+
+    if (!stack || !overflowExpanded || !overflowGrid) return;
+
+    // Hide the stack
+    stack.style.display = 'none';
+
+    // Show expanded section
+    overflowExpanded.style.display = 'block';
+
+    // Render overflow tiles
+    if (window.overflowChats && window.overflowChats.length > 0) {
+        overflowGrid.innerHTML = window.overflowChats.map(chat => createChatCardHTML(chat)).join('');
+    }
+}
+
+// Handle show less click
+function collapseChatStack() {
+    const stack = document.getElementById('chatStack');
+    const overflowExpanded = document.getElementById('chatsOverflowExpanded');
+
+    if (!stack || !overflowExpanded) return;
+
+    // Hide expanded section
+    overflowExpanded.style.display = 'none';
+
+    // Show stack again
+    stack.style.display = 'block';
+}
+
+// Set up event listeners for stack expand/collapse
+document.addEventListener('DOMContentLoaded', function() {
+    const stack = document.getElementById('chatStack');
+    const showLessBtn = document.getElementById('showLessBtn');
+
+    if (stack) {
+        stack.addEventListener('click', expandChatStack);
+    }
+
+    if (showLessBtn) {
+        showLessBtn.addEventListener('click', collapseChatStack);
+    }
+});
 
 // Delete a listening chat from database
 async function deleteListeningChat(chatId) {
