@@ -730,41 +730,55 @@
 
     // Save response to database
     async function saveResponseToDatabase(messageText) {
+        console.log('📤 saveResponseToDatabase called with:', messageText);
+
         const chat = window.currentChat;
+        console.log('📋 Current chat object:', chat);
 
         if (!chat || !chat.id) {
-            console.error('No chat loaded - cannot save response');
+            console.error('❌ No chat loaded - cannot save response. window.currentChat:', window.currentChat);
             return false;
         }
 
         if (!window.supabaseClient) {
-            console.error('Supabase client not available');
+            console.error('❌ Supabase client not available');
             return false;
         }
 
         const sessionId = getOrCreateSessionId();
+        console.log('🔑 Session ID:', sessionId);
+
+        const insertData = {
+            chat_id: chat.id,
+            session_id: sessionId,
+            response_text: messageText,
+            participant_name: null,
+            participant_email: null,
+            is_read: false,
+            submitted_at: new Date().toISOString()
+        };
+        console.log('📝 Insert data:', insertData);
 
         try {
+            console.log('⏳ Attempting to insert into chat_responses...');
+
             const { data, error } = await window.supabaseClient
                 .from('chat_responses')
-                .insert({
-                    chat_id: chat.id,
-                    session_id: sessionId,
-                    response_text: messageText,
-                    participant_name: null,
-                    participant_email: null,
-                    is_read: false
-                })
+                .insert(insertData)
                 .select()
                 .single();
 
-            if (error) throw error;
+            if (error) {
+                console.error('❌ Supabase insert error:', error);
+                throw error;
+            }
 
-            console.log('Response saved to database:', data);
+            console.log('✅ Response saved to database:', data);
             return true;
 
         } catch (error) {
-            console.error('Error saving response to database:', error);
+            console.error('❌ Error saving response to database:', error);
+            console.error('Error details:', JSON.stringify(error, null, 2));
             return false;
         }
     }
@@ -1216,10 +1230,19 @@
     }
 
     function sendMessage() {
+        console.log('📨 sendMessage called');
+
         const input = document.getElementById('user-input');
         const message = input.value.trim();
 
-        if (!message) return;
+        console.log('📝 Message text:', message);
+        console.log('🔧 Chat type:', chatType);
+        console.log('💬 window.currentChat:', window.currentChat);
+
+        if (!message) {
+            console.log('⚠️ Empty message, returning');
+            return;
+        }
 
         // Add user message
         addUserMessage(message);
@@ -1233,18 +1256,24 @@
 
         // Process based on chat type
         if (chatType === 'listening') {
+            console.log('🎧 Routing to handleListeningResponse');
             handleListeningResponse(message);
         } else if (chatType === 'chat') {
+            console.log('💬 Routing to handleChatSurveyResponse');
             handleChatSurveyResponse(message);
+        } else {
+            console.log('⚠️ Unknown chatType:', chatType);
         }
     }
 
     function handleListeningResponse(message) {
+        console.log('🎧 handleListeningResponse called with:', message);
+
         // Store response locally
         chatState.responses[`response_${Date.now()}`] = message;
 
-        // Save response to database
-        saveResponseToDatabase(message);
+        // NOTE: Database save is handled by the enhanced sendMessage function
+        // to prevent duplicate saves
 
         // Simulate AI response
         setTimeout(() => {
@@ -1365,8 +1394,8 @@
             chatState.currentQuestionIndex++;
         }
 
-        // Save response to database
-        saveResponseToDatabase(message);
+        // NOTE: Database save is handled by the enhanced sendMessage function
+        // to prevent duplicate saves
 
         // Show typing and ask next question
         setTimeout(() => {
@@ -1846,7 +1875,12 @@
                 const input = document.getElementById('user-input');
                 const message = input.value.trim();
 
-                if (!message || apiChatState.conversationComplete) return;
+                console.log('🚀 Enhanced sendMessage called with:', message);
+
+                if (!message || apiChatState.conversationComplete) {
+                    console.log('⚠️ Empty message or conversation complete, returning');
+                    return;
+                }
 
                 // Add user message to UI
                 addUserMessage(message);
@@ -1856,17 +1890,21 @@
                 // Show typing indicator
                 showTypingIndicator();
 
+                // ALWAYS save response to database regardless of mode
+                console.log('💾 Saving response to database from enhanced sendMessage...');
+                saveResponseToDatabase(message).then(saved => {
+                    console.log('✅ Database save result:', saved);
+                }).catch(err => {
+                    console.error('❌ Database save error:', err);
+                });
+
                 if (apiChatState.isRealTime) {
+                    console.log('🔴 Using real-time mode');
                     await handleRealTimeResponse(message);
-                } else if (originalSendMessage) {
-                    // Fallback to original functionality
-                    originalSendMessage();
                 } else {
-                    // Basic fallback response
-                    setTimeout(() => {
-                        hideTypingIndicator();
-                        addBotMessage("Thank you for your message. Is there anything else you'd like to share?");
-                    }, 1500);
+                    console.log('📦 Using standard mode - calling handleListeningResponse directly');
+                    // Call handleListeningResponse directly since originalSendMessage would see empty input
+                    handleListeningResponse(message);
                 }
             };
         }
