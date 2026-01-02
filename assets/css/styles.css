@@ -96,11 +96,14 @@
         }
 
         .nav-item:hover {
+            background-color: transparent;
             border: 2px solid #d6366c;
         }
 
         .nav-item.active {
-            background: var(--primary-color);
+            background: transparent;
+            background-color: transparent;
+            border: 2px solid #d6366c;
             color: white;
         }
 
@@ -2544,6 +2547,277 @@
 }
 
 /* ============================================
+   PARTICIPANT ENTRY PANEL (Invite Only)
+   ============================================ */
+
+.participant-entry-panel {
+    flex: 1;
+    min-width: 0;
+}
+
+.participant-entry-card {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 24px;
+    border: 1px solid #e5e7eb;
+}
+
+.participant-entry-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    position: relative;
+}
+
+.participant-entry-header h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.participant-entry-header .header-icon {
+    font-size: 1.5rem;
+}
+
+.participant-entry-header .close-panel-x {
+    position: absolute;
+    right: 0;
+    top: 0;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: #9ca3af;
+    cursor: pointer;
+}
+
+.participant-entry-header .close-panel-x:hover {
+    color: #6b7280;
+}
+
+.participant-entry-subtitle {
+    color: #6b7280;
+    margin: 0 0 20px 0;
+    font-size: 0.9rem;
+}
+
+/* Add participant form */
+.add-participant-form {
+    margin-bottom: 16px;
+}
+
+.add-participant-form .input-row {
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+}
+
+.add-participant-form .input-group {
+    flex: 1;
+}
+
+.add-participant-form .input-group label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 4px;
+}
+
+.add-participant-form .input-group input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    box-sizing: border-box;
+}
+
+.add-participant-form .input-group input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.btn-add-participant {
+    padding: 10px 20px;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.btn-add-participant:hover {
+    background: #2563eb;
+}
+
+/* CSV paste section */
+.csv-paste-section {
+    margin-bottom: 16px;
+}
+
+.btn-csv-toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    background: #f9fafb;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    color: #374151;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+
+.btn-csv-toggle:hover {
+    background: #f3f4f6;
+}
+
+.csv-paste-area {
+    margin-top: 12px;
+}
+
+.csv-paste-area textarea {
+    width: 100%;
+    height: 100px;
+    padding: 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-family: inherit;
+    resize: vertical;
+    box-sizing: border-box;
+}
+
+.btn-parse-csv {
+    margin-top: 8px;
+    padding: 8px 16px;
+    background: #f3f4f6;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    color: #374151;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+
+.btn-parse-csv:hover {
+    background: #e5e7eb;
+}
+
+/* Participants list */
+.participants-list-section {
+    margin-bottom: 20px;
+}
+
+.participants-list-header {
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+}
+
+.participants-list {
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    background: #f9fafb;
+}
+
+.empty-participants {
+    padding: 24px;
+    text-align: center;
+    color: #9ca3af;
+    font-size: 0.9rem;
+}
+
+.participant-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    border-bottom: 1px solid #e5e7eb;
+    background: #ffffff;
+}
+
+.participant-item:last-child {
+    border-bottom: none;
+}
+
+.participant-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.participant-name {
+    font-weight: 500;
+    color: #1f2937;
+}
+
+.participant-email {
+    font-size: 0.85rem;
+    color: #6b7280;
+}
+
+.btn-remove-participant {
+    background: none;
+    border: none;
+    color: #dc2626;
+    cursor: pointer;
+    padding: 4px 8px;
+    font-size: 0.8rem;
+}
+
+.btn-remove-participant:hover {
+    text-decoration: underline;
+}
+
+/* Action buttons */
+.participant-entry-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.participant-entry-buttons .btn-cancel {
+    padding: 10px 20px;
+    background: #6b7280;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.participant-entry-buttons .btn-cancel:hover {
+    background: #4b5563;
+}
+
+.participant-entry-buttons .btn-continue {
+    padding: 10px 20px;
+    background: #22c55e;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.participant-entry-buttons .btn-continue:hover {
+    background: #16a34a;
+}
+
+.participant-entry-buttons .btn-continue:disabled {
+    background: #86efac;
+    cursor: not-allowed;
+}
+
+/* ============================================
    CHAT EDITOR BUTTONS
    ============================================ */
 
@@ -2594,12 +2868,7 @@
    CHAT TILES GRID
    ============================================ */
 
-.chats-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    padding: 20px 0;
-}
+/* Note: .chats-grid styles are defined in the CHAT GRID STACKED CARDS section below */
 
 .new-chat-card {
     width: 200px;
@@ -2700,6 +2969,129 @@
 
 .chat-card-action svg {
     flex-shrink: 0;
+}
+
+/* ============================================
+   CHAT GRID STACKED CARDS
+   ============================================ */
+
+.chats-grid-container {
+    padding: 0;
+}
+
+.chats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+    max-width: 1200px;
+    padding: 20px 0;
+}
+
+/* Stacked cards effect */
+.chat-stack {
+    position: relative;
+    min-width: 200px;
+    height: 160px;
+    cursor: pointer;
+}
+
+.stack-card {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.stack-card.stack-3 {
+    top: 8px;
+    left: 8px;
+    z-index: 1;
+}
+
+.stack-card.stack-2 {
+    top: 4px;
+    left: 4px;
+    z-index: 2;
+}
+
+.stack-card.stack-1 {
+    top: 0;
+    left: 0;
+    z-index: 3;
+}
+
+.stack-top {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    z-index: 4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.stack-top:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.stack-count {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #3b82f6;
+}
+
+/* Expanded overflow section */
+.chats-overflow-expanded {
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.overflow-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.overflow-header span {
+    font-weight: 600;
+    color: #374151;
+}
+
+.btn-show-less {
+    padding: 8px 16px;
+    background: #f3f4f6;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    color: #374151;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-show-less:hover {
+    background: #e5e7eb;
+}
+
+.overflow-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: 8px;
 }
 
 /* ============================================

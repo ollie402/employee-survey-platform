@@ -1196,15 +1196,17 @@
         }
         
         .nav-item:hover {
-            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%) !important;
-            transform: translateX(4px) !important;
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15) !important;
+            background: transparent !important;
+            border: 2px solid #d6366c !important;
+            transform: none !important;
+            box-shadow: none !important;
         }
-        
+
         .nav-item.active {
-            background: linear-gradient(135deg, var(--primary-color) 0%, #1d4ed8 100%) !important;
-            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3) !important;
-            transform: translateX(2px) !important;
+            background: transparent !important;
+            border: 2px solid #d6366c !important;
+            box-shadow: none !important;
+            transform: none !important;
         }
         
         .nav-icon {
@@ -3682,21 +3684,38 @@
                 <!-- Listen Section (Chats) -->
                 <div id="listen-section" class="hidden">
                     <div class="chats-container">
-                        <header class="chat-dashboard-header">
-                            <div class="chat-dashboard-header-content">
-                                <div class="chat-logo">💬</div>
-                                <span class="chat-dashboard-title">Chats</span>
-                            </div>
-                        </header>
                         <main class="chat-dashboard-main">
                             <h1 class="chat-dashboard-section-title">Recent chats</h1>
-                            <div class="chats-grid" id="chats-grid">
-                                <!-- New Chat Card -->
-                                <div class="new-chat-card" onclick="openChatEditor()">
-                                    <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                                    <span>Blank</span>
+                            <div class="chats-grid-container">
+                                <div class="chats-grid" id="chats-grid">
+                                    <!-- New Chat Card -->
+                                    <div class="new-chat-card" onclick="openChatEditor()">
+                                        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                        <span>Blank</span>
+                                    </div>
+                                    <!-- Chat cards will be loaded dynamically from database -->
+
+                                    <!-- Stacked overflow (only shown when needed) -->
+                                    <div class="chat-stack" id="chatStack" style="display: none;">
+                                        <div class="stack-card stack-3"></div>
+                                        <div class="stack-card stack-2"></div>
+                                        <div class="stack-card stack-1"></div>
+                                        <div class="stack-top">
+                                            <span class="stack-count">+5 more</span>
+                                        </div>
+                                    </div>
                                 </div>
-                                <!-- Chat cards will be loaded dynamically from database -->
+
+                                <!-- Expanded overflow section (hidden by default) -->
+                                <div class="chats-overflow-expanded" id="chatsOverflowExpanded" style="display: none;">
+                                    <div class="overflow-header">
+                                        <span>All chats</span>
+                                        <button class="btn-show-less" id="showLessBtn">Show less</button>
+                                    </div>
+                                    <div class="overflow-grid" id="overflowGrid">
+                                        <!-- Hidden tiles appear here when expanded -->
+                                    </div>
+                                </div>
                             </div>
                         </main>
                     </div>
@@ -3812,6 +3831,65 @@
                                         <div class="chat-success-buttons">
                                             <button id="closeSuccessPanel" class="btn-close-panel">Close</button>
                                             <button id="testChatBtn" class="btn-test-chat">Test Chat</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Right side: Participant Entry Panel (for Invite Only) -->
+                                <div id="participant-entry-panel" class="participant-entry-panel" style="display: none;">
+                                    <div class="participant-entry-card">
+                                        <div class="participant-entry-header">
+                                            <span class="header-icon">👥</span>
+                                            <h2>Add Participants</h2>
+                                            <button class="close-panel-x" id="closeParticipantPanelX">&times;</button>
+                                        </div>
+
+                                        <p class="participant-entry-subtitle">Enter the names and emails of people you want to invite to this chat.</p>
+
+                                        <!-- Add participant form -->
+                                        <div class="add-participant-form">
+                                            <div class="input-row">
+                                                <div class="input-group">
+                                                    <label>Name</label>
+                                                    <input type="text" id="participantName" placeholder="John Smith">
+                                                </div>
+                                                <div class="input-group">
+                                                    <label>Email</label>
+                                                    <input type="email" id="participantEmail" placeholder="john@example.com">
+                                                </div>
+                                                <button type="button" id="addParticipantBtn" class="btn-add-participant">Add</button>
+                                            </div>
+                                        </div>
+
+                                        <!-- CSV paste option -->
+                                        <div class="csv-paste-section">
+                                            <button type="button" id="toggleCsvPaste" class="btn-csv-toggle">
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                                                    <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+                                                </svg>
+                                                Paste from CSV/Excel
+                                            </button>
+                                            <div id="csvPasteArea" class="csv-paste-area" style="display: none;">
+                                                <textarea id="csvInput" placeholder="Paste names and emails here (one per line, comma or tab separated)&#10;Example:&#10;John Smith, john@example.com&#10;Jane Doe, jane@example.com"></textarea>
+                                                <button type="button" id="parseCsvBtn" class="btn-parse-csv">Add from paste</button>
+                                            </div>
+                                        </div>
+
+                                        <!-- Participants list -->
+                                        <div class="participants-list-section">
+                                            <div class="participants-list-header">
+                                                <span>Participants (<span id="participantCount">0</span>)</span>
+                                            </div>
+                                            <div class="participants-list" id="participantsList">
+                                                <div class="empty-participants">No participants added yet</div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Action buttons -->
+                                        <div class="participant-entry-buttons">
+                                            <button type="button" id="cancelParticipantsBtn" class="btn-cancel">Cancel</button>
+                                            <button type="button" id="continueParticipantsBtn" class="btn-continue" disabled>Continue</button>
                                         </div>
                                     </div>
                                 </div>
@@ -11249,11 +11327,33 @@ function generateUniqueId() {
 }
 
 // Generate chat link and show success panel
+// Store participants temporarily for invite-only chats
+let pendingParticipants = [];
+
 function generateChatLink() {
     const chatName = document.getElementById('chat-setup-name').value || 'Untitled Chat';
+
+    // Check if Invite Only is selected
+    const accessType = getSelectedAccessType();
+
+    if (accessType === 'invite_only') {
+        // Show participant entry panel instead of success panel
+        showParticipantEntryPanel();
+    } else {
+        // Open Access - show success panel as usual
+        showSuccessPanelWithLink(chatName);
+    }
+}
+
+// Show success panel with generated link
+function showSuccessPanelWithLink(chatName) {
     const successPanel = document.getElementById('chat-success-panel');
+    const participantPanel = document.getElementById('participant-entry-panel');
     const successChatName = document.getElementById('successChatName');
     const generatedChatLink = document.getElementById('generatedChatLink');
+
+    // Hide participant panel if visible
+    if (participantPanel) participantPanel.style.display = 'none';
 
     // Generate unique ID and create link
     const uniqueId = generateUniqueId();
@@ -11265,6 +11365,256 @@ function generateChatLink() {
 
     // Show success panel
     successPanel.style.display = 'block';
+}
+
+// Show participant entry panel for Invite Only
+function showParticipantEntryPanel() {
+    const participantPanel = document.getElementById('participant-entry-panel');
+    const successPanel = document.getElementById('chat-success-panel');
+
+    if (successPanel) successPanel.style.display = 'none';
+    if (participantPanel) participantPanel.style.display = 'block';
+
+    // Reset the form
+    pendingParticipants = [];
+    renderParticipantsList();
+    const nameInput = document.getElementById('participantName');
+    const emailInput = document.getElementById('participantEmail');
+    if (nameInput) nameInput.value = '';
+    if (emailInput) emailInput.value = '';
+}
+
+// Add participant to list
+function addParticipant() {
+    const nameInput = document.getElementById('participantName');
+    const emailInput = document.getElementById('participantEmail');
+
+    const name = nameInput?.value?.trim();
+    const email = emailInput?.value?.trim();
+
+    if (!name || !email) {
+        alert('Please enter both name and email');
+        return;
+    }
+
+    // Basic email validation
+    if (!email.includes('@')) {
+        alert('Please enter a valid email address');
+        return;
+    }
+
+    // Check for duplicate
+    if (pendingParticipants.some(p => p.email.toLowerCase() === email.toLowerCase())) {
+        alert('This email has already been added');
+        return;
+    }
+
+    pendingParticipants.push({ name, email });
+    renderParticipantsList();
+
+    // Clear inputs
+    nameInput.value = '';
+    emailInput.value = '';
+    nameInput.focus();
+}
+
+// Remove participant from list
+function removeParticipant(index) {
+    pendingParticipants.splice(index, 1);
+    renderParticipantsList();
+}
+
+// Render participants list
+function renderParticipantsList() {
+    const list = document.getElementById('participantsList');
+    const count = document.getElementById('participantCount');
+    const continueBtn = document.getElementById('continueParticipantsBtn');
+
+    if (!list) return;
+
+    if (count) count.textContent = pendingParticipants.length;
+
+    if (pendingParticipants.length === 0) {
+        list.innerHTML = '<div class="empty-participants">No participants added yet</div>';
+        if (continueBtn) continueBtn.disabled = true;
+    } else {
+        list.innerHTML = pendingParticipants.map((p, index) => `
+            <div class="participant-item">
+                <div class="participant-info">
+                    <span class="participant-name">${escapeHtmlParticipant(p.name)}</span>
+                    <span class="participant-email">${escapeHtmlParticipant(p.email)}</span>
+                </div>
+                <button class="btn-remove-participant" onclick="removeParticipant(${index})">Remove</button>
+            </div>
+        `).join('');
+        if (continueBtn) continueBtn.disabled = false;
+    }
+}
+
+// Helper function to escape HTML for participants
+function escapeHtmlParticipant(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Parse CSV/pasted content
+function parseCsvInput() {
+    const csvInput = document.getElementById('csvInput');
+    const content = csvInput?.value?.trim();
+
+    if (!content) {
+        alert('Please paste some data first');
+        return;
+    }
+
+    const lines = content.split('\n');
+    let added = 0;
+
+    lines.forEach(line => {
+        line = line.trim();
+        if (!line) return;
+
+        // Try to split by comma or tab
+        let parts = line.includes('\t') ? line.split('\t') : line.split(',');
+
+        if (parts.length >= 2) {
+            const name = parts[0].trim();
+            const email = parts[1].trim();
+
+            if (name && email && email.includes('@')) {
+                // Check for duplicate
+                if (!pendingParticipants.some(p => p.email.toLowerCase() === email.toLowerCase())) {
+                    pendingParticipants.push({ name, email });
+                    added++;
+                }
+            }
+        }
+    });
+
+    if (added > 0) {
+        renderParticipantsList();
+        csvInput.value = '';
+        alert(`Added ${added} participant(s)`);
+    } else {
+        alert('No valid entries found. Please use format: Name, Email (one per line)');
+    }
+}
+
+// Toggle CSV paste area
+function toggleCsvPaste() {
+    const csvArea = document.getElementById('csvPasteArea');
+    if (csvArea) {
+        csvArea.style.display = csvArea.style.display === 'none' ? 'block' : 'none';
+    }
+}
+
+// Continue button - save participants and show success
+async function continueWithParticipants() {
+    if (pendingParticipants.length === 0) {
+        alert('Please add at least one participant');
+        return;
+    }
+
+    const continueBtn = document.getElementById('continueParticipantsBtn');
+    if (continueBtn) {
+        continueBtn.disabled = true;
+        continueBtn.textContent = 'Saving...';
+    }
+
+    try {
+        // Get current chat ID
+        const chatId = window.currentEditingChatId;
+
+        if (!chatId) {
+            throw new Error('No chat ID found. Please save the chat first.');
+        }
+
+        // Save participants to database
+        const participantsToInsert = pendingParticipants.map(p => ({
+            chat_id: chatId,
+            name: p.name,
+            email: p.email,
+            status: 'pending'
+        }));
+
+        const { error } = await window.supabaseClient
+            .from('chat_participants')
+            .insert(participantsToInsert);
+
+        if (error) throw error;
+
+        console.log('Participants saved:', participantsToInsert.length);
+
+        // Get chat name and show success panel
+        const chatName = document.getElementById('chat-setup-name').value || 'Untitled Chat';
+        showSuccessPanelWithLink(chatName);
+
+    } catch (error) {
+        console.error('Error saving participants:', error);
+        alert('Failed to save participants: ' + error.message);
+    } finally {
+        if (continueBtn) {
+            continueBtn.disabled = false;
+            continueBtn.textContent = 'Continue';
+        }
+    }
+}
+
+// Initialize participant entry panel event listeners
+function initParticipantEntryPanel() {
+    // Add participant button
+    const addBtn = document.getElementById('addParticipantBtn');
+    if (addBtn) {
+        addBtn.addEventListener('click', addParticipant);
+    }
+
+    // Enter key in email field adds participant
+    const emailInput = document.getElementById('participantEmail');
+    if (emailInput) {
+        emailInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                addParticipant();
+            }
+        });
+    }
+
+    // CSV toggle
+    const csvToggle = document.getElementById('toggleCsvPaste');
+    if (csvToggle) {
+        csvToggle.addEventListener('click', toggleCsvPaste);
+    }
+
+    // Parse CSV button
+    const parseCsvBtn = document.getElementById('parseCsvBtn');
+    if (parseCsvBtn) {
+        parseCsvBtn.addEventListener('click', parseCsvInput);
+    }
+
+    // Cancel button
+    const cancelBtn = document.getElementById('cancelParticipantsBtn');
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', function() {
+            document.getElementById('participant-entry-panel').style.display = 'none';
+            pendingParticipants = [];
+        });
+    }
+
+    // Continue button
+    const continueBtn = document.getElementById('continueParticipantsBtn');
+    if (continueBtn) {
+        continueBtn.addEventListener('click', continueWithParticipants);
+    }
+
+    // Close X button
+    const closeX = document.getElementById('closeParticipantPanelX');
+    if (closeX) {
+        closeX.addEventListener('click', function() {
+            document.getElementById('participant-entry-panel').style.display = 'none';
+            pendingParticipants = [];
+        });
+    }
 }
 
 // Initialize chat success panel event listeners
@@ -11318,6 +11668,9 @@ function initChatSuccessPanel() {
 
 // Initialize chat success panel when DOM is ready
 document.addEventListener('DOMContentLoaded', initChatSuccessPanel);
+
+// Initialize participant entry panel when DOM is ready
+document.addEventListener('DOMContentLoaded', initParticipantEntryPanel);
 
 // Copy chat link to clipboard (for slug-based links)
 function copyChatLink(slug) {
@@ -11524,38 +11877,124 @@ function createChatCardHTML(chat) {
     `;
 }
 
-// Render all chat cards
+// Maximum visible tiles before stacking (not counting blank card)
+const MAX_VISIBLE_TILES = 8;
+
+// Store overflow chats for expansion
+window.overflowChats = [];
+
+// Render all chat cards with stacking for overflow
 async function renderChatCards() {
     const chats = await loadListeningChats();
     const chatsGrid = document.getElementById('chats-grid');
+    const stack = document.getElementById('chatStack');
+    const overflowExpanded = document.getElementById('chatsOverflowExpanded');
+    const overflowGrid = document.getElementById('overflowGrid');
 
     if (!chatsGrid) {
         console.error('Chats grid container not found');
         return;
     }
 
-    // Keep the "New Chat" card, clear the rest
-    const newChatCard = chatsGrid.querySelector('.new-chat-card');
-    chatsGrid.innerHTML = '';
+    // Clear existing chat cards (but keep structure)
+    const existingCards = chatsGrid.querySelectorAll('.chat-card');
+    existingCards.forEach(card => card.remove());
 
-    // Re-add new chat card first
-    if (newChatCard) {
-        chatsGrid.appendChild(newChatCard);
-    } else {
-        // Create new chat card if it doesn't exist
-        chatsGrid.innerHTML = `
+    // Reset stack and overflow
+    if (stack) stack.style.display = 'none';
+    if (overflowExpanded) overflowExpanded.style.display = 'none';
+    if (overflowGrid) overflowGrid.innerHTML = '';
+    window.overflowChats = [];
+
+    // Ensure new chat card exists
+    let newChatCard = chatsGrid.querySelector('.new-chat-card');
+    if (!newChatCard) {
+        const newChatHTML = `
             <div class="new-chat-card" onclick="openChatEditor()">
                 <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                 <span>Blank</span>
             </div>
         `;
+        chatsGrid.insertAdjacentHTML('afterbegin', newChatHTML);
+        newChatCard = chatsGrid.querySelector('.new-chat-card');
     }
 
-    // Add chat cards from database
-    chats.forEach(chat => {
-        chatsGrid.insertAdjacentHTML('beforeend', createChatCardHTML(chat));
+    if (!chats || chats.length === 0) {
+        return;
+    }
+
+    // Split chats into visible and overflow
+    const visibleChats = chats.slice(0, MAX_VISIBLE_TILES);
+    const overflowChatsData = chats.slice(MAX_VISIBLE_TILES);
+
+    // Render visible tiles (insert before the stack element)
+    visibleChats.forEach(chat => {
+        const cardHTML = createChatCardHTML(chat);
+        if (stack) {
+            stack.insertAdjacentHTML('beforebegin', cardHTML);
+        } else {
+            chatsGrid.insertAdjacentHTML('beforeend', cardHTML);
+        }
     });
+
+    // Show stack if there are overflow chats
+    if (overflowChatsData.length > 0 && stack) {
+        stack.style.display = 'block';
+        const stackCount = stack.querySelector('.stack-count');
+        if (stackCount) {
+            stackCount.textContent = `+${overflowChatsData.length} more`;
+        }
+        window.overflowChats = overflowChatsData;
+    }
 }
+
+// Handle stack click to expand
+function expandChatStack() {
+    const stack = document.getElementById('chatStack');
+    const overflowExpanded = document.getElementById('chatsOverflowExpanded');
+    const overflowGrid = document.getElementById('overflowGrid');
+
+    if (!stack || !overflowExpanded || !overflowGrid) return;
+
+    // Hide the stack
+    stack.style.display = 'none';
+
+    // Show expanded section
+    overflowExpanded.style.display = 'block';
+
+    // Render overflow tiles
+    if (window.overflowChats && window.overflowChats.length > 0) {
+        overflowGrid.innerHTML = window.overflowChats.map(chat => createChatCardHTML(chat)).join('');
+    }
+}
+
+// Handle show less click
+function collapseChatStack() {
+    const stack = document.getElementById('chatStack');
+    const overflowExpanded = document.getElementById('chatsOverflowExpanded');
+
+    if (!stack || !overflowExpanded) return;
+
+    // Hide expanded section
+    overflowExpanded.style.display = 'none';
+
+    // Show stack again
+    stack.style.display = 'block';
+}
+
+// Set up event listeners for stack expand/collapse
+document.addEventListener('DOMContentLoaded', function() {
+    const stack = document.getElementById('chatStack');
+    const showLessBtn = document.getElementById('showLessBtn');
+
+    if (stack) {
+        stack.addEventListener('click', expandChatStack);
+    }
+
+    if (showLessBtn) {
+        showLessBtn.addEventListener('click', collapseChatStack);
+    }
+});
 
 // Delete a listening chat from database
 async function deleteListeningChat(chatId) {
