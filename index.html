@@ -3745,8 +3745,9 @@
                     <!-- Tab Navigation -->
                     <div style="display: flex; gap: 0; border-bottom: 1px solid #e2e8f0; background: white;">
                         <button class="chat-editor-tab active" onclick="showChatEditorTab('setup')" data-tab="setup" style="padding: 16px 24px; border: none; background: none; cursor: pointer; font-size: 14px; color: #3b82f6; border-bottom: 2px solid #3b82f6; font-weight: 500;">Setup</button>
+                        <button class="chat-editor-tab" onclick="showChatEditorTab('participants')" data-tab="participants" style="padding: 16px 24px; border: none; background: none; cursor: pointer; font-size: 14px; color: #64748b; border-bottom: 2px solid transparent;">Participants</button>
                         <button class="chat-editor-tab" onclick="showChatEditorTab('responses')" data-tab="responses" style="padding: 16px 24px; border: none; background: none; cursor: pointer; font-size: 14px; color: #64748b; border-bottom: 2px solid transparent;">Responses</button>
-                        <button class="chat-editor-tab" onclick="showChatEditorTab('settings')" data-tab="settings" style="padding: 16px 24px; border: none; background: none; cursor: pointer; font-size: 14px; color: #64748b; border-bottom: 2px solid transparent;">Settings</button>
+                        <button class="chat-editor-tab" onclick="showChatEditorTab('analytics')" data-tab="analytics" style="padding: 16px 24px; border: none; background: none; cursor: pointer; font-size: 14px; color: #64748b; border-bottom: 2px solid transparent;">Analytics</button>
                     </div>
 
                     <!-- Tab Content Area -->
@@ -3754,145 +3755,229 @@
 
                         <!-- Setup Tab -->
                         <div id="chat-editor-tab-setup" class="chat-editor-tab-content">
-                            <div class="chat-editor-setup-content">
-                                <!-- Left side: Form -->
-                                <div class="chat-editor-form" style="max-width: 500px; background: white; border-radius: 12px; padding: 32px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);">
+                            <div style="display: flex; gap: 24px;">
+                                <!-- Left Column: Form -->
+                                <div style="flex: 1; max-width: 600px; background: white; border-radius: 12px; padding: 32px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);">
 
+                                    <!-- Chat Name -->
                                     <div style="margin-bottom: 24px;">
                                         <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #1e293b;">Chat Name</label>
                                         <input type="text" id="chat-setup-name" placeholder="e.g., General Feedback, Customer Insights" style="width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
                                     </div>
 
+                                    <!-- Welcome Message -->
                                     <div style="margin-bottom: 24px;">
                                         <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #1e293b;">Welcome Message</label>
                                         <textarea id="chat-setup-welcome" rows="4" placeholder="Hi! Thanks for taking the time to share your feedback with us." style="width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; resize: vertical; box-sizing: border-box;">Hi! Thanks for taking the time to share your feedback with us. Please feel free to tell us about your experience or any suggestions you might have.</textarea>
-                                        <p style="color: #94a3b8; font-size: 12px; margin-top: 4px;">This message will appear when users first open the chat</p>
+                                        <p style="margin-top: 6px; font-size: 12px; color: #64748b;">This message will appear when users first open the chat.</p>
                                     </div>
 
+                                    <!-- Access Type -->
                                     <div style="margin-bottom: 24px;">
                                         <label style="display: block; font-weight: 600; margin-bottom: 12px; color: #1e293b;">Access Type</label>
-                                        <div style="display: flex; gap: 16px;">
-                                            <div onclick="selectAccessType('open')" id="access-type-open" style="flex: 1; padding: 20px; border: 2px solid #3b82f6; border-radius: 12px; cursor: pointer; text-align: center; background: #eff6ff;">
-                                                <div style="font-size: 32px; margin-bottom: 8px;">🌐</div>
-                                                <div style="font-weight: 600; color: #1e293b;">Open Access</div>
-                                                <div style="font-size: 12px; color: #64748b;">Anyone with the link can access</div>
+                                        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+
+                                            <!-- Open Access Card -->
+                                            <div id="access-type-open" onclick="selectAccessType('open')" style="flex: 1; min-width: 150px; padding: 16px; border: 2px solid #3b82f6; border-radius: 12px; cursor: pointer; text-align: center; background: #eff6ff; transition: all 0.2s;">
+                                                <div style="font-size: 24px; margin-bottom: 8px;">🌐</div>
+                                                <div style="font-weight: 600; color: #1e293b; margin-bottom: 4px;">Open Access</div>
+                                                <div style="font-size: 12px; color: #64748b;">Anyone with the link can respond</div>
                                             </div>
-                                            <div onclick="selectAccessType('invite')" id="access-type-invite" style="flex: 1; padding: 20px; border: 2px solid #e2e8f0; border-radius: 12px; cursor: pointer; text-align: center;">
-                                                <div style="font-size: 32px; margin-bottom: 8px;">🔒</div>
-                                                <div style="font-weight: 600; color: #1e293b;">Invite Only</div>
-                                                <div style="font-size: 12px; color: #64748b;">Only invited emails can access</div>
+
+                                            <!-- Closed Access Card -->
+                                            <div id="access-type-closed" onclick="selectAccessType('closed')" style="flex: 1; min-width: 150px; padding: 16px; border: 2px solid #e2e8f0; border-radius: 12px; cursor: pointer; text-align: center; background: white; transition: all 0.2s;">
+                                                <div style="font-size: 24px; margin-bottom: 8px;">🔒</div>
+                                                <div style="font-weight: 600; color: #1e293b; margin-bottom: 4px;">Closed Access</div>
+                                                <div style="font-size: 12px; color: #64748b;">Only invited participants via unique links</div>
                                             </div>
+
+                                            <!-- Combined Access Card -->
+                                            <div id="access-type-combined" onclick="selectAccessType('combined')" style="flex: 1; min-width: 150px; padding: 16px; border: 2px solid #e2e8f0; border-radius: 12px; cursor: pointer; text-align: center; background: white; transition: all 0.2s;">
+                                                <div style="font-size: 24px; margin-bottom: 8px;">🔗</div>
+                                                <div style="font-weight: 600; color: #1e293b; margin-bottom: 4px;">Combined Access</div>
+                                                <div style="font-size: 12px; color: #64748b;">Public link AND invited participants</div>
+                                            </div>
+
                                         </div>
+                                        <input type="hidden" id="chat-access-type" value="open">
                                     </div>
 
-                                    <div class="chat-editor-buttons">
-                                        <button onclick="generateChatLink()" class="btn-generate-link">Generate Link</button>
-                                        <button type="button" id="saveChatBtn" class="btn-save-chat">Save</button>
+                                    <!-- Action Buttons Row -->
+                                    <div style="display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap;">
+                                        <button onclick="generateChatLink()" style="flex: 1; min-width: 140px; padding: 12px 20px; background: #3b82f6; color: white; border: none; border-radius: 8px; font-weight: 500; cursor: pointer; font-size: 14px;">
+                                            🔗 Generate Link
+                                        </button>
+                                        <button onclick="saveListeningChat()" id="saveChatBtn" style="flex: 1; min-width: 140px; padding: 12px 20px; background: #10b981; color: white; border: none; border-radius: 8px; font-weight: 500; cursor: pointer; font-size: 14px;">
+                                            💾 Save Chat
+                                        </button>
+                                        <button onclick="showChatEditorTab('participants')" id="manage-participants-btn" style="flex: 1; min-width: 140px; padding: 12px 20px; background: #8b5cf6; color: white; border: none; border-radius: 8px; font-weight: 500; cursor: pointer; font-size: 14px;">
+                                            👥 Manage Participants
+                                        </button>
                                     </div>
 
                                 </div>
 
-                                <!-- Right side: Success Panel -->
-                                <div id="chat-success-panel" class="chat-success-panel" style="display: none;">
-                                    <div class="chat-success-card">
-                                        <div class="chat-success-header">
-                                            <span class="party-emoji">🎉</span>
-                                            <h2>Listening Chat Created!</h2>
-                                            <button class="chat-success-close-x" id="closeSuccessPanelX">&times;</button>
-                                        </div>
+                                <!-- Right Column: Success Panel (hidden by default) -->
+                                <div id="chat-success-panel" style="display: none; flex: 1; max-width: 400px; background: white; border-radius: 12px; padding: 32px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);">
+                                    <div style="text-align: center; margin-bottom: 24px;">
+                                        <div style="font-size: 48px; margin-bottom: 12px;">🎉</div>
+                                        <h3 style="color: #1e293b; margin-bottom: 8px;">Chat Created!</h3>
+                                        <p style="color: #64748b; font-size: 14px;"><span id="successChatName">Your chat</span> is ready to collect feedback.</p>
+                                    </div>
 
-                                        <div class="chat-success-ready">
-                                            <span class="green-check">✓</span>
-                                            <span>"<span id="successChatName">Untitled Chat</span>" is ready!</span>
+                                    <div style="margin-bottom: 20px;">
+                                        <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #1e293b;">Your Chat Link</label>
+                                        <div style="display: flex; gap: 8px;">
+                                            <input type="text" id="generatedChatLink" readonly style="flex: 1; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 13px; background: #f8fafc;">
+                                            <button onclick="copyGeneratedLink()" id="copyLinkBtn" style="padding: 12px 16px; background: #3b82f6; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 500;">Copy</button>
                                         </div>
-                                        <p class="chat-success-subtitle">Your listening chat has been created and is ready to collect feedback.</p>
+                                    </div>
 
-                                        <div class="chat-link-section">
-                                            <label class="chat-link-label">Your Chat Link</label>
-                                            <div class="chat-link-input-group">
-                                                <input type="text" id="generatedChatLink" class="chat-link-input" readonly>
-                                                <button id="copyLinkBtn" class="copy-link-btn">Copy Link</button>
-                                            </div>
-                                            <p class="chat-link-helper">Share this link with your audience to start collecting feedback.</p>
-                                        </div>
+                                    <div style="background: #f0fdf4; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
+                                        <div style="font-weight: 600; color: #166534; margin-bottom: 8px;">💡 Next Steps:</div>
+                                        <ul style="margin: 0; padding-left: 20px; color: #166534; font-size: 14px;">
+                                            <li>Share the link with your audience</li>
+                                            <li>Monitor responses in the Responses tab</li>
+                                            <li>View analytics as feedback comes in</li>
+                                        </ul>
+                                    </div>
 
-                                        <div class="next-steps-box">
-                                            <div class="next-steps-header">
-                                                <span>💡</span>
-                                                <strong>Next Steps:</strong>
-                                            </div>
-                                            <ul class="next-steps-list">
-                                                <li>Copy and share the link with your audience</li>
-                                                <li>Monitor responses in the Active Chats section</li>
-                                                <li>View analytics and insights as feedback comes in</li>
-                                            </ul>
-                                        </div>
-
-                                        <div class="chat-success-buttons">
-                                            <button id="closeSuccessPanel" class="btn-close-panel">Close</button>
-                                            <button id="testChatBtn" class="btn-test-chat">Test Chat</button>
-                                        </div>
+                                    <div style="display: flex; gap: 12px;">
+                                        <button id="closeSuccessPanel" onclick="document.getElementById('chat-success-panel').style.display='none'" style="flex: 1; padding: 12px; background: #f1f5f9; color: #475569; border: none; border-radius: 8px; cursor: pointer; font-weight: 500;">Close</button>
+                                        <button id="testChatBtn" onclick="testChat()" style="flex: 1; padding: 12px; background: #d6366c; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 500;">Test Chat</button>
                                     </div>
                                 </div>
 
-                                <!-- Right side: Participant Entry Panel (for Invite Only) -->
-                                <div id="participant-entry-panel" class="participant-entry-panel" style="display: none;">
-                                    <div class="participant-entry-card">
-                                        <div class="participant-entry-header">
-                                            <span class="header-icon">👥</span>
-                                            <h2>Add Participants</h2>
-                                            <button class="close-panel-x" id="closeParticipantPanelX">&times;</button>
-                                        </div>
+                            </div>
+                        </div>
 
-                                        <p class="participant-entry-subtitle">Enter the names and emails of people you want to invite to this chat.</p>
+                        <!-- Participants Tab -->
+                        <div id="chat-editor-tab-participants" class="chat-editor-tab-content" style="display: none;">
+                            <div style="max-width: 900px;">
 
-                                        <!-- Add participant form -->
-                                        <div class="add-participant-form">
-                                            <div class="input-row">
-                                                <div class="input-group">
-                                                    <label>Name</label>
-                                                    <input type="text" id="participantName" placeholder="John Smith">
-                                                </div>
-                                                <div class="input-group">
-                                                    <label>Email</label>
-                                                    <input type="email" id="participantEmail" placeholder="john@example.com">
-                                                </div>
-                                                <button type="button" id="addParticipantBtn" class="btn-add-participant">Add</button>
-                                            </div>
-                                        </div>
+                                <!-- Section 1: Manage Participants -->
+                                <div style="background: white; border-radius: 12px; padding: 32px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); margin-bottom: 24px;">
+                                    <h3 style="margin: 0 0 24px 0; color: #1e293b;">Manage Participants</h3>
 
-                                        <!-- CSV paste option -->
-                                        <div class="csv-paste-section">
-                                            <button type="button" id="toggleCsvPaste" class="btn-csv-toggle">
-                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                    <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
-                                                    <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
-                                                </svg>
-                                                Paste from CSV/Excel
+                                    <!-- Add Participant Row -->
+                                    <div style="display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap;">
+                                        <input type="text" id="participant-first-name" placeholder="First Name" style="flex: 1; min-width: 120px; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px;">
+                                        <input type="text" id="participant-surname" placeholder="Surname" style="flex: 1; min-width: 120px; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px;">
+                                        <input type="email" id="participant-email-new" placeholder="Email" style="flex: 2; min-width: 200px; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px;">
+                                        <button onclick="addNewParticipant()" style="padding: 10px 20px; background: #3b82f6; color: white; border: none; border-radius: 8px; font-weight: 500; cursor: pointer;">Add</button>
+                                    </div>
+
+                                    <!-- Paste from Excel Button -->
+                                    <button onclick="openExcelPasteModal()" style="margin-bottom: 24px; padding: 10px 16px; background: #f8fafc; color: #1e293b; border: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer; font-size: 14px;">
+                                        📋 Paste from Excel
+                                    </button>
+
+                                    <!-- Table Controls Row -->
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 12px;">
+                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                            <input type="checkbox" id="select-all-participants" onchange="toggleSelectAllParticipants()">
+                                            <span style="font-size: 14px; color: #64748b;">Select All</span>
+                                        </label>
+
+                                        <div style="display: flex; gap: 12px; align-items: center;">
+                                            <select id="invite-type-select" style="padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px;">
+                                                <option value="first">First Invite</option>
+                                                <option value="reminder">Reminder</option>
+                                            </select>
+                                            <button onclick="sendInvitesToSelected()" style="padding: 10px 16px; background: #d6366c; color: white; border: none; border-radius: 8px; font-weight: 500; cursor: pointer;">
+                                                ✉️ Send to Selected
                                             </button>
-                                            <div id="csvPasteArea" class="csv-paste-area" style="display: none;">
-                                                <textarea id="csvInput" placeholder="Paste names and emails here (one per line, comma or tab separated)&#10;Example:&#10;John Smith, john@example.com&#10;Jane Doe, jane@example.com"></textarea>
-                                                <button type="button" id="parseCsvBtn" class="btn-parse-csv">Add from paste</button>
-                                            </div>
-                                        </div>
-
-                                        <!-- Participants list -->
-                                        <div class="participants-list-section">
-                                            <div class="participants-list-header">
-                                                <span>Participants (<span id="participantCount">0</span>)</span>
-                                            </div>
-                                            <div class="participants-list" id="participantsList">
-                                                <div class="empty-participants">No participants added yet</div>
-                                            </div>
-                                        </div>
-
-                                        <!-- Action buttons -->
-                                        <div class="participant-entry-buttons">
-                                            <button type="button" id="cancelParticipantsBtn" class="btn-cancel">Cancel</button>
-                                            <button type="button" id="continueParticipantsBtn" class="btn-continue" disabled>Continue</button>
                                         </div>
                                     </div>
+
+                                    <!-- Participants Table -->
+                                    <div style="border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
+                                        <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                                            <thead>
+                                                <tr style="background: #f8fafc;">
+                                                    <th style="padding: 12px; text-align: left; font-weight: 600; color: #64748b; width: 40px;"></th>
+                                                    <th style="padding: 12px; text-align: left; font-weight: 600; color: #64748b;">First Name</th>
+                                                    <th style="padding: 12px; text-align: left; font-weight: 600; color: #64748b;">Surname</th>
+                                                    <th style="padding: 12px; text-align: left; font-weight: 600; color: #64748b;">Email</th>
+                                                    <th style="padding: 12px; text-align: left; font-weight: 600; color: #64748b;">Status</th>
+                                                    <th style="padding: 12px; text-align: center; font-weight: 600; color: #64748b; width: 100px;">Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="participants-table-body">
+                                                <tr id="no-participants-row">
+                                                    <td colspan="6" style="padding: 32px; text-align: center; color: #64748b;">
+                                                        No participants added yet. Add participants above or paste from Excel.
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <!-- Pagination -->
+                                    <div id="participants-pagination" style="display: flex; justify-content: center; gap: 8px; margin-top: 16px;">
+                                        <!-- Pagination buttons will be populated by JavaScript -->
+                                    </div>
+
                                 </div>
+
+                                <!-- Section 2: Manage Invites/Reminders -->
+                                <div style="background: white; border-radius: 12px; padding: 32px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);">
+                                    <h3 style="margin: 0 0 24px 0; color: #1e293b;">Manage Invites &amp; Reminders</h3>
+
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+
+                                        <!-- Left Column: Email Templates -->
+                                        <div>
+                                            <div style="margin-bottom: 20px;">
+                                                <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #1e293b;">Email Invite Text</label>
+                                                <textarea id="email-invite-template" rows="5" placeholder="Enter your invite email text..." style="width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; resize: vertical; box-sizing: border-box;">Hi {first_name},
+
+You've been invited to share your feedback with us. Please click the link below to participate:
+
+{link}
+
+Thank you for your time!</textarea>
+                                                <p style="margin-top: 6px; font-size: 12px; color: #64748b;">Use {first_name}, {surname}, {email}, {link} as placeholders.</p>
+                                            </div>
+
+                                            <div>
+                                                <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #1e293b;">Email Reminder Text</label>
+                                                <textarea id="email-reminder-template" rows="5" placeholder="Enter your reminder email text..." style="width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; resize: vertical; box-sizing: border-box;">Hi {first_name},
+
+This is a friendly reminder to share your feedback with us. Your input is valuable!
+
+{link}
+
+Thank you!</textarea>
+                                            </div>
+                                        </div>
+
+                                        <!-- Right Column: Scheduling -->
+                                        <div>
+                                            <div style="margin-bottom: 20px;">
+                                                <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #1e293b;">Schedule Invites</label>
+                                                <input type="datetime-local" id="schedule-invites-datetime" style="width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+                                                <p style="margin-top: 6px; font-size: 12px; color: #64748b;">Leave empty to send manually.</p>
+                                            </div>
+
+                                            <div>
+                                                <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #1e293b;">Schedule Reminders</label>
+                                                <input type="datetime-local" id="schedule-reminders-datetime" style="width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+                                                <p style="margin-top: 6px; font-size: 12px; color: #64748b;">Leave empty to send manually.</p>
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                    <!-- Save Button -->
+                                    <div style="margin-top: 24px; text-align: right;">
+                                        <button onclick="saveParticipantsSettings()" style="padding: 12px 24px; background: #10b981; color: white; border: none; border-radius: 8px; font-weight: 500; cursor: pointer; font-size: 14px;">
+                                            💾 Save Participants &amp; Settings
+                                        </button>
+                                    </div>
+
+                                </div>
+
                             </div>
                         </div>
 
@@ -3938,10 +4023,12 @@
                         </div>
 
                         <!-- Settings Tab -->
-                        <div id="chat-editor-tab-settings" class="chat-editor-tab-content" style="display: none;">
-                            <div style="max-width: 600px; background: white; border-radius: 12px; padding: 32px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);">
-                                <h3 style="margin-bottom: 24px; color: #1e293b;">Chat Settings</h3>
-                                <p style="color: #64748b;">Additional settings will be available here.</p>
+                        <!-- Analytics Tab -->
+                        <div id="chat-editor-tab-analytics" class="chat-editor-tab-content" style="display: none;">
+                            <div style="background: white; border-radius: 12px; padding: 32px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); text-align: center;">
+                                <div style="font-size: 48px; margin-bottom: 16px;">📊</div>
+                                <h3 style="color: #1e293b; margin-bottom: 8px;">Analytics Coming Soon</h3>
+                                <p style="color: #64748b;">Detailed analytics and insights will be available here once your chat receives responses.</p>
                             </div>
                         </div>
 
@@ -11248,19 +11335,32 @@ async function loadChatIntoEditor(chatId) {
             selectAccessType('open');
         }
 
-        // Show the success panel on the right with existing link
+        // Handle panel display based on access type
         const successPanel = document.getElementById('chat-success-panel');
+        const participantPanel = document.getElementById('participant-entry-panel');
+        const sendInvitesSection = document.getElementById('sendInvitesSection');
         const successChatName = document.getElementById('successChatName');
         const generatedChatLink = document.getElementById('generatedChatLink');
 
-        if (successPanel) {
-            successPanel.style.display = 'block';
-        }
-        if (successChatName) {
-            successChatName.textContent = chat.name || 'Untitled Chat';
-        }
-        if (generatedChatLink) {
-            generatedChatLink.value = 'https://rworldfeedback.co.uk/chat/' + chat.slug;
+        if (chat.access_type === 'invite_only') {
+            // For Invite Only chats, show participant panel with checkboxes
+            if (successPanel) successPanel.style.display = 'none';
+            if (participantPanel) participantPanel.style.display = 'block';
+            if (sendInvitesSection) sendInvitesSection.style.display = 'block';
+
+            // Load existing participants with checkboxes
+            window.isExistingChatMode = true;
+            await loadExistingParticipants(chatId);
+        } else {
+            // For Open Access chats, show success panel
+            if (participantPanel) participantPanel.style.display = 'none';
+            if (successPanel) successPanel.style.display = 'block';
+            if (successChatName) {
+                successChatName.textContent = chat.name || 'Untitled Chat';
+            }
+            if (generatedChatLink) {
+                generatedChatLink.value = 'https://rworldfeedback.co.uk/chat/' + chat.slug;
+            }
         }
 
         console.log('Loaded chat into editor:', chat.name);
@@ -11368,24 +11468,37 @@ function showSuccessPanelWithLink(chatName) {
 }
 
 // Show participant entry panel for Invite Only
-function showParticipantEntryPanel() {
+function showParticipantEntryPanel(isExistingChat = false) {
     const participantPanel = document.getElementById('participant-entry-panel');
+    const sendInvitesSection = document.getElementById('sendInvitesSection');
     const successPanel = document.getElementById('chat-success-panel');
 
     if (successPanel) successPanel.style.display = 'none';
     if (participantPanel) participantPanel.style.display = 'block';
 
-    // Reset the form
-    pendingParticipants = [];
-    renderParticipantsList();
+    window.isExistingChatMode = isExistingChat;
+
+    // Clear input fields
     const nameInput = document.getElementById('participantName');
     const emailInput = document.getElementById('participantEmail');
     if (nameInput) nameInput.value = '';
     if (emailInput) emailInput.value = '';
+
+    if (isExistingChat) {
+        // Show send invites button, load with checkboxes
+        if (sendInvitesSection) sendInvitesSection.style.display = 'block';
+        loadExistingParticipants(window.currentEditingChatId);
+    } else {
+        // Hide send invites button, use pending array
+        if (sendInvitesSection) sendInvitesSection.style.display = 'none';
+        pendingParticipants = [];
+        window.pendingParticipants = [];
+        renderParticipantsList();
+    }
 }
 
-// Add participant to list
-function addParticipant() {
+// Add participant to list (handles both new and existing chats)
+async function addParticipant() {
     const nameInput = document.getElementById('participantName');
     const emailInput = document.getElementById('participantEmail');
 
@@ -11403,14 +11516,61 @@ function addParticipant() {
         return;
     }
 
-    // Check for duplicate
-    if (pendingParticipants.some(p => p.email.toLowerCase() === email.toLowerCase())) {
-        alert('This email has already been added');
-        return;
-    }
+    // Get current chat ID
+    const chatId = window.currentEditingChatId;
 
-    pendingParticipants.push({ name, email });
-    renderParticipantsList();
+    if (!chatId) {
+        // If no chat ID yet, store in pending array (will be saved when chat is created)
+        if (!window.pendingParticipants) window.pendingParticipants = [];
+
+        if (window.pendingParticipants.some(p => p.email.toLowerCase() === email.toLowerCase())) {
+            alert('This email has already been added');
+            return;
+        }
+
+        window.pendingParticipants.push({ name, email });
+        pendingParticipants = window.pendingParticipants;
+        renderParticipantsList();
+    } else {
+        // Chat exists - save directly to database
+        try {
+            // Check for duplicate
+            const { data: existing } = await window.supabaseClient
+                .from('chat_participants')
+                .select('id')
+                .eq('chat_id', chatId)
+                .eq('email', email.toLowerCase())
+                .maybeSingle();
+
+            if (existing) {
+                alert('This email has already been added');
+                return;
+            }
+
+            const { data, error } = await window.supabaseClient
+                .from('chat_participants')
+                .insert({
+                    chat_id: chatId,
+                    name: name,
+                    email: email.toLowerCase(),
+                    status: 'pending'
+                })
+                .select()
+                .single();
+
+            if (error) throw error;
+
+            console.log('Participant saved:', data);
+
+            // Reload participants list
+            await loadExistingParticipants(chatId);
+
+        } catch (error) {
+            console.error('Error saving participant:', error);
+            alert('Failed to add participant: ' + error.message);
+            return;
+        }
+    }
 
     // Clear inputs
     nameInput.value = '';
@@ -11418,17 +11578,59 @@ function addParticipant() {
     nameInput.focus();
 }
 
-// Remove participant from list
+// Remove participant from pending list (for new chats)
 function removeParticipant(index) {
     pendingParticipants.splice(index, 1);
+    window.pendingParticipants = pendingParticipants;
     renderParticipantsList();
 }
 
-// Render participants list
+// Remove participant from database (for existing chats)
+async function removeParticipantFromDb(participantId) {
+    if (!confirm('Remove this participant?')) return;
+
+    try {
+        const { error } = await window.supabaseClient
+            .from('chat_participants')
+            .delete()
+            .eq('id', participantId);
+
+        if (error) throw error;
+
+        // Reload list
+        const chatId = window.currentEditingChatId;
+        if (chatId) {
+            await loadExistingParticipants(chatId);
+        }
+    } catch (error) {
+        console.error('Error removing participant:', error);
+        alert('Failed to remove participant');
+    }
+}
+
+// Load existing participants from database
+async function loadExistingParticipants(chatId) {
+    try {
+        const { data: participants, error } = await window.supabaseClient
+            .from('chat_participants')
+            .select('*')
+            .eq('chat_id', chatId)
+            .order('created_at', { ascending: true });
+
+        if (error) throw error;
+
+        window.existingParticipants = participants || [];
+        renderParticipantsListWithCheckboxes();
+
+    } catch (error) {
+        console.error('Error loading participants:', error);
+    }
+}
+
+// Render participants list for NEW chats (no checkboxes)
 function renderParticipantsList() {
     const list = document.getElementById('participantsList');
     const count = document.getElementById('participantCount');
-    const continueBtn = document.getElementById('continueParticipantsBtn');
 
     if (!list) return;
 
@@ -11436,7 +11638,6 @@ function renderParticipantsList() {
 
     if (pendingParticipants.length === 0) {
         list.innerHTML = '<div class="empty-participants">No participants added yet</div>';
-        if (continueBtn) continueBtn.disabled = true;
     } else {
         list.innerHTML = pendingParticipants.map((p, index) => `
             <div class="participant-item">
@@ -11447,7 +11648,44 @@ function renderParticipantsList() {
                 <button class="btn-remove-participant" onclick="removeParticipant(${index})">Remove</button>
             </div>
         `).join('');
-        if (continueBtn) continueBtn.disabled = false;
+    }
+}
+
+// Render participants list for EXISTING chats (with checkboxes and status)
+function renderParticipantsListWithCheckboxes() {
+    const list = document.getElementById('participantsList');
+    const count = document.getElementById('participantCount');
+    const sendInvitesBtn = document.getElementById('sendInvitesBtn');
+
+    if (!list) return;
+
+    const participants = window.existingParticipants || [];
+    if (count) count.textContent = participants.length;
+
+    if (participants.length === 0) {
+        list.innerHTML = '<div class="empty-participants">No participants added yet</div>';
+        if (sendInvitesBtn) sendInvitesBtn.style.display = 'none';
+    } else {
+        list.innerHTML = participants.map((p) => `
+            <div class="participant-item">
+                <div class="participant-checkbox-wrapper">
+                    <input type="checkbox"
+                           class="participant-checkbox"
+                           id="participant-${p.id}"
+                           data-participant-id="${p.id}"
+                           data-participant-email="${p.email}"
+                           ${p.status === 'sent' ? '' : 'checked'}>
+                </div>
+                <div class="participant-info">
+                    <span class="participant-name">${escapeHtmlParticipant(p.name)}</span>
+                    <span class="participant-email">${escapeHtmlParticipant(p.email)}</span>
+                    <span class="participant-status status-${p.status}">${p.status}</span>
+                </div>
+                <button class="btn-remove-participant" onclick="removeParticipantFromDb('${p.id}')">Remove</button>
+            </div>
+        `).join('');
+
+        if (sendInvitesBtn) sendInvitesBtn.style.display = 'block';
     }
 }
 
@@ -11561,6 +11799,103 @@ async function continueWithParticipants() {
     }
 }
 
+// Send invites to selected participants
+async function sendSelectedInvites() {
+    const checkboxes = document.querySelectorAll('.participant-checkbox:checked');
+
+    if (checkboxes.length === 0) {
+        alert('Please select at least one participant to invite');
+        return;
+    }
+
+    const sendBtn = document.getElementById('sendInvitesBtn');
+    if (sendBtn) {
+        sendBtn.disabled = true;
+        sendBtn.innerHTML = 'Sending...';
+    }
+
+    const chatId = window.currentEditingChatId;
+    const chat = window.currentEditingChat;
+
+    if (!chat) {
+        alert('Chat not loaded');
+        if (sendBtn) {
+            sendBtn.disabled = false;
+            sendBtn.innerHTML = `
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 2L11 13"></path>
+                    <path d="M22 2L15 22L11 13L2 9L22 2Z"></path>
+                </svg>
+                Send Invites
+            `;
+        }
+        return;
+    }
+
+    const chatLink = `https://rworldfeedback.co.uk/chat/${chat.slug}`;
+    let sent = 0;
+    let failed = 0;
+
+    for (const checkbox of checkboxes) {
+        const participantId = checkbox.dataset.participantId;
+
+        // Get participant details
+        const participant = window.existingParticipants.find(p => p.id === participantId);
+
+        if (!participant) continue;
+
+        try {
+            const htmlBody = createInviteEmailHTML(participant.name, chat.name, chatLink);
+            const textBody = createInviteEmailText(participant.name, chat.name, chatLink);
+
+            const response = await fetch('/api/send-email', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    to: participant.email,
+                    subject: `You're invited to share your feedback - ${chat.name}`,
+                    htmlBody: htmlBody,
+                    textBody: textBody
+                })
+            });
+
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+                // Update status to sent
+                await window.supabaseClient
+                    .from('chat_participants')
+                    .update({ status: 'sent' })
+                    .eq('id', participantId);
+
+                sent++;
+            } else {
+                failed++;
+            }
+        } catch (error) {
+            console.error('Error sending invite:', error);
+            failed++;
+        }
+    }
+
+    // Reload participants to show updated status
+    await loadExistingParticipants(chatId);
+
+    // Reset button
+    if (sendBtn) {
+        sendBtn.disabled = false;
+        sendBtn.innerHTML = `
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 2L11 13"></path>
+                <path d="M22 2L15 22L11 13L2 9L22 2Z"></path>
+            </svg>
+            Send Invites
+        `;
+    }
+
+    alert(`${sent} invite(s) sent successfully${failed > 0 ? `, ${failed} failed` : ''}`);
+}
+
 // Initialize participant entry panel event listeners
 function initParticipantEntryPanel() {
     // Add participant button
@@ -11592,19 +11927,10 @@ function initParticipantEntryPanel() {
         parseCsvBtn.addEventListener('click', parseCsvInput);
     }
 
-    // Cancel button
-    const cancelBtn = document.getElementById('cancelParticipantsBtn');
-    if (cancelBtn) {
-        cancelBtn.addEventListener('click', function() {
-            document.getElementById('participant-entry-panel').style.display = 'none';
-            pendingParticipants = [];
-        });
-    }
-
-    // Continue button
-    const continueBtn = document.getElementById('continueParticipantsBtn');
-    if (continueBtn) {
-        continueBtn.addEventListener('click', continueWithParticipants);
+    // Send Invites button
+    const sendInvitesBtn = document.getElementById('sendInvitesBtn');
+    if (sendInvitesBtn) {
+        sendInvitesBtn.addEventListener('click', sendSelectedInvites);
     }
 
     // Close X button
@@ -11613,6 +11939,7 @@ function initParticipantEntryPanel() {
         closeX.addEventListener('click', function() {
             document.getElementById('participant-entry-panel').style.display = 'none';
             pendingParticipants = [];
+            window.pendingParticipants = [];
         });
     }
 }
@@ -11714,6 +12041,175 @@ function getSelectedAccessType() {
     return 'invite_only';
 }
 
+// Create HTML email template for invite
+function createInviteEmailHTML(participantName, chatName, chatLink) {
+    return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>You're Invited to Share Feedback</title>
+    </head>
+    <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f5f5f5;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f5f5f5; padding: 40px 20px;">
+            <tr>
+                <td align="center">
+                    <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <!-- Header -->
+                        <tr>
+                            <td style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 32px; text-align: center;">
+                                <img src="https://rworldfeedback.co.uk/images/realworld-logo-white.svg" alt="Realworld" height="40" style="height: 40px;">
+                            </td>
+                        </tr>
+
+                        <!-- Content -->
+                        <tr>
+                            <td style="padding: 40px 32px;">
+                                <h1 style="margin: 0 0 16px 0; font-size: 24px; color: #1f2937;">You're Invited!</h1>
+
+                                <p style="margin: 0 0 24px 0; font-size: 16px; color: #4b5563; line-height: 1.6;">
+                                    Hi ${participantName},
+                                </p>
+
+                                <p style="margin: 0 0 24px 0; font-size: 16px; color: #4b5563; line-height: 1.6;">
+                                    You've been invited to share your feedback in <strong>"${chatName}"</strong>. Your input is valuable and will help us improve.
+                                </p>
+
+                                <p style="margin: 0 0 32px 0; font-size: 16px; color: #4b5563; line-height: 1.6;">
+                                    This is a confidential feedback session. Please take a few minutes to share your thoughts.
+                                </p>
+
+                                <!-- CTA Button -->
+                                <table width="100%" cellpadding="0" cellspacing="0">
+                                    <tr>
+                                        <td align="center">
+                                            <a href="${chatLink}" style="display: inline-block; padding: 14px 32px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #ffffff; text-decoration: none; font-weight: 600; font-size: 16px; border-radius: 8px;">
+                                                Share Your Feedback
+                                            </a>
+                                        </td>
+                                    </tr>
+                                </table>
+
+                                <p style="margin: 32px 0 0 0; font-size: 14px; color: #9ca3af; line-height: 1.6;">
+                                    Or copy and paste this link into your browser:<br>
+                                    <a href="${chatLink}" style="color: #667eea; word-break: break-all;">${chatLink}</a>
+                                </p>
+                            </td>
+                        </tr>
+
+                        <!-- Footer -->
+                        <tr>
+                            <td style="background-color: #f9fafb; padding: 24px 32px; border-top: 1px solid #e5e7eb;">
+                                <p style="margin: 0; font-size: 12px; color: #9ca3af; text-align: center;">
+                                    This email was sent by Realworld Feedback.<br>
+                                    If you didn't expect this invitation, you can safely ignore this email.
+                                </p>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </body>
+    </html>
+    `;
+}
+
+// Create plain text email for invite
+function createInviteEmailText(participantName, chatName, chatLink) {
+    return `
+Hi ${participantName},
+
+You've been invited to share your feedback in "${chatName}".
+
+Your input is valuable and will help us improve. This is a confidential feedback session.
+
+Please click the link below to share your thoughts:
+${chatLink}
+
+Thank you for your time!
+
+- The Realworld Team
+
+If you didn't expect this invitation, you can safely ignore this email.
+    `.trim();
+}
+
+// Send invite emails to all pending participants
+async function sendInviteEmails(chatId, chatName, chatSlug) {
+    console.log('Sending invite emails for chat:', chatId);
+
+    try {
+        // Get all pending participants for this chat
+        const { data: participants, error: fetchError } = await window.supabaseClient
+            .from('chat_participants')
+            .select('*')
+            .eq('chat_id', chatId)
+            .eq('status', 'pending');
+
+        if (fetchError) throw fetchError;
+
+        if (!participants || participants.length === 0) {
+            console.log('No pending participants to email');
+            return { sent: 0, failed: 0 };
+        }
+
+        console.log(`Found ${participants.length} participants to email`);
+
+        const chatLink = `https://rworldfeedback.co.uk/chat/${chatSlug}`;
+        let sent = 0;
+        let failed = 0;
+
+        // Send emails one by one
+        for (const participant of participants) {
+            try {
+                const htmlBody = createInviteEmailHTML(participant.name, chatName, chatLink);
+                const textBody = createInviteEmailText(participant.name, chatName, chatLink);
+
+                const response = await fetch('/api/send-email', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        to: participant.email,
+                        subject: `You're invited to share your feedback - ${chatName}`,
+                        htmlBody: htmlBody,
+                        textBody: textBody
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    // Update participant status to 'sent'
+                    await window.supabaseClient
+                        .from('chat_participants')
+                        .update({ status: 'sent' })
+                        .eq('id', participant.id);
+
+                    console.log(`Email sent to ${participant.email}`);
+                    sent++;
+                } else {
+                    console.error(`Failed to send to ${participant.email}:`, result);
+                    failed++;
+                }
+            } catch (emailError) {
+                console.error(`Error sending to ${participant.email}:`, emailError);
+                failed++;
+            }
+        }
+
+        console.log(`Email sending complete: ${sent} sent, ${failed} failed`);
+        return { sent, failed };
+
+    } catch (error) {
+        console.error('Error in sendInviteEmails:', error);
+        throw error;
+    }
+}
+
 // Save chat to database (handles both new and existing chats)
 async function saveListeningChat() {
     const saveChatBtn = document.getElementById('saveChatBtn');
@@ -11731,6 +12227,9 @@ async function saveListeningChat() {
     // Disable button and show loading state
     saveChatBtn.disabled = true;
     saveChatBtn.textContent = 'Saving...';
+
+    let chatId = null;
+    let chatSlug = null;
 
     try {
         // Check if we're updating an existing chat or creating a new one
@@ -11753,6 +12252,8 @@ async function saveListeningChat() {
                 throw chatError;
             }
 
+            chatId = chatData.id;
+            chatSlug = chatData.slug;
             console.log('Chat updated successfully:', chatData);
 
         } else {
@@ -11796,7 +12297,22 @@ async function saveListeningChat() {
                 throw chatError;
             }
 
+            chatId = chatData.id;
+            chatSlug = chatData.slug;
             console.log('Chat created successfully:', chatData);
+        }
+
+        // If Invite Only, send emails to pending participants
+        if (accessType === 'invite_only' && chatId) {
+            saveChatBtn.textContent = 'Sending invites...';
+
+            const emailResult = await sendInviteEmails(chatId, chatName, chatSlug);
+
+            if (emailResult.sent > 0) {
+                alert(`Chat saved! ${emailResult.sent} invite(s) sent successfully.${emailResult.failed > 0 ? ` ${emailResult.failed} failed.` : ''}`);
+            } else if (emailResult.failed > 0) {
+                alert(`Chat saved but failed to send ${emailResult.failed} invite(s). You can resend from Settings.`);
+            }
         }
 
         // Navigate back to the chats list page
@@ -13134,6 +13650,523 @@ window.showSection = function(sectionName) {
 // SURVEY BUILDER JAVASCRIPT - END                //
 // ============================================== //
 
+// ============================================== //
+// PARTICIPANT MANAGEMENT FUNCTIONS               //
+// ============================================== //
+
+// Global state for participants tab
+let chatParticipantsData = [];
+let currentParticipantPage = 1;
+const participantsPerPage = 10;
+
+// Update selectAccessType to handle 3 options
+function selectAccessType(type) {
+    const openCard = document.getElementById('access-type-open');
+    const closedCard = document.getElementById('access-type-closed');
+    const combinedCard = document.getElementById('access-type-combined');
+    const hiddenInput = document.getElementById('chat-access-type');
+
+    // Reset all cards
+    [openCard, closedCard, combinedCard].forEach(card => {
+        if (card) {
+            card.style.borderColor = '#e2e8f0';
+            card.style.background = 'white';
+        }
+    });
+
+    // Highlight selected card
+    const selectedCard = document.getElementById('access-type-' + type);
+    if (selectedCard) {
+        selectedCard.style.borderColor = '#3b82f6';
+        selectedCard.style.background = '#eff6ff';
+    }
+
+    // Update hidden input
+    if (hiddenInput) {
+        hiddenInput.value = type;
+    }
+}
+
+// Add a single participant from the Participants tab
+function addNewParticipant() {
+    const firstName = document.getElementById('participant-first-name').value.trim();
+    const surname = document.getElementById('participant-surname').value.trim();
+    const email = document.getElementById('participant-email-new').value.trim();
+
+    if (!firstName || !surname || !email) {
+        alert('Please fill in all fields (First Name, Surname, Email)');
+        return;
+    }
+
+    if (!isValidEmailFormat(email)) {
+        alert('Please enter a valid email address');
+        return;
+    }
+
+    // Check for duplicate email
+    if (chatParticipantsData.some(p => p.email.toLowerCase() === email.toLowerCase())) {
+        alert('A participant with this email already exists');
+        return;
+    }
+
+    chatParticipantsData.push({
+        id: 'temp-' + Date.now(),
+        first_name: firstName,
+        surname: surname,
+        email: email,
+        invite_sent: false,
+        reminder_sent: false,
+        selected: false
+    });
+
+    // Clear inputs
+    document.getElementById('participant-first-name').value = '';
+    document.getElementById('participant-surname').value = '';
+    document.getElementById('participant-email-new').value = '';
+
+    renderParticipantsTable();
+}
+
+// Validate email format
+function isValidEmailFormat(email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+// Open Excel paste modal
+function openExcelPasteModal() {
+    const modal = document.getElementById('excel-paste-modal');
+    modal.style.display = 'flex';
+    document.getElementById('excel-paste-textarea').value = '';
+    document.getElementById('excel-paste-textarea').focus();
+}
+
+// Close Excel paste modal
+function closeExcelPasteModal() {
+    document.getElementById('excel-paste-modal').style.display = 'none';
+}
+
+// Import participants from Excel paste
+function importFromExcel() {
+    const textarea = document.getElementById('excel-paste-textarea');
+    const data = textarea.value.trim();
+
+    if (!data) {
+        alert('Please paste some data first');
+        return;
+    }
+
+    const lines = data.split('\n');
+    let imported = 0;
+    let skipped = 0;
+
+    lines.forEach(line => {
+        const parts = line.split('\t');
+        if (parts.length >= 3) {
+            const firstName = parts[0].trim();
+            const surname = parts[1].trim();
+            const email = parts[2].trim();
+
+            if (firstName && surname && email && isValidEmailFormat(email)) {
+                // Check for duplicate
+                if (!chatParticipantsData.some(p => p.email.toLowerCase() === email.toLowerCase())) {
+                    chatParticipantsData.push({
+                        id: 'temp-' + Date.now() + '-' + imported,
+                        first_name: firstName,
+                        surname: surname,
+                        email: email,
+                        invite_sent: false,
+                        reminder_sent: false,
+                        selected: false
+                    });
+                    imported++;
+                } else {
+                    skipped++;
+                }
+            } else {
+                skipped++;
+            }
+        } else {
+            skipped++;
+        }
+    });
+
+    closeExcelPasteModal();
+    renderParticipantsTable();
+
+    alert(`Imported ${imported} participant(s). ${skipped > 0 ? skipped + ' row(s) skipped (invalid or duplicate).' : ''}`);
+}
+
+// Render participants table with pagination
+function renderParticipantsTable() {
+    const tbody = document.getElementById('participants-table-body');
+
+    if (!tbody) return;
+
+    if (chatParticipantsData.length === 0) {
+        tbody.innerHTML = `
+            <tr id="no-participants-row">
+                <td colspan="6" style="padding: 32px; text-align: center; color: #64748b;">
+                    No participants added yet. Add participants above or paste from Excel.
+                </td>
+            </tr>
+        `;
+        document.getElementById('participants-pagination').innerHTML = '';
+        return;
+    }
+
+    // Calculate pagination
+    const totalPages = Math.ceil(chatParticipantsData.length / participantsPerPage);
+    const startIndex = (currentParticipantPage - 1) * participantsPerPage;
+    const endIndex = Math.min(startIndex + participantsPerPage, chatParticipantsData.length);
+    const pageParticipants = chatParticipantsData.slice(startIndex, endIndex);
+
+    // Render rows
+    tbody.innerHTML = pageParticipants.map((p, index) => {
+        const globalIndex = startIndex + index;
+        const statusBadge = p.invite_sent
+            ? (p.reminder_sent ? '<span style="background: #dbeafe; color: #1e40af; padding: 2px 8px; border-radius: 4px; font-size: 12px;">Reminder Sent</span>' : '<span style="background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 4px; font-size: 12px;">Invited</span>')
+            : '<span style="background: #f3f4f6; color: #6b7280; padding: 2px 8px; border-radius: 4px; font-size: 12px;">Not Invited</span>';
+
+        return `
+            <tr style="border-top: 1px solid #e2e8f0;" id="participant-row-${globalIndex}">
+                <td style="padding: 12px; text-align: center;">
+                    <input type="checkbox" ${p.selected ? 'checked' : ''} onchange="toggleParticipantSelection(${globalIndex})">
+                </td>
+                <td style="padding: 12px;">${escapeHtmlText(p.first_name)}</td>
+                <td style="padding: 12px;">${escapeHtmlText(p.surname)}</td>
+                <td style="padding: 12px;">${escapeHtmlText(p.email)}</td>
+                <td style="padding: 12px;">${statusBadge}</td>
+                <td style="padding: 12px; text-align: center;">
+                    <button onclick="editParticipantRow(${globalIndex})" style="background: none; border: none; cursor: pointer; padding: 4px 8px;" title="Edit">✏️</button>
+                    <button onclick="removeParticipantRow(${globalIndex})" style="background: none; border: none; cursor: pointer; padding: 4px 8px;" title="Remove">🗑️</button>
+                </td>
+            </tr>
+        `;
+    }).join('');
+
+    // Render pagination
+    renderParticipantsPagination(totalPages);
+}
+
+// Escape HTML text
+function escapeHtmlText(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Render pagination buttons
+function renderParticipantsPagination(totalPages) {
+    const paginationDiv = document.getElementById('participants-pagination');
+
+    if (!paginationDiv) return;
+
+    if (totalPages <= 1) {
+        paginationDiv.innerHTML = '';
+        return;
+    }
+
+    let html = '';
+
+    // Previous button
+    html += `<button onclick="goToParticipantPage(${currentParticipantPage - 1})" ${currentParticipantPage === 1 ? 'disabled' : ''} style="padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 6px; background: white; cursor: ${currentParticipantPage === 1 ? 'not-allowed' : 'pointer'}; color: ${currentParticipantPage === 1 ? '#9ca3af' : '#1e293b'};">←</button>`;
+
+    // Page numbers
+    for (let i = 1; i <= totalPages; i++) {
+        const isActive = i === currentParticipantPage;
+        html += `<button onclick="goToParticipantPage(${i})" style="padding: 8px 12px; border: 1px solid ${isActive ? '#3b82f6' : '#e2e8f0'}; border-radius: 6px; background: ${isActive ? '#3b82f6' : 'white'}; color: ${isActive ? 'white' : '#1e293b'}; cursor: pointer;">${i}</button>`;
+    }
+
+    // Next button
+    html += `<button onclick="goToParticipantPage(${currentParticipantPage + 1})" ${currentParticipantPage === totalPages ? 'disabled' : ''} style="padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 6px; background: white; cursor: ${currentParticipantPage === totalPages ? 'not-allowed' : 'pointer'}; color: ${currentParticipantPage === totalPages ? '#9ca3af' : '#1e293b'};">→</button>`;
+
+    paginationDiv.innerHTML = html;
+}
+
+// Go to specific page
+function goToParticipantPage(page) {
+    const totalPages = Math.ceil(chatParticipantsData.length / participantsPerPage);
+    if (page < 1 || page > totalPages) return;
+    currentParticipantPage = page;
+    renderParticipantsTable();
+}
+
+// Toggle individual participant selection
+function toggleParticipantSelection(index) {
+    chatParticipantsData[index].selected = !chatParticipantsData[index].selected;
+    updateSelectAllCheckbox();
+}
+
+// Toggle select all participants
+function toggleSelectAllParticipants() {
+    const selectAll = document.getElementById('select-all-participants').checked;
+    chatParticipantsData.forEach(p => p.selected = selectAll);
+    renderParticipantsTable();
+}
+
+// Update select all checkbox state
+function updateSelectAllCheckbox() {
+    const selectAllCheckbox = document.getElementById('select-all-participants');
+    if (selectAllCheckbox) {
+        const allSelected = chatParticipantsData.length > 0 && chatParticipantsData.every(p => p.selected);
+        selectAllCheckbox.checked = allSelected;
+    }
+}
+
+// Edit participant row
+function editParticipantRow(index) {
+    const p = chatParticipantsData[index];
+    const newFirstName = prompt('First Name:', p.first_name);
+    if (newFirstName === null) return;
+
+    const newSurname = prompt('Surname:', p.surname);
+    if (newSurname === null) return;
+
+    const newEmail = prompt('Email:', p.email);
+    if (newEmail === null) return;
+
+    if (!newFirstName.trim() || !newSurname.trim() || !newEmail.trim()) {
+        alert('All fields are required');
+        return;
+    }
+
+    if (!isValidEmailFormat(newEmail)) {
+        alert('Please enter a valid email address');
+        return;
+    }
+
+    chatParticipantsData[index] = {
+        ...p,
+        first_name: newFirstName.trim(),
+        surname: newSurname.trim(),
+        email: newEmail.trim()
+    };
+
+    renderParticipantsTable();
+}
+
+// Remove participant row
+function removeParticipantRow(index) {
+    if (confirm('Are you sure you want to remove this participant?')) {
+        chatParticipantsData.splice(index, 1);
+        // Adjust current page if necessary
+        const totalPages = Math.ceil(chatParticipantsData.length / participantsPerPage);
+        if (currentParticipantPage > totalPages && totalPages > 0) {
+            currentParticipantPage = totalPages;
+        }
+        renderParticipantsTable();
+    }
+}
+
+// Send invites to selected participants
+async function sendInvitesToSelected() {
+    const selectedParticipants = chatParticipantsData.filter(p => p.selected);
+
+    if (selectedParticipants.length === 0) {
+        alert('Please select at least one participant');
+        return;
+    }
+
+    const inviteType = document.getElementById('invite-type-select').value;
+    const isReminder = inviteType === 'reminder';
+
+    if (!window.currentEditingChatId) {
+        alert('Please save the chat first before sending invites');
+        return;
+    }
+
+    const confirmMsg = `Send ${isReminder ? 'reminder' : 'invite'} emails to ${selectedParticipants.length} participant(s)?`;
+    if (!confirm(confirmMsg)) return;
+
+    // Get chat details
+    const chat = window.currentEditingChat;
+    if (!chat) {
+        alert('Chat data not loaded');
+        return;
+    }
+
+    const chatLink = `https://rworldfeedback.co.uk/chat/${chat.slug}`;
+    let sent = 0;
+    let failed = 0;
+
+    for (const participant of selectedParticipants) {
+        try {
+            const htmlBody = createInviteEmailHTML(participant.first_name, chat.name, chatLink);
+            const textBody = createInviteEmailText(participant.first_name, chat.name, chatLink);
+
+            const response = await fetch('/api/send-email', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    to: participant.email,
+                    subject: isReminder ? `Reminder: Share your feedback - ${chat.name}` : `You're invited to share your feedback - ${chat.name}`,
+                    htmlBody: htmlBody,
+                    textBody: textBody
+                })
+            });
+
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+                if (isReminder) {
+                    participant.reminder_sent = true;
+                } else {
+                    participant.invite_sent = true;
+                }
+                participant.selected = false;
+                sent++;
+            } else {
+                failed++;
+            }
+        } catch (error) {
+            console.error('Error sending invite:', error);
+            failed++;
+        }
+    }
+
+    renderParticipantsTable();
+    alert(`${sent} ${isReminder ? 'reminder(s)' : 'invite(s)'} sent successfully${failed > 0 ? `, ${failed} failed` : ''}`);
+}
+
+// Save participants and email settings
+async function saveParticipantsSettings() {
+    if (!window.currentEditingChatId) {
+        alert('Please save the chat first (on the Setup tab)');
+        return;
+    }
+
+    try {
+        // Save email templates and schedules to the chat record
+        const inviteTemplate = document.getElementById('email-invite-template').value;
+        const reminderTemplate = document.getElementById('email-reminder-template').value;
+        const scheduleInvites = document.getElementById('schedule-invites-datetime').value;
+        const scheduleReminders = document.getElementById('schedule-reminders-datetime').value;
+
+        const { error: updateError } = await window.supabaseClient
+            .from('listening_chats')
+            .update({
+                invite_email_template: inviteTemplate,
+                reminder_email_template: reminderTemplate,
+                scheduled_invite_date: scheduleInvites || null,
+                scheduled_reminder_date: scheduleReminders || null,
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', window.currentEditingChatId);
+
+        if (updateError) throw updateError;
+
+        // Delete existing participants for this chat
+        await window.supabaseClient
+            .from('chat_participants')
+            .delete()
+            .eq('chat_id', window.currentEditingChatId);
+
+        // Insert all current participants
+        if (chatParticipantsData.length > 0) {
+            const participantsToInsert = chatParticipantsData.map(p => ({
+                chat_id: window.currentEditingChatId,
+                first_name: p.first_name,
+                surname: p.surname,
+                email: p.email,
+                invite_sent: p.invite_sent || false,
+                reminder_sent: p.reminder_sent || false,
+                unique_token: generateParticipantToken()
+            }));
+
+            const { error: insertError } = await window.supabaseClient
+                .from('chat_participants')
+                .insert(participantsToInsert);
+
+            if (insertError) throw insertError;
+        }
+
+        alert('Participants and settings saved successfully!');
+
+    } catch (error) {
+        console.error('Error saving participants:', error);
+        alert('Error saving: ' + error.message);
+    }
+}
+
+// Generate unique token for participant links
+function generateParticipantToken() {
+    return 'xxxx-xxxx-xxxx'.replace(/x/g, () => Math.floor(Math.random() * 16).toString(16));
+}
+
+// Copy generated link to clipboard
+function copyGeneratedLink() {
+    const linkInput = document.getElementById('generatedChatLink');
+    if (linkInput) {
+        linkInput.select();
+        document.execCommand('copy');
+        alert('Link copied to clipboard!');
+    }
+}
+
+// Test chat function
+function testChat() {
+    const link = document.getElementById('generatedChatLink')?.value;
+    if (link) {
+        window.open(link, '_blank');
+    }
+}
+
+// Load participants when loading a chat
+async function loadChatParticipants(chatId) {
+    try {
+        const { data: participants, error } = await window.supabaseClient
+            .from('chat_participants')
+            .select('*')
+            .eq('chat_id', chatId)
+            .order('created_at', { ascending: true });
+
+        if (!error && participants) {
+            chatParticipantsData = participants.map(p => ({
+                id: p.id,
+                first_name: p.first_name || p.name?.split(' ')[0] || '',
+                surname: p.surname || p.name?.split(' ').slice(1).join(' ') || '',
+                email: p.email,
+                invite_sent: p.invite_sent || p.status === 'sent',
+                reminder_sent: p.reminder_sent || false,
+                selected: false
+            }));
+        } else {
+            chatParticipantsData = [];
+        }
+
+        renderParticipantsTable();
+    } catch (error) {
+        console.error('Error loading participants:', error);
+    }
+}
+
+// ============================================== //
+// PARTICIPANT MANAGEMENT FUNCTIONS - END         //
+// ============================================== //
+
 </script>
+
+<!-- Paste from Excel Modal -->
+<div id="excel-paste-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;">
+    <div style="background: white; border-radius: 12px; padding: 32px; width: 90%; max-width: 600px; max-height: 80vh; overflow-y: auto;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h3 style="margin: 0; color: #1e293b;">Paste from Excel</h3>
+            <button onclick="closeExcelPasteModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #64748b;">&times;</button>
+        </div>
+
+        <p style="color: #64748b; margin-bottom: 16px; font-size: 14px;">
+            Paste data from Excel with columns: <strong>First Name, Surname, Email</strong> (tab-separated, one participant per line).
+        </p>
+
+        <textarea id="excel-paste-textarea" rows="10" placeholder="John&#9;Smith&#9;john@example.com
+Jane&#9;Doe&#9;jane@example.com" style="width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; font-family: monospace; resize: vertical; box-sizing: border-box;"></textarea>
+
+        <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px;">
+            <button onclick="closeExcelPasteModal()" style="padding: 10px 20px; background: #f8fafc; color: #1e293b; border: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer;">Cancel</button>
+            <button onclick="importFromExcel()" style="padding: 10px 20px; background: #3b82f6; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 500;">Import Participants</button>
+        </div>
+    </div>
+</div>
+
 </body>
 </html>
