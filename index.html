@@ -3774,44 +3774,18 @@
 
                                     <!-- Access Type -->
                                     <div style="margin-bottom: 24px;">
-                                        <label style="display: block; font-weight: 600; margin-bottom: 12px; color: #1e293b;">Access Type</label>
-                                        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-
-                                            <!-- Open Access Card -->
-                                            <div id="access-type-open" onclick="selectAccessType('open')" style="flex: 1; min-width: 150px; padding: 16px; border: 2px solid #3b82f6; border-radius: 12px; cursor: pointer; text-align: center; background: #eff6ff; transition: all 0.2s;">
-                                                <div style="font-size: 24px; margin-bottom: 8px;">🌐</div>
-                                                <div style="font-weight: 600; color: #1e293b; margin-bottom: 4px;">Open Access</div>
-                                                <div style="font-size: 12px; color: #64748b;">Anyone with the link can respond</div>
-                                            </div>
-
-                                            <!-- Closed Access Card -->
-                                            <div id="access-type-closed" onclick="selectAccessType('closed')" style="flex: 1; min-width: 150px; padding: 16px; border: 2px solid #e2e8f0; border-radius: 12px; cursor: pointer; text-align: center; background: white; transition: all 0.2s;">
-                                                <div style="font-size: 24px; margin-bottom: 8px;">🔒</div>
-                                                <div style="font-weight: 600; color: #1e293b; margin-bottom: 4px;">Closed Access</div>
-                                                <div style="font-size: 12px; color: #64748b;">Only invited participants via unique links</div>
-                                            </div>
-
-                                            <!-- Combined Access Card -->
-                                            <div id="access-type-combined" onclick="selectAccessType('combined')" style="flex: 1; min-width: 150px; padding: 16px; border: 2px solid #e2e8f0; border-radius: 12px; cursor: pointer; text-align: center; background: white; transition: all 0.2s;">
-                                                <div style="font-size: 24px; margin-bottom: 8px;">🔗</div>
-                                                <div style="font-weight: 600; color: #1e293b; margin-bottom: 4px;">Combined Access</div>
-                                                <div style="font-size: 12px; color: #64748b;">Public link AND invited participants</div>
-                                            </div>
-
-                                        </div>
-                                        <input type="hidden" id="chat-access-type" value="open">
+                                        <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #1e293b;">Access Type</label>
+                                        <select id="chat-access-type" style="width: 100%; padding: 12px 16px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; background: white; cursor: pointer; color: #1e293b;">
+                                            <option value="open">🌐 Open Access - Anyone with the link can respond</option>
+                                            <option value="closed">🔒 Closed Access - Only invited participants via unique links</option>
+                                            <option value="combined">🔗 Combined Access - Public link AND invited participants</option>
+                                        </select>
                                     </div>
 
-                                    <!-- Action Buttons Row -->
-                                    <div style="display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap;">
-                                        <button onclick="generateChatLink()" style="flex: 1; min-width: 140px; padding: 12px 20px; background: #3b82f6; color: white; border: none; border-radius: 8px; font-weight: 500; cursor: pointer; font-size: 14px;">
-                                            🔗 Generate Link
-                                        </button>
-                                        <button onclick="saveListeningChat()" id="saveChatBtn" style="flex: 1; min-width: 140px; padding: 12px 20px; background: #10b981; color: white; border: none; border-radius: 8px; font-weight: 500; cursor: pointer; font-size: 14px;">
-                                            💾 Save Chat
-                                        </button>
-                                        <button onclick="showChatEditorTab('participants')" id="manage-participants-btn" style="flex: 1; min-width: 140px; padding: 12px 20px; background: #8b5cf6; color: white; border: none; border-radius: 8px; font-weight: 500; cursor: pointer; font-size: 14px;">
-                                            👥 Manage Participants
+                                    <!-- Create Chat Button -->
+                                    <div style="margin-bottom: 24px;">
+                                        <button onclick="createChat()" style="padding: 14px 32px; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 15px;">
+                                            ✨ Create Chat
                                         </button>
                                     </div>
 
@@ -11288,7 +11262,9 @@ function openChatEditor(chatId = null) {
         document.getElementById('chat-editor-name').value = '';
         document.getElementById('chat-setup-name').value = '';
         document.getElementById('chat-setup-welcome').value = 'Hi! Thanks for taking the time to share your feedback with us. Please feel free to tell us about your experience or any suggestions you might have.';
-        selectAccessType('open');
+        // Reset dropdown to default
+        const accessDropdown = document.getElementById('chat-access-type');
+        if (accessDropdown) accessDropdown.value = 'open';
     } else {
         // Existing chat - load from database
         loadChatIntoEditor(chatId);
@@ -11328,11 +11304,17 @@ async function loadChatIntoEditor(chatId) {
         if (chatSetupName) chatSetupName.value = chat.name || '';
         if (chatSetupWelcome) chatSetupWelcome.value = chat.welcome_message || '';
 
-        // Set access type selection
-        if (chat.access_type === 'invite_only') {
-            selectAccessType('invite');
-        } else {
-            selectAccessType('open');
+        // Set access type dropdown value
+        const accessTypeDropdown = document.getElementById('chat-access-type');
+        if (accessTypeDropdown) {
+            // Map database values to dropdown values
+            if (chat.access_type === 'invite_only' || chat.access_type === 'closed') {
+                accessTypeDropdown.value = 'closed';
+            } else if (chat.access_type === 'combined') {
+                accessTypeDropdown.value = 'combined';
+            } else {
+                accessTypeDropdown.value = 'open';
+            }
         }
 
         // Handle panel display based on access type
@@ -12034,11 +12016,15 @@ function generateSlug() {
 
 // Get current access type selection
 function getSelectedAccessType() {
-    const openCard = document.getElementById('access-type-open');
-    if (openCard && openCard.style.borderColor === 'rgb(59, 130, 246)') {
+    const dropdown = document.getElementById('chat-access-type');
+    if (dropdown) {
+        const value = dropdown.value;
+        // Map dropdown values to internal values
+        if (value === 'closed') return 'invite_only';
+        if (value === 'combined') return 'combined';
         return 'open';
     }
-    return 'invite_only';
+    return 'open';
 }
 
 // Create HTML email template for invite
@@ -13659,31 +13645,30 @@ let chatParticipantsData = [];
 let currentParticipantPage = 1;
 const participantsPerPage = 10;
 
-// Update selectAccessType to handle 3 options
-function selectAccessType(type) {
-    const openCard = document.getElementById('access-type-open');
-    const closedCard = document.getElementById('access-type-closed');
-    const combinedCard = document.getElementById('access-type-combined');
-    const hiddenInput = document.getElementById('chat-access-type');
+// Create chat based on selected access type
+async function createChat() {
+    const chatName = document.getElementById('chat-setup-name').value.trim();
+    const welcomeMessage = document.getElementById('chat-setup-welcome').value.trim();
+    const accessType = document.getElementById('chat-access-type').value;
 
-    // Reset all cards
-    [openCard, closedCard, combinedCard].forEach(card => {
-        if (card) {
-            card.style.borderColor = '#e2e8f0';
-            card.style.background = 'white';
-        }
-    });
-
-    // Highlight selected card
-    const selectedCard = document.getElementById('access-type-' + type);
-    if (selectedCard) {
-        selectedCard.style.borderColor = '#3b82f6';
-        selectedCard.style.background = '#eff6ff';
+    if (!chatName) {
+        alert('Please enter a chat name');
+        document.getElementById('chat-setup-name').focus();
+        return;
     }
 
-    // Update hidden input
-    if (hiddenInput) {
-        hiddenInput.value = type;
+    // Call the existing generateChatLink function which handles saving and link generation
+    // The access type is now read from the dropdown
+    await generateChatLink();
+
+    // After chat is created, handle based on access type
+    if (accessType === 'closed' || accessType === 'combined') {
+        // For closed or combined, prompt to add participants
+        setTimeout(() => {
+            if (confirm('Chat created! Would you like to add participants now?')) {
+                showChatEditorTab('participants');
+            }
+        }, 800);
     }
 }
 
