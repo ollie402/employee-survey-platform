@@ -2551,8 +2551,8 @@
    ============================================ */
 
 .participant-entry-panel {
-    flex: 1;
-    min-width: 0;
+    flex: 1.5;
+    min-width: 400px;
 }
 
 .participant-entry-card {
@@ -2561,6 +2561,9 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     padding: 24px;
     border: 1px solid #e5e7eb;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 .participant-entry-header {
@@ -2711,6 +2714,9 @@
 
 /* Participants list */
 .participants-list-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
     margin-bottom: 20px;
 }
 
@@ -2722,7 +2728,9 @@
 }
 
 .participants-list {
-    max-height: 200px;
+    flex: 1;
+    max-height: none;
+    min-height: 200px;
     overflow-y: auto;
     border: 1px solid #e5e7eb;
     border-radius: 8px;
@@ -2738,9 +2746,8 @@
 
 .participant-item {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding: 10px 12px;
+    padding: 12px;
     border-bottom: 1px solid #e5e7eb;
     background: #ffffff;
 }
@@ -2749,9 +2756,20 @@
     border-bottom: none;
 }
 
+.participant-checkbox-wrapper {
+    margin-right: 12px;
+}
+
+.participant-checkbox {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
 .participant-info {
     display: flex;
     flex-direction: column;
+    flex: 1;
 }
 
 .participant-name {
@@ -2762,6 +2780,30 @@
 .participant-email {
     font-size: 0.85rem;
     color: #6b7280;
+}
+
+.participant-status {
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    border-radius: 12px;
+    margin-top: 4px;
+    display: inline-block;
+    width: fit-content;
+}
+
+.participant-status.status-pending {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.participant-status.status-sent {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.participant-status.status-responded {
+    background: #dbeafe;
+    color: #1e40af;
 }
 
 .btn-remove-participant {
@@ -2814,6 +2856,39 @@
 
 .participant-entry-buttons .btn-continue:disabled {
     background: #86efac;
+    cursor: not-allowed;
+}
+
+/* Send Invites section */
+.send-invites-section {
+    padding: 16px 0 0 0;
+    border-top: 1px solid #e5e7eb;
+    margin-top: auto;
+}
+
+.btn-send-invites {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.btn-send-invites:hover {
+    opacity: 0.9;
+}
+
+.btn-send-invites:disabled {
+    opacity: 0.5;
     cursor: not-allowed;
 }
 
