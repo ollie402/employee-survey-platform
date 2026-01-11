@@ -3324,6 +3324,132 @@
             to { transform: rotate(360deg); }
         }
 
+        /* Response Volume Chart */
+        .analytics-chart-card.volume-chart .analytics-chart-container {
+            height: 200px;
+        }
+
+        /* Top Topics List */
+        .analytics-topics-list {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+
+        .analytics-topics-list-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 20px;
+        }
+
+        .topics-list-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .topics-list-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .topics-list-rank {
+            width: 28px;
+            height: 28px;
+            background: #f1f5f9;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            color: #64748b;
+            flex-shrink: 0;
+        }
+
+        .topics-list-rank.top-3 {
+            background: #6366f1;
+            color: white;
+        }
+
+        .topics-list-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .topics-list-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: #1e293b;
+            margin-bottom: 4px;
+            text-transform: capitalize;
+        }
+
+        .topics-list-bar-container {
+            height: 6px;
+            background: #e5e7eb;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .topics-list-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #6366f1, #8b5cf6);
+            border-radius: 3px;
+            transition: width 0.5s ease;
+        }
+
+        .topics-list-count {
+            font-size: 13px;
+            font-weight: 600;
+            color: #6366f1;
+            flex-shrink: 0;
+            min-width: 40px;
+            text-align: right;
+        }
+
+        /* Word Cloud Container */
+        .analytics-wordcloud-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+
+        .analytics-wordcloud-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 20px;
+        }
+
+        .wordcloud-container {
+            width: 100%;
+            height: 300px;
+            position: relative;
+        }
+
+        #wordCloudCanvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Two column layout for list and word cloud */
+        .analytics-bottom-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-top: 24px;
+        }
+
+        @media (max-width: 900px) {
+            .analytics-bottom-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
         /* ============================================================================
            ANALYTICS TAB STYLES - END
            ============================================================================ */
@@ -4312,6 +4438,37 @@ Thank you!</textarea>
                                                 <canvas id="sentimentTimeChart"></canvas>
                                             </div>
                                         </div>
+                                    </div>
+
+                                    <!-- Response Volume Chart -->
+                                    <div class="analytics-charts" style="margin-top: 24px;">
+                                        <div class="analytics-chart-card full-width volume-chart">
+                                            <div class="analytics-chart-title">Response Volume Over Time</div>
+                                            <div class="analytics-chart-container">
+                                                <canvas id="responseVolumeChart"></canvas>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Bottom Row: Topics List & Word Cloud -->
+                                    <div class="analytics-bottom-row">
+
+                                        <!-- Top Topics List -->
+                                        <div class="analytics-topics-list">
+                                            <div class="analytics-topics-list-title">Top Topics Ranked</div>
+                                            <div id="topicsListContainer">
+                                                <!-- Topics will be inserted here -->
+                                            </div>
+                                        </div>
+
+                                        <!-- Word Cloud -->
+                                        <div class="analytics-wordcloud-card">
+                                            <div class="analytics-wordcloud-title">Word Cloud</div>
+                                            <div class="wordcloud-container">
+                                                <canvas id="wordCloudCanvas"></canvas>
+                                            </div>
+                                        </div>
+
                                     </div>
 
                                 </div>
@@ -5442,6 +5599,8 @@ Thank you!</textarea>
 <script src="assets/js/database.js"></script>
 <!-- Chart.js for interactive charts -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- WordCloud library for word cloud visualization -->
+<script src="https://cdn.jsdelivr.net/npm/wordcloud@1.2.2/src/wordcloud2.min.js"></script>
 <script src="assets/js/analytics-dashboard.js"></script>
 <script src="assets/js/auth-wizard.js"></script>
 <script src="assets/js/app.js?v=20250908-2125"></script>
@@ -11845,6 +12004,15 @@ function displayAnalytics(allResponses, analyzedResponses) {
     createSentimentPieChart(sentimentCounts);
     createTopicsBarChart(sortedTopics);
     createSentimentTimeChart(analysisData);
+
+    // Create response volume chart
+    createResponseVolumeChart(allResponses);
+
+    // Create ranked topics list
+    createTopicsList(sortedTopics);
+
+    // Create word cloud
+    createWordCloud(allResponses);
 }
 
 /**
@@ -12088,6 +12256,205 @@ function createSentimentTimeChart(analysisData) {
                 mode: 'index'
             }
         }
+    });
+}
+
+// Store additional chart instance
+let responseVolumeChart = null;
+
+/**
+ * Create response volume bar chart
+ */
+function createResponseVolumeChart(allResponses) {
+    const ctx = document.getElementById('responseVolumeChart');
+    if (!ctx) return;
+
+    // Destroy existing chart
+    if (responseVolumeChart) {
+        responseVolumeChart.destroy();
+    }
+
+    // Group responses by date
+    const dateGroups = {};
+    allResponses.forEach(r => {
+        const date = new Date(r.submitted_at).toLocaleDateString('en-GB', {
+            day: 'numeric',
+            month: 'short'
+        });
+        dateGroups[date] = (dateGroups[date] || 0) + 1;
+    });
+
+    const dates = Object.keys(dateGroups);
+    const counts = Object.values(dateGroups);
+
+    responseVolumeChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: dates,
+            datasets: [{
+                label: 'Responses',
+                data: counts,
+                backgroundColor: 'rgba(99, 102, 241, 0.8)',
+                borderRadius: 6,
+                barThickness: dates.length > 14 ? 'flex' : 24
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                x: {
+                    grid: {
+                        display: false
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    },
+                    grid: {
+                        color: '#f1f5f9'
+                    }
+                }
+            }
+        }
+    });
+}
+
+/**
+ * Create ranked topics list with progress bars
+ */
+function createTopicsList(sortedTopics) {
+    const container = document.getElementById('topicsListContainer');
+    if (!container) return;
+
+    if (sortedTopics.length === 0) {
+        container.innerHTML = '<div style="color: #9ca3af; text-align: center; padding: 20px;">No topics analyzed yet</div>';
+        return;
+    }
+
+    const maxCount = sortedTopics[0][1];
+
+    container.innerHTML = sortedTopics.slice(0, 10).map((topic, index) => {
+        const [name, count] = topic;
+        const percentage = (count / maxCount) * 100;
+        const isTop3 = index < 3;
+
+        return `
+            <div class="topics-list-item">
+                <div class="topics-list-rank ${isTop3 ? 'top-3' : ''}">${index + 1}</div>
+                <div class="topics-list-content">
+                    <div class="topics-list-name">${escapeHtml(name)}</div>
+                    <div class="topics-list-bar-container">
+                        <div class="topics-list-bar" style="width: ${percentage}%"></div>
+                    </div>
+                </div>
+                <div class="topics-list-count">${count}</div>
+            </div>
+        `;
+    }).join('');
+}
+
+/**
+ * Helper function to escape HTML
+ */
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+/**
+ * Create word cloud from response text
+ */
+function createWordCloud(allResponses) {
+    const canvas = document.getElementById('wordCloudCanvas');
+    if (!canvas || typeof WordCloud === 'undefined') {
+        console.log('WordCloud not available');
+        return;
+    }
+
+    // Combine all response text
+    const allText = allResponses
+        .map(r => r.response_text || '')
+        .join(' ')
+        .toLowerCase();
+
+    // Common words to exclude (stop words)
+    const stopWords = new Set([
+        'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for',
+        'of', 'with', 'by', 'from', 'as', 'is', 'was', 'are', 'were', 'been',
+        'be', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could',
+        'should', 'may', 'might', 'must', 'shall', 'can', 'need', 'dare', 'ought',
+        'used', 'it', 'its', 'this', 'that', 'these', 'those', 'i', 'you', 'he',
+        'she', 'we', 'they', 'me', 'him', 'her', 'us', 'them', 'my', 'your',
+        'his', 'our', 'their', 'what', 'which', 'who', 'whom', 'when', 'where',
+        'why', 'how', 'all', 'each', 'every', 'both', 'few', 'more', 'most',
+        'other', 'some', 'such', 'no', 'nor', 'not', 'only', 'own', 'same',
+        'so', 'than', 'too', 'very', 'just', 'also', 'now', 'here', 'there',
+        'then', 'once', 'if', 'because', 'about', 'into', 'through', 'during',
+        'before', 'after', 'above', 'below', 'between', 'under', 'again',
+        'further', 'am', 'being', 'dont', 'didnt', 'doesnt', 'dont', 'hadnt',
+        'hasnt', 'havent', 'isnt', 'wasnt', 'werent', 'wont', 'wouldnt', 'ive',
+        'youve', 'weve', 'theyve', 'im', 'youre', 'hes', 'shes', 'its', 'were',
+        'theyre', 'really', 'think', 'feel', 'like', 'get', 'got', 'much',
+        'many', 'way', 'even', 'well', 'back', 'still', 'going', 'make', 'made'
+    ]);
+
+    // Extract words and count frequency
+    const wordCounts = {};
+    const words = allText.match(/\b[a-z]{3,}\b/g) || [];
+
+    words.forEach(word => {
+        if (!stopWords.has(word) && word.length >= 3) {
+            wordCounts[word] = (wordCounts[word] || 0) + 1;
+        }
+    });
+
+    // Convert to array format for WordCloud: [[word, count], ...]
+    const wordList = Object.entries(wordCounts)
+        .filter(([word, count]) => count >= 2) // Only words appearing 2+ times
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 80); // Top 80 words
+
+    if (wordList.length === 0) {
+        const container = canvas.parentElement;
+        container.innerHTML = '<div style="color: #9ca3af; text-align: center; padding: 60px 20px;">Not enough text data for word cloud</div>';
+        return;
+    }
+
+    // Scale the counts for better visualization
+    const maxCount = wordList[0][1];
+    const scaledList = wordList.map(([word, count]) => {
+        const size = Math.max(12, Math.floor((count / maxCount) * 60) + 10);
+        return [word, size];
+    });
+
+    // Clear canvas
+    const context = canvas.getContext('2d');
+    context.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Generate word cloud
+    WordCloud(canvas, {
+        list: scaledList,
+        gridSize: 8,
+        weightFactor: 1,
+        fontFamily: 'Inter, system-ui, sans-serif',
+        color: function(word, weight) {
+            const colors = ['#6366f1', '#8b5cf6', '#a855f7', '#3b82f6', '#06b6d4', '#10b981', '#f59e0b'];
+            return colors[Math.floor(Math.random() * colors.length)];
+        },
+        rotateRatio: 0.3,
+        rotationSteps: 2,
+        backgroundColor: 'transparent',
+        drawOutOfBound: false,
+        shrinkToFit: true
     });
 }
 
