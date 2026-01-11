@@ -4194,6 +4194,14 @@ Thank you!</textarea>
                                             <button onclick="analyzeAllUnanalyzedResponses()" class="ai-analyze-all-btn">
                                                 🔍 Analyze All with AI
                                             </button>
+                                            <button onclick="showImportResponsesModal()" class="btn-export-responses" style="background: #6366f1; color: white; border-color: #6366f1;">
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                                    <polyline points="17 8 12 3 7 8"></polyline>
+                                                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                                                </svg>
+                                                Import CSV
+                                            </button>
                                             <button class="btn-export-responses" id="exportResponsesBtn">
                                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -15343,6 +15351,274 @@ Jane&#9;Doe&#9;jane@example.com" style="width: 100%; padding: 12px; border: 1px 
         </div>
     </div>
 </div>
+
+<!-- Import Responses Modal -->
+<div id="import-responses-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;">
+    <div style="background: white; border-radius: 12px; padding: 32px; width: 90%; max-width: 600px; max-height: 80vh; overflow-y: auto;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h3 style="margin: 0; color: #1e293b;">Import Responses from CSV</h3>
+            <button onclick="closeImportResponsesModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #64748b;">&times;</button>
+        </div>
+
+        <p style="color: #64748b; margin-bottom: 16px; font-size: 14px;">
+            Upload a CSV file with a <strong>response_text</strong> column (required). Optional columns: <strong>submitted_at</strong> (date/time).
+        </p>
+
+        <div style="border: 2px dashed #e2e8f0; border-radius: 8px; padding: 32px; text-align: center; margin-bottom: 16px; cursor: pointer;" onclick="document.getElementById('import-responses-file').click()" id="import-responses-dropzone">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" style="margin-bottom: 12px;">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+            <p style="color: #64748b; margin: 0;">Click to upload or drag and drop</p>
+            <p style="color: #94a3b8; margin: 4px 0 0 0; font-size: 12px;">CSV files only</p>
+        </div>
+
+        <input type="file" id="import-responses-file" accept=".csv" style="display: none;" onchange="handleImportResponsesFile(this)">
+
+        <div id="import-responses-preview" style="display: none; margin-bottom: 16px;">
+            <div style="background: #f8fafc; border-radius: 8px; padding: 12px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span id="import-responses-filename" style="font-weight: 500; color: #1e293b;"></span>
+                    <span id="import-responses-count" style="color: #64748b; font-size: 13px;"></span>
+                </div>
+            </div>
+        </div>
+
+        <div id="import-responses-error" style="display: none; background: #fef2f2; color: #dc2626; padding: 12px; border-radius: 8px; margin-bottom: 16px; font-size: 14px;"></div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px;">
+            <button onclick="closeImportResponsesModal()" style="padding: 10px 20px; background: #f8fafc; color: #1e293b; border: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer;">Cancel</button>
+            <button onclick="importResponses()" id="import-responses-btn" style="padding: 10px 20px; background: #6366f1; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 500;" disabled>Import Responses</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ============================================================================
+// IMPORT RESPONSES FUNCTIONS
+// ============================================================================
+
+let importResponsesData = [];
+
+function showImportResponsesModal() {
+    const modal = document.getElementById('import-responses-modal');
+    if (modal) {
+        modal.style.display = 'flex';
+        // Reset state
+        importResponsesData = [];
+        document.getElementById('import-responses-file').value = '';
+        document.getElementById('import-responses-preview').style.display = 'none';
+        document.getElementById('import-responses-error').style.display = 'none';
+        document.getElementById('import-responses-btn').disabled = true;
+    }
+}
+
+function closeImportResponsesModal() {
+    const modal = document.getElementById('import-responses-modal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+function handleImportResponsesFile(input) {
+    const file = input.files[0];
+    if (!file) return;
+
+    const errorEl = document.getElementById('import-responses-error');
+    const previewEl = document.getElementById('import-responses-preview');
+    const filenameEl = document.getElementById('import-responses-filename');
+    const countEl = document.getElementById('import-responses-count');
+    const importBtn = document.getElementById('import-responses-btn');
+
+    // Reset
+    errorEl.style.display = 'none';
+    previewEl.style.display = 'none';
+    importBtn.disabled = true;
+    importResponsesData = [];
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const text = e.target.result;
+            const lines = text.split(/\r?\n/).filter(line => line.trim());
+
+            if (lines.length < 2) {
+                throw new Error('CSV must have a header row and at least one data row');
+            }
+
+            // Parse header
+            const header = parseCSVLine(lines[0]);
+            const responseTextIndex = header.findIndex(h =>
+                h.toLowerCase().replace(/[^a-z]/g, '') === 'responsetext' ||
+                h.toLowerCase().replace(/[^a-z]/g, '') === 'response'
+            );
+
+            if (responseTextIndex === -1) {
+                throw new Error('CSV must have a "response_text" or "response" column');
+            }
+
+            const submittedAtIndex = header.findIndex(h =>
+                h.toLowerCase().replace(/[^a-z]/g, '') === 'submittedat' ||
+                h.toLowerCase().replace(/[^a-z]/g, '') === 'date' ||
+                h.toLowerCase().replace(/[^a-z]/g, '') === 'timestamp'
+            );
+
+            // Parse data rows
+            for (let i = 1; i < lines.length; i++) {
+                const row = parseCSVLine(lines[i]);
+                const responseText = row[responseTextIndex]?.trim();
+
+                if (responseText) {
+                    const responseData = {
+                        response_text: responseText,
+                        submitted_at: submittedAtIndex !== -1 && row[submittedAtIndex]
+                            ? new Date(row[submittedAtIndex]).toISOString()
+                            : new Date().toISOString()
+                    };
+                    importResponsesData.push(responseData);
+                }
+            }
+
+            if (importResponsesData.length === 0) {
+                throw new Error('No valid responses found in CSV');
+            }
+
+            // Show preview
+            filenameEl.textContent = file.name;
+            countEl.textContent = `${importResponsesData.length} responses found`;
+            previewEl.style.display = 'block';
+            importBtn.disabled = false;
+
+        } catch (err) {
+            errorEl.textContent = err.message;
+            errorEl.style.display = 'block';
+        }
+    };
+
+    reader.onerror = function() {
+        errorEl.textContent = 'Error reading file';
+        errorEl.style.display = 'block';
+    };
+
+    reader.readAsText(file);
+}
+
+function parseCSVLine(line) {
+    const result = [];
+    let current = '';
+    let inQuotes = false;
+
+    for (let i = 0; i < line.length; i++) {
+        const char = line[i];
+        const nextChar = line[i + 1];
+
+        if (inQuotes) {
+            if (char === '"' && nextChar === '"') {
+                current += '"';
+                i++;
+            } else if (char === '"') {
+                inQuotes = false;
+            } else {
+                current += char;
+            }
+        } else {
+            if (char === '"') {
+                inQuotes = true;
+            } else if (char === ',') {
+                result.push(current.trim());
+                current = '';
+            } else {
+                current += char;
+            }
+        }
+    }
+    result.push(current.trim());
+    return result;
+}
+
+async function importResponses() {
+    if (!window.currentEditingChatId || importResponsesData.length === 0) {
+        alert('No chat selected or no data to import');
+        return;
+    }
+
+    const importBtn = document.getElementById('import-responses-btn');
+    const errorEl = document.getElementById('import-responses-error');
+    const originalText = importBtn.textContent;
+
+    try {
+        importBtn.disabled = true;
+        importBtn.textContent = 'Importing...';
+
+        // Prepare data for insert
+        const responsesToInsert = importResponsesData.map(r => ({
+            chat_id: window.currentEditingChatId,
+            response_text: r.response_text,
+            submitted_at: r.submitted_at,
+            status: 'new'
+        }));
+
+        // Insert into Supabase
+        const { data, error } = await window.supabaseClient
+            .from('chat_responses')
+            .insert(responsesToInsert)
+            .select();
+
+        if (error) throw error;
+
+        // Success
+        closeImportResponsesModal();
+        alert(`Successfully imported ${data.length} responses!`);
+
+        // Refresh the responses table
+        if (typeof loadChatResponses === 'function') {
+            loadChatResponses(window.currentEditingChatId);
+        }
+
+    } catch (err) {
+        console.error('Import error:', err);
+        errorEl.textContent = 'Error importing responses: ' + err.message;
+        errorEl.style.display = 'block';
+    } finally {
+        importBtn.disabled = false;
+        importBtn.textContent = originalText;
+    }
+}
+
+// Add drag and drop support
+document.addEventListener('DOMContentLoaded', function() {
+    const dropzone = document.getElementById('import-responses-dropzone');
+    if (dropzone) {
+        dropzone.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            this.style.borderColor = '#6366f1';
+            this.style.background = '#f8fafc';
+        });
+
+        dropzone.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            this.style.borderColor = '#e2e8f0';
+            this.style.background = 'transparent';
+        });
+
+        dropzone.addEventListener('drop', function(e) {
+            e.preventDefault();
+            this.style.borderColor = '#e2e8f0';
+            this.style.background = 'transparent';
+
+            const file = e.dataTransfer.files[0];
+            if (file && file.name.endsWith('.csv')) {
+                const fileInput = document.getElementById('import-responses-file');
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                fileInput.files = dataTransfer.files;
+                handleImportResponsesFile(fileInput);
+            }
+        });
+    }
+});
+</script>
 
 </body>
 </html>
