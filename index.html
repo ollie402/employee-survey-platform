@@ -3107,6 +3107,101 @@
         /* ============================================== */
         /* CHATS SECTION STYLES - END                     */
         /* ============================================== */
+
+        /* ============================================================================
+           AI ANALYSIS STYLES
+           ============================================================================ */
+
+        /* Sentiment Badges */
+        .ai-sentiment-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .ai-sentiment-badge.positive {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .ai-sentiment-badge.negative {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .ai-sentiment-badge.neutral {
+            background: #f3f4f6;
+            color: #4b5563;
+        }
+
+        /* Topic Tags */
+        .ai-topic-tag {
+            display: inline-block;
+            padding: 2px 8px;
+            margin: 2px;
+            background: #e0e7ff;
+            color: #3730a3;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+        }
+
+        /* Analyze Buttons */
+        .ai-analyze-btn {
+            padding: 6px 12px;
+            background: #8b5cf6;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .ai-analyze-btn:hover {
+            background: #7c3aed;
+        }
+
+        .ai-analyze-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        /* Analyze All Button */
+        .ai-analyze-all-btn {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .ai-analyze-all-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+        }
+
+        .ai-analyze-all-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* ============================================================================
+           AI ANALYSIS STYLES - END
+           ============================================================================ */
     </style>
 </head>
 <body>
@@ -3817,7 +3912,8 @@
                                     </div>
 
                                     <div style="display: flex; gap: 12px;">
-                                        <button id="closeSuccessPanel" onclick="document.getElementById('chat-success-panel').style.display='none'" style="flex: 1; padding: 12px; background: #f1f5f9; color: #475569; border: none; border-radius: 8px; cursor: pointer; font-weight: 500;">Close</button>
+                                        <button onclick="closeSuccessPanel()" style="flex: 1; padding: 12px; background: #f1f5f9; color: #475569; border: none; border-radius: 8px; cursor: pointer; font-weight: 500;">Close</button>
+                                        <button onclick="saveChatToDatabase()" id="save-chat-btn" style="flex: 1; padding: 12px; background: #10b981; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 500;">💾 Save Chat</button>
                                         <button id="testChatBtn" onclick="testChat()" style="flex: 1; padding: 12px; background: #d6366c; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 500;">Test Chat</button>
                                     </div>
                                 </div>
@@ -3969,19 +4065,26 @@ Thank you!</textarea>
                                 <div class="responses-table-container" id="responsesTableContainer">
                                     <div class="responses-table-header">
                                         <h3>Responses (<span id="responseCount">0</span>)</h3>
-                                        <button class="btn-export-responses" id="exportResponsesBtn">
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                                                <polyline points="7 10 12 15 17 10"></polyline>
-                                                <line x1="12" y1="15" x2="12" y2="3"></line>
-                                            </svg>
-                                            Export CSV
-                                        </button>
+                                        <div style="display: flex; gap: 12px; align-items: center;">
+                                            <button onclick="analyzeAllUnanalyzedResponses()" class="ai-analyze-all-btn">
+                                                🔍 Analyze All with AI
+                                            </button>
+                                            <button class="btn-export-responses" id="exportResponsesBtn">
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                                    <polyline points="7 10 12 15 17 10"></polyline>
+                                                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                                                </svg>
+                                                Export CSV
+                                            </button>
+                                        </div>
                                     </div>
                                     <table class="responses-table">
                                         <thead>
                                             <tr>
                                                 <th class="col-response">Response</th>
+                                                <th class="col-sentiment" style="width: 120px;">Sentiment</th>
+                                                <th class="col-topics" style="width: 180px;">Topics</th>
                                                 <th class="col-participant" id="participantColumn">Participant</th>
                                                 <th class="col-date">Date Submitted</th>
                                                 <th class="col-status">Status</th>
@@ -11256,6 +11359,14 @@ function openChatEditor(chatId = null) {
     window.currentEditingChatId = null;
     window.currentEditingChat = null;
 
+    // Reset save button state
+    const saveBtn = document.getElementById('save-chat-btn');
+    if (saveBtn) {
+        saveBtn.textContent = '💾 Save Chat';
+        saveBtn.style.background = '#10b981';
+        saveBtn.disabled = false;
+    }
+
     // Reset form for new chat or load existing
     if (!chatId) {
         // New chat - reset form
@@ -11265,6 +11376,8 @@ function openChatEditor(chatId = null) {
         // Reset dropdown to default
         const accessDropdown = document.getElementById('chat-access-type');
         if (accessDropdown) accessDropdown.value = 'open';
+        // Clear participants data for new chat
+        chatParticipantsData = [];
     } else {
         // Existing chat - load from database
         loadChatIntoEditor(chatId);
@@ -12543,7 +12656,327 @@ document.addEventListener('DOMContentLoaded', initSaveChatButton);
 // CHAT RESPONSES FUNCTIONS
 // ============================================
 
-// Load responses for the current chat
+// ============================================================================
+// AI ANALYSIS CONFIGURATION & FUNCTIONS
+// ============================================================================
+
+const AI_SERVER_URL = 'http://localhost:8080';  // Change for production
+
+/**
+ * Check if AI server is available
+ */
+async function checkAIServerHealth() {
+    try {
+        const response = await fetch(`${AI_SERVER_URL}/health`, {
+            method: 'GET'
+        });
+        const data = await response.json();
+        return data.status === 'healthy';
+    } catch (error) {
+        console.log('AI server not available:', error.message);
+        return false;
+    }
+}
+
+/**
+ * Analyze a single response
+ */
+async function analyzeResponse(responseId, responseText) {
+    try {
+        const response = await fetch(`${AI_SERVER_URL}/analyze`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                text: responseText,
+                response_id: responseId
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`AI server error: ${response.status}`);
+        }
+
+        const result = await response.json();
+
+        if (!result.success) {
+            throw new Error(result.error || 'Analysis failed');
+        }
+
+        return result.data;
+
+    } catch (error) {
+        console.error('Error analyzing response:', error);
+        throw error;
+    }
+}
+
+/**
+ * Analyze multiple responses at once
+ */
+async function analyzeResponsesBatch(responses) {
+    try {
+        const response = await fetch(`${AI_SERVER_URL}/analyze-batch`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                responses: responses.map(r => ({
+                    id: r.id,
+                    text: r.response_text
+                }))
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`AI server error: ${response.status}`);
+        }
+
+        const result = await response.json();
+
+        if (!result.success) {
+            throw new Error(result.error || 'Batch analysis failed');
+        }
+
+        return result.results;
+
+    } catch (error) {
+        console.error('Error in batch analysis:', error);
+        throw error;
+    }
+}
+
+/**
+ * Save analysis results to Supabase
+ */
+async function saveAnalysisToDatabase(analysisData) {
+    try {
+        const { data, error } = await window.supabaseClient
+            .from('chat_response_analysis')
+            .upsert({
+                response_id: analysisData.response_id,
+                sentiment_label: analysisData.sentiment_label,
+                sentiment_score: analysisData.sentiment_score,
+                primary_topic: analysisData.primary_topic,
+                topics: analysisData.topics,
+                entities: analysisData.entities,
+                summary: analysisData.summary,
+                language_quality: analysisData.language_quality,
+                raw_results: analysisData.raw_results,
+                analyzed_at: new Date().toISOString()
+            }, {
+                onConflict: 'response_id'
+            })
+            .select()
+            .single();
+
+        if (error) throw error;
+
+        return data;
+
+    } catch (error) {
+        console.error('Error saving analysis:', error);
+        throw error;
+    }
+}
+
+/**
+ * Analyze a single response and save to database
+ */
+async function analyzeAndSaveSingle(responseId, responseText, buttonElement) {
+    // Show loading state
+    if (buttonElement) {
+        buttonElement.disabled = true;
+        buttonElement.innerHTML = '⏳ Analyzing...';
+    }
+
+    try {
+        // Get AI analysis
+        const analysis = await analyzeResponse(responseId, responseText);
+
+        // Save to database
+        await saveAnalysisToDatabase(analysis);
+
+        // Update the row UI
+        updateResponseRowWithAnalysis(responseId, analysis);
+
+        // Show success
+        if (buttonElement) {
+            buttonElement.innerHTML = '✅ Done';
+            buttonElement.style.background = '#10b981';
+        }
+
+        return analysis;
+
+    } catch (error) {
+        // Show error
+        if (buttonElement) {
+            buttonElement.disabled = false;
+            buttonElement.innerHTML = '🔍 Retry';
+            buttonElement.style.background = '#ef4444';
+        }
+        alert('Analysis failed: ' + error.message);
+        throw error;
+    }
+}
+
+/**
+ * Analyze all unanalyzed responses for current chat
+ */
+async function analyzeAllUnanalyzedResponses() {
+    if (!window.currentEditingChatId) {
+        alert('No chat selected');
+        return;
+    }
+
+    try {
+        // Check if AI server is available
+        const isHealthy = await checkAIServerHealth();
+        if (!isHealthy) {
+            alert('AI server is not available. Make sure it is running on localhost:8080');
+            return;
+        }
+
+        // Get responses that don't have analysis yet
+        const { data: allResponses, error: fetchError } = await window.supabaseClient
+            .from('chat_responses')
+            .select('id, response_text')
+            .eq('chat_id', window.currentEditingChatId);
+
+        if (fetchError) throw fetchError;
+
+        // Get existing analyses
+        const { data: existingAnalyses } = await window.supabaseClient
+            .from('chat_response_analysis')
+            .select('response_id')
+            .in('response_id', allResponses.map(r => r.id));
+
+        const analyzedIds = new Set((existingAnalyses || []).map(a => a.response_id));
+        const unanalyzedResponses = allResponses.filter(r => !analyzedIds.has(r.id));
+
+        if (unanalyzedResponses.length === 0) {
+            alert('All responses have already been analyzed!');
+            return;
+        }
+
+        const confirmMsg = `Analyze ${unanalyzedResponses.length} response(s)? This may take a moment.`;
+        if (!confirm(confirmMsg)) return;
+
+        // Show progress modal
+        showAnalysisProgressModal(unanalyzedResponses.length);
+
+        // Analyze in batches
+        const results = await analyzeResponsesBatch(unanalyzedResponses);
+
+        // Save each result
+        let completed = 0;
+        for (const result of results) {
+            if (result.analysis) {
+                await saveAnalysisToDatabase(result.analysis);
+            }
+            completed++;
+            updateAnalysisProgress(completed, unanalyzedResponses.length);
+        }
+
+        // Close progress modal
+        hideAnalysisProgressModal();
+
+        // Reload responses to show analysis
+        loadChatResponses(window.currentEditingChatId);
+
+        alert(`Successfully analyzed ${completed} response(s)!`);
+
+    } catch (error) {
+        console.error('Error in bulk analysis:', error);
+        hideAnalysisProgressModal();
+        alert('Bulk analysis failed: ' + error.message);
+    }
+}
+
+/**
+ * Show progress modal during analysis
+ */
+function showAnalysisProgressModal(total) {
+    // Remove existing modal if any
+    hideAnalysisProgressModal();
+
+    const modal = document.createElement('div');
+    modal.id = 'analysis-progress-modal';
+    modal.innerHTML = `
+        <div style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 9999; display: flex; align-items: center; justify-content: center;">
+            <div style="background: white; padding: 32px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); min-width: 300px;">
+                <h3 style="margin: 0 0 16px 0; color: #1e293b;">🔍 Analyzing Responses...</h3>
+                <div id="analysis-progress-text" style="margin-bottom: 12px; color: #64748b;">0 / ${total}</div>
+                <div style="background: #e5e7eb; height: 8px; border-radius: 4px; overflow: hidden;">
+                    <div id="analysis-progress-bar" style="background: linear-gradient(90deg, #8b5cf6, #6366f1); height: 100%; width: 0%; transition: width 0.3s;"></div>
+                </div>
+                <p style="margin: 12px 0 0 0; font-size: 12px; color: #9ca3af;">Please wait, this may take a minute...</p>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+}
+
+/**
+ * Update progress bar
+ */
+function updateAnalysisProgress(completed, total) {
+    const textEl = document.getElementById('analysis-progress-text');
+    const barEl = document.getElementById('analysis-progress-bar');
+
+    if (textEl) textEl.textContent = `${completed} / ${total}`;
+    if (barEl) barEl.style.width = `${(completed / total) * 100}%`;
+}
+
+/**
+ * Hide progress modal
+ */
+function hideAnalysisProgressModal() {
+    const modal = document.getElementById('analysis-progress-modal');
+    if (modal) modal.remove();
+}
+
+/**
+ * Update a response row with analysis data
+ */
+function updateResponseRowWithAnalysis(responseId, analysis) {
+    const row = document.querySelector(`tr[data-response-id="${responseId}"]`);
+    if (!row) return;
+
+    // Update sentiment cell
+    const sentimentCell = row.querySelector('.sentiment-cell');
+    if (sentimentCell) {
+        sentimentCell.innerHTML = getSentimentBadgeHTML(analysis.sentiment_label);
+    }
+
+    // Update topics cell
+    const topicsCell = row.querySelector('.topics-cell');
+    if (topicsCell && analysis.topics && analysis.topics.length > 0) {
+        topicsCell.innerHTML = analysis.topics
+            .map(t => `<span class="ai-topic-tag">${escapeHtmlForResponses(t)}</span>`)
+            .join('');
+    }
+}
+
+/**
+ * Get sentiment badge HTML
+ */
+function getSentimentBadgeHTML(sentiment) {
+    const badges = {
+        positive: '<span class="ai-sentiment-badge positive">😊 Positive</span>',
+        negative: '<span class="ai-sentiment-badge negative">😞 Negative</span>',
+        neutral: '<span class="ai-sentiment-badge neutral">😐 Neutral</span>'
+    };
+    return badges[sentiment] || badges.neutral;
+}
+
+// ============================================================================
+// AI ANALYSIS FUNCTIONS - END
+// ============================================================================
+
+// Load responses for the current chat (with AI analysis)
 async function loadChatResponses(chatId) {
     if (!chatId) {
         console.log('No chat ID provided for loading responses');
@@ -12553,7 +12986,15 @@ async function loadChatResponses(chatId) {
     try {
         const { data: responses, error } = await window.supabaseClient
             .from('chat_responses')
-            .select('*')
+            .select(`
+                *,
+                chat_response_analysis (
+                    sentiment_label,
+                    sentiment_score,
+                    primary_topic,
+                    topics
+                )
+            `)
             .eq('chat_id', chatId)
             .order('submitted_at', { ascending: false });
 
@@ -12566,7 +13007,7 @@ async function loadChatResponses(chatId) {
     }
 }
 
-// Display responses in the table
+// Display responses in the table (with AI analysis)
 function displayResponses(responses) {
     const tableContainer = document.getElementById('responsesTableContainer');
     const tableBody = document.getElementById('responsesTableBody');
@@ -12601,7 +13042,7 @@ function displayResponses(responses) {
     if (!responses || responses.length === 0) {
         tableBody.innerHTML = `
             <tr class="empty-row">
-                <td colspan="5" style="text-align: center; padding: 40px; color: #6b7280;">
+                <td colspan="7" style="text-align: center; padding: 40px; color: #6b7280;">
                     <div style="font-size: 2rem; margin-bottom: 8px;">📭</div>
                     <div>No responses yet. Responses will appear here once people start using your chat.</div>
                 </td>
@@ -12610,32 +13051,63 @@ function displayResponses(responses) {
         return;
     }
 
-    // Display responses
-    tableBody.innerHTML = responses.map(response => `
-        <tr data-response-id="${response.id}">
-            <td>
-                <div class="response-text">${escapeHtmlForResponses(response.response_text || '')}</div>
-            </td>
-            <td class="col-participant" style="${showParticipant ? '' : 'display: none;'}">
-                <div class="participant-info">
-                    ${response.participant_name ? escapeHtmlForResponses(response.participant_name) : 'Anonymous'}
-                </div>
-                ${response.participant_email ? `<div class="participant-email">${escapeHtmlForResponses(response.participant_email)}</div>` : ''}
-            </td>
-            <td>
-                <div class="date-submitted">${formatResponseDate(response.submitted_at)}</div>
-            </td>
-            <td>
-                ${!response.is_read ? '<span class="status-badge new">New</span>' : ''}
-            </td>
-            <td>
-                <div class="action-buttons">
-                    ${!response.is_read ? `<button class="btn-action" onclick="markResponseAsRead('${response.id}')">Mark Read</button>` : ''}
-                    <button class="btn-action delete" onclick="deleteResponse('${response.id}')">Delete</button>
-                </div>
-            </td>
-        </tr>
-    `).join('');
+    // Display responses with AI analysis
+    tableBody.innerHTML = responses.map(response => {
+        // Get analysis data (handle both array and object formats from Supabase)
+        const analysis = response.chat_response_analysis?.[0] || response.chat_response_analysis;
+        const hasAnalysis = analysis && analysis.sentiment_label;
+
+        // Sentiment cell content
+        let sentimentContent;
+        if (hasAnalysis) {
+            sentimentContent = getSentimentBadgeHTML(analysis.sentiment_label);
+        } else {
+            // Escape the response text for use in onclick handler
+            const escapedText = escapeHtmlForResponses(response.response_text || '').replace(/'/g, "\\'").replace(/`/g, "\\`");
+            sentimentContent = `<button class="ai-analyze-btn" onclick="analyzeAndSaveSingle('${response.id}', '${escapedText}', this)">🔍 Analyze</button>`;
+        }
+
+        // Topics cell content
+        let topicsContent = '<span style="color: #9ca3af;">-</span>';
+        if (hasAnalysis && analysis.topics && analysis.topics.length > 0) {
+            topicsContent = analysis.topics
+                .slice(0, 3)
+                .map(t => `<span class="ai-topic-tag">${escapeHtmlForResponses(t)}</span>`)
+                .join('');
+        }
+
+        return `
+            <tr data-response-id="${response.id}">
+                <td>
+                    <div class="response-text">${escapeHtmlForResponses(response.response_text || '')}</div>
+                </td>
+                <td class="sentiment-cell">
+                    ${sentimentContent}
+                </td>
+                <td class="topics-cell">
+                    ${topicsContent}
+                </td>
+                <td class="col-participant" style="${showParticipant ? '' : 'display: none;'}">
+                    <div class="participant-info">
+                        ${response.participant_name ? escapeHtmlForResponses(response.participant_name) : 'Anonymous'}
+                    </div>
+                    ${response.participant_email ? `<div class="participant-email">${escapeHtmlForResponses(response.participant_email)}</div>` : ''}
+                </td>
+                <td>
+                    <div class="date-submitted">${formatResponseDate(response.submitted_at)}</div>
+                </td>
+                <td>
+                    ${!response.is_read ? '<span class="status-badge new">New</span>' : ''}
+                </td>
+                <td>
+                    <div class="action-buttons">
+                        ${!response.is_read ? `<button class="btn-action" onclick="markResponseAsRead('${response.id}')">Mark Read</button>` : ''}
+                        <button class="btn-action delete" onclick="deleteResponse('${response.id}')">Delete</button>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join('');
 }
 
 // Format date for display
@@ -13644,6 +14116,7 @@ window.showSection = function(sectionName) {
 let chatParticipantsData = [];
 let currentParticipantPage = 1;
 const participantsPerPage = 10;
+let currentChatId = null;
 
 // Create chat based on selected access type
 async function createChat() {
@@ -14013,62 +14486,110 @@ async function sendInvitesToSelected() {
     alert(`${sent} ${isReminder ? 'reminder(s)' : 'invite(s)'} sent successfully${failed > 0 ? `, ${failed} failed` : ''}`);
 }
 
-// Save participants and email settings
+// Save participants and settings (also saves chat for Closed access type)
 async function saveParticipantsSettings() {
-    if (!window.currentEditingChatId) {
-        alert('Please save the chat first (on the Setup tab)');
+    const chatName = document.getElementById('chat-setup-name').value.trim();
+    const welcomeMessage = document.getElementById('chat-setup-welcome').value.trim();
+    const accessType = document.getElementById('chat-access-type').value;
+
+    if (!chatName) {
+        alert('Please enter a chat name on the Setup tab first');
+        return;
+    }
+
+    // Check if we have participants for closed/combined access
+    if ((accessType === 'closed' || accessType === 'combined') && (!chatParticipantsData || chatParticipantsData.length === 0)) {
+        alert('Please add at least one participant');
         return;
     }
 
     try {
-        // Save email templates and schedules to the chat record
-        const inviteTemplate = document.getElementById('email-invite-template').value;
-        const reminderTemplate = document.getElementById('email-reminder-template').value;
-        const scheduleInvites = document.getElementById('schedule-invites-datetime').value;
-        const scheduleReminders = document.getElementById('schedule-reminders-datetime').value;
+        const { data: { user } } = await window.supabaseClient.auth.getUser();
+        if (!user) {
+            alert('Please log in to save');
+            return;
+        }
 
-        const { error: updateError } = await window.supabaseClient
-            .from('listening_chats')
-            .update({
-                invite_email_template: inviteTemplate,
-                reminder_email_template: reminderTemplate,
-                scheduled_invite_date: scheduleInvites || null,
-                scheduled_reminder_date: scheduleReminders || null,
-                updated_at: new Date().toISOString()
-            })
-            .eq('id', window.currentEditingChatId);
+        // For Closed access, or if chat hasn't been saved yet, save the chat first
+        if (!currentChatId && !window.currentEditingChatId) {
+            // Generate a simple slug/link code
+            const linkCode = Math.random().toString(36).substring(2, 10);
 
-        if (updateError) throw updateError;
+            // Only send fields that work
+            const chatData = {
+                name: chatName,
+                welcome_message: welcomeMessage,
+                access_type: accessType,
+                user_id: user.id,
+                slug: linkCode
+            };
 
-        // Delete existing participants for this chat
-        await window.supabaseClient
-            .from('chat_participants')
-            .delete()
-            .eq('chat_id', window.currentEditingChatId);
+            console.log('Saving chat with data:', chatData);
 
-        // Insert all current participants
-        if (chatParticipantsData.length > 0) {
+            const { data: newChat, error: chatError } = await window.supabaseClient
+                .from('listening_chats')
+                .insert(chatData)
+                .select()
+                .single();
+
+            if (chatError) {
+                console.error('Chat insert error:', chatError);
+                throw chatError;
+            }
+
+            currentChatId = newChat.id;
+            window.currentEditingChatId = newChat.id;
+            console.log('Chat saved:', newChat);
+        }
+
+        // Use whichever ID is available
+        const chatId = currentChatId || window.currentEditingChatId;
+
+        // Now save participants if we have any
+        if (chatParticipantsData && chatParticipantsData.length > 0) {
+            // Delete existing participants for this chat first
+            await window.supabaseClient
+                .from('chat_participants')
+                .delete()
+                .eq('chat_id', chatId);
+
+            // Insert all current participants - only send fields that work
             const participantsToInsert = chatParticipantsData.map(p => ({
-                chat_id: window.currentEditingChatId,
+                chat_id: chatId,
                 first_name: p.first_name,
                 surname: p.surname,
                 email: p.email,
-                invite_sent: p.invite_sent || false,
-                reminder_sent: p.reminder_sent || false,
-                unique_token: generateParticipantToken()
+                unique_token: Math.random().toString(36).substring(2, 10)
             }));
+
+            console.log('Saving participants:', participantsToInsert);
 
             const { error: insertError } = await window.supabaseClient
                 .from('chat_participants')
                 .insert(participantsToInsert);
 
-            if (insertError) throw insertError;
+            if (insertError) {
+                console.error('Participants insert error:', insertError);
+                throw insertError;
+            }
         }
 
-        alert('Participants and settings saved successfully!');
+        // Update button to show success
+        const saveBtn = event?.target;
+        if (saveBtn) {
+            const originalText = saveBtn.innerHTML;
+            saveBtn.innerHTML = '✓ Saved!';
+            saveBtn.style.background = '#059669';
+            setTimeout(() => {
+                saveBtn.innerHTML = originalText;
+                saveBtn.style.background = '#10b981';
+            }, 2000);
+        }
+
+        alert('Chat and participants saved successfully!');
 
     } catch (error) {
-        console.error('Error saving participants:', error);
+        console.error('Error saving:', error);
         alert('Error saving: ' + error.message);
     }
 }
@@ -14076,6 +14597,87 @@ async function saveParticipantsSettings() {
 // Generate unique token for participant links
 function generateParticipantToken() {
     return 'xxxx-xxxx-xxxx'.replace(/x/g, () => Math.floor(Math.random() * 16).toString(16));
+}
+
+// Close success panel
+function closeSuccessPanel() {
+    document.getElementById('chat-success-panel').style.display = 'none';
+}
+
+// Save chat to database (for Open and Combined access types)
+async function saveChatToDatabase() {
+    const chatName = document.getElementById('chat-setup-name').value.trim();
+    const welcomeMessage = document.getElementById('chat-setup-welcome').value.trim();
+    const accessType = document.getElementById('chat-access-type').value;
+
+    if (!chatName) {
+        alert('Please enter a chat name');
+        return;
+    }
+
+    try {
+        const { data: { user } } = await window.supabaseClient.auth.getUser();
+        if (!user) {
+            alert('Please log in to save chats');
+            return;
+        }
+
+        // Get the generated link code from the displayed link
+        const generatedLinkInput = document.getElementById('generatedChatLink');
+        let linkCode = null;
+        if (generatedLinkInput && generatedLinkInput.value) {
+            // Extract code from URL like "https://rworldfeedback.co.uk/chat/abc123"
+            const linkParts = generatedLinkInput.value.split('/chat/');
+            if (linkParts.length > 1) {
+                linkCode = linkParts[1];
+            }
+        }
+
+        // Only send the fields that work - keep it minimal
+        const chatData = {
+            name: chatName,
+            welcome_message: welcomeMessage,
+            access_type: accessType,
+            user_id: user.id
+        };
+
+        // Only add slug if we have a link code
+        if (linkCode) {
+            chatData.slug = linkCode;
+        }
+
+        console.log('Saving chat with data:', chatData);
+
+        const { data: newChat, error } = await window.supabaseClient
+            .from('listening_chats')
+            .insert(chatData)
+            .select()
+            .single();
+
+        if (error) {
+            console.error('Insert error:', error);
+            throw error;
+        }
+
+        // Store the chat ID globally for participant saving later
+        currentChatId = newChat.id;
+        window.currentEditingChatId = newChat.id;
+
+        // Visual feedback - change button to show saved
+        const saveBtn = document.getElementById('save-chat-btn');
+        if (saveBtn) {
+            saveBtn.textContent = '✓ Saved!';
+            saveBtn.style.background = '#059669';
+            saveBtn.disabled = true;
+        }
+
+        console.log('Chat saved successfully:', newChat);
+        alert('Chat saved successfully!');
+
+    } catch (error) {
+        console.error('Error saving chat:', error);
+        alert('Error saving chat: ' + error.message);
+    }
 }
 
 // Copy generated link to clipboard
