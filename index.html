@@ -2036,6 +2036,15 @@
             color: var(--sb-primary);
         }
 
+        .survey-builder-container .sb-question-logic-btn.active {
+            color: var(--sb-primary) !important;
+            background: var(--sb-primary-light);
+        }
+
+        .survey-builder-container .sb-question-logic-btn.active svg {
+            color: var(--sb-primary);
+        }
+
         .survey-builder-container .sb-page-logic-panel {
             padding: 16px 24px;
             background: var(--sb-surface);
@@ -2106,94 +2115,6 @@
             font-size: 12px;
             color: var(--sb-text-secondary);
             margin-top: 8px;
-        }
-
-        .survey-builder-container .sb-logic-rule-delete {
-            background: none;
-            border: none;
-            color: #dc2626;
-            cursor: pointer;
-            padding: 4px;
-            border-radius: 4px;
-            margin-left: auto;
-        }
-
-        .survey-builder-container .sb-logic-rule-delete:hover {
-            background: #fee2e2;
-        }
-
-        .survey-builder-container .sb-logic-empty {
-            text-align: center;
-            padding: 24px;
-            color: var(--sb-text-secondary);
-            font-size: 13px;
-        }
-
-        .survey-builder-container .sb-logic-empty svg {
-            width: 32px;
-            height: 32px;
-            margin-bottom: 8px;
-            opacity: 0.5;
-        }
-
-        /* Question Logic Button */
-        .survey-builder-container .sb-question-logic-btn {
-            background: none;
-            border: none;
-            padding: 6px;
-            cursor: pointer;
-            color: var(--sb-text-secondary);
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-        }
-
-        .survey-builder-container .sb-question-logic-btn:hover {
-            background: var(--sb-primary-light);
-            color: var(--sb-primary);
-        }
-
-        .survey-builder-container .sb-question-logic-btn.has-logic {
-            color: var(--sb-primary);
-            background: var(--sb-primary-light);
-        }
-
-        /* Question Logic Panel */
-        .survey-builder-container .sb-question-logic-panel {
-            padding: 16px 24px;
-            background: var(--sb-surface);
-            border-top: 1px solid var(--sb-border);
-        }
-
-        .survey-builder-container .sb-logic-panel-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-        }
-
-        .survey-builder-container .sb-logic-panel-title {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: 500;
-            font-size: 13px;
-            color: var(--sb-primary);
-        }
-
-        .survey-builder-container .sb-logic-panel-close {
-            background: none;
-            border: none;
-            color: var(--sb-text-secondary);
-            cursor: pointer;
-            padding: 4px;
-            border-radius: 4px;
-        }
-
-        .survey-builder-container .sb-logic-panel-close:hover {
-            background: var(--sb-border);
         }
 
         /* Question Card */
@@ -3412,132 +3333,6 @@
             to { transform: rotate(360deg); }
         }
 
-        /* Response Volume Chart */
-        .analytics-chart-card.volume-chart .analytics-chart-container {
-            height: 200px;
-        }
-
-        /* Top Topics List */
-        .analytics-topics-list {
-            background: white;
-            border-radius: 12px;
-            padding: 24px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-        }
-
-        .analytics-topics-list-title {
-            font-size: 16px;
-            font-weight: 600;
-            color: #1e293b;
-            margin-bottom: 20px;
-        }
-
-        .topics-list-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 16px;
-        }
-
-        .topics-list-item:last-child {
-            margin-bottom: 0;
-        }
-
-        .topics-list-rank {
-            width: 28px;
-            height: 28px;
-            background: #f1f5f9;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            font-weight: 600;
-            color: #64748b;
-            flex-shrink: 0;
-        }
-
-        .topics-list-rank.top-3 {
-            background: #6366f1;
-            color: white;
-        }
-
-        .topics-list-content {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .topics-list-name {
-            font-size: 14px;
-            font-weight: 500;
-            color: #1e293b;
-            margin-bottom: 4px;
-            text-transform: capitalize;
-        }
-
-        .topics-list-bar-container {
-            height: 6px;
-            background: #e5e7eb;
-            border-radius: 3px;
-            overflow: hidden;
-        }
-
-        .topics-list-bar {
-            height: 100%;
-            background: linear-gradient(90deg, #6366f1, #8b5cf6);
-            border-radius: 3px;
-            transition: width 0.5s ease;
-        }
-
-        .topics-list-count {
-            font-size: 13px;
-            font-weight: 600;
-            color: #6366f1;
-            flex-shrink: 0;
-            min-width: 40px;
-            text-align: right;
-        }
-
-        /* Word Cloud Container */
-        .analytics-wordcloud-card {
-            background: white;
-            border-radius: 12px;
-            padding: 24px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-        }
-
-        .analytics-wordcloud-title {
-            font-size: 16px;
-            font-weight: 600;
-            color: #1e293b;
-            margin-bottom: 20px;
-        }
-
-        .wordcloud-container {
-            width: 100%;
-            height: 300px;
-            position: relative;
-        }
-
-        #wordCloudCanvas {
-            width: 100%;
-            height: 100%;
-        }
-
-        /* Two column layout for list and word cloud */
-        .analytics-bottom-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 24px;
-            margin-top: 24px;
-        }
-
-        @media (max-width: 900px) {
-            .analytics-bottom-row {
-                grid-template-columns: 1fr;
-            }
-        }
-
         /* ============================================================================
            ANALYTICS TAB STYLES - END
            ============================================================================ */
@@ -4526,37 +4321,6 @@ Thank you!</textarea>
                                                 <canvas id="sentimentTimeChart"></canvas>
                                             </div>
                                         </div>
-                                    </div>
-
-                                    <!-- Response Volume Chart -->
-                                    <div class="analytics-charts" style="margin-top: 24px;">
-                                        <div class="analytics-chart-card full-width volume-chart">
-                                            <div class="analytics-chart-title">Response Volume Over Time</div>
-                                            <div class="analytics-chart-container">
-                                                <canvas id="responseVolumeChart"></canvas>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Bottom Row: Topics List & Word Cloud -->
-                                    <div class="analytics-bottom-row">
-
-                                        <!-- Top Topics List -->
-                                        <div class="analytics-topics-list">
-                                            <div class="analytics-topics-list-title">Top Topics Ranked</div>
-                                            <div id="topicsListContainer">
-                                                <!-- Topics will be inserted here -->
-                                            </div>
-                                        </div>
-
-                                        <!-- Word Cloud -->
-                                        <div class="analytics-wordcloud-card">
-                                            <div class="analytics-wordcloud-title">Word Cloud</div>
-                                            <div class="wordcloud-container">
-                                                <canvas id="wordCloudCanvas"></canvas>
-                                            </div>
-                                        </div>
-
                                     </div>
 
                                 </div>
@@ -5687,8 +5451,6 @@ Thank you!</textarea>
 <script src="assets/js/database.js"></script>
 <!-- Chart.js for interactive charts -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<!-- WordCloud library for word cloud visualization -->
-<script src="https://cdn.jsdelivr.net/npm/wordcloud@1.2.2/src/wordcloud2.min.js"></script>
 <script src="assets/js/analytics-dashboard.js"></script>
 <script src="assets/js/auth-wizard.js"></script>
 <script src="assets/js/app.js?v=20250908-2125"></script>
@@ -12092,15 +11854,6 @@ function displayAnalytics(allResponses, analyzedResponses) {
     createSentimentPieChart(sentimentCounts);
     createTopicsBarChart(sortedTopics);
     createSentimentTimeChart(analysisData);
-
-    // Create response volume chart
-    createResponseVolumeChart(allResponses);
-
-    // Create ranked topics list
-    createTopicsList(sortedTopics);
-
-    // Create word cloud
-    createWordCloud(allResponses);
 }
 
 /**
@@ -12344,205 +12097,6 @@ function createSentimentTimeChart(analysisData) {
                 mode: 'index'
             }
         }
-    });
-}
-
-// Store additional chart instance
-let responseVolumeChart = null;
-
-/**
- * Create response volume bar chart
- */
-function createResponseVolumeChart(allResponses) {
-    const ctx = document.getElementById('responseVolumeChart');
-    if (!ctx) return;
-
-    // Destroy existing chart
-    if (responseVolumeChart) {
-        responseVolumeChart.destroy();
-    }
-
-    // Group responses by date
-    const dateGroups = {};
-    allResponses.forEach(r => {
-        const date = new Date(r.submitted_at).toLocaleDateString('en-GB', {
-            day: 'numeric',
-            month: 'short'
-        });
-        dateGroups[date] = (dateGroups[date] || 0) + 1;
-    });
-
-    const dates = Object.keys(dateGroups);
-    const counts = Object.values(dateGroups);
-
-    responseVolumeChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: dates,
-            datasets: [{
-                label: 'Responses',
-                data: counts,
-                backgroundColor: 'rgba(99, 102, 241, 0.8)',
-                borderRadius: 6,
-                barThickness: dates.length > 14 ? 'flex' : 24
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    display: false
-                }
-            },
-            scales: {
-                x: {
-                    grid: {
-                        display: false
-                    }
-                },
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        stepSize: 1
-                    },
-                    grid: {
-                        color: '#f1f5f9'
-                    }
-                }
-            }
-        }
-    });
-}
-
-/**
- * Create ranked topics list with progress bars
- */
-function createTopicsList(sortedTopics) {
-    const container = document.getElementById('topicsListContainer');
-    if (!container) return;
-
-    if (sortedTopics.length === 0) {
-        container.innerHTML = '<div style="color: #9ca3af; text-align: center; padding: 20px;">No topics analyzed yet</div>';
-        return;
-    }
-
-    const maxCount = sortedTopics[0][1];
-
-    container.innerHTML = sortedTopics.slice(0, 10).map((topic, index) => {
-        const [name, count] = topic;
-        const percentage = (count / maxCount) * 100;
-        const isTop3 = index < 3;
-
-        return `
-            <div class="topics-list-item">
-                <div class="topics-list-rank ${isTop3 ? 'top-3' : ''}">${index + 1}</div>
-                <div class="topics-list-content">
-                    <div class="topics-list-name">${escapeHtml(name)}</div>
-                    <div class="topics-list-bar-container">
-                        <div class="topics-list-bar" style="width: ${percentage}%"></div>
-                    </div>
-                </div>
-                <div class="topics-list-count">${count}</div>
-            </div>
-        `;
-    }).join('');
-}
-
-/**
- * Helper function to escape HTML
- */
-function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
-
-/**
- * Create word cloud from response text
- */
-function createWordCloud(allResponses) {
-    const canvas = document.getElementById('wordCloudCanvas');
-    if (!canvas || typeof WordCloud === 'undefined') {
-        console.log('WordCloud not available');
-        return;
-    }
-
-    // Combine all response text
-    const allText = allResponses
-        .map(r => r.response_text || '')
-        .join(' ')
-        .toLowerCase();
-
-    // Common words to exclude (stop words)
-    const stopWords = new Set([
-        'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for',
-        'of', 'with', 'by', 'from', 'as', 'is', 'was', 'are', 'were', 'been',
-        'be', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could',
-        'should', 'may', 'might', 'must', 'shall', 'can', 'need', 'dare', 'ought',
-        'used', 'it', 'its', 'this', 'that', 'these', 'those', 'i', 'you', 'he',
-        'she', 'we', 'they', 'me', 'him', 'her', 'us', 'them', 'my', 'your',
-        'his', 'our', 'their', 'what', 'which', 'who', 'whom', 'when', 'where',
-        'why', 'how', 'all', 'each', 'every', 'both', 'few', 'more', 'most',
-        'other', 'some', 'such', 'no', 'nor', 'not', 'only', 'own', 'same',
-        'so', 'than', 'too', 'very', 'just', 'also', 'now', 'here', 'there',
-        'then', 'once', 'if', 'because', 'about', 'into', 'through', 'during',
-        'before', 'after', 'above', 'below', 'between', 'under', 'again',
-        'further', 'am', 'being', 'dont', 'didnt', 'doesnt', 'dont', 'hadnt',
-        'hasnt', 'havent', 'isnt', 'wasnt', 'werent', 'wont', 'wouldnt', 'ive',
-        'youve', 'weve', 'theyve', 'im', 'youre', 'hes', 'shes', 'its', 'were',
-        'theyre', 'really', 'think', 'feel', 'like', 'get', 'got', 'much',
-        'many', 'way', 'even', 'well', 'back', 'still', 'going', 'make', 'made'
-    ]);
-
-    // Extract words and count frequency
-    const wordCounts = {};
-    const words = allText.match(/\b[a-z]{3,}\b/g) || [];
-
-    words.forEach(word => {
-        if (!stopWords.has(word) && word.length >= 3) {
-            wordCounts[word] = (wordCounts[word] || 0) + 1;
-        }
-    });
-
-    // Convert to array format for WordCloud: [[word, count], ...]
-    const wordList = Object.entries(wordCounts)
-        .filter(([word, count]) => count >= 2) // Only words appearing 2+ times
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 80); // Top 80 words
-
-    if (wordList.length === 0) {
-        const container = canvas.parentElement;
-        container.innerHTML = '<div style="color: #9ca3af; text-align: center; padding: 60px 20px;">Not enough text data for word cloud</div>';
-        return;
-    }
-
-    // Scale the counts for better visualization
-    const maxCount = wordList[0][1];
-    const scaledList = wordList.map(([word, count]) => {
-        const size = Math.max(12, Math.floor((count / maxCount) * 60) + 10);
-        return [word, size];
-    });
-
-    // Clear canvas
-    const context = canvas.getContext('2d');
-    context.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Generate word cloud
-    WordCloud(canvas, {
-        list: scaledList,
-        gridSize: 8,
-        weightFactor: 1,
-        fontFamily: 'Inter, system-ui, sans-serif',
-        color: function(word, weight) {
-            const colors = ['#6366f1', '#8b5cf6', '#a855f7', '#3b82f6', '#06b6d4', '#10b981', '#f59e0b'];
-            return colors[Math.floor(Math.random() * colors.length)];
-        },
-        rotateRatio: 0.3,
-        rotationSteps: 2,
-        backgroundColor: 'transparent',
-        drawOutOfBound: false,
-        shrinkToFit: true
     });
 }
 
@@ -14419,7 +13973,7 @@ function sbRenderBuilderMain() {
                         <svg class="sb-icon" viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
                         PAGE ${sbCurrentPageIndex + 1} SETTINGS
                     </div>
-                    <button class="sb-page-logic-btn ${page.logic && page.logic.length > 0 ? 'active' : ''}" onclick="sbTogglePageLogic()">
+                    <button class="sb-page-logic-btn ${page.logic && page.logic.length > 0 ? 'active' : ''}" onclick="sbTogglePageLogic(${sbCurrentPageIndex})">
                         <svg class="sb-icon-sm" viewBox="0 0 24 24"><line x1="6" y1="3" x2="6" y2="15"></line><circle cx="18" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><path d="M18 9a9 9 0 0 1-9 9"></path></svg>
                         Page Logic ${page.logic && page.logic.length > 0 ? `(${page.logic.length})` : ''}
                     </button>
@@ -14427,8 +13981,27 @@ function sbRenderBuilderMain() {
                 <input type="text" class="sb-input" style="font-size:18px;" value="${page.title || ''}" placeholder="Page title (optional)" oninput="sbCurrentSurvey.pages[${sbCurrentPageIndex}].title = this.value; sbRenderPageSidebar();">
                 <textarea class="sb-input" rows="2" placeholder="Page instructions - explain what this section is about..." oninput="sbCurrentSurvey.pages[${sbCurrentPageIndex}].instructions = this.value;">${page.instructions || ''}</textarea>
             </div>
-            <div class="sb-page-logic-panel sb-hidden" id="sb-page-logic-panel">
-                <!-- Page logic will be rendered here -->
+            <div class="sb-page-logic-panel sb-hidden" id="sb-page-logic-panel" style="padding:16px 24px;background:#f8f9fa;border-top:1px solid #e0e0e0;">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#673ab7" stroke-width="2">
+                        <line x1="6" y1="3" x2="6" y2="15"></line>
+                        <circle cx="18" cy="6" r="3"></circle>
+                        <circle cx="6" cy="18" r="3"></circle>
+                        <path d="M18 9a9 9 0 0 1-9 9"></path>
+                    </svg>
+                    <span style="font-weight:600;font-size:14px;color:#333;">Page Logic Rules</span>
+                    <span style="font-size:12px;color:#888;">Control where respondents go after this page</span>
+                </div>
+                <div id="sb-page-logic-rules">
+                    <!-- Rules will be rendered here by sbRenderPageLogicRules() -->
+                </div>
+                <button onclick="sbAddPageLogicRule(${sbCurrentPageIndex})" style="display:flex;align-items:center;gap:8px;padding:10px 16px;border:1px dashed #ccc;border-radius:4px;background:transparent;cursor:pointer;font-size:13px;color:#673ab7;margin-top:12px;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    Add Logic Rule
+                </button>
             </div>
         </div>
     `;
@@ -14553,14 +14126,14 @@ function sbRenderQuestionCard(question, qIndex) {
                 ${textHtml}
             </div>
             <div class="sb-question-footer">
-                <button class="sb-question-logic-btn ${question.logic && question.logic.length > 0 ? 'has-logic' : ''}" onclick="sbToggleQuestionLogic(${qIndex})" title="Question Logic">
-                    <svg class="sb-icon" viewBox="0 0 24 24"><line x1="6" y1="3" x2="6" y2="15"></line><circle cx="18" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><path d="M18 9a9 9 0 0 1-9 9"></path></svg>
-                </button>
                 <button class="sb-btn-icon" onclick="sbDuplicateQuestion(${qIndex})" title="Duplicate">
                     <svg class="sb-icon" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
                 </button>
                 <button class="sb-btn-icon" onclick="sbDeleteQuestion(${qIndex})" title="Delete">
                     <svg class="sb-icon" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                </button>
+                <button class="sb-btn-icon sb-question-logic-btn ${question.logic && question.logic.length > 0 ? 'active' : ''}" onclick="sbToggleQuestionLogic(sbCurrentPageIndex, ${qIndex})" title="Question Logic">
+                    <svg class="sb-icon" viewBox="0 0 24 24"><line x1="6" y1="3" x2="6" y2="15"></line><circle cx="18" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><path d="M18 9a9 9 0 0 1-9 9"></path></svg>
                 </button>
                 <div class="sb-question-footer-divider"></div>
                 <div class="sb-required-toggle">
@@ -14571,22 +14144,18 @@ function sbRenderQuestionCard(question, qIndex) {
                     </label>
                 </div>
             </div>
-            <div class="sb-question-logic-panel sb-hidden" id="sb-question-logic-panel-${qIndex}">
-                <div class="sb-logic-panel-header">
-                    <div class="sb-logic-panel-title">
-                        <svg class="sb-icon-sm" viewBox="0 0 24 24"><line x1="6" y1="3" x2="6" y2="15"></line><circle cx="18" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><path d="M18 9a9 9 0 0 1-9 9"></path></svg>
-                        Skip Logic
-                    </div>
-                    <button class="sb-logic-panel-close" onclick="sbToggleQuestionLogic(${qIndex})">
-                        <svg class="sb-icon-sm" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                    </button>
+            <div class="sb-question-logic-panel sb-hidden" id="sb-question-logic-panel-${qIndex}" style="padding:16px;background:#f8f9fa;border-top:1px solid #e0e0e0;border-radius:0 0 8px 8px;">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+                    <svg style="width:16px;height:16px;color:#6366f1;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="6" y1="3" x2="6" y2="15"></line><circle cx="18" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><path d="M18 9a9 9 0 0 1-9 9"></path></svg>
+                    <span style="font-weight:600;font-size:13px;color:#333;">Question Logic Rules</span>
+                    <span style="font-size:11px;color:#888;">Skip to a specific question or page based on the answer</span>
                 </div>
                 <div id="sb-question-logic-rules-${qIndex}">
-                    <!-- Rules will be rendered here -->
+                    <!-- Rules will be rendered here by sbRenderQuestionLogicRules() -->
                 </div>
-                <button class="sb-add-logic-btn" onclick="sbAddQuestionLogicRule(${qIndex})">
-                    <svg class="sb-icon-sm" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                    Add Skip Rule
+                <button onclick="sbAddQuestionLogicRule(sbCurrentPageIndex, ${qIndex})" style="display:flex;align-items:center;gap:6px;padding:8px 12px;border:1px dashed #cbd5e1;border-radius:6px;background:white;color:#64748b;font-size:12px;cursor:pointer;margin-top:8px;">
+                    <svg style="width:14px;height:14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    Add Logic Rule
                 </button>
             </div>
         </div>
@@ -14733,55 +14302,61 @@ function sbDeletePage(index) {
 }
 
 // ============================================== //
-// PAGE & QUESTION LOGIC FUNCTIONS               //
+// PAGE LOGIC FUNCTIONS                           //
 // ============================================== //
 
-function sbTogglePageLogic() {
+function sbTogglePageLogic(pageIndex) {
     const panel = document.getElementById('sb-page-logic-panel');
     const isHidden = panel.classList.contains('sb-hidden');
     panel.classList.toggle('sb-hidden');
 
     if (isHidden) {
-        sbRenderPageLogicRules();
+        sbRenderPageLogicRules(pageIndex);
     }
 }
 
-function sbEnsurePageLogicExists() {
-    if (!sbCurrentSurvey.pages[sbCurrentPageIndex].logic) {
-        sbCurrentSurvey.pages[sbCurrentPageIndex].logic = [];
+function sbEnsurePageLogicExists(pageIndex) {
+    if (!sbCurrentSurvey.pages[pageIndex]) return;
+    if (!sbCurrentSurvey.pages[pageIndex].logic) {
+        sbCurrentSurvey.pages[pageIndex].logic = [];
     }
 }
 
-function sbAddPageLogicRule() {
-    sbEnsurePageLogicExists();
-    sbCurrentSurvey.pages[sbCurrentPageIndex].logic.push({
+function sbAddPageLogicRule(pageIndex) {
+    sbEnsurePageLogicExists(pageIndex);
+    sbCurrentSurvey.pages[pageIndex].logic.push({
         condition: '',
         target: ''
     });
-    sbRenderPageLogicRules();
-    sbUpdatePageLogicButton();
+    sbRenderPageLogicRules(pageIndex);
+    sbUpdatePageLogicButtonState(pageIndex);
 }
 
-function sbRemovePageLogicRule(ruleIndex) {
-    sbCurrentSurvey.pages[sbCurrentPageIndex].logic.splice(ruleIndex, 1);
-    sbRenderPageLogicRules();
-    sbUpdatePageLogicButton();
+function sbRemovePageLogicRule(pageIndex, ruleIndex) {
+    if (!sbCurrentSurvey.pages[pageIndex] || !sbCurrentSurvey.pages[pageIndex].logic) return;
+    sbCurrentSurvey.pages[pageIndex].logic.splice(ruleIndex, 1);
+    sbRenderPageLogicRules(pageIndex);
+    sbUpdatePageLogicButtonState(pageIndex);
 }
 
-function sbUpdatePageLogicCondition(ruleIndex, value) {
-    sbEnsurePageLogicExists();
-    sbCurrentSurvey.pages[sbCurrentPageIndex].logic[ruleIndex].condition = value;
+function sbUpdatePageLogicCondition(pageIndex, ruleIndex, value) {
+    sbEnsurePageLogicExists(pageIndex);
+    if (sbCurrentSurvey.pages[pageIndex].logic[ruleIndex]) {
+        sbCurrentSurvey.pages[pageIndex].logic[ruleIndex].condition = value;
+    }
 }
 
-function sbUpdatePageLogicTarget(ruleIndex, value) {
-    sbEnsurePageLogicExists();
-    sbCurrentSurvey.pages[sbCurrentPageIndex].logic[ruleIndex].target = value;
+function sbUpdatePageLogicTarget(pageIndex, ruleIndex, value) {
+    sbEnsurePageLogicExists(pageIndex);
+    if (sbCurrentSurvey.pages[pageIndex].logic[ruleIndex]) {
+        sbCurrentSurvey.pages[pageIndex].logic[ruleIndex].target = value;
+    }
 }
 
-function sbGetPageLogicConditionOptions(selectedValue) {
+function sbGetPageLogicConditions(pageIndex, selectedValue) {
     let options = '<option value="">Select condition...</option>';
-    const page = sbCurrentSurvey.pages[sbCurrentPageIndex];
-    if (!page.questions) return options;
+    const page = sbCurrentSurvey.pages[pageIndex];
+    if (!page || !page.questions) return options;
 
     page.questions.forEach((question, qIndex) => {
         if (question.type === 'single' || question.type === 'multi') {
@@ -14789,17 +14364,17 @@ function sbGetPageLogicConditionOptions(selectedValue) {
                 question.options.forEach((opt, optIndex) => {
                     const value = `${question.id}:${optIndex}`;
                     const qText = question.text ? question.text.substring(0, 20) : 'Untitled';
-                    const label = `Q${qIndex + 1} "${qText}" = "${opt}"`;
+                    const label = `Q${qIndex + 1} "${qText}..." = "${opt}"`;
                     const selected = value === selectedValue ? 'selected' : '';
                     options += `<option value="${value}" ${selected}>${label}</option>`;
                 });
             }
         } else if (question.type === 'rating') {
-            const values = sbCurrentSurvey.ratingScale.values;
+            const values = sbCurrentSurvey.ratingScale ? sbCurrentSurvey.ratingScale.values : [1,2,3,4,5];
             values.forEach(val => {
                 const value = `${question.id}:${val}`;
                 const qText = question.text ? question.text.substring(0, 20) : 'Untitled';
-                const label = `Q${qIndex + 1} "${qText}" = ${val}`;
+                const label = `Q${qIndex + 1} "${qText}..." = ${val}`;
                 const selected = value === selectedValue ? 'selected' : '';
                 options += `<option value="${value}" ${selected}>${label}</option>`;
             });
@@ -14808,11 +14383,12 @@ function sbGetPageLogicConditionOptions(selectedValue) {
     return options;
 }
 
-function sbGetPageLogicTargetOptions(selectedValue) {
+function sbGetPageLogicTargets(pageIndex, selectedValue) {
     let options = '<option value="">Select destination...</option>';
 
+    // Add later pages as options
     sbCurrentSurvey.pages.forEach((page, pIndex) => {
-        if (pIndex > sbCurrentPageIndex) {
+        if (pIndex > pageIndex) {
             const value = `page-${pIndex}`;
             const label = `Go to Page ${pIndex + 1}: ${page.title || 'Untitled'}`;
             const selected = value === selectedValue ? 'selected' : '';
@@ -14820,85 +14396,72 @@ function sbGetPageLogicTargetOptions(selectedValue) {
         }
     });
 
-    const endSelected = 'end' === selectedValue ? 'selected' : '';
+    // Add End Survey option
+    const endSelected = selectedValue === 'end' ? 'selected' : '';
     options += `<option value="end" ${endSelected}>End Survey (Submit)</option>`;
+
     return options;
 }
 
-function sbRenderPageLogicRules() {
-    const container = document.getElementById('sb-page-logic-panel');
+function sbRenderPageLogicRules(pageIndex) {
+    const container = document.getElementById('sb-page-logic-rules');
     if (!container) return;
 
-    sbEnsurePageLogicExists();
-    const rules = sbCurrentSurvey.pages[sbCurrentPageIndex].logic;
-
-    let html = `
-        <div class="sb-page-logic-title">
-            <svg class="sb-icon-sm" viewBox="0 0 24 24"><line x1="6" y1="3" x2="6" y2="15"></line><circle cx="18" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><path d="M18 9a9 9 0 0 1-9 9"></path></svg>
-            <span>Page Logic Rules</span>
-            <small>Control where respondents go after this page</small>
-        </div>
-    `;
+    sbEnsurePageLogicExists(pageIndex);
+    const rules = sbCurrentSurvey.pages[pageIndex].logic;
 
     if (rules.length === 0) {
-        html += `
-            <div class="sb-logic-empty">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <line x1="6" y1="3" x2="6" y2="15"></line><circle cx="18" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><path d="M18 9a9 9 0 0 1-9 9"></path>
+        container.innerHTML = `
+            <div class="sb-logic-empty" style="text-align:center;padding:24px;color:#888;">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-bottom:8px;opacity:0.5;">
+                    <line x1="6" y1="3" x2="6" y2="15"></line>
+                    <circle cx="18" cy="6" r="3"></circle>
+                    <circle cx="6" cy="18" r="3"></circle>
+                    <path d="M18 9a9 9 0 0 1-9 9"></path>
                 </svg>
-                <p>No logic rules yet.<br>Add a rule to control page flow based on answers.</p>
+                <p style="margin:0;font-size:13px;">No logic rules yet.<br>Add a rule to control page flow based on answers.</p>
             </div>
         `;
-    } else {
-        rules.forEach((rule, ruleIndex) => {
-            html += `
-                <div class="sb-logic-rule">
-                    <span class="sb-logic-rule-label">IF</span>
-                    <select onchange="sbUpdatePageLogicCondition(${ruleIndex}, this.value)">
-                        ${sbGetPageLogicConditionOptions(rule.condition)}
-                    </select>
-                    <span class="sb-logic-rule-label">THEN</span>
-                    <select onchange="sbUpdatePageLogicTarget(${ruleIndex}, this.value)">
-                        ${sbGetPageLogicTargetOptions(rule.target)}
-                    </select>
-                    <button class="sb-logic-rule-delete" onclick="sbRemovePageLogicRule(${ruleIndex})" title="Delete rule">
-                        <svg class="sb-icon-sm" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                    </button>
-                </div>
-            `;
-        });
+        return;
     }
 
-    html += `
-        <button class="sb-add-logic-btn" onclick="sbAddPageLogicRule()">
-            <svg class="sb-icon-sm" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-            Add Logic Rule
-        </button>
-        <p class="sb-logic-help">Logic rules are evaluated in order. First matching rule wins.</p>
-    `;
+    let html = '';
+    rules.forEach((rule, ruleIndex) => {
+        html += `
+            <div class="sb-logic-rule" style="display:flex;align-items:center;gap:12px;margin-bottom:12px;padding:12px;background:#ede7f6;border-radius:8px;flex-wrap:wrap;">
+                <span style="font-size:13px;color:#666;font-weight:500;">IF</span>
+                <select onchange="sbUpdatePageLogicCondition(${pageIndex}, ${ruleIndex}, this.value)" style="padding:8px 12px;border:1px solid #ddd;border-radius:4px;font-size:13px;min-width:180px;">
+                    ${sbGetPageLogicConditions(pageIndex, rule.condition)}
+                </select>
+                <span style="font-size:13px;color:#666;font-weight:500;">THEN</span>
+                <select onchange="sbUpdatePageLogicTarget(${pageIndex}, ${ruleIndex}, this.value)" style="padding:8px 12px;border:1px solid #ddd;border-radius:4px;font-size:13px;min-width:180px;">
+                    ${sbGetPageLogicTargets(pageIndex, rule.target)}
+                </select>
+                <button onclick="sbRemovePageLogicRule(${pageIndex}, ${ruleIndex})" style="margin-left:auto;background:none;border:none;color:#dc2626;cursor:pointer;padding:4px;" title="Delete rule">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    </svg>
+                </button>
+            </div>
+        `;
+    });
 
     container.innerHTML = html;
 }
 
-function sbUpdatePageLogicButton() {
+function sbUpdatePageLogicButtonState(pageIndex) {
     const btn = document.querySelector('.sb-page-logic-btn');
     if (!btn) return;
 
-    const hasRules = sbCurrentSurvey.pages[sbCurrentPageIndex].logic &&
-                     sbCurrentSurvey.pages[sbCurrentPageIndex].logic.length > 0;
+    const hasRules = sbCurrentSurvey.pages[pageIndex] &&
+                     sbCurrentSurvey.pages[pageIndex].logic &&
+                     sbCurrentSurvey.pages[pageIndex].logic.length > 0;
 
     if (hasRules) {
         btn.classList.add('active');
-        btn.innerHTML = `
-            <svg class="sb-icon-sm" viewBox="0 0 24 24"><line x1="6" y1="3" x2="6" y2="15"></line><circle cx="18" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><path d="M18 9a9 9 0 0 1-9 9"></path></svg>
-            Page Logic (${sbCurrentSurvey.pages[sbCurrentPageIndex].logic.length})
-        `;
     } else {
         btn.classList.remove('active');
-        btn.innerHTML = `
-            <svg class="sb-icon-sm" viewBox="0 0 24 24"><line x1="6" y1="3" x2="6" y2="15"></line><circle cx="18" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><path d="M18 9a9 9 0 0 1-9 9"></path></svg>
-            Page Logic
-        `;
     }
 }
 
@@ -14906,54 +14469,64 @@ function sbUpdatePageLogicButton() {
 // QUESTION LOGIC FUNCTIONS                       //
 // ============================================== //
 
-function sbToggleQuestionLogic(qIndex) {
+function sbToggleQuestionLogic(pageIndex, qIndex) {
     const panel = document.getElementById(`sb-question-logic-panel-${qIndex}`);
-    const btn = document.querySelector(`#sb-question-${qIndex} .sb-question-logic-btn`);
-    const isHidden = panel.classList.contains('sb-hidden');
+    if (!panel) return;
 
+    const isHidden = panel.classList.contains('sb-hidden');
     panel.classList.toggle('sb-hidden');
 
     if (isHidden) {
-        sbRenderQuestionLogicRules(qIndex);
+        sbRenderQuestionLogicRules(pageIndex, qIndex);
     }
 }
 
-function sbEnsureQuestionLogicExists(qIndex) {
-    const question = sbCurrentSurvey.pages[sbCurrentPageIndex].questions[qIndex];
-    if (!question.logic) {
-        question.logic = [];
+function sbEnsureQuestionLogicExists(pageIndex, qIndex) {
+    if (!sbCurrentSurvey.pages[pageIndex]) return;
+    if (!sbCurrentSurvey.pages[pageIndex].questions[qIndex]) return;
+    if (!sbCurrentSurvey.pages[pageIndex].questions[qIndex].logic) {
+        sbCurrentSurvey.pages[pageIndex].questions[qIndex].logic = [];
     }
 }
 
-function sbAddQuestionLogicRule(qIndex) {
-    sbEnsureQuestionLogicExists(qIndex);
-    sbCurrentSurvey.pages[sbCurrentPageIndex].questions[qIndex].logic.push({
+function sbAddQuestionLogicRule(pageIndex, qIndex) {
+    sbEnsureQuestionLogicExists(pageIndex, qIndex);
+    sbCurrentSurvey.pages[pageIndex].questions[qIndex].logic.push({
         condition: '',
         target: ''
     });
-    sbRenderQuestionLogicRules(qIndex);
-    sbUpdateQuestionLogicButton(qIndex);
+    sbRenderQuestionLogicRules(pageIndex, qIndex);
+    sbUpdateQuestionLogicButtonState(pageIndex, qIndex);
 }
 
-function sbRemoveQuestionLogicRule(qIndex, ruleIndex) {
-    sbCurrentSurvey.pages[sbCurrentPageIndex].questions[qIndex].logic.splice(ruleIndex, 1);
-    sbRenderQuestionLogicRules(qIndex);
-    sbUpdateQuestionLogicButton(qIndex);
+function sbRemoveQuestionLogicRule(pageIndex, qIndex, ruleIndex) {
+    if (!sbCurrentSurvey.pages[pageIndex] ||
+        !sbCurrentSurvey.pages[pageIndex].questions[qIndex] ||
+        !sbCurrentSurvey.pages[pageIndex].questions[qIndex].logic) return;
+
+    sbCurrentSurvey.pages[pageIndex].questions[qIndex].logic.splice(ruleIndex, 1);
+    sbRenderQuestionLogicRules(pageIndex, qIndex);
+    sbUpdateQuestionLogicButtonState(pageIndex, qIndex);
 }
 
-function sbUpdateQuestionLogicCondition(qIndex, ruleIndex, value) {
-    sbEnsureQuestionLogicExists(qIndex);
-    sbCurrentSurvey.pages[sbCurrentPageIndex].questions[qIndex].logic[ruleIndex].condition = value;
+function sbUpdateQuestionLogicCondition(pageIndex, qIndex, ruleIndex, value) {
+    sbEnsureQuestionLogicExists(pageIndex, qIndex);
+    if (sbCurrentSurvey.pages[pageIndex].questions[qIndex].logic[ruleIndex]) {
+        sbCurrentSurvey.pages[pageIndex].questions[qIndex].logic[ruleIndex].condition = value;
+    }
 }
 
-function sbUpdateQuestionLogicTarget(qIndex, ruleIndex, value) {
-    sbEnsureQuestionLogicExists(qIndex);
-    sbCurrentSurvey.pages[sbCurrentPageIndex].questions[qIndex].logic[ruleIndex].target = value;
+function sbUpdateQuestionLogicTarget(pageIndex, qIndex, ruleIndex, value) {
+    sbEnsureQuestionLogicExists(pageIndex, qIndex);
+    if (sbCurrentSurvey.pages[pageIndex].questions[qIndex].logic[ruleIndex]) {
+        sbCurrentSurvey.pages[pageIndex].questions[qIndex].logic[ruleIndex].target = value;
+    }
 }
 
-function sbGetQuestionLogicConditionOptions(qIndex, selectedValue) {
+function sbGetQuestionLogicConditions(pageIndex, qIndex, selectedValue) {
     let options = '<option value="">If answer is...</option>';
-    const question = sbCurrentSurvey.pages[sbCurrentPageIndex].questions[qIndex];
+    const question = sbCurrentSurvey.pages[pageIndex].questions[qIndex];
+    if (!question) return options;
 
     if (question.type === 'single' || question.type === 'multi') {
         if (question.options && question.options.length > 0) {
@@ -14964,7 +14537,7 @@ function sbGetQuestionLogicConditionOptions(qIndex, selectedValue) {
             });
         }
     } else if (question.type === 'rating') {
-        const values = sbCurrentSurvey.ratingScale.values;
+        const values = sbCurrentSurvey.ratingScale ? sbCurrentSurvey.ratingScale.values : [1,2,3,4,5];
         values.forEach(val => {
             const selected = val.toString() === selectedValue ? 'selected' : '';
             options += `<option value="${val}" ${selected}>${val}</option>`;
@@ -14973,50 +14546,51 @@ function sbGetQuestionLogicConditionOptions(qIndex, selectedValue) {
     return options;
 }
 
-function sbGetQuestionLogicTargetOptions(qIndex, selectedValue) {
+function sbGetQuestionLogicTargets(pageIndex, qIndex, selectedValue) {
     let options = '<option value="">Then go to...</option>';
-    const currentPage = sbCurrentSurvey.pages[sbCurrentPageIndex];
+    const currentPage = sbCurrentSurvey.pages[pageIndex];
 
     // Later questions on same page
-    currentPage.questions.forEach((q, idx) => {
-        if (idx > qIndex) {
-            const value = `question-${idx}`;
-            const qText = q.text ? q.text.substring(0, 25) + (q.text.length > 25 ? '...' : '') : 'Untitled';
-            const label = `Q${idx + 1}: ${qText}`;
-            const selected = value === selectedValue ? 'selected' : '';
-            options += `<option value="${value}" ${selected}>${label}</option>`;
-        }
-    });
+    if (currentPage && currentPage.questions) {
+        currentPage.questions.forEach((q, idx) => {
+            if (idx > qIndex) {
+                const value = `question-${idx}`;
+                const qText = q.text ? q.text.substring(0, 25) + (q.text.length > 25 ? '...' : '') : 'Untitled';
+                const label = `Skip to Q${idx + 1}: ${qText}`;
+                const selected = value === selectedValue ? 'selected' : '';
+                options += `<option value="${value}" ${selected}>${label}</option>`;
+            }
+        });
+    }
 
     // Later pages
     sbCurrentSurvey.pages.forEach((page, pIndex) => {
-        if (pIndex > sbCurrentPageIndex) {
+        if (pIndex > pageIndex) {
             const value = `page-${pIndex}`;
-            const label = `Page ${pIndex + 1}: ${page.title || 'Untitled'}`;
+            const label = `Go to Page ${pIndex + 1}: ${page.title || 'Untitled'}`;
             const selected = value === selectedValue ? 'selected' : '';
             options += `<option value="${value}" ${selected}>${label}</option>`;
         }
     });
 
-    const endSelected = 'end' === selectedValue ? 'selected' : '';
+    // End survey
+    const endSelected = selectedValue === 'end' ? 'selected' : '';
     options += `<option value="end" ${endSelected}>End Survey (Submit)</option>`;
+
     return options;
 }
 
-function sbRenderQuestionLogicRules(qIndex) {
+function sbRenderQuestionLogicRules(pageIndex, qIndex) {
     const container = document.getElementById(`sb-question-logic-rules-${qIndex}`);
     if (!container) return;
 
-    sbEnsureQuestionLogicExists(qIndex);
-    const rules = sbCurrentSurvey.pages[sbCurrentPageIndex].questions[qIndex].logic;
+    sbEnsureQuestionLogicExists(pageIndex, qIndex);
+    const rules = sbCurrentSurvey.pages[pageIndex].questions[qIndex].logic;
 
     if (rules.length === 0) {
         container.innerHTML = `
-            <div class="sb-logic-empty">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <line x1="6" y1="3" x2="6" y2="15"></line><circle cx="18" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><path d="M18 9a9 9 0 0 1-9 9"></path>
-                </svg>
-                <p>No skip logic yet.<br>Add a rule to skip questions based on this answer.</p>
+            <div style="text-align:center;padding:16px;color:#888;font-size:13px;">
+                <p style="margin:0;">No skip logic yet. Add a rule to skip questions based on this answer.</p>
             </div>
         `;
         return;
@@ -15025,17 +14599,20 @@ function sbRenderQuestionLogicRules(qIndex) {
     let html = '';
     rules.forEach((rule, ruleIndex) => {
         html += `
-            <div class="sb-logic-rule">
-                <span class="sb-logic-rule-label">IF</span>
-                <select onchange="sbUpdateQuestionLogicCondition(${qIndex}, ${ruleIndex}, this.value)">
-                    ${sbGetQuestionLogicConditionOptions(qIndex, rule.condition)}
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;padding:10px;background:#ede7f6;border-radius:6px;flex-wrap:wrap;">
+                <span style="font-size:12px;color:#666;font-weight:500;">IF</span>
+                <select onchange="sbUpdateQuestionLogicCondition(${pageIndex}, ${qIndex}, ${ruleIndex}, this.value)" style="padding:6px 10px;border:1px solid #ddd;border-radius:4px;font-size:12px;min-width:120px;">
+                    ${sbGetQuestionLogicConditions(pageIndex, qIndex, rule.condition)}
                 </select>
-                <span class="sb-logic-rule-label">THEN</span>
-                <select onchange="sbUpdateQuestionLogicTarget(${qIndex}, ${ruleIndex}, this.value)">
-                    ${sbGetQuestionLogicTargetOptions(qIndex, rule.target)}
+                <span style="font-size:12px;color:#666;font-weight:500;">THEN</span>
+                <select onchange="sbUpdateQuestionLogicTarget(${pageIndex}, ${qIndex}, ${ruleIndex}, this.value)" style="padding:6px 10px;border:1px solid #ddd;border-radius:4px;font-size:12px;min-width:150px;">
+                    ${sbGetQuestionLogicTargets(pageIndex, qIndex, rule.target)}
                 </select>
-                <button class="sb-logic-rule-delete" onclick="sbRemoveQuestionLogicRule(${qIndex}, ${ruleIndex})" title="Delete rule">
-                    <svg class="sb-icon-sm" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                <button onclick="sbRemoveQuestionLogicRule(${pageIndex}, ${qIndex}, ${ruleIndex})" style="margin-left:auto;background:none;border:none;color:#dc2626;cursor:pointer;padding:2px;" title="Delete">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
                 </button>
             </div>
         `;
@@ -15044,17 +14621,21 @@ function sbRenderQuestionLogicRules(qIndex) {
     container.innerHTML = html;
 }
 
-function sbUpdateQuestionLogicButton(qIndex) {
+function sbUpdateQuestionLogicButtonState(pageIndex, qIndex) {
     const btn = document.querySelector(`#sb-question-${qIndex} .sb-question-logic-btn`);
     if (!btn) return;
 
-    const question = sbCurrentSurvey.pages[sbCurrentPageIndex].questions[qIndex];
-    const hasRules = question.logic && question.logic.length > 0;
+    const question = sbCurrentSurvey.pages[pageIndex].questions[qIndex];
+    const hasRules = question && question.logic && question.logic.length > 0;
 
     if (hasRules) {
         btn.classList.add('has-logic');
+        btn.style.color = '#673ab7';
+        btn.style.background = '#ede7f6';
     } else {
         btn.classList.remove('has-logic');
+        btn.style.color = '';
+        btn.style.background = '';
     }
 }
 
