@@ -2036,6 +2036,15 @@
             color: var(--sb-primary);
         }
 
+        .survey-builder-container .sb-question-logic-btn.active {
+            color: var(--sb-primary) !important;
+            background: var(--sb-primary-light);
+        }
+
+        .survey-builder-container .sb-question-logic-btn.active svg {
+            color: var(--sb-primary);
+        }
+
         .survey-builder-container .sb-page-logic-panel {
             padding: 16px 24px;
             background: var(--sb-surface);
@@ -13964,7 +13973,7 @@ function sbRenderBuilderMain() {
                         <svg class="sb-icon" viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
                         PAGE ${sbCurrentPageIndex + 1} SETTINGS
                     </div>
-                    <button class="sb-page-logic-btn ${page.logic && page.logic.length > 0 ? 'active' : ''}" onclick="sbTogglePageLogic()">
+                    <button class="sb-page-logic-btn ${page.logic && page.logic.length > 0 ? 'active' : ''}" onclick="sbTogglePageLogic(${sbCurrentPageIndex})">
                         <svg class="sb-icon-sm" viewBox="0 0 24 24"><line x1="6" y1="3" x2="6" y2="15"></line><circle cx="18" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><path d="M18 9a9 9 0 0 1-9 9"></path></svg>
                         Page Logic ${page.logic && page.logic.length > 0 ? `(${page.logic.length})` : ''}
                     </button>
@@ -13972,8 +13981,27 @@ function sbRenderBuilderMain() {
                 <input type="text" class="sb-input" style="font-size:18px;" value="${page.title || ''}" placeholder="Page title (optional)" oninput="sbCurrentSurvey.pages[${sbCurrentPageIndex}].title = this.value; sbRenderPageSidebar();">
                 <textarea class="sb-input" rows="2" placeholder="Page instructions - explain what this section is about..." oninput="sbCurrentSurvey.pages[${sbCurrentPageIndex}].instructions = this.value;">${page.instructions || ''}</textarea>
             </div>
-            <div class="sb-page-logic-panel sb-hidden" id="sb-page-logic-panel">
-                <!-- Page logic will be rendered here -->
+            <div class="sb-page-logic-panel sb-hidden" id="sb-page-logic-panel" style="padding:16px 24px;background:#f8f9fa;border-top:1px solid #e0e0e0;">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#673ab7" stroke-width="2">
+                        <line x1="6" y1="3" x2="6" y2="15"></line>
+                        <circle cx="18" cy="6" r="3"></circle>
+                        <circle cx="6" cy="18" r="3"></circle>
+                        <path d="M18 9a9 9 0 0 1-9 9"></path>
+                    </svg>
+                    <span style="font-weight:600;font-size:14px;color:#333;">Page Logic Rules</span>
+                    <span style="font-size:12px;color:#888;">Control where respondents go after this page</span>
+                </div>
+                <div id="sb-page-logic-rules">
+                    <!-- Rules will be rendered here by sbRenderPageLogicRules() -->
+                </div>
+                <button onclick="sbAddPageLogicRule(${sbCurrentPageIndex})" style="display:flex;align-items:center;gap:8px;padding:10px 16px;border:1px dashed #ccc;border-radius:4px;background:transparent;cursor:pointer;font-size:13px;color:#673ab7;margin-top:12px;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    Add Logic Rule
+                </button>
             </div>
         </div>
     `;
@@ -14104,6 +14132,9 @@ function sbRenderQuestionCard(question, qIndex) {
                 <button class="sb-btn-icon" onclick="sbDeleteQuestion(${qIndex})" title="Delete">
                     <svg class="sb-icon" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                 </button>
+                <button class="sb-btn-icon sb-question-logic-btn ${question.logic && question.logic.length > 0 ? 'active' : ''}" onclick="sbToggleQuestionLogic(sbCurrentPageIndex, ${qIndex})" title="Question Logic">
+                    <svg class="sb-icon" viewBox="0 0 24 24"><line x1="6" y1="3" x2="6" y2="15"></line><circle cx="18" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><path d="M18 9a9 9 0 0 1-9 9"></path></svg>
+                </button>
                 <div class="sb-question-footer-divider"></div>
                 <div class="sb-required-toggle">
                     <span class="sb-required-label">Required</span>
@@ -14112,6 +14143,20 @@ function sbRenderQuestionCard(question, qIndex) {
                         <span class="sb-toggle-slider"></span>
                     </label>
                 </div>
+            </div>
+            <div class="sb-question-logic-panel sb-hidden" id="sb-question-logic-panel-${qIndex}" style="padding:16px;background:#f8f9fa;border-top:1px solid #e0e0e0;border-radius:0 0 8px 8px;">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+                    <svg style="width:16px;height:16px;color:#6366f1;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="6" y1="3" x2="6" y2="15"></line><circle cx="18" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><path d="M18 9a9 9 0 0 1-9 9"></path></svg>
+                    <span style="font-weight:600;font-size:13px;color:#333;">Question Logic Rules</span>
+                    <span style="font-size:11px;color:#888;">Skip to a specific question or page based on the answer</span>
+                </div>
+                <div id="sb-question-logic-rules-${qIndex}">
+                    <!-- Rules will be rendered here by sbRenderQuestionLogicRules() -->
+                </div>
+                <button onclick="sbAddQuestionLogicRule(sbCurrentPageIndex, ${qIndex})" style="display:flex;align-items:center;gap:6px;padding:8px 12px;border:1px dashed #cbd5e1;border-radius:6px;background:white;color:#64748b;font-size:12px;cursor:pointer;margin-top:8px;">
+                    <svg style="width:14px;height:14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    Add Logic Rule
+                </button>
             </div>
         </div>
     `;
@@ -14256,9 +14301,342 @@ function sbDeletePage(index) {
     }
 }
 
-function sbTogglePageLogic() {
+// ============================================== //
+// PAGE LOGIC FUNCTIONS                           //
+// ============================================== //
+
+function sbTogglePageLogic(pageIndex) {
     const panel = document.getElementById('sb-page-logic-panel');
+    const isHidden = panel.classList.contains('sb-hidden');
     panel.classList.toggle('sb-hidden');
+
+    if (isHidden) {
+        sbRenderPageLogicRules(pageIndex);
+    }
+}
+
+function sbEnsurePageLogicExists(pageIndex) {
+    if (!sbCurrentSurvey.pages[pageIndex]) return;
+    if (!sbCurrentSurvey.pages[pageIndex].logic) {
+        sbCurrentSurvey.pages[pageIndex].logic = [];
+    }
+}
+
+function sbAddPageLogicRule(pageIndex) {
+    sbEnsurePageLogicExists(pageIndex);
+    sbCurrentSurvey.pages[pageIndex].logic.push({
+        condition: '',
+        target: ''
+    });
+    sbRenderPageLogicRules(pageIndex);
+    sbUpdatePageLogicButtonState(pageIndex);
+}
+
+function sbRemovePageLogicRule(pageIndex, ruleIndex) {
+    if (!sbCurrentSurvey.pages[pageIndex] || !sbCurrentSurvey.pages[pageIndex].logic) return;
+    sbCurrentSurvey.pages[pageIndex].logic.splice(ruleIndex, 1);
+    sbRenderPageLogicRules(pageIndex);
+    sbUpdatePageLogicButtonState(pageIndex);
+}
+
+function sbUpdatePageLogicCondition(pageIndex, ruleIndex, value) {
+    sbEnsurePageLogicExists(pageIndex);
+    if (sbCurrentSurvey.pages[pageIndex].logic[ruleIndex]) {
+        sbCurrentSurvey.pages[pageIndex].logic[ruleIndex].condition = value;
+    }
+}
+
+function sbUpdatePageLogicTarget(pageIndex, ruleIndex, value) {
+    sbEnsurePageLogicExists(pageIndex);
+    if (sbCurrentSurvey.pages[pageIndex].logic[ruleIndex]) {
+        sbCurrentSurvey.pages[pageIndex].logic[ruleIndex].target = value;
+    }
+}
+
+function sbGetPageLogicConditions(pageIndex, selectedValue) {
+    let options = '<option value="">Select condition...</option>';
+    const page = sbCurrentSurvey.pages[pageIndex];
+    if (!page || !page.questions) return options;
+
+    page.questions.forEach((question, qIndex) => {
+        if (question.type === 'single' || question.type === 'multi') {
+            if (question.options && question.options.length > 0) {
+                question.options.forEach((opt, optIndex) => {
+                    const value = `${question.id}:${optIndex}`;
+                    const qText = question.text ? question.text.substring(0, 20) : 'Untitled';
+                    const label = `Q${qIndex + 1} "${qText}..." = "${opt}"`;
+                    const selected = value === selectedValue ? 'selected' : '';
+                    options += `<option value="${value}" ${selected}>${label}</option>`;
+                });
+            }
+        } else if (question.type === 'rating') {
+            const values = sbCurrentSurvey.ratingScale ? sbCurrentSurvey.ratingScale.values : [1,2,3,4,5];
+            values.forEach(val => {
+                const value = `${question.id}:${val}`;
+                const qText = question.text ? question.text.substring(0, 20) : 'Untitled';
+                const label = `Q${qIndex + 1} "${qText}..." = ${val}`;
+                const selected = value === selectedValue ? 'selected' : '';
+                options += `<option value="${value}" ${selected}>${label}</option>`;
+            });
+        }
+    });
+    return options;
+}
+
+function sbGetPageLogicTargets(pageIndex, selectedValue) {
+    let options = '<option value="">Select destination...</option>';
+
+    // Add later pages as options
+    sbCurrentSurvey.pages.forEach((page, pIndex) => {
+        if (pIndex > pageIndex) {
+            const value = `page-${pIndex}`;
+            const label = `Go to Page ${pIndex + 1}: ${page.title || 'Untitled'}`;
+            const selected = value === selectedValue ? 'selected' : '';
+            options += `<option value="${value}" ${selected}>${label}</option>`;
+        }
+    });
+
+    // Add End Survey option
+    const endSelected = selectedValue === 'end' ? 'selected' : '';
+    options += `<option value="end" ${endSelected}>End Survey (Submit)</option>`;
+
+    return options;
+}
+
+function sbRenderPageLogicRules(pageIndex) {
+    const container = document.getElementById('sb-page-logic-rules');
+    if (!container) return;
+
+    sbEnsurePageLogicExists(pageIndex);
+    const rules = sbCurrentSurvey.pages[pageIndex].logic;
+
+    if (rules.length === 0) {
+        container.innerHTML = `
+            <div class="sb-logic-empty" style="text-align:center;padding:24px;color:#888;">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-bottom:8px;opacity:0.5;">
+                    <line x1="6" y1="3" x2="6" y2="15"></line>
+                    <circle cx="18" cy="6" r="3"></circle>
+                    <circle cx="6" cy="18" r="3"></circle>
+                    <path d="M18 9a9 9 0 0 1-9 9"></path>
+                </svg>
+                <p style="margin:0;font-size:13px;">No logic rules yet.<br>Add a rule to control page flow based on answers.</p>
+            </div>
+        `;
+        return;
+    }
+
+    let html = '';
+    rules.forEach((rule, ruleIndex) => {
+        html += `
+            <div class="sb-logic-rule" style="display:flex;align-items:center;gap:12px;margin-bottom:12px;padding:12px;background:#ede7f6;border-radius:8px;flex-wrap:wrap;">
+                <span style="font-size:13px;color:#666;font-weight:500;">IF</span>
+                <select onchange="sbUpdatePageLogicCondition(${pageIndex}, ${ruleIndex}, this.value)" style="padding:8px 12px;border:1px solid #ddd;border-radius:4px;font-size:13px;min-width:180px;">
+                    ${sbGetPageLogicConditions(pageIndex, rule.condition)}
+                </select>
+                <span style="font-size:13px;color:#666;font-weight:500;">THEN</span>
+                <select onchange="sbUpdatePageLogicTarget(${pageIndex}, ${ruleIndex}, this.value)" style="padding:8px 12px;border:1px solid #ddd;border-radius:4px;font-size:13px;min-width:180px;">
+                    ${sbGetPageLogicTargets(pageIndex, rule.target)}
+                </select>
+                <button onclick="sbRemovePageLogicRule(${pageIndex}, ${ruleIndex})" style="margin-left:auto;background:none;border:none;color:#dc2626;cursor:pointer;padding:4px;" title="Delete rule">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    </svg>
+                </button>
+            </div>
+        `;
+    });
+
+    container.innerHTML = html;
+}
+
+function sbUpdatePageLogicButtonState(pageIndex) {
+    const btn = document.querySelector('.sb-page-logic-btn');
+    if (!btn) return;
+
+    const hasRules = sbCurrentSurvey.pages[pageIndex] &&
+                     sbCurrentSurvey.pages[pageIndex].logic &&
+                     sbCurrentSurvey.pages[pageIndex].logic.length > 0;
+
+    if (hasRules) {
+        btn.classList.add('active');
+    } else {
+        btn.classList.remove('active');
+    }
+}
+
+// ============================================== //
+// QUESTION LOGIC FUNCTIONS                       //
+// ============================================== //
+
+function sbToggleQuestionLogic(pageIndex, qIndex) {
+    const panel = document.getElementById(`sb-question-logic-panel-${qIndex}`);
+    if (!panel) return;
+
+    const isHidden = panel.classList.contains('sb-hidden');
+    panel.classList.toggle('sb-hidden');
+
+    if (isHidden) {
+        sbRenderQuestionLogicRules(pageIndex, qIndex);
+    }
+}
+
+function sbEnsureQuestionLogicExists(pageIndex, qIndex) {
+    if (!sbCurrentSurvey.pages[pageIndex]) return;
+    if (!sbCurrentSurvey.pages[pageIndex].questions[qIndex]) return;
+    if (!sbCurrentSurvey.pages[pageIndex].questions[qIndex].logic) {
+        sbCurrentSurvey.pages[pageIndex].questions[qIndex].logic = [];
+    }
+}
+
+function sbAddQuestionLogicRule(pageIndex, qIndex) {
+    sbEnsureQuestionLogicExists(pageIndex, qIndex);
+    sbCurrentSurvey.pages[pageIndex].questions[qIndex].logic.push({
+        condition: '',
+        target: ''
+    });
+    sbRenderQuestionLogicRules(pageIndex, qIndex);
+    sbUpdateQuestionLogicButtonState(pageIndex, qIndex);
+}
+
+function sbRemoveQuestionLogicRule(pageIndex, qIndex, ruleIndex) {
+    if (!sbCurrentSurvey.pages[pageIndex] ||
+        !sbCurrentSurvey.pages[pageIndex].questions[qIndex] ||
+        !sbCurrentSurvey.pages[pageIndex].questions[qIndex].logic) return;
+
+    sbCurrentSurvey.pages[pageIndex].questions[qIndex].logic.splice(ruleIndex, 1);
+    sbRenderQuestionLogicRules(pageIndex, qIndex);
+    sbUpdateQuestionLogicButtonState(pageIndex, qIndex);
+}
+
+function sbUpdateQuestionLogicCondition(pageIndex, qIndex, ruleIndex, value) {
+    sbEnsureQuestionLogicExists(pageIndex, qIndex);
+    if (sbCurrentSurvey.pages[pageIndex].questions[qIndex].logic[ruleIndex]) {
+        sbCurrentSurvey.pages[pageIndex].questions[qIndex].logic[ruleIndex].condition = value;
+    }
+}
+
+function sbUpdateQuestionLogicTarget(pageIndex, qIndex, ruleIndex, value) {
+    sbEnsureQuestionLogicExists(pageIndex, qIndex);
+    if (sbCurrentSurvey.pages[pageIndex].questions[qIndex].logic[ruleIndex]) {
+        sbCurrentSurvey.pages[pageIndex].questions[qIndex].logic[ruleIndex].target = value;
+    }
+}
+
+function sbGetQuestionLogicConditions(pageIndex, qIndex, selectedValue) {
+    let options = '<option value="">If answer is...</option>';
+    const question = sbCurrentSurvey.pages[pageIndex].questions[qIndex];
+    if (!question) return options;
+
+    if (question.type === 'single' || question.type === 'multi') {
+        if (question.options && question.options.length > 0) {
+            question.options.forEach((opt, optIndex) => {
+                const value = optIndex.toString();
+                const selected = value === selectedValue ? 'selected' : '';
+                options += `<option value="${value}" ${selected}>${opt}</option>`;
+            });
+        }
+    } else if (question.type === 'rating') {
+        const values = sbCurrentSurvey.ratingScale ? sbCurrentSurvey.ratingScale.values : [1,2,3,4,5];
+        values.forEach(val => {
+            const selected = val.toString() === selectedValue ? 'selected' : '';
+            options += `<option value="${val}" ${selected}>${val}</option>`;
+        });
+    }
+    return options;
+}
+
+function sbGetQuestionLogicTargets(pageIndex, qIndex, selectedValue) {
+    let options = '<option value="">Then go to...</option>';
+    const currentPage = sbCurrentSurvey.pages[pageIndex];
+
+    // Later questions on same page
+    if (currentPage && currentPage.questions) {
+        currentPage.questions.forEach((q, idx) => {
+            if (idx > qIndex) {
+                const value = `question-${idx}`;
+                const qText = q.text ? q.text.substring(0, 25) + (q.text.length > 25 ? '...' : '') : 'Untitled';
+                const label = `Skip to Q${idx + 1}: ${qText}`;
+                const selected = value === selectedValue ? 'selected' : '';
+                options += `<option value="${value}" ${selected}>${label}</option>`;
+            }
+        });
+    }
+
+    // Later pages
+    sbCurrentSurvey.pages.forEach((page, pIndex) => {
+        if (pIndex > pageIndex) {
+            const value = `page-${pIndex}`;
+            const label = `Go to Page ${pIndex + 1}: ${page.title || 'Untitled'}`;
+            const selected = value === selectedValue ? 'selected' : '';
+            options += `<option value="${value}" ${selected}>${label}</option>`;
+        }
+    });
+
+    // End survey
+    const endSelected = selectedValue === 'end' ? 'selected' : '';
+    options += `<option value="end" ${endSelected}>End Survey (Submit)</option>`;
+
+    return options;
+}
+
+function sbRenderQuestionLogicRules(pageIndex, qIndex) {
+    const container = document.getElementById(`sb-question-logic-rules-${qIndex}`);
+    if (!container) return;
+
+    sbEnsureQuestionLogicExists(pageIndex, qIndex);
+    const rules = sbCurrentSurvey.pages[pageIndex].questions[qIndex].logic;
+
+    if (rules.length === 0) {
+        container.innerHTML = `
+            <div style="text-align:center;padding:16px;color:#888;font-size:13px;">
+                <p style="margin:0;">No skip logic yet. Add a rule to skip questions based on this answer.</p>
+            </div>
+        `;
+        return;
+    }
+
+    let html = '';
+    rules.forEach((rule, ruleIndex) => {
+        html += `
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;padding:10px;background:#ede7f6;border-radius:6px;flex-wrap:wrap;">
+                <span style="font-size:12px;color:#666;font-weight:500;">IF</span>
+                <select onchange="sbUpdateQuestionLogicCondition(${pageIndex}, ${qIndex}, ${ruleIndex}, this.value)" style="padding:6px 10px;border:1px solid #ddd;border-radius:4px;font-size:12px;min-width:120px;">
+                    ${sbGetQuestionLogicConditions(pageIndex, qIndex, rule.condition)}
+                </select>
+                <span style="font-size:12px;color:#666;font-weight:500;">THEN</span>
+                <select onchange="sbUpdateQuestionLogicTarget(${pageIndex}, ${qIndex}, ${ruleIndex}, this.value)" style="padding:6px 10px;border:1px solid #ddd;border-radius:4px;font-size:12px;min-width:150px;">
+                    ${sbGetQuestionLogicTargets(pageIndex, qIndex, rule.target)}
+                </select>
+                <button onclick="sbRemoveQuestionLogicRule(${pageIndex}, ${qIndex}, ${ruleIndex})" style="margin-left:auto;background:none;border:none;color:#dc2626;cursor:pointer;padding:2px;" title="Delete">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+        `;
+    });
+
+    container.innerHTML = html;
+}
+
+function sbUpdateQuestionLogicButtonState(pageIndex, qIndex) {
+    const btn = document.querySelector(`#sb-question-${qIndex} .sb-question-logic-btn`);
+    if (!btn) return;
+
+    const question = sbCurrentSurvey.pages[pageIndex].questions[qIndex];
+    const hasRules = question && question.logic && question.logic.length > 0;
+
+    if (hasRules) {
+        btn.classList.add('has-logic');
+        btn.style.color = '#673ab7';
+        btn.style.background = '#ede7f6';
+    } else {
+        btn.classList.remove('has-logic');
+        btn.style.color = '';
+        btn.style.background = '';
+    }
 }
 
 // Settings
