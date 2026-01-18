@@ -2177,153 +2177,219 @@
             width: 100%;
         }
 
-        /* Autocomplete dropdown */
-        .survey-builder-container .sb-autocomplete-dropdown {
+        /* ============================================
+           QUESTION BANK - SIDEBAR OVERLAY STYLES
+           ============================================ */
+
+        /* Overlay that appears over the left sidebar/pages panel */
+        .sb-question-bank-overlay {
             position: absolute;
-            top: 100%;
+            top: 0;
             left: 0;
             right: 0;
+            bottom: 0;
             background: white;
-            border: 1px solid #e0e0e0;
-            border-top: none;
-            border-radius: 0 0 8px 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            max-height: 280px;
-            overflow-y: auto;
-            z-index: 1000;
+            z-index: 100;
             display: none;
+            flex-direction: column;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
         }
 
-        .survey-builder-container .sb-autocomplete-dropdown.active {
-            display: block;
+        .sb-question-bank-overlay.active {
+            display: flex;
         }
 
-        /* Dropdown header */
-        .survey-builder-container .sb-autocomplete-header {
-            padding: 0.5rem 0.75rem;
-            background: #f8f9fa;
-            border-bottom: 1px solid #e0e0e0;
-            font-size: 0.75rem;
-            color: #666;
-            font-weight: 500;
+        /* Overlay header */
+        .sb-question-bank-header {
+            padding: 0.75rem 1rem;
+            background: linear-gradient(135deg, #7c3aed, #6d28d9);
+            color: white;
+            font-weight: 600;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+
+        .sb-question-bank-header-title {
             display: flex;
             align-items: center;
             gap: 0.5rem;
         }
 
-        .survey-builder-container .sb-autocomplete-header svg {
-            width: 14px;
-            height: 14px;
+        .sb-question-bank-header svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .sb-question-bank-close {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        .sb-question-bank-close:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Search info bar */
+        .sb-question-bank-search-info {
+            padding: 0.5rem 1rem;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 0.75rem;
+            color: #666;
+            flex-shrink: 0;
+        }
+
+        .sb-question-bank-search-info strong {
             color: #7c3aed;
         }
 
+        /* Scrollable suggestions list */
+        .sb-question-bank-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0.5rem;
+        }
+
         /* Individual suggestion item */
-        .survey-builder-container .sb-autocomplete-item {
+        .sb-question-bank-item {
             padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            background: #f8f9fa;
+            border: 1px solid #e8e8e8;
+            border-radius: 6px;
             cursor: pointer;
-            border-bottom: 1px solid #f0f0f0;
-            transition: background 0.15s;
+            transition: all 0.15s;
         }
 
-        .survey-builder-container .sb-autocomplete-item:last-child {
-            border-bottom: none;
-        }
-
-        .survey-builder-container .sb-autocomplete-item:hover {
+        .sb-question-bank-item:hover {
             background: #f3e8ff;
+            border-color: #c4b5fd;
         }
 
-        .survey-builder-container .sb-autocomplete-item.selected {
+        .sb-question-bank-item.selected {
             background: #ede9fe;
+            border-color: #7c3aed;
         }
 
-        /* Question text in suggestion */
-        .survey-builder-container .sb-autocomplete-question {
-            font-size: 0.9rem;
+        /* Question text */
+        .sb-question-bank-item-text {
+            font-size: 0.85rem;
             color: #333;
-            margin-bottom: 0.25rem;
             line-height: 1.4;
+            margin-bottom: 0.4rem;
+            word-break: break-word;
         }
 
-        /* Highlight matching text */
-        .survey-builder-container .sb-autocomplete-question mark {
+        .sb-question-bank-item-text mark {
             background: #fef08a;
             color: inherit;
             padding: 0 2px;
             border-radius: 2px;
         }
 
-        /* Question type badge */
-        .survey-builder-container .sb-autocomplete-meta {
+        /* Question meta (type badge + use count) */
+        .sb-question-bank-item-meta {
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            font-size: 0.75rem;
-            color: #888;
+            flex-wrap: wrap;
         }
 
-        .survey-builder-container .sb-autocomplete-type {
-            background: #e5e7eb;
+        .sb-question-bank-item-type {
+            font-size: 0.7rem;
             padding: 0.15rem 0.5rem;
             border-radius: 4px;
             font-weight: 500;
+            text-transform: capitalize;
         }
 
-        .survey-builder-container .sb-autocomplete-type.single,
-        .survey-builder-container .sb-autocomplete-type.multi {
+        .sb-question-bank-item-type.multiple-choice,
+        .sb-question-bank-item-type.single-choice,
+        .sb-question-bank-item-type.checkboxes {
             background: #dbeafe;
             color: #1d4ed8;
         }
 
-        .survey-builder-container .sb-autocomplete-type.rating {
+        .sb-question-bank-item-type.rating,
+        .sb-question-bank-item-type.linear-scale {
             background: #fef3c7;
             color: #b45309;
         }
 
-        .survey-builder-container .sb-autocomplete-type.text {
+        .sb-question-bank-item-type.text,
+        .sb-question-bank-item-type.long-text {
             background: #d1fae5;
             color: #047857;
         }
 
-        /* Use count */
-        .survey-builder-container .sb-autocomplete-uses {
-            color: #aaa;
+        .sb-question-bank-item-type.dropdown {
+            background: #ede9fe;
+            color: #6d28d9;
         }
 
-        /* Options preview for multiple choice */
-        .survey-builder-container .sb-autocomplete-options {
+        .sb-question-bank-item-uses {
+            font-size: 0.7rem;
+            color: #999;
+        }
+
+        /* Options preview */
+        .sb-question-bank-item-options {
             margin-top: 0.35rem;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             color: #888;
+            font-style: italic;
         }
 
-        /* No results state */
-        .survey-builder-container .sb-autocomplete-empty {
-            padding: 1rem;
+        /* Empty state */
+        .sb-question-bank-empty {
+            padding: 2rem 1rem;
             text-align: center;
             color: #888;
+        }
+
+        .sb-question-bank-empty svg {
+            width: 40px;
+            height: 40px;
+            margin-bottom: 0.75rem;
+            opacity: 0.4;
+        }
+
+        .sb-question-bank-empty p {
             font-size: 0.85rem;
+            margin: 0;
         }
 
         /* Loading state */
-        .survey-builder-container .sb-autocomplete-loading {
-            padding: 1rem;
+        .sb-question-bank-loading {
+            padding: 2rem 1rem;
             text-align: center;
             color: #888;
             font-size: 0.85rem;
         }
 
-        .survey-builder-container .sb-autocomplete-loading::after {
-            content: '';
-            display: inline-block;
-            width: 14px;
-            height: 14px;
-            border: 2px solid #e0e0e0;
-            border-top-color: #7c3aed;
-            border-radius: 50%;
-            animation: sb-spin 0.8s linear infinite;
-            margin-left: 0.5rem;
-            vertical-align: middle;
+        /* Results count */
+        .sb-question-bank-count {
+            padding: 0.5rem 1rem;
+            background: #f0f0f0;
+            font-size: 0.75rem;
+            color: #666;
+            text-align: center;
+            flex-shrink: 0;
+            border-top: 1px solid #e0e0e0;
         }
 
         @keyframes sb-spin {
@@ -15018,117 +15084,173 @@ function sbHandleQuestionInput(inputElement, qIndex) {
 }
 
 /**
- * Show autocomplete dropdown for a question input
+ * Show question bank overlay in the left sidebar
  * @param {HTMLElement} inputElement - The question text input
  * @param {number} pageIndex - Current page index
  * @param {number} questionIndex - Current question index
  */
 async function sbShowAutocomplete(inputElement, pageIndex, questionIndex) {
     const searchText = inputElement.value;
-    const dropdownId = `sb-autocomplete-${pageIndex}-${questionIndex}`;
-    let dropdown = document.getElementById(dropdownId);
 
-    // Create dropdown if it doesn't exist
-    if (!dropdown) {
-        dropdown = document.createElement('div');
-        dropdown.id = dropdownId;
-        dropdown.className = 'sb-autocomplete-dropdown';
-        inputElement.parentElement.appendChild(dropdown);
-    }
+    // Find the left sidebar/pages panel to overlay
+    const sidebar = document.querySelector('.sb-page-sidebar') ||
+                    document.querySelector('.sb-pages-panel') ||
+                    document.querySelector('.sb-sidebar') ||
+                    document.getElementById('sb-page-sidebar');
 
-    // Hide if search text too short
-    if (!searchText || searchText.length < 2) {
-        dropdown.classList.remove('active');
+    if (!sidebar) {
+        console.error('Could not find sidebar for question bank overlay');
         return;
     }
 
-    // Show loading state
-    dropdown.innerHTML = '<div class="sb-autocomplete-loading">Searching...</div>';
-    dropdown.classList.add('active');
+    // Ensure sidebar has relative positioning for the overlay
+    sidebar.style.position = 'relative';
+
+    // Get or create the overlay
+    let overlay = document.getElementById('sb-question-bank-overlay');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'sb-question-bank-overlay';
+        overlay.className = 'sb-question-bank-overlay';
+        sidebar.appendChild(overlay);
+    }
+
+    // Store current context for selection
+    overlay.dataset.pageIndex = pageIndex;
+    overlay.dataset.questionIndex = questionIndex;
+
+    // Hide if search text too short
+    if (!searchText || searchText.length < 2) {
+        overlay.classList.remove('active');
+        return;
+    }
+
+    // Show with loading state
+    overlay.innerHTML = `
+        <div class="sb-question-bank-header">
+            <div class="sb-question-bank-header-title">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                Question Bank
+            </div>
+            <button class="sb-question-bank-close" onclick="sbHideQuestionBankOverlay()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 6L6 18M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+        <div class="sb-question-bank-search-info">
+            Searching for: <strong>"${searchText}"</strong>
+        </div>
+        <div class="sb-question-bank-loading">Searching your questions...</div>
+    `;
+    overlay.classList.add('active');
 
     // Search question bank
     const results = await sbSearchQuestionBank(searchText);
 
+    // Build results HTML
+    let listHTML = '';
+
     if (results.length === 0) {
-        dropdown.innerHTML = '<div class="sb-autocomplete-empty">No matching questions found</div>';
-        return;
-    }
-
-    // Build dropdown HTML
-    let html = `
-        <div class="sb-autocomplete-header">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-            Previously used questions
-        </div>
-    `;
-
-    const typeLabels = {
-        single: 'Single Choice',
-        multi: 'Multiple Choice',
-        rating: 'Rating Scale',
-        text: 'Long Text'
-    };
-
-    results.forEach((q, index) => {
-        // Highlight matching text
-        const highlightedText = sbHighlightMatch(q.question_text, searchText);
-
-        // Format question type for display
-        const typeDisplay = typeLabels[q.question_type] || q.question_type;
-
-        // Options preview for multiple choice
-        let optionsPreview = '';
-        if (q.options && q.options.length > 0) {
-            const optionTexts = q.options.slice(0, 3).map(o => o.text).join(', ');
-            const more = q.options.length > 3 ? ` +${q.options.length - 3} more` : '';
-            optionsPreview = `<div class="sb-autocomplete-options">Options: ${optionTexts}${more}</div>`;
-        }
-
-        html += `
-            <div class="sb-autocomplete-item"
-                 data-index="${index}"
-                 onclick="sbSelectAutocomplete(${pageIndex}, ${questionIndex}, ${index})">
-                <div class="sb-autocomplete-question">${highlightedText}</div>
-                <div class="sb-autocomplete-meta">
-                    <span class="sb-autocomplete-type ${q.question_type}">${typeDisplay}</span>
-                    <span class="sb-autocomplete-uses">Used ${q.use_count} time${q.use_count !== 1 ? 's' : ''}</span>
-                </div>
-                ${optionsPreview}
+        listHTML = `
+            <div class="sb-question-bank-empty">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"/>
+                    <path d="M21 21l-4.35-4.35"/>
+                </svg>
+                <p>No matching questions found</p>
             </div>
         `;
-    });
+    } else {
+        results.forEach((q, index) => {
+            const highlightedText = sbHighlightMatch(q.question_text, searchText);
+            const typeClass = q.question_type.replace(/\s+/g, '-').toLowerCase();
+            const typeDisplay = q.question_type.replace(/-/g, ' ');
 
-    dropdown.innerHTML = html;
+            // Options preview
+            let optionsHTML = '';
+            if (q.options && q.options.length > 0) {
+                const optionTexts = q.options.slice(0, 3).map(o => o.text).join(', ');
+                const more = q.options.length > 3 ? ` +${q.options.length - 3} more` : '';
+                optionsHTML = `<div class="sb-question-bank-item-options">Options: ${optionTexts}${more}</div>`;
+            }
+
+            listHTML += `
+                <div class="sb-question-bank-item"
+                     data-index="${index}"
+                     onclick="sbSelectFromBank(${index})">
+                    <div class="sb-question-bank-item-text">${highlightedText}</div>
+                    <div class="sb-question-bank-item-meta">
+                        <span class="sb-question-bank-item-type ${typeClass}">${typeDisplay}</span>
+                        <span class="sb-question-bank-item-uses">Used ${q.use_count}×</span>
+                    </div>
+                    ${optionsHTML}
+                </div>
+            `;
+        });
+    }
+
+    // Update overlay content
+    overlay.innerHTML = `
+        <div class="sb-question-bank-header">
+            <div class="sb-question-bank-header-title">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                Question Bank
+            </div>
+            <button class="sb-question-bank-close" onclick="sbHideQuestionBankOverlay()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 6L6 18M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+        <div class="sb-question-bank-search-info">
+            Searching for: <strong>"${searchText}"</strong>
+        </div>
+        <div class="sb-question-bank-list">
+            ${listHTML}
+        </div>
+        ${results.length > 0 ? `<div class="sb-question-bank-count">${results.length} suggestion${results.length !== 1 ? 's' : ''}</div>` : ''}
+    `;
+
+    // Store results for keyboard navigation / selection
+    overlay.dataset.results = JSON.stringify(results);
     sbAutocompleteSelectedIndex = -1;
-
-    // Store results for selection
-    dropdown.dataset.results = JSON.stringify(results);
 }
 
 /**
- * Hide autocomplete dropdown
+ * Hide the question bank overlay
+ */
+function sbHideQuestionBankOverlay() {
+    const overlay = document.getElementById('sb-question-bank-overlay');
+    if (overlay) {
+        overlay.classList.remove('active');
+    }
+    sbAutocompleteSelectedIndex = -1;
+}
+
+/**
+ * Legacy function for backwards compatibility
  */
 function sbHideAutocomplete(pageIndex, questionIndex) {
-    const dropdown = document.getElementById(`sb-autocomplete-${pageIndex}-${questionIndex}`);
-    if (dropdown) {
-        // Small delay to allow click events to fire
-        setTimeout(() => {
-            dropdown.classList.remove('active');
-        }, 150);
-    }
+    sbHideQuestionBankOverlay();
 }
 
 /**
- * Select an autocomplete suggestion
+ * Select a question from the bank overlay
  */
-function sbSelectAutocomplete(pageIndex, questionIndex, resultIndex) {
-    const dropdown = document.getElementById(`sb-autocomplete-${pageIndex}-${questionIndex}`);
-    if (!dropdown) return;
+function sbSelectFromBank(resultIndex) {
+    const overlay = document.getElementById('sb-question-bank-overlay');
+    if (!overlay) return;
 
-    const results = JSON.parse(dropdown.dataset.results || '[]');
+    const pageIndex = parseInt(overlay.dataset.pageIndex);
+    const questionIndex = parseInt(overlay.dataset.questionIndex);
+    const results = JSON.parse(overlay.dataset.results || '[]');
     const selected = results[resultIndex];
+
     if (!selected) return;
 
     // Get the current question in the survey
@@ -15142,17 +15264,35 @@ function sbSelectAutocomplete(pageIndex, questionIndex, resultIndex) {
 
     // Update options if applicable
     if (selected.options && selected.options.length > 0) {
-        question.options = selected.options.map(opt => opt.text);
+        question.options = selected.options.map((opt, i) => ({
+            id: `opt-${Date.now()}-${i}`,
+            text: opt.text
+        }));
     }
 
-    // Hide dropdown
-    dropdown.classList.remove('active');
+    // Update rating settings if applicable
+    if (['rating', 'linear-scale'].includes(selected.question_type)) {
+        question.minValue = selected.rating_min || 1;
+        question.maxValue = selected.rating_max || 5;
+        question.minLabel = selected.rating_min_label || '';
+        question.maxLabel = selected.rating_max_label || '';
+    }
+
+    // Hide overlay
+    sbHideQuestionBankOverlay();
 
     // Re-render the builder to show changes
     sbRenderBuilder();
 
-    // Show a brief success indicator
+    // Show success toast
     sbShowToast('Question loaded from your bank');
+}
+
+/**
+ * Legacy function for backwards compatibility
+ */
+function sbSelectAutocomplete(pageIndex, questionIndex, resultIndex) {
+    sbSelectFromBank(resultIndex);
 }
 
 /**
@@ -15167,54 +15307,60 @@ function sbHighlightMatch(text, search) {
 }
 
 /**
- * Handle keyboard navigation in autocomplete
+ * Handle keyboard navigation in question bank overlay
  */
 function sbAutocompleteKeydown(event, qIndex) {
-    const dropdown = document.getElementById(`sb-autocomplete-${sbCurrentPageIndex}-${qIndex}`);
-    if (!dropdown || !dropdown.classList.contains('active')) return;
+    const overlay = document.getElementById('sb-question-bank-overlay');
+    if (!overlay || !overlay.classList.contains('active')) return;
 
-    const items = dropdown.querySelectorAll('.sb-autocomplete-item');
+    const items = overlay.querySelectorAll('.sb-question-bank-item');
     if (items.length === 0) return;
 
     switch (event.key) {
         case 'ArrowDown':
             event.preventDefault();
             sbAutocompleteSelectedIndex = Math.min(sbAutocompleteSelectedIndex + 1, items.length - 1);
-            sbUpdateAutocompleteSelection(items);
+            sbUpdateBankSelection(items);
             break;
 
         case 'ArrowUp':
             event.preventDefault();
             sbAutocompleteSelectedIndex = Math.max(sbAutocompleteSelectedIndex - 1, 0);
-            sbUpdateAutocompleteSelection(items);
+            sbUpdateBankSelection(items);
             break;
 
         case 'Enter':
             if (sbAutocompleteSelectedIndex >= 0) {
                 event.preventDefault();
-                sbSelectAutocomplete(sbCurrentPageIndex, qIndex, sbAutocompleteSelectedIndex);
+                sbSelectFromBank(sbAutocompleteSelectedIndex);
             }
             break;
 
         case 'Escape':
-            dropdown.classList.remove('active');
-            sbAutocompleteSelectedIndex = -1;
+            sbHideQuestionBankOverlay();
             break;
     }
 }
 
 /**
- * Update visual selection in autocomplete dropdown
+ * Update visual selection in bank overlay
  */
-function sbUpdateAutocompleteSelection(items) {
+function sbUpdateBankSelection(items) {
     items.forEach((item, index) => {
         if (index === sbAutocompleteSelectedIndex) {
             item.classList.add('selected');
-            item.scrollIntoView({ block: 'nearest' });
+            item.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
         } else {
             item.classList.remove('selected');
         }
     });
+}
+
+/**
+ * Legacy function for backwards compatibility
+ */
+function sbUpdateAutocompleteSelection(items) {
+    sbUpdateBankSelection(items);
 }
 
 /**
