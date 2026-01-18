@@ -2167,6 +2167,169 @@
             flex: 1;
         }
 
+        /* ============================================
+           QUESTION BANK AUTOCOMPLETE STYLES
+           ============================================ */
+
+        /* Autocomplete container - positioned relative to question input */
+        .survey-builder-container .sb-question-input-wrapper {
+            position: relative;
+            width: 100%;
+        }
+
+        /* Autocomplete dropdown */
+        .survey-builder-container .sb-autocomplete-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            max-height: 280px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+        }
+
+        .survey-builder-container .sb-autocomplete-dropdown.active {
+            display: block;
+        }
+
+        /* Dropdown header */
+        .survey-builder-container .sb-autocomplete-header {
+            padding: 0.5rem 0.75rem;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 0.75rem;
+            color: #666;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .survey-builder-container .sb-autocomplete-header svg {
+            width: 14px;
+            height: 14px;
+            color: #7c3aed;
+        }
+
+        /* Individual suggestion item */
+        .survey-builder-container .sb-autocomplete-item {
+            padding: 0.75rem;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background 0.15s;
+        }
+
+        .survey-builder-container .sb-autocomplete-item:last-child {
+            border-bottom: none;
+        }
+
+        .survey-builder-container .sb-autocomplete-item:hover {
+            background: #f3e8ff;
+        }
+
+        .survey-builder-container .sb-autocomplete-item.selected {
+            background: #ede9fe;
+        }
+
+        /* Question text in suggestion */
+        .survey-builder-container .sb-autocomplete-question {
+            font-size: 0.9rem;
+            color: #333;
+            margin-bottom: 0.25rem;
+            line-height: 1.4;
+        }
+
+        /* Highlight matching text */
+        .survey-builder-container .sb-autocomplete-question mark {
+            background: #fef08a;
+            color: inherit;
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+
+        /* Question type badge */
+        .survey-builder-container .sb-autocomplete-meta {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.75rem;
+            color: #888;
+        }
+
+        .survey-builder-container .sb-autocomplete-type {
+            background: #e5e7eb;
+            padding: 0.15rem 0.5rem;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+
+        .survey-builder-container .sb-autocomplete-type.single,
+        .survey-builder-container .sb-autocomplete-type.multi {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .survey-builder-container .sb-autocomplete-type.rating {
+            background: #fef3c7;
+            color: #b45309;
+        }
+
+        .survey-builder-container .sb-autocomplete-type.text {
+            background: #d1fae5;
+            color: #047857;
+        }
+
+        /* Use count */
+        .survey-builder-container .sb-autocomplete-uses {
+            color: #aaa;
+        }
+
+        /* Options preview for multiple choice */
+        .survey-builder-container .sb-autocomplete-options {
+            margin-top: 0.35rem;
+            font-size: 0.75rem;
+            color: #888;
+        }
+
+        /* No results state */
+        .survey-builder-container .sb-autocomplete-empty {
+            padding: 1rem;
+            text-align: center;
+            color: #888;
+            font-size: 0.85rem;
+        }
+
+        /* Loading state */
+        .survey-builder-container .sb-autocomplete-loading {
+            padding: 1rem;
+            text-align: center;
+            color: #888;
+            font-size: 0.85rem;
+        }
+
+        .survey-builder-container .sb-autocomplete-loading::after {
+            content: '';
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid #e0e0e0;
+            border-top-color: #7c3aed;
+            border-radius: 50%;
+            animation: sb-spin 0.8s linear infinite;
+            margin-left: 0.5rem;
+            vertical-align: middle;
+        }
+
+        @keyframes sb-spin {
+            to { transform: rotate(360deg); }
+        }
+
         /* Question Type Selector */
         .survey-builder-container .sb-question-type-selector {
             position: relative;
@@ -14102,8 +14265,11 @@ function sbRenderQuestionCard(question, qIndex) {
             </div>
             <div class="sb-question-body">
                 <div class="sb-question-header">
-                    <div class="sb-question-text-input">
-                        <input type="text" class="sb-input sb-input-lg" value="${question.text}" placeholder="Question" onchange="sbUpdateQuestionText(${qIndex}, this.value)">
+                    <div class="sb-question-text-input sb-question-input-wrapper">
+                        <input type="text" class="sb-input sb-input-lg" value="${question.text}" placeholder="Question"
+                            oninput="sbHandleQuestionInput(this, ${qIndex})"
+                            onkeydown="sbAutocompleteKeydown(event, ${qIndex})"
+                            onblur="sbHideAutocomplete(sbCurrentPageIndex, ${qIndex})">
                     </div>
                     <div class="sb-question-type-selector">
                         <button class="sb-question-type-btn" onclick="sbToggleTypeDropdown(${qIndex})">
@@ -14639,6 +14805,452 @@ function sbUpdateQuestionLogicButtonState(pageIndex, qIndex) {
     }
 }
 
+/* ============================================
+   QUESTION BANK FUNCTIONS
+   ============================================ */
+
+// Cache for autocomplete results to reduce API calls
+let sbQuestionBankCache = [];
+let sbQuestionBankLastFetch = null;
+const SB_CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+// Debounce timer for autocomplete
+let sbAutocompleteDebounceTimer = null;
+
+// Currently selected autocomplete index (for keyboard navigation)
+let sbAutocompleteSelectedIndex = -1;
+
+/**
+ * Fetch user's question bank from database
+ * Returns cached results if available and fresh
+ */
+async function sbFetchQuestionBank(forceRefresh = false) {
+    // Return cached data if still fresh
+    if (!forceRefresh && sbQuestionBankCache.length > 0 && sbQuestionBankLastFetch) {
+        const age = Date.now() - sbQuestionBankLastFetch;
+        if (age < SB_CACHE_DURATION) {
+            return sbQuestionBankCache;
+        }
+    }
+
+    try {
+        const { data, error } = await window.supabaseClient
+            .from('question_bank')
+            .select('*')
+            .order('use_count', { ascending: false })
+            .order('last_used_at', { ascending: false })
+            .limit(500);
+
+        if (error) {
+            console.error('Error fetching question bank:', error);
+            return [];
+        }
+
+        sbQuestionBankCache = data || [];
+        sbQuestionBankLastFetch = Date.now();
+        return sbQuestionBankCache;
+
+    } catch (err) {
+        console.error('Failed to fetch question bank:', err);
+        return [];
+    }
+}
+
+/**
+ * Search question bank for matching questions
+ * @param {string} searchText - The text to search for
+ * @returns {Array} - Matching questions sorted by relevance
+ */
+async function sbSearchQuestionBank(searchText) {
+    if (!searchText || searchText.length < 2) {
+        return [];
+    }
+
+    const bank = await sbFetchQuestionBank();
+    const searchLower = searchText.toLowerCase().trim();
+    const searchWords = searchLower.split(/\s+/).filter(w => w.length > 1);
+
+    // Score and filter questions
+    const scored = bank.map(q => {
+        const textLower = q.question_text.toLowerCase();
+        let score = 0;
+
+        // Exact match at start gets highest score
+        if (textLower.startsWith(searchLower)) {
+            score += 100;
+        }
+        // Contains exact phrase
+        else if (textLower.includes(searchLower)) {
+            score += 50;
+        }
+
+        // Score individual word matches
+        searchWords.forEach(word => {
+            if (textLower.includes(word)) {
+                score += 10;
+                // Bonus if word is at start of question
+                if (textLower.startsWith(word)) {
+                    score += 5;
+                }
+            }
+        });
+
+        // Boost frequently used questions slightly
+        score += Math.min(q.use_count, 10);
+
+        return { ...q, score };
+    });
+
+    // Filter out zero scores and sort by score descending
+    return scored
+        .filter(q => q.score > 0)
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 8); // Limit to 8 suggestions
+}
+
+/**
+ * Save questions to the question bank when survey is published
+ * @param {Object} survey - The survey object with pages and questions
+ */
+async function sbSaveQuestionsToBank(survey) {
+    if (!survey || !survey.pages) return;
+
+    const questionsToSave = [];
+
+    survey.pages.forEach(page => {
+        if (!page.questions) return;
+
+        page.questions.forEach(q => {
+            // Skip if no question text
+            if (!q.text || q.text.trim() === '' || q.text === 'Question') return;
+
+            const questionData = {
+                question_text: q.text.trim(),
+                question_type: q.type || 'single',
+                options: [],
+                rating_min: null,
+                rating_max: null,
+                rating_min_label: null,
+                rating_max_label: null
+            };
+
+            // Save options for multiple choice / dropdown
+            if (['single', 'multi'].includes(q.type)) {
+                if (q.options && q.options.length > 0) {
+                    questionData.options = q.options
+                        .filter(opt => opt && opt.trim() !== '' && opt !== 'Option')
+                        .map(opt => ({ text: opt }));
+                }
+            }
+
+            // Save rating scale settings
+            if (q.type === 'rating') {
+                questionData.rating_min = sbCurrentSurvey.ratingScale?.values?.[0] || 1;
+                questionData.rating_max = sbCurrentSurvey.ratingScale?.values?.[sbCurrentSurvey.ratingScale?.values?.length - 1] || 5;
+                questionData.rating_min_label = sbCurrentSurvey.ratingScale?.labels?.[0] || '';
+                questionData.rating_max_label = sbCurrentSurvey.ratingScale?.labels?.[sbCurrentSurvey.ratingScale?.labels?.length - 1] || '';
+            }
+
+            questionsToSave.push(questionData);
+        });
+    });
+
+    if (questionsToSave.length === 0) return;
+
+    // Upsert each question (insert or update use_count if exists)
+    for (const q of questionsToSave) {
+        try {
+            // First try to find existing
+            const { data: existing } = await window.supabaseClient
+                .from('question_bank')
+                .select('id, use_count')
+                .eq('question_text', q.question_text)
+                .eq('question_type', q.question_type)
+                .single();
+
+            if (existing) {
+                // Update use count and last used
+                await window.supabaseClient
+                    .from('question_bank')
+                    .update({
+                        use_count: existing.use_count + 1,
+                        last_used_at: new Date().toISOString(),
+                        options: q.options,
+                        rating_min: q.rating_min,
+                        rating_max: q.rating_max,
+                        rating_min_label: q.rating_min_label,
+                        rating_max_label: q.rating_max_label
+                    })
+                    .eq('id', existing.id);
+            } else {
+                // Insert new question
+                const { data: userData } = await window.supabaseClient.auth.getUser();
+                if (userData?.user?.id) {
+                    await window.supabaseClient
+                        .from('question_bank')
+                        .insert({
+                            user_id: userData.user.id,
+                            ...q
+                        });
+                }
+            }
+        } catch (err) {
+            console.error('Error saving question to bank:', err);
+        }
+    }
+
+    // Refresh cache
+    await sbFetchQuestionBank(true);
+}
+
+/**
+ * Handle question input with debounce for autocomplete
+ */
+function sbHandleQuestionInput(inputElement, qIndex) {
+    // Update the question text in the survey object
+    sbCurrentSurvey.pages[sbCurrentPageIndex].questions[qIndex].text = inputElement.value;
+
+    // Debounce autocomplete search
+    clearTimeout(sbAutocompleteDebounceTimer);
+    sbAutocompleteDebounceTimer = setTimeout(() => {
+        sbShowAutocomplete(inputElement, sbCurrentPageIndex, qIndex);
+    }, 300); // 300ms delay
+}
+
+/**
+ * Show autocomplete dropdown for a question input
+ * @param {HTMLElement} inputElement - The question text input
+ * @param {number} pageIndex - Current page index
+ * @param {number} questionIndex - Current question index
+ */
+async function sbShowAutocomplete(inputElement, pageIndex, questionIndex) {
+    const searchText = inputElement.value;
+    const dropdownId = `sb-autocomplete-${pageIndex}-${questionIndex}`;
+    let dropdown = document.getElementById(dropdownId);
+
+    // Create dropdown if it doesn't exist
+    if (!dropdown) {
+        dropdown = document.createElement('div');
+        dropdown.id = dropdownId;
+        dropdown.className = 'sb-autocomplete-dropdown';
+        inputElement.parentElement.appendChild(dropdown);
+    }
+
+    // Hide if search text too short
+    if (!searchText || searchText.length < 2) {
+        dropdown.classList.remove('active');
+        return;
+    }
+
+    // Show loading state
+    dropdown.innerHTML = '<div class="sb-autocomplete-loading">Searching...</div>';
+    dropdown.classList.add('active');
+
+    // Search question bank
+    const results = await sbSearchQuestionBank(searchText);
+
+    if (results.length === 0) {
+        dropdown.innerHTML = '<div class="sb-autocomplete-empty">No matching questions found</div>';
+        return;
+    }
+
+    // Build dropdown HTML
+    let html = `
+        <div class="sb-autocomplete-header">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            Previously used questions
+        </div>
+    `;
+
+    const typeLabels = {
+        single: 'Single Choice',
+        multi: 'Multiple Choice',
+        rating: 'Rating Scale',
+        text: 'Long Text'
+    };
+
+    results.forEach((q, index) => {
+        // Highlight matching text
+        const highlightedText = sbHighlightMatch(q.question_text, searchText);
+
+        // Format question type for display
+        const typeDisplay = typeLabels[q.question_type] || q.question_type;
+
+        // Options preview for multiple choice
+        let optionsPreview = '';
+        if (q.options && q.options.length > 0) {
+            const optionTexts = q.options.slice(0, 3).map(o => o.text).join(', ');
+            const more = q.options.length > 3 ? ` +${q.options.length - 3} more` : '';
+            optionsPreview = `<div class="sb-autocomplete-options">Options: ${optionTexts}${more}</div>`;
+        }
+
+        html += `
+            <div class="sb-autocomplete-item"
+                 data-index="${index}"
+                 onclick="sbSelectAutocomplete(${pageIndex}, ${questionIndex}, ${index})">
+                <div class="sb-autocomplete-question">${highlightedText}</div>
+                <div class="sb-autocomplete-meta">
+                    <span class="sb-autocomplete-type ${q.question_type}">${typeDisplay}</span>
+                    <span class="sb-autocomplete-uses">Used ${q.use_count} time${q.use_count !== 1 ? 's' : ''}</span>
+                </div>
+                ${optionsPreview}
+            </div>
+        `;
+    });
+
+    dropdown.innerHTML = html;
+    sbAutocompleteSelectedIndex = -1;
+
+    // Store results for selection
+    dropdown.dataset.results = JSON.stringify(results);
+}
+
+/**
+ * Hide autocomplete dropdown
+ */
+function sbHideAutocomplete(pageIndex, questionIndex) {
+    const dropdown = document.getElementById(`sb-autocomplete-${pageIndex}-${questionIndex}`);
+    if (dropdown) {
+        // Small delay to allow click events to fire
+        setTimeout(() => {
+            dropdown.classList.remove('active');
+        }, 150);
+    }
+}
+
+/**
+ * Select an autocomplete suggestion
+ */
+function sbSelectAutocomplete(pageIndex, questionIndex, resultIndex) {
+    const dropdown = document.getElementById(`sb-autocomplete-${pageIndex}-${questionIndex}`);
+    if (!dropdown) return;
+
+    const results = JSON.parse(dropdown.dataset.results || '[]');
+    const selected = results[resultIndex];
+    if (!selected) return;
+
+    // Get the current question in the survey
+    const question = sbCurrentSurvey.pages[pageIndex].questions[questionIndex];
+
+    // Update question text
+    question.text = selected.question_text;
+
+    // Update question type
+    question.type = selected.question_type;
+
+    // Update options if applicable
+    if (selected.options && selected.options.length > 0) {
+        question.options = selected.options.map(opt => opt.text);
+    }
+
+    // Hide dropdown
+    dropdown.classList.remove('active');
+
+    // Re-render the builder to show changes
+    sbRenderBuilder();
+
+    // Show a brief success indicator
+    sbShowToast('Question loaded from your bank');
+}
+
+/**
+ * Highlight matching text in a string
+ */
+function sbHighlightMatch(text, search) {
+    if (!search) return text;
+
+    const escapedSearch = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(`(${escapedSearch})`, 'gi');
+    return text.replace(regex, '<mark>$1</mark>');
+}
+
+/**
+ * Handle keyboard navigation in autocomplete
+ */
+function sbAutocompleteKeydown(event, qIndex) {
+    const dropdown = document.getElementById(`sb-autocomplete-${sbCurrentPageIndex}-${qIndex}`);
+    if (!dropdown || !dropdown.classList.contains('active')) return;
+
+    const items = dropdown.querySelectorAll('.sb-autocomplete-item');
+    if (items.length === 0) return;
+
+    switch (event.key) {
+        case 'ArrowDown':
+            event.preventDefault();
+            sbAutocompleteSelectedIndex = Math.min(sbAutocompleteSelectedIndex + 1, items.length - 1);
+            sbUpdateAutocompleteSelection(items);
+            break;
+
+        case 'ArrowUp':
+            event.preventDefault();
+            sbAutocompleteSelectedIndex = Math.max(sbAutocompleteSelectedIndex - 1, 0);
+            sbUpdateAutocompleteSelection(items);
+            break;
+
+        case 'Enter':
+            if (sbAutocompleteSelectedIndex >= 0) {
+                event.preventDefault();
+                sbSelectAutocomplete(sbCurrentPageIndex, qIndex, sbAutocompleteSelectedIndex);
+            }
+            break;
+
+        case 'Escape':
+            dropdown.classList.remove('active');
+            sbAutocompleteSelectedIndex = -1;
+            break;
+    }
+}
+
+/**
+ * Update visual selection in autocomplete dropdown
+ */
+function sbUpdateAutocompleteSelection(items) {
+    items.forEach((item, index) => {
+        if (index === sbAutocompleteSelectedIndex) {
+            item.classList.add('selected');
+            item.scrollIntoView({ block: 'nearest' });
+        } else {
+            item.classList.remove('selected');
+        }
+    });
+}
+
+/**
+ * Show a brief toast notification
+ */
+function sbShowToast(message) {
+    // Check if toast container exists
+    let toast = document.getElementById('sb-toast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'sb-toast';
+        toast.style.cssText = `
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            z-index: 9999;
+            opacity: 0;
+            transition: opacity 0.3s;
+        `;
+        document.body.appendChild(toast);
+    }
+
+    toast.textContent = message;
+    toast.style.opacity = '1';
+
+    setTimeout(() => {
+        toast.style.opacity = '0';
+    }, 2500);
+}
+
 // Settings
 function sbOpenSettings() {
     document.getElementById('sb-settings-panel').classList.remove('sb-hidden');
@@ -14750,7 +15362,7 @@ function sbInitSettingsListeners() {
 }
 
 // Save
-function sbSaveSurvey() {
+async function sbSaveSurvey() {
     const existingIndex = sbSurveys.findIndex(s => s.id === sbCurrentSurvey.id);
     if (existingIndex >= 0) {
         sbSurveys[existingIndex] = sbCurrentSurvey;
@@ -14759,6 +15371,15 @@ function sbSaveSurvey() {
     }
     sbSaveSurveys();
     sbRenderDashboard();
+
+    // Save questions to question bank for future autocomplete
+    try {
+        await sbSaveQuestionsToBank(sbCurrentSurvey);
+        console.log('Questions saved to bank');
+    } catch (err) {
+        console.error('Failed to save questions to bank:', err);
+        // Don't block save if bank save fails
+    }
 }
 
 // Link Modal
