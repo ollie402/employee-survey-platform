@@ -15178,7 +15178,7 @@ async function sbShowAutocomplete(inputElement, pageIndex, questionIndex) {
             listHTML += `
                 <div class="sb-question-bank-item"
                      data-index="${index}"
-                     onclick="sbSelectFromBank(${index})">
+                     onmousedown="sbSelectFromBank(${index}); event.preventDefault();">
                     <div class="sb-question-bank-item-text">${highlightedText}</div>
                     <div class="sb-question-bank-item-meta">
                         <span class="sb-question-bank-item-type ${typeClass}">${typeDisplay}</span>
@@ -15231,10 +15231,13 @@ function sbHideQuestionBankOverlay() {
 }
 
 /**
- * Legacy function for backwards compatibility
+ * Legacy function for backwards compatibility - called from onblur
+ * Uses setTimeout to allow mousedown events to fire first
  */
 function sbHideAutocomplete(pageIndex, questionIndex) {
-    sbHideQuestionBankOverlay();
+    setTimeout(() => {
+        sbHideQuestionBankOverlay();
+    }, 200);
 }
 
 /**
