@@ -2521,41 +2521,75 @@
             padding-bottom: 4px;
         }
 
-        /* Rating Scale Preview */
-        .survey-builder-container .sb-rating-preview {
-            margin-top: 24px;
+        /* Rating Scale Options in Question Card */
+        .survey-builder-container .sb-rating-options {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e8e8e8;
+        }
+
+        .survey-builder-container .sb-rating-scale-row {
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
         }
 
-        .survey-builder-container .sb-rating-label {
-            font-size: 14px;
-            color: var(--sb-text-secondary);
+        .survey-builder-container .sb-rating-scale-label {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #555;
+            min-width: 45px;
         }
 
-        .survey-builder-container .sb-rating-points {
+        .survey-builder-container .sb-rating-scale-select {
+            padding: 0.4rem 0.75rem;
+            border: 1px solid #d0d0d0;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            background: white;
+            cursor: pointer;
+        }
+
+        .survey-builder-container .sb-rating-scale-select:focus {
+            outline: none;
+            border-color: #7c3aed;
+        }
+
+        /* Rating labels preview */
+        .survey-builder-container .sb-rating-labels-preview {
             display: flex;
-            gap: 24px;
+            justify-content: space-between;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
         }
 
-        .survey-builder-container .sb-rating-point {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
+        .survey-builder-container .sb-rating-point-preview {
+            flex: 1;
+            text-align: center;
+            padding: 0.5rem 0.25rem;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            min-width: 0;
         }
 
-        .survey-builder-container .sb-rating-point-value {
-            font-size: 12px;
-            color: var(--sb-text-secondary);
+        .survey-builder-container .sb-rating-point-number {
+            font-weight: 600;
+            color: #7c3aed;
+            font-size: 0.9rem;
+            display: block;
+            margin-bottom: 0.25rem;
         }
 
-        .survey-builder-container .sb-rating-point-circle {
-            width: 20px;
-            height: 20px;
-            border: 2px solid var(--sb-text-secondary);
-            border-radius: 50%;
+        .survey-builder-container .sb-rating-point-label {
+            color: #666;
+            word-break: break-word;
+            line-height: 1.2;
+            display: block;
         }
 
         /* Question Footer */
@@ -3037,40 +3071,103 @@
             margin-left: 4px;
         }
 
-        .survey-builder-container .sb-preview-rating {
+        /* Survey Taker - Rating Question with Labels */
+        .survey-builder-container .sb-preview-rating-container {
+            margin-top: 1rem;
+        }
+
+        .survey-builder-container .sb-preview-rating-scale {
             display: flex;
-            align-items: center;
-            gap: 16px;
+            justify-content: space-between;
+            gap: 0.5rem;
             flex-wrap: wrap;
         }
 
-        .survey-builder-container .sb-preview-rating-label {
-            font-size: 14px;
-            color: var(--sb-text-secondary);
-        }
-
-        .survey-builder-container .sb-preview-rating-points {
-            display: flex;
-            gap: 24px;
-        }
-
-        .survey-builder-container .sb-preview-rating-point {
+        .survey-builder-container .sb-preview-rating-option {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 8px;
             cursor: pointer;
+            flex: 1;
+            min-width: 60px;
+            max-width: 100px;
+            text-align: center;
+            padding: 0.5rem;
+            border-radius: 8px;
+            transition: background 0.2s;
         }
 
-        .survey-builder-container .sb-preview-rating-point-value {
-            font-size: 12px;
-            color: var(--sb-text-secondary);
+        .survey-builder-container .sb-preview-rating-option:hover {
+            background: var(--sb-primary-light, #f3e8ff);
         }
 
-        .survey-builder-container .sb-preview-rating-point input {
-            width: 20px;
-            height: 20px;
-            accent-color: var(--sb-primary);
+        .survey-builder-container .sb-preview-rating-option input[type="radio"] {
+            display: none;
+        }
+
+        .survey-builder-container .sb-preview-rating-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid #d0d0d0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 1rem;
+            color: #666;
+            transition: all 0.2s;
+            background: white;
+        }
+
+        .survey-builder-container .sb-preview-rating-option:hover .sb-preview-rating-circle {
+            border-color: var(--sb-primary, #7c3aed);
+            color: var(--sb-primary, #7c3aed);
+        }
+
+        .survey-builder-container .sb-preview-rating-option input:checked + .sb-preview-rating-circle {
+            background: var(--sb-primary, #7c3aed);
+            border-color: var(--sb-primary, #7c3aed);
+            color: white;
+        }
+
+        .survey-builder-container .sb-preview-rating-text {
+            margin-top: 0.5rem;
+            font-size: 0.75rem;
+            color: #666;
+            line-height: 1.3;
+            word-break: break-word;
+        }
+
+        .survey-builder-container .sb-preview-rating-option:hover .sb-preview-rating-text {
+            color: var(--sb-primary, #7c3aed);
+        }
+
+        .survey-builder-container .sb-preview-rating-option input:checked ~ .sb-preview-rating-text {
+            color: var(--sb-primary, #7c3aed);
+            font-weight: 500;
+        }
+
+        /* Responsive - adjust for smaller screens */
+        @media (max-width: 600px) {
+            .survey-builder-container .sb-preview-rating-scale {
+                justify-content: center;
+            }
+
+            .survey-builder-container .sb-preview-rating-option {
+                min-width: 50px;
+                margin-bottom: 0.5rem;
+            }
+
+            .survey-builder-container .sb-preview-rating-circle {
+                width: 36px;
+                height: 36px;
+                font-size: 0.9rem;
+            }
+
+            .survey-builder-container .sb-preview-rating-text {
+                font-size: 0.7rem;
+            }
         }
 
         .survey-builder-container .sb-preview-options {
@@ -11721,7 +11818,7 @@ function sbCreateDefaultSurvey() {
 }
 
 function sbCreateDefaultQuestion(type) {
-    return {
+    const question = {
         id: sbGenerateId(),
         type,
         text: '',
@@ -11729,6 +11826,14 @@ function sbCreateDefaultQuestion(type) {
         options: type === 'single' || type === 'multi' ? ['Option 1'] : undefined,
         logic: []
     };
+
+    // Initialize rating settings if rating type
+    if (type === 'rating') {
+        question.ratingScale = 5;
+        question.ratingLabels = sbGetDefaultRatingLabels(5);
+    }
+
+    return question;
 }
 
 function sbApplyTheme(colorName) {
@@ -14298,17 +14403,21 @@ function sbRenderQuestionCard(question, qIndex) {
     ` : '';
 
     const ratingHtml = question.type === 'rating' ? `
-        <div class="sb-rating-preview">
-            <span class="sb-rating-label">${sbCurrentSurvey.ratingScale.labels[0]}</span>
-            <div class="sb-rating-points">
-                ${sbCurrentSurvey.ratingScale.values.map(val => `
-                    <div class="sb-rating-point">
-                        <span class="sb-rating-point-value">${val}</span>
-                        <div class="sb-rating-point-circle"></div>
-                    </div>
-                `).join('')}
+        <div class="sb-rating-options">
+            <div class="sb-rating-scale-row">
+                <label class="sb-rating-scale-label">Scale:</label>
+                <select class="sb-rating-scale-select" onchange="sbUpdateQuestionRatingScale(${qIndex}, parseInt(this.value))">
+                    <option value="3" ${question.ratingScale === 3 ? 'selected' : ''}>3 points</option>
+                    <option value="4" ${question.ratingScale === 4 ? 'selected' : ''}>4 points</option>
+                    <option value="5" ${question.ratingScale === 5 ? 'selected' : ''}>5 points</option>
+                    <option value="6" ${question.ratingScale === 6 ? 'selected' : ''}>6 points</option>
+                    <option value="7" ${question.ratingScale === 7 ? 'selected' : ''}>7 points</option>
+                    <option value="10" ${question.ratingScale === 10 ? 'selected' : ''}>10 points</option>
+                </select>
             </div>
-            <span class="sb-rating-label">${sbCurrentSurvey.ratingScale.labels[sbCurrentSurvey.ratingScale.labels.length - 1]}</span>
+            <div class="sb-rating-labels-preview">
+                ${sbGenerateRatingLabelsPreview(question)}
+            </div>
         </div>
     ` : '';
 
@@ -14436,7 +14545,57 @@ function sbChangeQuestionType(qIndex, type) {
     if (type === 'single' || type === 'multi') {
         if (!question.options) question.options = ['Option 1'];
     }
+    // Initialize rating settings when switching to rating type
+    if (type === 'rating') {
+        if (!question.ratingScale) question.ratingScale = 5;
+        if (!question.ratingLabels) question.ratingLabels = sbGetDefaultRatingLabels(question.ratingScale);
+    }
     sbRenderBuilder();
+}
+
+/**
+ * Update a question's rating scale
+ */
+function sbUpdateQuestionRatingScale(qIndex, scale) {
+    const question = sbCurrentSurvey.pages[sbCurrentPageIndex].questions[qIndex];
+    question.ratingScale = scale;
+    question.ratingLabels = sbGetDefaultRatingLabels(scale);
+    sbRenderBuilder();
+}
+
+/**
+ * Get default rating labels based on scale size
+ */
+function sbGetDefaultRatingLabels(scale) {
+    const defaultLabels = {
+        3: ['Disagree', 'Neutral', 'Agree'],
+        4: ['Strongly Disagree', 'Disagree', 'Agree', 'Strongly Agree'],
+        5: ['Strongly Disagree', 'Disagree', 'Neutral', 'Agree', 'Strongly Agree'],
+        6: ['Strongly Disagree', 'Disagree', 'Slightly Disagree', 'Slightly Agree', 'Agree', 'Strongly Agree'],
+        7: ['Strongly Disagree', 'Disagree', 'Somewhat Disagree', 'Neutral', 'Somewhat Agree', 'Agree', 'Strongly Agree'],
+        10: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']
+    };
+    return defaultLabels[scale] || defaultLabels[5];
+}
+
+/**
+ * Generate HTML preview of rating labels for the builder
+ */
+function sbGenerateRatingLabelsPreview(question) {
+    const scale = question.ratingScale || 5;
+    const labels = question.ratingLabels || sbGetDefaultRatingLabels(scale);
+
+    let html = '';
+    for (let i = 0; i < scale; i++) {
+        const label = labels[i] || (i + 1).toString();
+        html += `
+            <div class="sb-rating-point-preview">
+                <span class="sb-rating-point-number">${i + 1}</span>
+                <span class="sb-rating-point-label">${label}</span>
+            </div>
+        `;
+    }
+    return html;
 }
 
 function sbAddOption(qIndex) {
@@ -15728,20 +15887,24 @@ function sbRenderPreviewQuestion(question, qIndex, theme) {
     let inputHtml = '';
 
     if (question.type === 'rating') {
+        // Use per-question rating settings
+        const scale = question.ratingScale || 5;
+        const labels = question.ratingLabels || sbGetDefaultRatingLabels(scale);
+        const values = Array.from({ length: scale }, (_, i) => i + 1);
+
         inputHtml = `
-            <div class="sb-preview-rating">
-                <span class="sb-preview-rating-label">${sbCurrentSurvey.ratingScale.labels[0]}</span>
-                <div class="sb-preview-rating-points">
-                    ${sbCurrentSurvey.ratingScale.values.map(val => `
-                        <label class="sb-preview-rating-point">
-                            <span class="sb-preview-rating-point-value">${val}</span>
+            <div class="sb-preview-rating-container">
+                <div class="sb-preview-rating-scale">
+                    ${values.map((val, i) => `
+                        <label class="sb-preview-rating-option ${response === val ? 'selected' : ''}">
                             <input type="radio" name="sb-q-${question.id}" value="${val}"
                                    ${response === val ? 'checked' : ''}
                                    onchange="sbSetPreviewResponse('${question.id}', ${val})">
+                            <span class="sb-preview-rating-circle">${val}</span>
+                            <span class="sb-preview-rating-text">${labels[i] || val}</span>
                         </label>
                     `).join('')}
                 </div>
-                <span class="sb-preview-rating-label">${sbCurrentSurvey.ratingScale.labels[sbCurrentSurvey.ratingScale.labels.length - 1]}</span>
             </div>
         `;
     } else if (question.type === 'single') {
