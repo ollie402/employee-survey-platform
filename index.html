@@ -2178,16 +2178,16 @@
         }
 
         /* ============================================
-           QUESTION BANK - SIDEBAR OVERLAY STYLES
+           QUESTION BANK - FLOATING PANEL STYLES
            ============================================ */
 
-        /* Overlay that appears over the left sidebar/pages panel */
+        /* Floating panel that appears in the gap between sidebar and main area */
         .sb-question-bank-overlay {
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            top: 16px;
+            left: 168px;  /* 160px sidebar + 8px gap */
+            width: 240px;
+            max-height: calc(100vh - 280px);
             background: white;
             z-index: 100;
             display: none;
@@ -2195,6 +2195,7 @@
             border-radius: 8px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
             overflow: hidden;
+            border: 1px solid #e0e0e0;
         }
 
         .sb-question-bank-overlay.active {
@@ -15092,19 +15093,16 @@ function sbHandleQuestionInput(inputElement, qIndex) {
 async function sbShowAutocomplete(inputElement, pageIndex, questionIndex) {
     const searchText = inputElement.value;
 
-    // Find the left sidebar/pages panel to overlay
-    const sidebar = document.querySelector('.sb-page-sidebar') ||
-                    document.querySelector('.sb-pages-panel') ||
-                    document.querySelector('.sb-sidebar') ||
-                    document.getElementById('sb-page-sidebar');
+    // Find the builder content container (parent of sidebar and main area)
+    const builderContent = document.querySelector('.sb-builder-content');
 
-    if (!sidebar) {
-        console.error('Could not find sidebar for question bank overlay');
+    if (!builderContent) {
+        console.error('Could not find builder content for question bank overlay');
         return;
     }
 
-    // Ensure sidebar has relative positioning for the overlay
-    sidebar.style.position = 'relative';
+    // Ensure builder content has relative positioning for the overlay
+    builderContent.style.position = 'relative';
 
     // Get or create the overlay
     let overlay = document.getElementById('sb-question-bank-overlay');
@@ -15112,7 +15110,7 @@ async function sbShowAutocomplete(inputElement, pageIndex, questionIndex) {
         overlay = document.createElement('div');
         overlay.id = 'sb-question-bank-overlay';
         overlay.className = 'sb-question-bank-overlay';
-        sidebar.appendChild(overlay);
+        builderContent.appendChild(overlay);
     }
 
     // Store current context for selection
