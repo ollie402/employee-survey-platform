@@ -15241,17 +15241,32 @@ function sbHideAutocomplete(pageIndex, questionIndex) {
  * Select a question from the bank overlay
  */
 function sbSelectFromBank(resultIndex) {
+    console.log('sbSelectFromBank called with index:', resultIndex);
+
     const overlay = document.getElementById('sb-question-bank-overlay');
-    if (!overlay) return;
+    if (!overlay) {
+        console.error('Overlay not found');
+        return;
+    }
 
     const pageIndex = parseInt(overlay.dataset.pageIndex);
     const questionIndex = parseInt(overlay.dataset.questionIndex);
     const results = JSON.parse(overlay.dataset.results || '[]');
     const selected = results[resultIndex];
 
-    if (!selected) return;
+    console.log('Selection context:', { pageIndex, questionIndex, selected });
+
+    if (!selected) {
+        console.error('No selection found at index', resultIndex);
+        return;
+    }
 
     // Get the current question in the survey
+    if (!sbCurrentSurvey || !sbCurrentSurvey.pages[pageIndex] || !sbCurrentSurvey.pages[pageIndex].questions[questionIndex]) {
+        console.error('Could not find question at', pageIndex, questionIndex);
+        return;
+    }
+
     const question = sbCurrentSurvey.pages[pageIndex].questions[questionIndex];
 
     // Update question text
@@ -15260,12 +15275,9 @@ function sbSelectFromBank(resultIndex) {
     // Update question type
     question.type = selected.question_type;
 
-    // Update options if applicable
+    // Update options if applicable - options are stored as simple strings
     if (selected.options && selected.options.length > 0) {
-        question.options = selected.options.map((opt, i) => ({
-            id: `opt-${Date.now()}-${i}`,
-            text: opt.text
-        }));
+        question.options = selected.options.map(opt => opt.text || opt);
     }
 
     // Update rating settings if applicable
@@ -15275,6 +15287,8 @@ function sbSelectFromBank(resultIndex) {
         question.minLabel = selected.rating_min_label || '';
         question.maxLabel = selected.rating_max_label || '';
     }
+
+    console.log('Question updated:', question);
 
     // Hide overlay
     sbHideQuestionBankOverlay();
