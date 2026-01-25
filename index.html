@@ -2592,6 +2592,35 @@
             display: block;
         }
 
+        .survey-builder-container .sb-rating-point-label-input {
+            width: 100%;
+            padding: 4px 6px;
+            font-size: 0.7rem;
+            border: 1px solid #e0e0e0;
+            border-radius: 3px;
+            background: #fafafa;
+            color: #555;
+            text-align: center;
+            line-height: 1.2;
+            transition: border-color 0.2s, background 0.2s;
+        }
+
+        .survey-builder-container .sb-rating-point-label-input:hover {
+            border-color: #c0c0c0;
+            background: white;
+        }
+
+        .survey-builder-container .sb-rating-point-label-input:focus {
+            outline: none;
+            border-color: #7c3aed;
+            background: white;
+            box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.1);
+        }
+
+        .survey-builder-container .sb-rating-point-label-input::placeholder {
+            color: #aaa;
+        }
+
         /* Question Footer */
         .survey-builder-container .sb-question-footer {
             display: flex;
@@ -14416,7 +14445,7 @@ function sbRenderQuestionCard(question, qIndex) {
                 </select>
             </div>
             <div class="sb-rating-labels-preview">
-                ${sbGenerateRatingLabelsPreview(question)}
+                ${sbGenerateRatingLabelsPreview(question, qIndex)}
             </div>
         </div>
     ` : '';
@@ -14554,12 +14583,28 @@ function sbChangeQuestionType(qIndex, type) {
 }
 
 /**
- * Update a question's rating scale
+ * Update a question's rating scale, preserving custom labels where possible
  */
 function sbUpdateQuestionRatingScale(qIndex, scale) {
     const question = sbCurrentSurvey.pages[sbCurrentPageIndex].questions[qIndex];
+    const oldScale = question.ratingScale || 5;
+    const oldLabels = question.ratingLabels || [];
+    const defaultLabels = sbGetDefaultRatingLabels(scale);
+
+    // Build new labels array, preserving custom labels for existing points
+    const newLabels = [];
+    for (let i = 0; i < scale; i++) {
+        if (i < oldLabels.length && oldLabels[i]) {
+            // Preserve existing custom label
+            newLabels[i] = oldLabels[i];
+        } else {
+            // Use default for new points
+            newLabels[i] = defaultLabels[i] || (i + 1).toString();
+        }
+    }
+
     question.ratingScale = scale;
-    question.ratingLabels = sbGetDefaultRatingLabels(scale);
+    question.ratingLabels = newLabels;
     sbRenderBuilder();
 }
 
@@ -14579,9 +14624,9 @@ function sbGetDefaultRatingLabels(scale) {
 }
 
 /**
- * Generate HTML preview of rating labels for the builder
+ * Generate HTML preview of rating labels for the builder with editable inputs
  */
-function sbGenerateRatingLabelsPreview(question) {
+function sbGenerateRatingLabelsPreview(question, qIndex) {
     const scale = question.ratingScale || 5;
     const labels = question.ratingLabels || sbGetDefaultRatingLabels(scale);
 
@@ -14591,11 +14636,28 @@ function sbGenerateRatingLabelsPreview(question) {
         html += `
             <div class="sb-rating-point-preview">
                 <span class="sb-rating-point-number">${i + 1}</span>
-                <span class="sb-rating-point-label">${label}</span>
+                <input
+                    type="text"
+                    class="sb-rating-point-label-input"
+                    value="${label}"
+                    placeholder="Label..."
+                    onchange="sbUpdateRatingLabel(${qIndex}, ${i}, this.value)"
+                >
             </div>
         `;
     }
     return html;
+}
+
+/**
+ * Update a single rating label for a question
+ */
+function sbUpdateRatingLabel(qIndex, pointIndex, value) {
+    const question = sbCurrentSurvey.pages[sbCurrentPageIndex].questions[qIndex];
+    if (!question.ratingLabels) {
+        question.ratingLabels = sbGetDefaultRatingLabels(question.ratingScale || 5);
+    }
+    question.ratingLabels[pointIndex] = value;
 }
 
 function sbAddOption(qIndex) {
