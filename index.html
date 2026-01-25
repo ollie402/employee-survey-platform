@@ -2167,6 +2167,236 @@
             flex: 1;
         }
 
+        /* ============================================
+           QUESTION BANK AUTOCOMPLETE STYLES
+           ============================================ */
+
+        /* Autocomplete container - positioned relative to question input */
+        .survey-builder-container .sb-question-input-wrapper {
+            position: relative;
+            width: 100%;
+        }
+
+        /* ============================================
+           QUESTION BANK - FLOATING PANEL STYLES
+           ============================================ */
+
+        /* Floating panel that appears in the gap between sidebar and main area */
+        .sb-question-bank-overlay {
+            position: absolute;
+            top: 16px;
+            left: 168px;  /* 160px sidebar + 8px gap */
+            width: 240px;
+            max-height: calc(100vh - 280px);
+            background: white;
+            z-index: 100;
+            display: none;
+            flex-direction: column;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            border: 1px solid #e0e0e0;
+        }
+
+        .sb-question-bank-overlay.active {
+            display: flex;
+        }
+
+        /* Overlay header */
+        .sb-question-bank-header {
+            padding: 0.75rem 1rem;
+            background: linear-gradient(135deg, #7c3aed, #6d28d9);
+            color: white;
+            font-weight: 600;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+
+        .sb-question-bank-header-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .sb-question-bank-header svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .sb-question-bank-close {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        .sb-question-bank-close:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Search info bar */
+        .sb-question-bank-search-info {
+            padding: 0.5rem 1rem;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 0.75rem;
+            color: #666;
+            flex-shrink: 0;
+        }
+
+        .sb-question-bank-search-info strong {
+            color: #7c3aed;
+        }
+
+        /* Scrollable suggestions list */
+        .sb-question-bank-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0.5rem;
+        }
+
+        /* Individual suggestion item */
+        .sb-question-bank-item {
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            background: #f8f9fa;
+            border: 1px solid #e8e8e8;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .sb-question-bank-item:hover {
+            background: #f3e8ff;
+            border-color: #c4b5fd;
+        }
+
+        .sb-question-bank-item.selected {
+            background: #ede9fe;
+            border-color: #7c3aed;
+        }
+
+        /* Question text */
+        .sb-question-bank-item-text {
+            font-size: 0.85rem;
+            color: #333;
+            line-height: 1.4;
+            margin-bottom: 0.4rem;
+            word-break: break-word;
+        }
+
+        .sb-question-bank-item-text mark {
+            background: #fef08a;
+            color: inherit;
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+
+        /* Question meta (type badge + use count) */
+        .sb-question-bank-item-meta {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .sb-question-bank-item-type {
+            font-size: 0.7rem;
+            padding: 0.15rem 0.5rem;
+            border-radius: 4px;
+            font-weight: 500;
+            text-transform: capitalize;
+        }
+
+        .sb-question-bank-item-type.multiple-choice,
+        .sb-question-bank-item-type.single-choice,
+        .sb-question-bank-item-type.checkboxes {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .sb-question-bank-item-type.rating,
+        .sb-question-bank-item-type.linear-scale {
+            background: #fef3c7;
+            color: #b45309;
+        }
+
+        .sb-question-bank-item-type.text,
+        .sb-question-bank-item-type.long-text {
+            background: #d1fae5;
+            color: #047857;
+        }
+
+        .sb-question-bank-item-type.dropdown {
+            background: #ede9fe;
+            color: #6d28d9;
+        }
+
+        .sb-question-bank-item-uses {
+            font-size: 0.7rem;
+            color: #999;
+        }
+
+        /* Options preview */
+        .sb-question-bank-item-options {
+            margin-top: 0.35rem;
+            font-size: 0.7rem;
+            color: #888;
+            font-style: italic;
+        }
+
+        /* Empty state */
+        .sb-question-bank-empty {
+            padding: 2rem 1rem;
+            text-align: center;
+            color: #888;
+        }
+
+        .sb-question-bank-empty svg {
+            width: 40px;
+            height: 40px;
+            margin-bottom: 0.75rem;
+            opacity: 0.4;
+        }
+
+        .sb-question-bank-empty p {
+            font-size: 0.85rem;
+            margin: 0;
+        }
+
+        /* Loading state */
+        .sb-question-bank-loading {
+            padding: 2rem 1rem;
+            text-align: center;
+            color: #888;
+            font-size: 0.85rem;
+        }
+
+        /* Results count */
+        .sb-question-bank-count {
+            padding: 0.5rem 1rem;
+            background: #f0f0f0;
+            font-size: 0.75rem;
+            color: #666;
+            text-align: center;
+            flex-shrink: 0;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        @keyframes sb-spin {
+            to { transform: rotate(360deg); }
+        }
+
         /* Question Type Selector */
         .survey-builder-container .sb-question-type-selector {
             position: relative;
@@ -2291,41 +2521,104 @@
             padding-bottom: 4px;
         }
 
-        /* Rating Scale Preview */
-        .survey-builder-container .sb-rating-preview {
-            margin-top: 24px;
+        /* Rating Scale Options in Question Card */
+        .survey-builder-container .sb-rating-options {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e8e8e8;
+        }
+
+        .survey-builder-container .sb-rating-scale-row {
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
         }
 
-        .survey-builder-container .sb-rating-label {
-            font-size: 14px;
-            color: var(--sb-text-secondary);
+        .survey-builder-container .sb-rating-scale-label {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #555;
+            min-width: 45px;
         }
 
-        .survey-builder-container .sb-rating-points {
+        .survey-builder-container .sb-rating-scale-select {
+            padding: 0.4rem 0.75rem;
+            border: 1px solid #d0d0d0;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            background: white;
+            cursor: pointer;
+        }
+
+        .survey-builder-container .sb-rating-scale-select:focus {
+            outline: none;
+            border-color: #7c3aed;
+        }
+
+        /* Rating labels preview */
+        .survey-builder-container .sb-rating-labels-preview {
             display: flex;
-            gap: 24px;
+            justify-content: space-between;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
         }
 
-        .survey-builder-container .sb-rating-point {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
+        .survey-builder-container .sb-rating-point-preview {
+            flex: 1;
+            text-align: center;
+            padding: 0.5rem 0.25rem;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            min-width: 0;
         }
 
-        .survey-builder-container .sb-rating-point-value {
-            font-size: 12px;
-            color: var(--sb-text-secondary);
+        .survey-builder-container .sb-rating-point-number {
+            font-weight: 600;
+            color: #7c3aed;
+            font-size: 0.9rem;
+            display: block;
+            margin-bottom: 0.25rem;
         }
 
-        .survey-builder-container .sb-rating-point-circle {
-            width: 20px;
-            height: 20px;
-            border: 2px solid var(--sb-text-secondary);
-            border-radius: 50%;
+        .survey-builder-container .sb-rating-point-label {
+            color: #666;
+            word-break: break-word;
+            line-height: 1.2;
+            display: block;
+        }
+
+        .survey-builder-container .sb-rating-point-label-input {
+            width: 100%;
+            padding: 4px 6px;
+            font-size: 0.7rem;
+            border: 1px solid #e0e0e0;
+            border-radius: 3px;
+            background: #fafafa;
+            color: #555;
+            text-align: center;
+            line-height: 1.2;
+            transition: border-color 0.2s, background 0.2s;
+        }
+
+        .survey-builder-container .sb-rating-point-label-input:hover {
+            border-color: #c0c0c0;
+            background: white;
+        }
+
+        .survey-builder-container .sb-rating-point-label-input:focus {
+            outline: none;
+            border-color: #7c3aed;
+            background: white;
+            box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.1);
+        }
+
+        .survey-builder-container .sb-rating-point-label-input::placeholder {
+            color: #aaa;
         }
 
         /* Question Footer */
@@ -2807,40 +3100,103 @@
             margin-left: 4px;
         }
 
-        .survey-builder-container .sb-preview-rating {
+        /* Survey Taker - Rating Question with Labels */
+        .survey-builder-container .sb-preview-rating-container {
+            margin-top: 1rem;
+        }
+
+        .survey-builder-container .sb-preview-rating-scale {
             display: flex;
-            align-items: center;
-            gap: 16px;
+            justify-content: space-between;
+            gap: 0.5rem;
             flex-wrap: wrap;
         }
 
-        .survey-builder-container .sb-preview-rating-label {
-            font-size: 14px;
-            color: var(--sb-text-secondary);
-        }
-
-        .survey-builder-container .sb-preview-rating-points {
-            display: flex;
-            gap: 24px;
-        }
-
-        .survey-builder-container .sb-preview-rating-point {
+        .survey-builder-container .sb-preview-rating-option {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 8px;
             cursor: pointer;
+            flex: 1;
+            min-width: 60px;
+            max-width: 100px;
+            text-align: center;
+            padding: 0.5rem;
+            border-radius: 8px;
+            transition: background 0.2s;
         }
 
-        .survey-builder-container .sb-preview-rating-point-value {
-            font-size: 12px;
-            color: var(--sb-text-secondary);
+        .survey-builder-container .sb-preview-rating-option:hover {
+            background: var(--sb-primary-light, #f3e8ff);
         }
 
-        .survey-builder-container .sb-preview-rating-point input {
-            width: 20px;
-            height: 20px;
-            accent-color: var(--sb-primary);
+        .survey-builder-container .sb-preview-rating-option input[type="radio"] {
+            display: none;
+        }
+
+        .survey-builder-container .sb-preview-rating-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid #d0d0d0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 1rem;
+            color: #666;
+            transition: all 0.2s;
+            background: white;
+        }
+
+        .survey-builder-container .sb-preview-rating-option:hover .sb-preview-rating-circle {
+            border-color: var(--sb-primary, #7c3aed);
+            color: var(--sb-primary, #7c3aed);
+        }
+
+        .survey-builder-container .sb-preview-rating-option input:checked + .sb-preview-rating-circle {
+            background: var(--sb-primary, #7c3aed);
+            border-color: var(--sb-primary, #7c3aed);
+            color: white;
+        }
+
+        .survey-builder-container .sb-preview-rating-text {
+            margin-top: 0.5rem;
+            font-size: 0.75rem;
+            color: #666;
+            line-height: 1.3;
+            word-break: break-word;
+        }
+
+        .survey-builder-container .sb-preview-rating-option:hover .sb-preview-rating-text {
+            color: var(--sb-primary, #7c3aed);
+        }
+
+        .survey-builder-container .sb-preview-rating-option input:checked ~ .sb-preview-rating-text {
+            color: var(--sb-primary, #7c3aed);
+            font-weight: 500;
+        }
+
+        /* Responsive - adjust for smaller screens */
+        @media (max-width: 600px) {
+            .survey-builder-container .sb-preview-rating-scale {
+                justify-content: center;
+            }
+
+            .survey-builder-container .sb-preview-rating-option {
+                min-width: 50px;
+                margin-bottom: 0.5rem;
+            }
+
+            .survey-builder-container .sb-preview-rating-circle {
+                width: 36px;
+                height: 36px;
+                font-size: 0.9rem;
+            }
+
+            .survey-builder-container .sb-preview-rating-text {
+                font-size: 0.7rem;
+            }
         }
 
         .survey-builder-container .sb-preview-options {
@@ -11491,7 +11847,7 @@ function sbCreateDefaultSurvey() {
 }
 
 function sbCreateDefaultQuestion(type) {
-    return {
+    const question = {
         id: sbGenerateId(),
         type,
         text: '',
@@ -11499,6 +11855,14 @@ function sbCreateDefaultQuestion(type) {
         options: type === 'single' || type === 'multi' ? ['Option 1'] : undefined,
         logic: []
     };
+
+    // Initialize rating settings if rating type
+    if (type === 'rating') {
+        question.ratingScale = 5;
+        question.ratingLabels = sbGetDefaultRatingLabels(5);
+    }
+
+    return question;
 }
 
 function sbApplyTheme(colorName) {
@@ -14068,17 +14432,21 @@ function sbRenderQuestionCard(question, qIndex) {
     ` : '';
 
     const ratingHtml = question.type === 'rating' ? `
-        <div class="sb-rating-preview">
-            <span class="sb-rating-label">${sbCurrentSurvey.ratingScale.labels[0]}</span>
-            <div class="sb-rating-points">
-                ${sbCurrentSurvey.ratingScale.values.map(val => `
-                    <div class="sb-rating-point">
-                        <span class="sb-rating-point-value">${val}</span>
-                        <div class="sb-rating-point-circle"></div>
-                    </div>
-                `).join('')}
+        <div class="sb-rating-options">
+            <div class="sb-rating-scale-row">
+                <label class="sb-rating-scale-label">Scale:</label>
+                <select class="sb-rating-scale-select" onchange="sbUpdateQuestionRatingScale(${qIndex}, parseInt(this.value))">
+                    <option value="3" ${question.ratingScale === 3 ? 'selected' : ''}>3 points</option>
+                    <option value="4" ${question.ratingScale === 4 ? 'selected' : ''}>4 points</option>
+                    <option value="5" ${question.ratingScale === 5 ? 'selected' : ''}>5 points</option>
+                    <option value="6" ${question.ratingScale === 6 ? 'selected' : ''}>6 points</option>
+                    <option value="7" ${question.ratingScale === 7 ? 'selected' : ''}>7 points</option>
+                    <option value="10" ${question.ratingScale === 10 ? 'selected' : ''}>10 points</option>
+                </select>
             </div>
-            <span class="sb-rating-label">${sbCurrentSurvey.ratingScale.labels[sbCurrentSurvey.ratingScale.labels.length - 1]}</span>
+            <div class="sb-rating-labels-preview">
+                ${sbGenerateRatingLabelsPreview(question, qIndex)}
+            </div>
         </div>
     ` : '';
 
@@ -14102,8 +14470,11 @@ function sbRenderQuestionCard(question, qIndex) {
             </div>
             <div class="sb-question-body">
                 <div class="sb-question-header">
-                    <div class="sb-question-text-input">
-                        <input type="text" class="sb-input sb-input-lg" value="${question.text}" placeholder="Question" onchange="sbUpdateQuestionText(${qIndex}, this.value)">
+                    <div class="sb-question-text-input sb-question-input-wrapper">
+                        <input type="text" class="sb-input sb-input-lg" value="${question.text}" placeholder="Question"
+                            oninput="sbHandleQuestionInput(this, ${qIndex})"
+                            onkeydown="sbAutocompleteKeydown(event, ${qIndex})"
+                            onblur="sbHideAutocomplete(sbCurrentPageIndex, ${qIndex})">
                     </div>
                     <div class="sb-question-type-selector">
                         <button class="sb-question-type-btn" onclick="sbToggleTypeDropdown(${qIndex})">
@@ -14203,7 +14574,90 @@ function sbChangeQuestionType(qIndex, type) {
     if (type === 'single' || type === 'multi') {
         if (!question.options) question.options = ['Option 1'];
     }
+    // Initialize rating settings when switching to rating type
+    if (type === 'rating') {
+        if (!question.ratingScale) question.ratingScale = 5;
+        if (!question.ratingLabels) question.ratingLabels = sbGetDefaultRatingLabels(question.ratingScale);
+    }
     sbRenderBuilder();
+}
+
+/**
+ * Update a question's rating scale, preserving custom labels where possible
+ */
+function sbUpdateQuestionRatingScale(qIndex, scale) {
+    const question = sbCurrentSurvey.pages[sbCurrentPageIndex].questions[qIndex];
+    const oldScale = question.ratingScale || 5;
+    const oldLabels = question.ratingLabels || [];
+    const defaultLabels = sbGetDefaultRatingLabels(scale);
+
+    // Build new labels array, preserving custom labels for existing points
+    const newLabels = [];
+    for (let i = 0; i < scale; i++) {
+        if (i < oldLabels.length && oldLabels[i]) {
+            // Preserve existing custom label
+            newLabels[i] = oldLabels[i];
+        } else {
+            // Use default for new points
+            newLabels[i] = defaultLabels[i] || (i + 1).toString();
+        }
+    }
+
+    question.ratingScale = scale;
+    question.ratingLabels = newLabels;
+    sbRenderBuilder();
+}
+
+/**
+ * Get default rating labels based on scale size
+ */
+function sbGetDefaultRatingLabels(scale) {
+    const defaultLabels = {
+        3: ['Disagree', 'Neutral', 'Agree'],
+        4: ['Strongly Disagree', 'Disagree', 'Agree', 'Strongly Agree'],
+        5: ['Strongly Disagree', 'Disagree', 'Neutral', 'Agree', 'Strongly Agree'],
+        6: ['Strongly Disagree', 'Disagree', 'Slightly Disagree', 'Slightly Agree', 'Agree', 'Strongly Agree'],
+        7: ['Strongly Disagree', 'Disagree', 'Somewhat Disagree', 'Neutral', 'Somewhat Agree', 'Agree', 'Strongly Agree'],
+        10: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']
+    };
+    return defaultLabels[scale] || defaultLabels[5];
+}
+
+/**
+ * Generate HTML preview of rating labels for the builder with editable inputs
+ */
+function sbGenerateRatingLabelsPreview(question, qIndex) {
+    const scale = question.ratingScale || 5;
+    const labels = question.ratingLabels || sbGetDefaultRatingLabels(scale);
+
+    let html = '';
+    for (let i = 0; i < scale; i++) {
+        const label = labels[i] || (i + 1).toString();
+        html += `
+            <div class="sb-rating-point-preview">
+                <span class="sb-rating-point-number">${i + 1}</span>
+                <input
+                    type="text"
+                    class="sb-rating-point-label-input"
+                    value="${label}"
+                    placeholder="Label..."
+                    onchange="sbUpdateRatingLabel(${qIndex}, ${i}, this.value)"
+                >
+            </div>
+        `;
+    }
+    return html;
+}
+
+/**
+ * Update a single rating label for a question
+ */
+function sbUpdateRatingLabel(qIndex, pointIndex, value) {
+    const question = sbCurrentSurvey.pages[sbCurrentPageIndex].questions[qIndex];
+    if (!question.ratingLabels) {
+        question.ratingLabels = sbGetDefaultRatingLabels(question.ratingScale || 5);
+    }
+    question.ratingLabels[pointIndex] = value;
 }
 
 function sbAddOption(qIndex) {
@@ -14639,6 +15093,559 @@ function sbUpdateQuestionLogicButtonState(pageIndex, qIndex) {
     }
 }
 
+/* ============================================
+   QUESTION BANK FUNCTIONS
+   ============================================ */
+
+// Cache for autocomplete results to reduce API calls
+let sbQuestionBankCache = [];
+let sbQuestionBankLastFetch = null;
+const SB_CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+// Debounce timer for autocomplete
+let sbAutocompleteDebounceTimer = null;
+
+// Currently selected autocomplete index (for keyboard navigation)
+let sbAutocompleteSelectedIndex = -1;
+
+/**
+ * Fetch user's question bank from database
+ * Returns cached results if available and fresh
+ */
+async function sbFetchQuestionBank(forceRefresh = false) {
+    // Return cached data if still fresh
+    if (!forceRefresh && sbQuestionBankCache.length > 0 && sbQuestionBankLastFetch) {
+        const age = Date.now() - sbQuestionBankLastFetch;
+        if (age < SB_CACHE_DURATION) {
+            return sbQuestionBankCache;
+        }
+    }
+
+    try {
+        const { data, error } = await window.supabaseClient
+            .from('question_bank')
+            .select('*')
+            .order('use_count', { ascending: false })
+            .order('last_used_at', { ascending: false })
+            .limit(500);
+
+        if (error) {
+            console.error('Error fetching question bank:', error);
+            return [];
+        }
+
+        sbQuestionBankCache = data || [];
+        sbQuestionBankLastFetch = Date.now();
+        return sbQuestionBankCache;
+
+    } catch (err) {
+        console.error('Failed to fetch question bank:', err);
+        return [];
+    }
+}
+
+/**
+ * Search question bank for matching questions
+ * @param {string} searchText - The text to search for
+ * @returns {Array} - Matching questions sorted by relevance
+ */
+async function sbSearchQuestionBank(searchText) {
+    if (!searchText || searchText.length < 2) {
+        return [];
+    }
+
+    const bank = await sbFetchQuestionBank();
+    const searchLower = searchText.toLowerCase().trim();
+    const searchWords = searchLower.split(/\s+/).filter(w => w.length > 1);
+
+    // Score and filter questions
+    const scored = bank.map(q => {
+        const textLower = q.question_text.toLowerCase();
+        let score = 0;
+
+        // Exact match at start gets highest score
+        if (textLower.startsWith(searchLower)) {
+            score += 100;
+        }
+        // Contains exact phrase
+        else if (textLower.includes(searchLower)) {
+            score += 50;
+        }
+
+        // Score individual word matches
+        searchWords.forEach(word => {
+            if (textLower.includes(word)) {
+                score += 10;
+                // Bonus if word is at start of question
+                if (textLower.startsWith(word)) {
+                    score += 5;
+                }
+            }
+        });
+
+        // Boost frequently used questions slightly
+        score += Math.min(q.use_count, 10);
+
+        return { ...q, score };
+    });
+
+    // Filter out zero scores and sort by score descending
+    return scored
+        .filter(q => q.score > 0)
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 8); // Limit to 8 suggestions
+}
+
+/**
+ * Save questions to the question bank when survey is published
+ * @param {Object} survey - The survey object with pages and questions
+ */
+async function sbSaveQuestionsToBank(survey) {
+    if (!survey || !survey.pages) return;
+
+    const questionsToSave = [];
+
+    survey.pages.forEach(page => {
+        if (!page.questions) return;
+
+        page.questions.forEach(q => {
+            // Skip if no question text
+            if (!q.text || q.text.trim() === '' || q.text === 'Question') return;
+
+            const questionData = {
+                question_text: q.text.trim(),
+                question_type: q.type || 'single',
+                options: [],
+                rating_min: null,
+                rating_max: null,
+                rating_min_label: null,
+                rating_max_label: null
+            };
+
+            // Save options for multiple choice / dropdown
+            if (['single', 'multi'].includes(q.type)) {
+                if (q.options && q.options.length > 0) {
+                    questionData.options = q.options
+                        .filter(opt => opt && opt.trim() !== '' && opt !== 'Option')
+                        .map(opt => ({ text: opt }));
+                }
+            }
+
+            // Save rating scale settings - use per-question ratingScale and ratingLabels
+            if (q.type === 'rating') {
+                const scale = q.ratingScale || 5;
+                const labels = q.ratingLabels || sbGetDefaultRatingLabels(scale);
+                questionData.rating_min = 1;
+                questionData.rating_max = scale;
+                questionData.rating_min_label = labels[0] || '';
+                questionData.rating_max_label = labels[labels.length - 1] || '';
+                // Store full labels as JSON string for complete restoration
+                questionData.rating_labels_json = JSON.stringify(labels);
+            }
+
+            questionsToSave.push(questionData);
+        });
+    });
+
+    if (questionsToSave.length === 0) return;
+
+    // Upsert each question (insert or update use_count if exists)
+    for (const q of questionsToSave) {
+        try {
+            // First try to find existing
+            const { data: existing } = await window.supabaseClient
+                .from('question_bank')
+                .select('id, use_count')
+                .eq('question_text', q.question_text)
+                .eq('question_type', q.question_type)
+                .single();
+
+            if (existing) {
+                // Update use count and last used
+                await window.supabaseClient
+                    .from('question_bank')
+                    .update({
+                        use_count: existing.use_count + 1,
+                        last_used_at: new Date().toISOString(),
+                        options: q.options,
+                        rating_min: q.rating_min,
+                        rating_max: q.rating_max,
+                        rating_min_label: q.rating_min_label,
+                        rating_max_label: q.rating_max_label
+                    })
+                    .eq('id', existing.id);
+            } else {
+                // Insert new question
+                const { data: userData } = await window.supabaseClient.auth.getUser();
+                if (userData?.user?.id) {
+                    await window.supabaseClient
+                        .from('question_bank')
+                        .insert({
+                            user_id: userData.user.id,
+                            ...q
+                        });
+                }
+            }
+        } catch (err) {
+            console.error('Error saving question to bank:', err);
+        }
+    }
+
+    // Refresh cache
+    await sbFetchQuestionBank(true);
+}
+
+/**
+ * Handle question input with debounce for autocomplete
+ */
+function sbHandleQuestionInput(inputElement, qIndex) {
+    // Update the question text in the survey object
+    sbCurrentSurvey.pages[sbCurrentPageIndex].questions[qIndex].text = inputElement.value;
+
+    // Debounce autocomplete search
+    clearTimeout(sbAutocompleteDebounceTimer);
+    sbAutocompleteDebounceTimer = setTimeout(() => {
+        sbShowAutocomplete(inputElement, sbCurrentPageIndex, qIndex);
+    }, 300); // 300ms delay
+}
+
+/**
+ * Show question bank overlay in the left sidebar
+ * @param {HTMLElement} inputElement - The question text input
+ * @param {number} pageIndex - Current page index
+ * @param {number} questionIndex - Current question index
+ */
+async function sbShowAutocomplete(inputElement, pageIndex, questionIndex) {
+    const searchText = inputElement.value;
+
+    // Find the builder content container (parent of sidebar and main area)
+    const builderContent = document.querySelector('.sb-builder-content');
+
+    if (!builderContent) {
+        console.error('Could not find builder content for question bank overlay');
+        return;
+    }
+
+    // Ensure builder content has relative positioning for the overlay
+    builderContent.style.position = 'relative';
+
+    // Get or create the overlay
+    let overlay = document.getElementById('sb-question-bank-overlay');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'sb-question-bank-overlay';
+        overlay.className = 'sb-question-bank-overlay';
+        builderContent.appendChild(overlay);
+    }
+
+    // Store current context for selection
+    overlay.dataset.pageIndex = pageIndex;
+    overlay.dataset.questionIndex = questionIndex;
+
+    // Hide if search text too short
+    if (!searchText || searchText.length < 2) {
+        overlay.classList.remove('active');
+        return;
+    }
+
+    // Show with loading state
+    overlay.innerHTML = `
+        <div class="sb-question-bank-header">
+            <div class="sb-question-bank-header-title">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                Question Bank
+            </div>
+            <button class="sb-question-bank-close" onclick="sbHideQuestionBankOverlay()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 6L6 18M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+        <div class="sb-question-bank-search-info">
+            Searching for: <strong>"${searchText}"</strong>
+        </div>
+        <div class="sb-question-bank-loading">Searching your questions...</div>
+    `;
+    overlay.classList.add('active');
+
+    // Search question bank
+    const results = await sbSearchQuestionBank(searchText);
+
+    // Build results HTML
+    let listHTML = '';
+
+    if (results.length === 0) {
+        listHTML = `
+            <div class="sb-question-bank-empty">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"/>
+                    <path d="M21 21l-4.35-4.35"/>
+                </svg>
+                <p>No matching questions found</p>
+            </div>
+        `;
+    } else {
+        results.forEach((q, index) => {
+            const highlightedText = sbHighlightMatch(q.question_text, searchText);
+            const typeClass = q.question_type.replace(/\s+/g, '-').toLowerCase();
+            const typeDisplay = q.question_type.replace(/-/g, ' ');
+
+            // Options preview
+            let optionsHTML = '';
+            if (q.options && q.options.length > 0) {
+                const optionTexts = q.options.slice(0, 3).map(o => o.text).join(', ');
+                const more = q.options.length > 3 ? ` +${q.options.length - 3} more` : '';
+                optionsHTML = `<div class="sb-question-bank-item-options">Options: ${optionTexts}${more}</div>`;
+            }
+
+            listHTML += `
+                <div class="sb-question-bank-item"
+                     data-index="${index}"
+                     onmousedown="sbSelectFromBank(${index}); event.preventDefault();">
+                    <div class="sb-question-bank-item-text">${highlightedText}</div>
+                    <div class="sb-question-bank-item-meta">
+                        <span class="sb-question-bank-item-type ${typeClass}">${typeDisplay}</span>
+                        <span class="sb-question-bank-item-uses">Used ${q.use_count}×</span>
+                    </div>
+                    ${optionsHTML}
+                </div>
+            `;
+        });
+    }
+
+    // Update overlay content
+    overlay.innerHTML = `
+        <div class="sb-question-bank-header">
+            <div class="sb-question-bank-header-title">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                Question Bank
+            </div>
+            <button class="sb-question-bank-close" onclick="sbHideQuestionBankOverlay()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 6L6 18M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+        <div class="sb-question-bank-search-info">
+            Searching for: <strong>"${searchText}"</strong>
+        </div>
+        <div class="sb-question-bank-list">
+            ${listHTML}
+        </div>
+        ${results.length > 0 ? `<div class="sb-question-bank-count">${results.length} suggestion${results.length !== 1 ? 's' : ''}</div>` : ''}
+    `;
+
+    // Store results for keyboard navigation / selection
+    overlay.dataset.results = JSON.stringify(results);
+    sbAutocompleteSelectedIndex = -1;
+}
+
+/**
+ * Hide the question bank overlay
+ */
+function sbHideQuestionBankOverlay() {
+    const overlay = document.getElementById('sb-question-bank-overlay');
+    if (overlay) {
+        overlay.classList.remove('active');
+    }
+    sbAutocompleteSelectedIndex = -1;
+}
+
+/**
+ * Legacy function for backwards compatibility - called from onblur
+ * Uses setTimeout to allow mousedown events to fire first
+ */
+function sbHideAutocomplete(pageIndex, questionIndex) {
+    setTimeout(() => {
+        sbHideQuestionBankOverlay();
+    }, 200);
+}
+
+/**
+ * Select a question from the bank overlay
+ */
+function sbSelectFromBank(resultIndex) {
+    console.log('sbSelectFromBank called with index:', resultIndex);
+
+    const overlay = document.getElementById('sb-question-bank-overlay');
+    if (!overlay) {
+        console.error('Overlay not found');
+        return;
+    }
+
+    const pageIndex = parseInt(overlay.dataset.pageIndex);
+    const questionIndex = parseInt(overlay.dataset.questionIndex);
+    const results = JSON.parse(overlay.dataset.results || '[]');
+    const selected = results[resultIndex];
+
+    console.log('Selection context:', { pageIndex, questionIndex, selected });
+
+    if (!selected) {
+        console.error('No selection found at index', resultIndex);
+        return;
+    }
+
+    // Get the current question in the survey
+    if (!sbCurrentSurvey || !sbCurrentSurvey.pages[pageIndex] || !sbCurrentSurvey.pages[pageIndex].questions[questionIndex]) {
+        console.error('Could not find question at', pageIndex, questionIndex);
+        return;
+    }
+
+    const question = sbCurrentSurvey.pages[pageIndex].questions[questionIndex];
+
+    // Update question text
+    question.text = selected.question_text;
+
+    // Update question type
+    question.type = selected.question_type;
+
+    // Update options if applicable - options are stored as simple strings
+    if (selected.options && selected.options.length > 0) {
+        question.options = selected.options.map(opt => opt.text || opt);
+    }
+
+    // Update rating settings if applicable - restore per-question ratingScale and ratingLabels
+    if (['rating', 'linear-scale'].includes(selected.question_type)) {
+        const scale = selected.rating_max || 5;
+        question.ratingScale = scale;
+
+        // Try to restore full labels from JSON, otherwise use defaults
+        if (selected.rating_labels_json) {
+            try {
+                question.ratingLabels = JSON.parse(selected.rating_labels_json);
+            } catch (e) {
+                question.ratingLabels = sbGetDefaultRatingLabels(scale);
+            }
+        } else {
+            question.ratingLabels = sbGetDefaultRatingLabels(scale);
+        }
+    }
+
+    console.log('Question updated:', question);
+
+    // Hide overlay
+    sbHideQuestionBankOverlay();
+
+    // Re-render the builder to show changes
+    sbRenderBuilder();
+
+    // Show success toast
+    sbShowToast('Question loaded from your bank');
+}
+
+/**
+ * Legacy function for backwards compatibility
+ */
+function sbSelectAutocomplete(pageIndex, questionIndex, resultIndex) {
+    sbSelectFromBank(resultIndex);
+}
+
+/**
+ * Highlight matching text in a string
+ */
+function sbHighlightMatch(text, search) {
+    if (!search) return text;
+
+    const escapedSearch = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(`(${escapedSearch})`, 'gi');
+    return text.replace(regex, '<mark>$1</mark>');
+}
+
+/**
+ * Handle keyboard navigation in question bank overlay
+ */
+function sbAutocompleteKeydown(event, qIndex) {
+    const overlay = document.getElementById('sb-question-bank-overlay');
+    if (!overlay || !overlay.classList.contains('active')) return;
+
+    const items = overlay.querySelectorAll('.sb-question-bank-item');
+    if (items.length === 0) return;
+
+    switch (event.key) {
+        case 'ArrowDown':
+            event.preventDefault();
+            sbAutocompleteSelectedIndex = Math.min(sbAutocompleteSelectedIndex + 1, items.length - 1);
+            sbUpdateBankSelection(items);
+            break;
+
+        case 'ArrowUp':
+            event.preventDefault();
+            sbAutocompleteSelectedIndex = Math.max(sbAutocompleteSelectedIndex - 1, 0);
+            sbUpdateBankSelection(items);
+            break;
+
+        case 'Enter':
+            if (sbAutocompleteSelectedIndex >= 0) {
+                event.preventDefault();
+                sbSelectFromBank(sbAutocompleteSelectedIndex);
+            }
+            break;
+
+        case 'Escape':
+            sbHideQuestionBankOverlay();
+            break;
+    }
+}
+
+/**
+ * Update visual selection in bank overlay
+ */
+function sbUpdateBankSelection(items) {
+    items.forEach((item, index) => {
+        if (index === sbAutocompleteSelectedIndex) {
+            item.classList.add('selected');
+            item.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        } else {
+            item.classList.remove('selected');
+        }
+    });
+}
+
+/**
+ * Legacy function for backwards compatibility
+ */
+function sbUpdateAutocompleteSelection(items) {
+    sbUpdateBankSelection(items);
+}
+
+/**
+ * Show a brief toast notification
+ */
+function sbShowToast(message) {
+    // Check if toast container exists
+    let toast = document.getElementById('sb-toast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'sb-toast';
+        toast.style.cssText = `
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            z-index: 9999;
+            opacity: 0;
+            transition: opacity 0.3s;
+        `;
+        document.body.appendChild(toast);
+    }
+
+    toast.textContent = message;
+    toast.style.opacity = '1';
+
+    setTimeout(() => {
+        toast.style.opacity = '0';
+    }, 2500);
+}
+
 // Settings
 function sbOpenSettings() {
     document.getElementById('sb-settings-panel').classList.remove('sb-hidden');
@@ -14750,7 +15757,7 @@ function sbInitSettingsListeners() {
 }
 
 // Save
-function sbSaveSurvey() {
+async function sbSaveSurvey() {
     const existingIndex = sbSurveys.findIndex(s => s.id === sbCurrentSurvey.id);
     if (existingIndex >= 0) {
         sbSurveys[existingIndex] = sbCurrentSurvey;
@@ -14759,6 +15766,15 @@ function sbSaveSurvey() {
     }
     sbSaveSurveys();
     sbRenderDashboard();
+
+    // Save questions to question bank for future autocomplete
+    try {
+        await sbSaveQuestionsToBank(sbCurrentSurvey);
+        console.log('Questions saved to bank');
+    } catch (err) {
+        console.error('Failed to save questions to bank:', err);
+        // Don't block save if bank save fails
+    }
 }
 
 // Link Modal
@@ -14946,20 +15962,24 @@ function sbRenderPreviewQuestion(question, qIndex, theme) {
     let inputHtml = '';
 
     if (question.type === 'rating') {
+        // Use per-question rating settings
+        const scale = question.ratingScale || 5;
+        const labels = question.ratingLabels || sbGetDefaultRatingLabels(scale);
+        const values = Array.from({ length: scale }, (_, i) => i + 1);
+
         inputHtml = `
-            <div class="sb-preview-rating">
-                <span class="sb-preview-rating-label">${sbCurrentSurvey.ratingScale.labels[0]}</span>
-                <div class="sb-preview-rating-points">
-                    ${sbCurrentSurvey.ratingScale.values.map(val => `
-                        <label class="sb-preview-rating-point">
-                            <span class="sb-preview-rating-point-value">${val}</span>
+            <div class="sb-preview-rating-container">
+                <div class="sb-preview-rating-scale">
+                    ${values.map((val, i) => `
+                        <label class="sb-preview-rating-option ${response === val ? 'selected' : ''}">
                             <input type="radio" name="sb-q-${question.id}" value="${val}"
                                    ${response === val ? 'checked' : ''}
                                    onchange="sbSetPreviewResponse('${question.id}', ${val})">
+                            <span class="sb-preview-rating-circle">${val}</span>
+                            <span class="sb-preview-rating-text">${labels[i] || val}</span>
                         </label>
                     `).join('')}
                 </div>
-                <span class="sb-preview-rating-label">${sbCurrentSurvey.ratingScale.labels[sbCurrentSurvey.ratingScale.labels.length - 1]}</span>
             </div>
         `;
     } else if (question.type === 'single') {
