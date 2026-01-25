@@ -4014,9 +4014,11 @@
                     <div class="nav-item" onclick="showSection('chat-feedback')">
                         <span data-translate="chat-feedback">Analytics</span>
                     </div>
+                    <!-- REMOVED: Chat Management nav item
                     <div class="nav-item" onclick="showSection('chat-management')">
                         <span data-translate="chat-management">Chat Management</span>
                     </div>
+                    -->
                     <div class="nav-item" onclick="showSection('survey-builder')">
                         <span>Survey Builder</span>
                     </div>
@@ -5130,7 +5132,7 @@ Thank you!</textarea>
                     </div>
                 </div>
 
-                <!-- Chat Management Section -->
+                <!-- REMOVED: Chat Management Section
                 <div id="chat-management-section" class="hidden">
                     <div class="card">
                         <div class="card-header">
@@ -5151,22 +5153,19 @@ Thank you!</textarea>
                                     <button class="btn btn-secondary btn-sm" onclick="loadActiveChatsList()" style="font-size: 0.75rem;">🔄 Refresh</button>
                                 </div>
                             </div>
-                            
-                            <!-- Empty state for now -->
+
                             <div style="text-align: center; padding: 3rem; color: var(--text-secondary);">
                                 <div style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;">💬</div>
                                 <h3 style="margin-bottom: 0.5rem;">No Active Chats</h3>
                                 <p style="margin-bottom: 2rem;">Active chat sessions will appear here when users start conversations.</p>
                                 <button class="btn btn-primary" onclick="createNewChatWidget()">Create Your First Chat Widget</button>
                             </div>
-                            
-                            <!-- This is where active chats will be listed when they exist -->
-                            <div id="active-chats-list" style="display: none;">
-                                <!-- Chat items will be dynamically added here -->
-                            </div>
+
+                            <div id="active-chats-list" style="display: none;"></div>
                         </div>
                     </div>
                 </div>
+                END REMOVED: Chat Management Section -->
 
                 <!-- Chat Reports Section -->
                 <div id="chat-reports-section" class="hidden">
@@ -6065,47 +6064,21 @@ function generateListeningChatLink(event) {
     // Save to database
     saveChatSession(chatData).then(() => {
         console.log('Listening chat saved to database');
-        // Refresh the active chats display
-        loadActiveChatsList();
+        // REMOVED: loadActiveChatsList() - Chat Management section removed
     }).catch(error => {
         console.error('Error saving listening chat:', error);
     });
-    
+
     // Close current modal (remove all modals to be safe)
     document.querySelectorAll('.modal').forEach(modal => modal.remove());
-    
+
     // Show success toast
     showToast(`Listening chat "${chatName}" created successfully!`, 'success');
 
-    // Add to chat management interface
-    addChatToManagement(chatData);
+    // REMOVED: addChatToManagement(chatData) - Chat Management section removed
 
-    // Check access type and handle accordingly
-    if (accessType === 'open') {
-        // For open access, show popup with link
-        showListeningLinkModal(chatData);
-    } else {
-        // For invite only, navigate to chat management section (existing behavior)
-        setTimeout(() => {
-            // Hide all sections first
-            document.querySelectorAll('[id$="-section"]').forEach(section => {
-                section.classList.add('hidden');
-            });
-
-            // Show chat management section
-            const chatMgmtSection = document.getElementById('chat-management-section');
-            if (chatMgmtSection) {
-                chatMgmtSection.classList.remove('hidden');
-            }
-
-            // Update navigation highlight
-            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-            const chatMgmtNavItem = document.querySelector('[onclick="showSection(\'chat-management\')"]');
-            if (chatMgmtNavItem) {
-                chatMgmtNavItem.classList.add('active');
-            }
-        }, 100);
-    }
+    // Show the link modal for both open and closed access types
+    showListeningLinkModal(chatData);
 }
 
 // Show modal with generated listening chat link
@@ -6313,8 +6286,7 @@ function generateGuidedChatLink(event) {
     // Save to database
     saveChatSession(chatData).then(() => {
         console.log('Guided chat saved to database');
-        // Refresh the active chats display
-        loadActiveChatsList();
+        // REMOVED: loadActiveChatsList() - Chat Management section removed
     }).catch(error => {
         console.error('Error saving guided chat:', error);
     });
@@ -6608,41 +6580,21 @@ function generatePulseLink(event) {
     // Save to database
     saveChatSession(chatData).then(() => {
         console.log('Pulse survey saved to database');
-        // Refresh the active chats display
-        loadActiveChatsList();
+        // REMOVED: loadActiveChatsList() - Chat Management section removed
     }).catch(error => {
         console.error('Error saving pulse survey:', error);
     });
-    
+
     // Close current modal (remove all modals to be safe)
     document.querySelectorAll('.modal').forEach(modal => modal.remove());
-    
+
     // Show success toast
     showToast(`Pulse survey "${surveyName}" created successfully!`, 'success');
-    
-    // Add to chat management interface
-    addChatToManagement(chatData);
-    
-    // Navigate to chat management section
-    setTimeout(() => {
-        // Hide all sections first
-        document.querySelectorAll('[id$="-section"]').forEach(section => {
-            section.classList.add('hidden');
-        });
-        
-        // Show chat management section
-        const chatMgmtSection = document.getElementById('chat-management-section');
-        if (chatMgmtSection) {
-            chatMgmtSection.classList.remove('hidden');
-        }
-        
-        // Update navigation highlight
-        document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-        const chatMgmtNavItem = document.querySelector('[onclick="showSection(\'chat-management\')"]');
-        if (chatMgmtNavItem) {
-            chatMgmtNavItem.classList.add('active');
-        }
-    }, 100);
+
+    // REMOVED: addChatToManagement(chatData) - Chat Management section removed
+
+    // Show the pulse link modal
+    showPulseLinkModal(chatData);
 }
 
 // Show modal with generated pulse survey link
@@ -8722,14 +8674,13 @@ document.addEventListener('DOMContentLoaded', function() {
     loadTemplates();
     loadOrganizationsData();
     loadUsersData();
-    
-    // Load active chats
-    loadActiveChatsList();
-    
-    // Initialize enhanced chat management features
-    if (window.location.hash === '#chat-management') {
-        showSection('chat-management');
-    }
+
+    // REMOVED: loadActiveChatsList() - Chat Management section removed
+
+    // REMOVED: Chat Management hash check
+    // if (window.location.hash === '#chat-management') {
+    //     showSection('chat-management');
+    // }
 });
 
 // Handle short URL redirects
@@ -8945,77 +8896,11 @@ async function deleteChatSession(sessionId) {
     }
 }
 
-// Function to add chat to management interface
+// REMOVED: Function to add chat to management interface - Chat Management section removed
+// Stub function to prevent errors if called
 function addChatToManagement(chatSessionData) {
-    const activeChatsList = document.getElementById('active-chats-list');
-    const emptyState = document.querySelector('#chat-management-section .card:nth-child(2) > div:not(#active-chats-list)');
-    
-    // Hide empty state and show the list
-    if (emptyState) {
-        emptyState.style.display = 'none';
-    }
-    activeChatsList.style.display = 'block';
-    
-    // Create chat item
-    const chatItem = document.createElement('div');
-    chatItem.className = 'chat-item';
-    chatItem.style.cssText = `
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 1rem;
-        border: 1px solid var(--border-color);
-        border-radius: 8px;
-        margin-bottom: 1rem;
-        background: var(--bg-primary);
-    `;
-    
-    const chatTypeBadge = chatSessionData.type === 'listening' ? 'Listening' : chatSessionData.type === 'pulse' ? 'Pulse' : 'Chat';
-    const welcomeMsg = chatSessionData.welcome || chatSessionData.welcomeMsg || 'No welcome message';
-    
-    chatItem.innerHTML = `
-        <div>
-            <h4 style="margin: 0 0 0.5rem 0;">${chatSessionData.name}</h4>
-            <p style="margin: 0; color: var(--text-secondary); font-size: 0.875rem;">${welcomeMsg}</p>
-            <div style="margin-top: 0.5rem;">
-                <span class="tag tag-active" style="font-size: 0.75rem;">Active</span>
-                <span class="tag" style="font-size: 0.75rem; margin-left: 0.5rem; background: var(--primary-color); color: white;">${chatTypeBadge}</span>
-                <span style="color: var(--text-secondary); font-size: 0.75rem; margin-left: 1rem;">
-                    Created: ${new Date().toLocaleDateString()}
-                </span>
-            </div>
-        </div>
-        <div style="display: flex; gap: 0.5rem; align-items: center;">
-            <div class="dropdown" style="position: relative;">
-                <button class="btn btn-secondary btn-sm" onclick="toggleChatDropdown(this, event)" style="border-radius: 4px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; padding: 0;" title="Chat Settings">
-                    ⚙️
-                </button>
-                <div class="dropdown-menu" style="display: none; position: absolute; top: 100%; right: 0; background: white; border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; min-width: 200px; padding: 8px 0;">
-                    <button class="dropdown-item" onclick="editChatSettings('${chatSessionData.id}')" style="width: 100%; text-align: left; padding: 0.75rem 1rem; border: none; background: none; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem;">
-                        <span style="width: 16px;">✏️</span> Edit Chat
-                    </button>
-                    <button class="dropdown-item" onclick="copyChatSession('${chatSessionData.id}')" style="width: 100%; text-align: left; padding: 0.75rem 1rem; border: none; background: none; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem;">
-                        <span style="width: 16px;">📄</span> Copy Chat
-                    </button>
-                    <button class="dropdown-item" onclick="exportPrintCopy('${chatSessionData.id}')" style="width: 100%; text-align: left; padding: 0.75rem 1rem; border: none; background: none; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem;">
-                        <span style="width: 16px;">📤</span> Export Print Copy
-                    </button>
-                    <button class="dropdown-item" onclick="downloadChatData('${chatSessionData.id}')" style="width: 100%; text-align: left; padding: 0.75rem 1rem; border: none; background: none; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem;">
-                        <span style="width: 16px;">💾</span> Download Chat Data
-                    </button>
-                    <button class="dropdown-item" onclick="manageRecipients('${chatSessionData.id}')" style="width: 100%; text-align: left; padding: 0.75rem 1rem; border: none; background: none; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem;">
-                        <span style="width: 16px;">👥</span> Manage Recipients
-                    </button>
-                    <hr style="margin: 0.5rem 0; border: none; border-top: 1px solid var(--border-color);">
-                    <button class="dropdown-item" onclick="deleteChat('${chatSessionData.id}')" style="width: 100%; text-align: left; padding: 0.75rem 1rem; border: none; background: none; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; color: var(--danger-color);">
-                        <span style="width: 16px;">🗑️</span> Delete Chat
-                    </button>
-                </div>
-            </div>
-        </div>
-    `;
-    
-    activeChatsList.appendChild(chatItem);
+    // No-op: Chat Management section has been removed
+    console.log('addChatToManagement called but Chat Management section is removed');
 }
 
 // Universal chat finder function
@@ -9823,7 +9708,7 @@ function manageRecipients(chatId) {
                     </span>
                     <span class="breadcrumb-separator">></span>
                     <span class="breadcrumb-item">
-                        <a href="#" onclick="returnToChatManagement()" class="breadcrumb-link">Chat Management</a>
+                        <a href="#" onclick="returnToChatManagement()" class="breadcrumb-link">Listen</a>
                     </span>
                     <span class="breadcrumb-separator">></span>
                     <span class="breadcrumb-item current">
@@ -9831,7 +9716,7 @@ function manageRecipients(chatId) {
                     </span>
                 </div>
                 <div class="back-arrow">
-                    <button onclick="returnToChatManagement()" class="back-btn" title="Back to Chat Management">
+                    <button onclick="returnToChatManagement()" class="back-btn" title="Back to Listen">
                         <span class="back-icon">←</span> Back
                     </button>
                 </div>
@@ -10069,7 +9954,7 @@ function showSection(sectionName) {
     console.log(`🔄 showSection called with: ${sectionName}`);
 
     // Clear any stored content when navigating to prevent conflicts
-    if (window.originalContentHTML && sectionName !== 'chat-management') {
+    if (window.originalContentHTML) {
         console.log('🧹 Clearing stored content for section navigation');
         window.originalContentHTML = null;
     }
@@ -10119,18 +10004,17 @@ function showSection(sectionName) {
 
     updateNavHighlight(sectionName);
 
-    // Reload chat list when showing chat management to ensure latest template is used
-    if (sectionName === 'chat-management') {
-        // Wait for DOM to update, then load chats
-        setTimeout(() => {
-            try {
-                console.log('⏰ Delayed loading of active chats...');
-                loadActiveChatsList();
-            } catch (error) {
-                console.error('Error loading active chats list:', error);
-            }
-        }, 500);
-    }
+    // REMOVED: Chat Management section handling
+    // if (sectionName === 'chat-management') {
+    //     setTimeout(() => {
+    //         try {
+    //             console.log('⏰ Delayed loading of active chats...');
+    //             loadActiveChatsList();
+    //         } catch (error) {
+    //             console.error('Error loading active chats list:', error);
+    //         }
+    //     }, 500);
+    // }
 
     // Initialize analytics dashboard when showing analytics section
     if (sectionName === 'chat-feedback' && typeof initAnalyticsDashboard === 'function') {
@@ -10216,43 +10100,25 @@ function getCurrentChatId() {
 // Recipients Management Helper Functions
 // loadRecipientsData function removed - using version from app.js to avoid conflicts
 
+// REMOVED: Chat Management section removed - redirect to Listen section instead
 function returnToChatManagement() {
-    console.log('🔄 Returning to Chat Management...');
+    console.log('🔄 Chat Management removed, redirecting to Listen section...');
 
     // Restore the original content if it was stored
     const contentArea = document.getElementById('content-area');
     if (contentArea && window.originalContentHTML) {
         console.log('📦 Restoring original content...');
         contentArea.innerHTML = window.originalContentHTML;
-
-        // Clear the stored content to prevent issues
         window.originalContentHTML = null;
     } else if (contentArea) {
-        // If no stored content, refresh the page to restore everything
         console.log('🔄 No stored content found, reloading page...');
         window.location.reload();
         return;
     }
 
-    // Small delay to ensure content is restored before showing section
+    // Redirect to Listen section instead of Chat Management
     setTimeout(() => {
-        // Show the chat management section
-        showSection('chat-management');
-
-        // Update the breadcrumb
-        const breadcrumb = document.getElementById('breadcrumb');
-        if (breadcrumb) {
-            breadcrumb.textContent = 'Chat Management';
-        }
-
-        // Make sure the nav item is highlighted
-        document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-        const chatMgmtNavItem = document.querySelector('[onclick="showSection(\'chat-management\')"]');
-        if (chatMgmtNavItem) {
-            chatMgmtNavItem.classList.add('active');
-        }
-
-        console.log('✅ Successfully returned to Chat Management');
+        showSection('listen');
     }, 100);
 }
 
