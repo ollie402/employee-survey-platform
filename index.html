@@ -15169,12 +15169,16 @@ async function sbSaveQuestionsToBank(survey) {
                 }
             }
 
-            // Save rating scale settings
+            // Save rating scale settings - use per-question ratingScale and ratingLabels
             if (q.type === 'rating') {
-                questionData.rating_min = sbCurrentSurvey.ratingScale?.values?.[0] || 1;
-                questionData.rating_max = sbCurrentSurvey.ratingScale?.values?.[sbCurrentSurvey.ratingScale?.values?.length - 1] || 5;
-                questionData.rating_min_label = sbCurrentSurvey.ratingScale?.labels?.[0] || '';
-                questionData.rating_max_label = sbCurrentSurvey.ratingScale?.labels?.[sbCurrentSurvey.ratingScale?.labels?.length - 1] || '';
+                const scale = q.ratingScale || 5;
+                const labels = q.ratingLabels || sbGetDefaultRatingLabels(scale);
+                questionData.rating_min = 1;
+                questionData.rating_max = scale;
+                questionData.rating_min_label = labels[0] || '';
+                questionData.rating_max_label = labels[labels.length - 1] || '';
+                // Store full labels as JSON string for complete restoration
+                questionData.rating_labels_json = JSON.stringify(labels);
             }
 
             questionsToSave.push(questionData);
@@ -15442,12 +15446,21 @@ function sbSelectFromBank(resultIndex) {
         question.options = selected.options.map(opt => opt.text || opt);
     }
 
-    // Update rating settings if applicable
+    // Update rating settings if applicable - restore per-question ratingScale and ratingLabels
     if (['rating', 'linear-scale'].includes(selected.question_type)) {
-        question.minValue = selected.rating_min || 1;
-        question.maxValue = selected.rating_max || 5;
-        question.minLabel = selected.rating_min_label || '';
-        question.maxLabel = selected.rating_max_label || '';
+        const scale = selected.rating_max || 5;
+        question.ratingScale = scale;
+
+        // Try to restore full labels from JSON, otherwise use defaults
+        if (selected.rating_labels_json) {
+            try {
+                question.ratingLabels = JSON.parse(selected.rating_labels_json);
+            } catch (e) {
+                question.ratingLabels = sbGetDefaultRatingLabels(scale);
+            }
+        } else {
+            question.ratingLabels = sbGetDefaultRatingLabels(scale);
+        }
     }
 
     console.log('Question updated:', question);
