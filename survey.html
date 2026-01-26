@@ -499,7 +499,17 @@
 
                 if (error) {
                     console.error('Supabase error:', error);
-                    showError('Survey not found');
+                    console.error('Error code:', error.code);
+                    console.error('Error message:', error.message);
+                    console.error('Error details:', error.details);
+                    console.error('Error hint:', error.hint);
+
+                    // Check if table doesn't exist
+                    if (error.code === '42P01' || error.message?.includes('does not exist')) {
+                        showError('Survey system is being set up. Please try again later.');
+                    } else {
+                        showError('Survey not found');
+                    }
                     return;
                 }
 

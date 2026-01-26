@@ -15690,15 +15690,22 @@ async function sbSyncSurveyToSupabase(survey) {
         updated_at: new Date().toISOString()
     };
 
+    console.log('Syncing survey to Supabase:', surveyRecord.id, surveyRecord.name);
+    console.log('Full survey record:', JSON.stringify(surveyRecord, null, 2));
+
     // Upsert (insert or update)
-    const { error } = await window.supabaseClient
+    const { data, error } = await window.supabaseClient
         .from('surveys')
-        .upsert(surveyRecord, { onConflict: 'id' });
+        .upsert(surveyRecord, { onConflict: 'id' })
+        .select();
 
     if (error) {
         console.error('Error syncing survey to Supabase:', error);
+        console.error('Error details:', JSON.stringify(error, null, 2));
         throw error;
     }
+
+    console.log('Survey synced successfully:', data);
 }
 
 // Link Modal
