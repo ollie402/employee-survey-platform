@@ -14070,11 +14070,24 @@ function sbEditSurvey(id) {
     }
 }
 
-function sbDeleteSurvey(id) {
+async function sbDeleteSurvey(id) {
     if (confirm('Are you sure you want to delete this survey?')) {
         sbSurveys = sbSurveys.filter(s => s.id !== id);
         sbSaveSurveys();
         sbRenderDashboard();
+
+        // Also delete from Supabase
+        try {
+            if (window.supabaseClient) {
+                await window.supabaseClient
+                    .from('surveys')
+                    .delete()
+                    .eq('id', id);
+                console.log('Survey deleted from Supabase');
+            }
+        } catch (err) {
+            console.error('Failed to delete survey from Supabase:', err);
+        }
     }
 }
 
@@ -15636,6 +15649,15 @@ async function sbSaveSurvey() {
     sbSaveSurveys();
     sbRenderDashboard();
 
+    // Sync survey to Supabase for public access
+    try {
+        await sbSyncSurveyToSupabase(sbCurrentSurvey);
+        console.log('Survey synced to Supabase');
+    } catch (err) {
+        console.error('Failed to sync survey to Supabase:', err);
+        // Don't block save if sync fails
+    }
+
     // Save questions to question bank for future autocomplete
     try {
         await sbSaveQuestionsToBank(sbCurrentSurvey);
@@ -15643,6 +15665,39 @@ async function sbSaveSurvey() {
     } catch (err) {
         console.error('Failed to save questions to bank:', err);
         // Don't block save if bank save fails
+    }
+}
+
+// Sync survey to Supabase for public survey taker access
+async function sbSyncSurveyToSupabase(survey) {
+    if (!window.supabaseClient) {
+        console.warn('Supabase client not available');
+        return;
+    }
+
+    // Prepare survey data for Supabase (snake_case columns)
+    const surveyRecord = {
+        id: survey.id,
+        name: survey.name || 'Untitled Survey',
+        description: survey.description || '',
+        theme_color: survey.themeColor || 'purple',
+        rating_scale: survey.ratingScale || { points: 5, labels: ['Strongly Disagree', 'Disagree', 'Neutral', 'Agree', 'Strongly Agree'] },
+        start_date: survey.startDate || null,
+        end_date: survey.endDate || null,
+        landing_page_content: survey.landingPageContent || 'Thank you for taking the time to complete this survey.',
+        thank_you_content: survey.thankYouContent || 'Your response has been recorded. Thank you for your feedback!',
+        data: survey, // Store full survey structure as JSON
+        updated_at: new Date().toISOString()
+    };
+
+    // Upsert (insert or update)
+    const { error } = await window.supabaseClient
+        .from('surveys')
+        .upsert(surveyRecord, { onConflict: 'id' });
+
+    if (error) {
+        console.error('Error syncing survey to Supabase:', error);
+        throw error;
     }
 }
 

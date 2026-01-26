@@ -9,6 +9,10 @@
     {
       "source": "/chat/:slug",
       "destination": "/chat.html"
+    },
+    {
+      "source": "/survey/:id",
+      "destination": "/survey.html"
     }
   ]
 }
