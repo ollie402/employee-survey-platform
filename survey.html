@@ -462,7 +462,7 @@
         // Supabase configuration
         const SUPABASE_URL = 'https://wdwpqdzndlaldpuzuxyo.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indkd3BxZHpuZGxhbGRwdXp1eHlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYyMzUyNjYsImV4cCI6MjA3MTgxMTI2Nn0.POnq8gaOkM4gDtzD9jCSC1mV4ymqurTW1wKTQz6CUCM';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         // Current state
         let currentSurvey = null;
@@ -491,7 +491,7 @@
 
             try {
                 // Fetch survey from database
-                const { data: survey, error } = await supabase
+                const { data: survey, error } = await supabaseClient
                     .from('surveys')
                     .select('*')
                     .eq('id', surveyId)
@@ -942,7 +942,7 @@
 
             try {
                 // Save response to database
-                const { error } = await supabase
+                const { error } = await supabaseClient
                     .from('survey_responses')
                     .insert({
                         survey_id: currentSurvey.id,
