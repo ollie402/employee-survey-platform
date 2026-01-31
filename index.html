@@ -11692,13 +11692,28 @@ let sbDraggedQuestionIndex = null;
 
 // Survey Builder Utility Functions
 function sbGenerateId() {
-    return Math.random().toString(36).substr(2, 9);
+    // Generate a proper UUID v4 for database primary keys
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        const r = Math.random() * 16 | 0;
+        const v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
+}
+
+function sbGenerateShortCode(length = 9) {
+    // Generate short alphanumeric code for URLs and internal IDs
+    const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    for (let i = 0; i < length; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
 }
 
 function sbCreateDefaultSurvey() {
     return {
-        id: sbGenerateId(),
-        public_code: sbGenerateId(), // Short code for public survey links
+        id: sbGenerateId(), // UUID for database primary key
+        public_code: sbGenerateShortCode(), // Short code for shareable URLs
         name: 'Untitled Survey',
         description: '',
         themeColor: 'purple',
@@ -11711,14 +11726,14 @@ function sbCreateDefaultSurvey() {
         endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
         landingPageContent: 'Thank you for taking the time to complete this survey. Your feedback is valuable to us.',
         thankYouContent: 'Your response has been recorded. Thank you for your feedback!',
-        pages: [{ id: sbGenerateId(), title: 'Page 1', instructions: '', questions: [], logic: [] }],
+        pages: [{ id: sbGenerateShortCode(), title: 'Page 1', instructions: '', questions: [], logic: [] }],
         createdAt: new Date().toISOString()
     };
 }
 
 function sbCreateDefaultQuestion(type) {
     const question = {
-        id: sbGenerateId(),
+        id: sbGenerateShortCode(),
         type,
         text: '',
         required: false,
@@ -14068,7 +14083,7 @@ function sbEditSurvey(id) {
     if (sbCurrentSurvey) {
         // Ensure old surveys have a public_code
         if (!sbCurrentSurvey.public_code) {
-            sbCurrentSurvey.public_code = sbGenerateId();
+            sbCurrentSurvey.public_code = sbGenerateShortCode();
         }
         sbCurrentPageIndex = 0;
         sbOpenBuilder();
@@ -14569,7 +14584,7 @@ function sbToggleRequired(qIndex, checked) {
 function sbDuplicateQuestion(qIndex) {
     const question = sbCurrentSurvey.pages[sbCurrentPageIndex].questions[qIndex];
     const newQuestion = JSON.parse(JSON.stringify(question));
-    newQuestion.id = sbGenerateId();
+    newQuestion.id = sbGenerateShortCode();
     sbCurrentSurvey.pages[sbCurrentPageIndex].questions.splice(qIndex + 1, 0, newQuestion);
     sbRenderBuilder();
 }
@@ -14622,7 +14637,7 @@ function sbSelectPage(index) {
 
 function sbAddPage() {
     sbCurrentSurvey.pages.push({
-        id: sbGenerateId(),
+        id: sbGenerateShortCode(),
         title: `Page ${sbCurrentSurvey.pages.length + 1}`,
         instructions: '',
         questions: [],
@@ -15683,7 +15698,7 @@ async function sbSyncSurveyToSupabase(survey) {
     // Prepare survey data for Supabase (snake_case columns)
     const surveyRecord = {
         id: survey.id,
-        public_code: survey.public_code || sbGenerateId(), // Ensure public_code exists for sharing
+        public_code: survey.public_code || sbGenerateShortCode(), // Ensure public_code exists for sharing
         name: survey.name || 'Untitled Survey',
         description: survey.description || '',
         theme_color: survey.themeColor || 'purple',
