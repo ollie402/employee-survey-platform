@@ -3617,6 +3617,60 @@
             padding: 0.5rem;
         }
 
+        /* Calendar Analytics */
+        .survey-builder-container .sb-calendar-analytics {
+            padding: 0.5rem 0;
+        }
+
+        .survey-builder-container .sb-popular-dates {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .survey-builder-container .sb-date-bar-row {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .survey-builder-container .sb-date-label {
+            width: 100px;
+            font-size: 0.875rem;
+            color: #374151;
+            flex-shrink: 0;
+        }
+
+        .survey-builder-container .sb-date-bar-container {
+            flex: 1;
+            height: 24px;
+            background: #f3f4f6;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .survey-builder-container .sb-date-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #8b5cf6, #a78bfa);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .survey-builder-container .sb-date-count {
+            width: 80px;
+            font-size: 0.75rem;
+            color: #6b7280;
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        .survey-builder-container .sb-no-data {
+            color: #9ca3af;
+            font-style: italic;
+            text-align: center;
+            padding: 1rem;
+        }
+
         /* ============================================== */
         /* SURVEY BUILDER STYLES - END                    */
         /* ============================================== */
@@ -5686,6 +5740,9 @@ Thank you!</textarea>
                                 </button>
                                 <button class="sb-floating-action" onclick="sbAddQuestion('text')" title="Paragraph">
                                     <svg class="sb-icon" viewBox="0 0 24 24"><line x1="17" y1="10" x2="3" y2="10"></line><line x1="21" y1="6" x2="3" y2="6"></line><line x1="21" y1="14" x2="3" y2="14"></line><line x1="17" y1="18" x2="3" y2="18"></line></svg>
+                                </button>
+                                <button class="sb-floating-action" onclick="sbAddQuestion('calendar')" title="Calendar">
+                                    <svg class="sb-icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
                                 </button>
                             </div>
 
@@ -12037,7 +12094,8 @@ const sbQuestionTypeLabels = {
     rating: 'Linear Scale',
     single: 'Multiple Choice',
     multi: 'Checkboxes',
-    text: 'Paragraph'
+    text: 'Paragraph',
+    calendar: 'Calendar'
 };
 
 let sbSurveys = JSON.parse(localStorage.getItem('sbSurveys') || '[]');
@@ -14747,6 +14805,55 @@ function sbRenderAnalytics(responses) {
                     ${answers.length > 10 ? `<div class="sb-more-responses">+ ${answers.length - 10} more responses</div>` : ''}
                 </div>
             `;
+        } else if (question.type === 'calendar') {
+            // Calendar questions: Show date popularity chart
+            const dateCount = {};
+            answers.forEach(answer => {
+                // Answer could be a JSON array of dates or a comma-separated string
+                let dates = [];
+                try {
+                    dates = typeof answer === 'string' ? JSON.parse(answer) : answer;
+                } catch (e) {
+                    dates = answer.split(',').map(d => d.trim());
+                }
+                if (Array.isArray(dates)) {
+                    dates.forEach(date => {
+                        if (date) {
+                            dateCount[date] = (dateCount[date] || 0) + 1;
+                        }
+                    });
+                }
+            });
+
+            // Sort dates by count (most popular first)
+            const sortedDates = Object.entries(dateCount)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 10); // Show top 10 dates
+
+            if (sortedDates.length > 0) {
+                const maxCount = sortedDates[0][1];
+                analyticsHTML += `
+                    <div class="sb-calendar-analytics">
+                        <div class="sb-popular-dates">
+                            ${sortedDates.map(([date, count]) => {
+                                const percentage = Math.round((count / answers.length) * 100);
+                                const barWidth = Math.round((count / maxCount) * 100);
+                                return `
+                                    <div class="sb-date-bar-row">
+                                        <div class="sb-date-label">${date}</div>
+                                        <div class="sb-date-bar-container">
+                                            <div class="sb-date-bar" style="width: ${barWidth}%"></div>
+                                        </div>
+                                        <div class="sb-date-count">${count} (${percentage}%)</div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            } else {
+                analyticsHTML += '<p class="sb-no-data">No dates selected yet</p>';
+            }
         } else {
             // Default: show text responses
             analyticsHTML += `
@@ -15100,6 +15207,29 @@ function sbRenderQuestionCard(question, qIndex) {
         </div>
     ` : '';
 
+    const calendarHtml = question.type === 'calendar' ? `
+        <div style="margin-top:16px;padding:16px;background:#f9fafb;border-radius:8px;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+                <svg style="width:20px;height:20px;color:var(--sb-primary);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+                <span style="font-size:14px;color:var(--sb-text);">Calendar Date Picker</span>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(7, 1fr);gap:4px;margin-bottom:8px;">
+                ${['M','T','W','T','F','S','S'].map(d => `<div style="text-align:center;font-size:10px;color:var(--sb-text-secondary);font-weight:600;">${d}</div>`).join('')}
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(7, 1fr);gap:4px;">
+                ${[...Array(14)].map((_, i) => `<div style="aspect-ratio:1;background:${i === 5 || i === 9 ? 'var(--sb-primary)' : 'white'};color:${i === 5 || i === 9 ? 'white' : 'var(--sb-text-secondary)'};border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:11px;">${i + 1}</div>`).join('')}
+            </div>
+            <p style="margin-top:12px;font-size:12px;color:var(--sb-text-secondary);text-align:center;">
+                Respondents can select multiple dates
+            </p>
+        </div>
+    ` : '';
+
     return `
         <div class="sb-card sb-question-card"
              id="sb-question-${qIndex}"
@@ -15139,6 +15269,7 @@ function sbRenderQuestionCard(question, qIndex) {
                 ${optionsHtml}
                 ${ratingHtml}
                 ${textHtml}
+                ${calendarHtml}
             </div>
             <div class="sb-question-footer">
                 <button class="sb-btn-icon" onclick="sbDuplicateQuestion(${qIndex})" title="Duplicate">
@@ -15182,7 +15313,8 @@ function sbGetQuestionTypeIcon(type) {
         rating: '<svg class="sb-icon" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>',
         single: '<svg class="sb-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle></svg>',
         multi: '<svg class="sb-icon" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>',
-        text: '<svg class="sb-icon" viewBox="0 0 24 24"><line x1="17" y1="10" x2="3" y2="10"></line><line x1="21" y1="6" x2="3" y2="6"></line><line x1="21" y1="14" x2="3" y2="14"></line><line x1="17" y1="18" x2="3" y2="18"></line></svg>'
+        text: '<svg class="sb-icon" viewBox="0 0 24 24"><line x1="17" y1="10" x2="3" y2="10"></line><line x1="21" y1="6" x2="3" y2="6"></line><line x1="21" y1="14" x2="3" y2="14"></line><line x1="17" y1="18" x2="3" y2="18"></line></svg>',
+        calendar: '<svg class="sb-icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>'
     };
     return icons[type] || icons.single;
 }

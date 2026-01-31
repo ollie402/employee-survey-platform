@@ -281,6 +281,152 @@
             word-break: break-word;
         }
 
+        /* Calendar Question */
+        .calendar-question {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding: 0.5rem 0;
+        }
+
+        .calendar-month-year {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .calendar-nav-btn {
+            background: none;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            width: 36px;
+            height: 36px;
+            font-size: 1.25rem;
+            cursor: pointer;
+            color: #374151;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .calendar-nav-btn:hover {
+            background: #f3f4f6;
+            border-color: #7c3aed;
+            color: #7c3aed;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+            margin-bottom: 2px;
+        }
+
+        .calendar-day-header {
+            text-align: center;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #6b7280;
+            padding: 0.5rem 0;
+            text-transform: uppercase;
+        }
+
+        .calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #374151;
+            transition: all 0.15s;
+            border: 2px solid transparent;
+            background: white;
+        }
+
+        .calendar-day:hover:not(.empty) {
+            background: #f5f3ff;
+            border-color: #7c3aed;
+        }
+
+        .calendar-day.selected {
+            background: #7c3aed;
+            color: white;
+            border-color: #7c3aed;
+        }
+
+        .calendar-day.selected:hover {
+            background: #6d28d9;
+        }
+
+        .calendar-day.today:not(.selected) {
+            border-color: #7c3aed;
+            color: #7c3aed;
+            font-weight: 700;
+        }
+
+        .calendar-day.empty {
+            cursor: default;
+            background: transparent;
+        }
+
+        .calendar-selected-info {
+            text-align: center;
+            margin-top: 1rem;
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .calendar-selected-dates {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+            justify-content: center;
+        }
+
+        .calendar-date-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            background: #f5f3ff;
+            color: #7c3aed;
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .calendar-tag-remove {
+            background: none;
+            border: none;
+            color: #7c3aed;
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 0;
+            line-height: 1;
+            opacity: 0.7;
+        }
+
+        .calendar-tag-remove:hover {
+            opacity: 1;
+        }
+
         /* Text Inputs */
         .text-input,
         .text-area,
@@ -664,6 +810,9 @@
 
             // Restore any saved responses for this page
             restoreResponses();
+
+            // Initialize any calendar questions
+            initAllCalendars();
         }
 
         function renderQuestion(question, qIndex) {
@@ -700,6 +849,9 @@
                     break;
                 case 'dropdown':
                     html += renderDropdown(question, questionId);
+                    break;
+                case 'calendar':
+                    html += renderCalendar(question, questionId);
                     break;
                 default:
                     html += renderTextInput(question, questionId);
@@ -861,6 +1013,181 @@
 
             html += '</select>';
             return html;
+        }
+
+        // Calendar question rendering and logic
+        const calendarSelections = {}; // Store selected dates per question
+
+        function renderCalendar(question, questionId) {
+            const today = new Date();
+            const currentMonth = today.getMonth();
+            const currentYear = today.getFullYear();
+
+            return `
+                <div class="calendar-question" id="calendar-${questionId}"
+                     data-question-id="${questionId}"
+                     data-current-month="${currentMonth}"
+                     data-current-year="${currentYear}">
+                    <div class="calendar-header">
+                        <button type="button" class="calendar-nav-btn" onclick="calendarPrevMonth('${questionId}')">‹</button>
+                        <span class="calendar-month-year" id="calendar-title-${questionId}"></span>
+                        <button type="button" class="calendar-nav-btn" onclick="calendarNextMonth('${questionId}')">›</button>
+                    </div>
+                    <div class="calendar-grid">
+                        <div class="calendar-day-header">Mon</div>
+                        <div class="calendar-day-header">Tue</div>
+                        <div class="calendar-day-header">Wed</div>
+                        <div class="calendar-day-header">Thu</div>
+                        <div class="calendar-day-header">Fri</div>
+                        <div class="calendar-day-header">Sat</div>
+                        <div class="calendar-day-header">Sun</div>
+                    </div>
+                    <div class="calendar-days" id="calendar-days-${questionId}"></div>
+                    <div class="calendar-selected-info">
+                        <span id="calendar-count-${questionId}">0 dates selected</span>
+                    </div>
+                    <div class="calendar-selected-dates" id="calendar-selected-${questionId}"></div>
+                </div>
+            `;
+        }
+
+        function initCalendar(questionId) {
+            if (!calendarSelections[questionId]) {
+                calendarSelections[questionId] = new Set();
+            }
+            const container = document.getElementById(`calendar-${questionId}`);
+            if (!container) return;
+            const month = parseInt(container.dataset.currentMonth);
+            const year = parseInt(container.dataset.currentYear);
+            renderCalendarMonth(questionId, year, month);
+        }
+
+        function renderCalendarMonth(questionId, year, month) {
+            const container = document.getElementById(`calendar-${questionId}`);
+            if (!container) return;
+            container.dataset.currentMonth = month;
+            container.dataset.currentYear = year;
+
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                                'July', 'August', 'September', 'October', 'November', 'December'];
+            document.getElementById(`calendar-title-${questionId}`).textContent =
+                `${monthNames[month]} ${year}`;
+
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const startDayOfWeek = (firstDay.getDay() + 6) % 7; // Monday = 0
+            const daysInMonth = lastDay.getDate();
+
+            const daysContainer = document.getElementById(`calendar-days-${questionId}`);
+            let html = '';
+
+            // Empty cells before first day
+            for (let i = 0; i < startDayOfWeek; i++) {
+                html += '<div class="calendar-day empty"></div>';
+            }
+
+            // Day cells
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const isSelected = calendarSelections[questionId]?.has(dateStr);
+                const dateObj = new Date(year, month, day);
+                const isToday = dateObj.getTime() === today.getTime();
+
+                html += `<div class="calendar-day ${isSelected ? 'selected' : ''} ${isToday ? 'today' : ''}"
+                              onclick="toggleCalendarDate('${questionId}', '${dateStr}')"
+                              data-date="${dateStr}">
+                            ${day}
+                         </div>`;
+            }
+
+            daysContainer.innerHTML = html;
+        }
+
+        function toggleCalendarDate(questionId, dateStr) {
+            if (!calendarSelections[questionId]) {
+                calendarSelections[questionId] = new Set();
+            }
+
+            if (calendarSelections[questionId].has(dateStr)) {
+                calendarSelections[questionId].delete(dateStr);
+            } else {
+                calendarSelections[questionId].add(dateStr);
+            }
+
+            // Re-render current month
+            const container = document.getElementById(`calendar-${questionId}`);
+            const month = parseInt(container.dataset.currentMonth);
+            const year = parseInt(container.dataset.currentYear);
+            renderCalendarMonth(questionId, year, month);
+
+            // Update selected count and list
+            updateCalendarInfo(questionId);
+
+            // Save response
+            const selected = calendarSelections[questionId];
+            const dates = selected ? Array.from(selected).sort() : [];
+            responses[questionId] = dates;
+        }
+
+        function calendarPrevMonth(questionId) {
+            const container = document.getElementById(`calendar-${questionId}`);
+            let month = parseInt(container.dataset.currentMonth);
+            let year = parseInt(container.dataset.currentYear);
+
+            month--;
+            if (month < 0) {
+                month = 11;
+                year--;
+            }
+
+            renderCalendarMonth(questionId, year, month);
+        }
+
+        function calendarNextMonth(questionId) {
+            const container = document.getElementById(`calendar-${questionId}`);
+            let month = parseInt(container.dataset.currentMonth);
+            let year = parseInt(container.dataset.currentYear);
+
+            month++;
+            if (month > 11) {
+                month = 0;
+                year++;
+            }
+
+            renderCalendarMonth(questionId, year, month);
+        }
+
+        function updateCalendarInfo(questionId) {
+            const selected = calendarSelections[questionId];
+            const count = selected ? selected.size : 0;
+
+            document.getElementById(`calendar-count-${questionId}`).textContent =
+                `${count} date${count !== 1 ? 's' : ''} selected`;
+
+            const selectedContainer = document.getElementById(`calendar-selected-${questionId}`);
+            if (count > 0) {
+                const sortedDates = Array.from(selected).sort();
+                selectedContainer.innerHTML = sortedDates.map(date => {
+                    const d = new Date(date + 'T00:00:00');
+                    const formatted = d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+                    return `<span class="calendar-date-tag">
+                                ${formatted}
+                                <button type="button" class="calendar-tag-remove" onclick="toggleCalendarDate('${questionId}', '${date}')">×</button>
+                            </span>`;
+                }).join('');
+            } else {
+                selectedContainer.innerHTML = '';
+            }
+        }
+
+        function initAllCalendars() {
+            document.querySelectorAll('.calendar-question').forEach(cal => {
+                const questionId = cal.dataset.questionId;
+                initCalendar(questionId);
+            });
         }
 
         // Response handling
