@@ -11698,6 +11698,7 @@ function sbGenerateId() {
 function sbCreateDefaultSurvey() {
     return {
         id: sbGenerateId(),
+        public_code: sbGenerateId(), // Short code for public survey links
         name: 'Untitled Survey',
         description: '',
         themeColor: 'purple',
@@ -11773,7 +11774,7 @@ function sbRenderDashboard() {
                     <span>Opened ${new Date(survey.createdAt).toLocaleDateString()}</span>
                 </div>
                 <div class="sb-survey-card-actions">
-                    <button class="sb-survey-card-action" onclick="event.stopPropagation(); sbCopyToClipboard('${survey.id}', this)">
+                    <button class="sb-survey-card-action" onclick="event.stopPropagation(); sbCopyToClipboard('${survey.public_code || survey.id}', this)">
                         <svg class="sb-icon-sm" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
                         Copy link
                     </button>
@@ -14065,6 +14066,10 @@ function sbCreateNewSurvey() {
 function sbEditSurvey(id) {
     sbCurrentSurvey = sbSurveys.find(s => s.id === id);
     if (sbCurrentSurvey) {
+        // Ensure old surveys have a public_code
+        if (!sbCurrentSurvey.public_code) {
+            sbCurrentSurvey.public_code = sbGenerateId();
+        }
         sbCurrentPageIndex = 0;
         sbOpenBuilder();
     }
@@ -14091,8 +14096,8 @@ async function sbDeleteSurvey(id) {
     }
 }
 
-function sbCopyToClipboard(surveyId, button) {
-    const link = `${window.location.origin}/survey/${surveyId}`;
+function sbCopyToClipboard(publicCode, button) {
+    const link = `${window.location.origin}/survey/${publicCode}`;
     navigator.clipboard.writeText(link);
     button.classList.add('copied');
     button.innerHTML = `
@@ -15678,6 +15683,7 @@ async function sbSyncSurveyToSupabase(survey) {
     // Prepare survey data for Supabase (snake_case columns)
     const surveyRecord = {
         id: survey.id,
+        public_code: survey.public_code || sbGenerateId(), // Ensure public_code exists for sharing
         name: survey.name || 'Untitled Survey',
         description: survey.description || '',
         theme_color: survey.themeColor || 'purple',
@@ -15711,7 +15717,7 @@ async function sbSyncSurveyToSupabase(survey) {
 // Link Modal
 function sbOpenLinkModal() {
     document.getElementById('sb-link-modal').classList.remove('sb-hidden');
-    document.getElementById('sb-survey-link').value = `${window.location.origin}/survey/${sbCurrentSurvey.id}`;
+    document.getElementById('sb-survey-link').value = `${window.location.origin}/survey/${sbCurrentSurvey.public_code || sbCurrentSurvey.id}`;
 }
 
 function sbCloseLinkModal() {

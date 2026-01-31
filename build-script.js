@@ -24,6 +24,7 @@ console.log('🚀 Building project...\n');
 // Copy HTML files
 copyFile('index.html', 'dist/index.html');
 copyFile('chat.html', 'dist/chat.html');
+copyFile('survey.html', 'dist/survey.html');
 
 // Copy CSS files
 if (fs.existsSync('assets/css')) {
