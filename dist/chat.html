@@ -12,8 +12,9 @@
         }
 
         :root {
-            --primary-color: #2563eb;
-            --primary-hover: #1d4ed8;
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --primary-color: #667eea;
+            --primary-hover: #5a67d8;
             --secondary-color: #764ba2;
             --success-color: #10b981;
             --warning-color: #f59e0b;
@@ -21,86 +22,96 @@
             --text-primary: #1f2937;
             --text-secondary: #6b7280;
             --bg-primary: #ffffff;
-            --bg-secondary: #f3f4f6;
+            --bg-secondary: #f8f9fa;
             --border-color: #e5e7eb;
+        }
+
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
         }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--bg-secondary);
             min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 1rem;
         }
 
+        /* Full Page Layout */
         .chat-container {
-            background: var(--bg-primary);
-            border-radius: 20px;
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
-            width: 100%;
-            max-width: 600px;
-            height: 85vh;
-            max-height: 700px;
             display: flex;
             flex-direction: column;
-            overflow: hidden;
+            height: 100vh;
+            background: var(--bg-secondary);
         }
 
+        /* Header */
         .chat-header {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: white;
-            padding: 1.5rem;
-            text-align: center;
-            position: relative;
+            background: var(--primary-gradient);
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            flex-shrink: 0;
+            z-index: 10;
+        }
+
+        .chat-header-logo {
+            display: flex;
+            align-items: center;
+        }
+
+        .chat-header-logo img {
+            height: 28px;
+            width: auto;
+        }
+
+        .chat-header-divider {
+            width: 1px;
+            height: 24px;
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .chat-header-info {
+            flex: 1;
         }
 
         .chat-header h2 {
-            font-size: 1.5rem;
+            font-size: 1.125rem;
             font-weight: 600;
-            margin-bottom: 0.25rem;
+            color: white;
+            margin: 0;
         }
 
         .chat-header p {
-            opacity: 0.9;
-            font-size: 0.875rem;
-        }
-
-        .progress-bar {
-            height: 4px;
-            background: rgba(255, 255, 255, 0.2);
-            position: relative;
-            overflow: hidden;
-            margin-top: 1rem;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: white;
-            transition: width 0.3s ease;
-            width: 0%;
+            display: none;
         }
 
         .session-info {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            background: rgba(255, 255, 255, 0.2);
-            padding: 0.25rem 0.75rem;
-            border-radius: 15px;
-            font-size: 0.75rem;
+            display: none;
         }
 
+        .progress-bar {
+            display: none;
+        }
+
+        /* Chat Messages Area */
         .chat-messages {
             flex: 1;
             overflow-y: auto;
-            padding: 1.5rem;
-            background: #f8f9fa;
+            padding: 24px;
+            background: var(--bg-secondary);
+        }
+
+        .chat-messages-inner {
+            max-width: 800px;
+            margin: 0 auto;
         }
 
         .message {
-            margin-bottom: 1rem;
+            margin-bottom: 16px;
             display: flex;
             animation: fadeIn 0.3s ease-in;
         }
@@ -120,28 +131,34 @@
 
         .message-bubble {
             max-width: 70%;
-            padding: 0.75rem 1rem;
+            padding: 14px 18px;
             border-radius: 16px;
             word-wrap: break-word;
+            line-height: 1.5;
+            font-size: 0.9375rem;
         }
 
         .message.bot .message-bubble {
             background: white;
             color: var(--text-primary);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            border-bottom-left-radius: 4px;
         }
 
         .message.user .message-bubble {
-            background: var(--primary-color);
+            background: var(--primary-gradient);
             color: white;
+            border-bottom-right-radius: 4px;
         }
 
+        /* Typing Indicator */
         .typing-indicator {
             display: none;
-            padding: 0.75rem 1rem;
+            padding: 14px 18px;
             background: white;
             border-radius: 16px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
             width: fit-content;
         }
 
@@ -173,183 +190,77 @@
                 opacity: 0.7;
             }
             30% {
-                transform: translateY(-10px);
+                transform: translateY(-8px);
                 opacity: 1;
             }
         }
 
+        /* Input Area */
         .input-area {
-            padding: 1rem;
             background: white;
+            padding: 16px 24px;
             border-top: 1px solid var(--border-color);
+            flex-shrink: 0;
         }
 
         .input-container {
+            max-width: 800px;
+            margin: 0 auto;
             display: flex;
-            gap: 0.5rem;
+            gap: 12px;
             align-items: flex-end;
         }
 
         .input-container textarea {
             flex: 1;
-            padding: 0.75rem;
+            padding: 14px 20px;
             border: 1px solid var(--border-color);
-            border-radius: 12px;
+            border-radius: 24px;
             resize: none;
             font-family: inherit;
-            font-size: 0.875rem;
+            font-size: 1rem;
             max-height: 120px;
             outline: none;
-            transition: border-color 0.2s;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            line-height: 1.4;
         }
 
         .input-container textarea:focus {
             border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
         .send-button {
-            padding: 0.75rem 1.5rem;
-            background: var(--primary-color);
+            padding: 14px 28px;
+            background: var(--primary-gradient);
             color: white;
             border: none;
-            border-radius: 12px;
-            font-weight: 500;
+            border-radius: 24px;
+            font-weight: 600;
+            font-size: 1rem;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: opacity 0.2s, transform 0.1s;
+            white-space: nowrap;
         }
 
         .send-button:hover {
-            background: var(--primary-hover);
+            opacity: 0.9;
+        }
+
+        .send-button:active {
+            transform: scale(0.98);
         }
 
         .send-button:disabled {
-            background: var(--text-secondary);
+            background: #d1d5db;
             cursor: not-allowed;
+            opacity: 1;
         }
 
-        /* Pulse Survey Specific Styles */
-        .question-container {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 12px;
-            margin-bottom: 1rem;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-        }
-
-        .question-text {
-            font-size: 1.125rem;
-            font-weight: 500;
-            margin-bottom: 1rem;
-            color: var(--text-primary);
-        }
-
-        .options-container {
-            display: grid;
-            gap: 0.5rem;
-        }
-
-        .option-button {
-            padding: 0.75rem;
-            background: white;
-            border: 2px solid var(--border-color);
-            border-radius: 8px;
-            text-align: left;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .option-button:hover {
-            border-color: var(--primary-color);
-            background: #f0f9ff;
-        }
-
-        .option-button.selected {
-            border-color: var(--primary-color);
-            background: var(--primary-color);
-            color: white;
-        }
-
-        .scale-container {
-            display: flex;
-            justify-content: space-between;
-            gap: 0.5rem;
-        }
-
-        .scale-button {
-            flex: 1;
-            padding: 0.75rem;
-            background: white;
-            border: 2px solid var(--border-color);
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-align: center;
-            font-weight: 600;
-        }
-
-        .scale-button:hover {
-            border-color: var(--primary-color);
-            background: #f0f9ff;
-        }
-
-        .scale-button.selected {
-            border-color: var(--primary-color);
-            background: var(--primary-color);
-            color: white;
-        }
-
-        .navigation-buttons {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 1.5rem;
-        }
-
-        .nav-button {
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 8px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .nav-button.prev {
-            background: var(--bg-secondary);
-            color: var(--text-primary);
-        }
-
-        .nav-button.next {
-            background: var(--primary-color);
-            color: white;
-        }
-
-        .nav-button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        /* Sentiment Indicator */
+        /* Sentiment Indicator - Hidden */
         .sentiment-indicator {
-            padding: 0.5rem 1rem;
-            background: white;
-            border-bottom: 1px solid var(--border-color);
-            font-size: 0.875rem;
-            color: var(--text-secondary);
             display: none;
         }
-
-        .sentiment-indicator.show {
-            display: block;
-        }
-
-        .sentiment-value {
-            font-weight: 600;
-            margin-left: 0.5rem;
-        }
-
-        .sentiment-positive { color: var(--success-color); }
-        .sentiment-neutral { color: var(--warning-color); }
-        .sentiment-negative { color: var(--danger-color); }
 
         /* Completion Screen */
         .completion-screen {
@@ -357,45 +268,54 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 2rem;
+            padding: 3rem;
             text-align: center;
+            background: white;
+            max-width: 500px;
+            margin: auto;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
         }
 
         .completion-screen.show {
             display: flex;
             flex: 1;
+            margin: 24px;
         }
 
         .completion-icon {
             font-size: 4rem;
-            margin-bottom: 1rem;
+            margin-bottom: 1.5rem;
         }
 
         .completion-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
             color: var(--text-primary);
         }
 
         .completion-message {
             color: var(--text-secondary);
             margin-bottom: 2rem;
+            font-size: 1.0625rem;
+            line-height: 1.6;
         }
 
         .completion-button {
-            padding: 0.75rem 2rem;
-            background: var(--primary-color);
+            padding: 14px 32px;
+            background: var(--primary-gradient);
             color: white;
             border: none;
-            border-radius: 8px;
-            font-weight: 500;
+            border-radius: 24px;
+            font-weight: 600;
+            font-size: 1rem;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: opacity 0.2s;
         }
 
         .completion-button:hover {
-            background: var(--primary-hover);
+            opacity: 0.9;
         }
 
         /* Loading State */
@@ -405,12 +325,12 @@
             align-items: center;
             justify-content: center;
             height: 100vh;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--primary-gradient);
         }
 
         .loader {
-            width: 50px;
-            height: 50px;
+            width: 48px;
+            height: 48px;
             border: 3px solid rgba(255, 255, 255, 0.3);
             border-top-color: white;
             border-radius: 50%;
@@ -423,26 +343,246 @@
 
         .loading-text {
             color: white;
-            margin-top: 1rem;
-            font-size: 1.125rem;
+            margin-top: 1.25rem;
+            font-size: 1.0625rem;
+            font-weight: 500;
         }
 
+        /* Pulse Survey Styles */
+        .question-container {
+            background: white;
+            padding: 24px;
+            border-radius: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+
+        .question-text {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 1.25rem;
+            color: var(--text-primary);
+        }
+
+        .options-container {
+            display: grid;
+            gap: 10px;
+        }
+
+        .option-button {
+            padding: 14px 18px;
+            background: white;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9375rem;
+        }
+
+        .option-button:hover {
+            border-color: var(--primary-color);
+            background: #f8f7ff;
+        }
+
+        .option-button.selected {
+            border-color: var(--primary-color);
+            background: var(--primary-gradient);
+            color: white;
+        }
+
+        .scale-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .scale-button {
+            flex: 1;
+            padding: 14px 8px;
+            background: white;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .scale-button:hover {
+            border-color: var(--primary-color);
+            background: #f8f7ff;
+        }
+
+        .scale-button.selected {
+            border-color: var(--primary-color);
+            background: var(--primary-gradient);
+            color: white;
+        }
+
+        .navigation-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1.5rem;
+            gap: 12px;
+        }
+
+        .nav-button {
+            padding: 14px 24px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9375rem;
+        }
+
+        .nav-button.prev {
+            background: #f1f3f5;
+            color: var(--text-primary);
+        }
+
+        .nav-button.prev:hover {
+            background: #e9ecef;
+        }
+
+        .nav-button.next {
+            background: var(--primary-gradient);
+            color: white;
+        }
+
+        .nav-button.next:hover {
+            opacity: 0.9;
+        }
+
+        .nav-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Sentiment colors (kept for functionality) */
+        .sentiment-positive { color: var(--success-color); }
+        .sentiment-neutral { color: var(--warning-color); }
+        .sentiment-negative { color: var(--danger-color); }
+
+        /* Responsive */
         @media (max-width: 768px) {
-            .chat-container {
-                height: 100vh;
-                max-height: none;
-                border-radius: 0;
+            .chat-header {
+                padding: 14px 16px;
+            }
+
+            .chat-header-logo img {
+                height: 24px;
+            }
+
+            .chat-header h2 {
+                font-size: 1rem;
+            }
+
+            .chat-messages {
+                padding: 16px;
             }
 
             .message-bubble {
                 max-width: 85%;
+                padding: 12px 16px;
             }
+
+            .input-area {
+                padding: 12px 16px;
+            }
+
+            .input-container textarea {
+                padding: 12px 16px;
+            }
+
+            .send-button {
+                padding: 12px 20px;
+            }
+
+            .completion-screen.show {
+                margin: 16px;
+                padding: 2rem;
+            }
+        }
+
+        /* Submit Chat Area */
+        .chat-submit-area {
+            padding: 16px 24px;
+            text-align: center;
+            background: #f8f9fa;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .btn-submit-chat {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 32px;
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-submit-chat:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+        }
+
+        .btn-submit-chat:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .submit-hint {
+            margin: 8px 0 0 0;
+            font-size: 0.85rem;
+            color: #6b7280;
+        }
+
+        .chat-submitted-message {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 60px 24px;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+        }
+
+        .chat-submitted-message h2 {
+            color: #166534;
+            margin: 0 0 8px 0;
+            font-size: 1.75rem;
+        }
+
+        .chat-submitted-message p {
+            color: #6b7280;
+            margin: 0;
+            font-size: 1rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .btn-submit-chat .spinner {
+            animation: spin 1s linear infinite;
         }
     </style>
 </head>
 <body>
     <!-- Loading Screen -->
     <div id="loading-screen" class="loading-screen">
+        <img src="/assets/images/rworld-in-line-logo-white.svg" alt="Realworld" style="height: 40px; margin-bottom: 2rem;">
         <div class="loader"></div>
         <div class="loading-text">Loading your session...</div>
     </div>
@@ -450,9 +590,15 @@
     <!-- Main Chat Container -->
     <div id="chat-container" class="chat-container" style="display: none;">
         <div class="chat-header">
+            <div class="chat-header-logo">
+                <img src="/assets/images/rworld-in-line-logo-white.svg" alt="Realworld">
+            </div>
+            <div class="chat-header-divider"></div>
+            <div class="chat-header-info">
+                <h2 id="chat-title">Loading...</h2>
+            </div>
             <div class="session-info" id="session-info"></div>
-            <h2 id="chat-title">Loading...</h2>
-            <p id="chat-subtitle">Please wait...</p>
+            <p id="chat-subtitle" style="display:none;">Please wait...</p>
             <div class="progress-bar">
                 <div class="progress-fill" id="progress-fill"></div>
             </div>
@@ -491,12 +637,24 @@
                 <button class="nav-button next" id="next-button" onclick="nextQuestion()">Next</button>
             </div>
         </div>
+
+        <!-- Submit Chat Area -->
+        <div class="chat-submit-area" id="chat-submit-area" style="display: none;">
+            <button id="submitChatBtn" class="btn-submit-chat" onclick="submitChat()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                Submit Feedback
+            </button>
+            <p class="submit-hint">Click when you're done to complete your feedback session</p>
+        </div>
     </div>
 
     <script>
     // Global Variables
     let sessionConfig = null;
     let chatType = 'listening';
+    let userMessageCount = 0;  // Track number of user messages sent
     let chatState = {
         messages: [],
         responses: {},
@@ -509,12 +667,147 @@
 
     // Prevent double initialization
     let isInitialized = false;
-    
+
+    // Get slug from URL path (e.g., /chat/abc123xyz -> abc123xyz)
+    function getChatSlugFromURL() {
+        const path = window.location.pathname;
+        const matches = path.match(/\/chat\/([a-zA-Z0-9]+)/);
+        return matches ? matches[1] : null;
+    }
+
+    // Load chat data from database using slug
+    async function loadChatFromSlug(slug) {
+        // Wait for Supabase to be ready (up to 5 seconds)
+        let attempts = 0;
+        const maxAttempts = 50;
+        while (!window.supabaseClient && attempts < maxAttempts) {
+            console.log('Waiting for Supabase client... attempt', attempts + 1);
+            await new Promise(resolve => setTimeout(resolve, 100));
+            attempts++;
+        }
+
+        if (!window.supabaseClient) {
+            console.error('Supabase client not available after', maxAttempts, 'attempts');
+            return null;
+        }
+
+        console.log('Supabase client is ready');
+
+        try {
+            const { data: chat, error } = await window.supabaseClient
+                .from('listening_chats')
+                .select('*')
+                .eq('slug', slug)
+                .eq('is_active', true)
+                .single();
+
+            if (error || !chat) {
+                console.error('Chat not found or not active:', error);
+                return null;
+            }
+
+            // Store chat data for later use
+            window.currentChat = chat;
+            console.log('Chat loaded from database:', chat.name);
+
+            return chat;
+
+        } catch (error) {
+            console.error('Error loading chat:', error);
+            return null;
+        }
+    }
+
+    // Generate or retrieve session ID for grouping messages
+    function getOrCreateSessionId() {
+        let sessionId = sessionStorage.getItem('chat_session_id');
+        if (!sessionId) {
+            sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
+            sessionStorage.setItem('chat_session_id', sessionId);
+        }
+        return sessionId;
+    }
+
+    // Save response to database
+    async function saveResponseToDatabase(messageText) {
+        console.log('📤 saveResponseToDatabase called with:', messageText);
+
+        const chat = window.currentChat;
+        console.log('📋 Current chat object:', chat);
+
+        if (!chat || !chat.id) {
+            console.error('❌ No chat loaded - cannot save response. window.currentChat:', window.currentChat);
+            return false;
+        }
+
+        if (!window.supabaseClient) {
+            console.error('❌ Supabase client not available');
+            return false;
+        }
+
+        const sessionId = getOrCreateSessionId();
+        console.log('🔑 Session ID:', sessionId);
+
+        const insertData = {
+            chat_id: chat.id,
+            session_id: sessionId,
+            response_text: messageText,
+            participant_name: null,
+            participant_email: null,
+            is_read: false,
+            submitted_at: new Date().toISOString()
+        };
+        console.log('📝 Insert data:', insertData);
+
+        try {
+            console.log('⏳ Attempting to insert into chat_responses...');
+
+            const { data, error } = await window.supabaseClient
+                .from('chat_responses')
+                .insert(insertData)
+                .select()
+                .single();
+
+            if (error) {
+                console.error('❌ Supabase insert error:', error);
+                throw error;
+            }
+
+            console.log('✅ Response saved to database:', data);
+            return true;
+
+        } catch (error) {
+            console.error('❌ Error saving response to database:', error);
+            console.error('Error details:', JSON.stringify(error, null, 2));
+            return false;
+        }
+    }
+
+    // Show error message when chat cannot be loaded
+    function showChatError(message) {
+        const loadingScreen = document.getElementById('loading-screen');
+        const chatContainer = document.getElementById('chat-container');
+
+        if (loadingScreen) loadingScreen.style.display = 'none';
+        if (chatContainer) chatContainer.style.display = 'flex';
+
+        document.getElementById('chat-title').textContent = 'Chat Unavailable';
+        document.getElementById('chat-subtitle').textContent = message;
+
+        const inputArea = document.getElementById('input-area');
+        const userInput = document.getElementById('user-input');
+        const sendButton = document.getElementById('send-button');
+
+        if (inputArea) inputArea.style.display = 'none';
+        if (userInput) userInput.disabled = true;
+        if (sendButton) sendButton.disabled = true;
+    }
+
     // Initialize on page load
     window.addEventListener('DOMContentLoaded', initializeChat);
 
-    // Failsafe: Force show chat after 5 seconds if still loading
-    setTimeout(() => {
+    // Failsafe: Force show chat after 8 seconds if still loading (increased for async db load)
+    setTimeout(async () => {
         const loadingScreen = document.getElementById('loading-screen');
         const chatContainer = document.getElementById('chat-container');
 
@@ -528,12 +821,12 @@
             // Initialize if not already done
             if (!isInitialized) {
                 console.log('🆘 Failsafe initialization');
-                initializeChat();
+                await initializeChat();
             }
         }
-    }, 5000);
+    }, 8000);
 
-    function initializeChat() {
+    async function initializeChat() {
         console.log('🔄 initializeChat() called, isInitialized:', isInitialized);
 
         // Prevent double initialization
@@ -544,42 +837,76 @@
 
         console.log('🚀 Starting chat initialization...');
 
-        // Parse URL parameters
-        const urlParams = new URLSearchParams(window.location.search);
-        let sessionId = urlParams.get('session');
-        const typeParam = urlParams.get('type');
-        const chatName = urlParams.get('name');
-        const welcomeMsg = urlParams.get('welcome');
-        const topics = urlParams.get('topics');
-        const questionsParam = urlParams.get('questions');
+        // First, check if there's a slug in the URL path (e.g., /chat/abc123xyz)
+        const slug = getChatSlugFromURL();
 
-        console.log('📋 URL params:', { sessionId, typeParam, chatName, welcomeMsg, topics, questionsParam });
+        if (slug) {
+            console.log('🔗 Found slug in URL path:', slug);
 
-        // Allow direct access for testing or when using API-generated sessions
-        if (!sessionId) {
-            // Check if this is API-powered mode
-            if (typeof apiChatState !== 'undefined' && apiChatState.sessionId) {
-                sessionId = apiChatState.sessionId;
-                console.log('🔄 Using API-generated session:', sessionId);
+            // Load chat from database
+            const chat = await loadChatFromSlug(slug);
+
+            if (chat) {
+                // Create session configuration from database chat
+                sessionConfig = {
+                    id: chat.id,
+                    type: 'listening',
+                    name: chat.name || 'Feedback Session',
+                    welcomeMessage: chat.welcome_message || 'Welcome to this feedback session!',
+                    topics: null,
+                    questions: null,
+                    slug: chat.slug,
+                    organizationId: chat.organization_id
+                };
+
+                chatType = 'listening';
+                chatState.participantId = 'participant_' + Math.random().toString(36).substr(2, 9);
+
+                console.log('✅ Chat loaded from database:', sessionConfig.name);
             } else {
-                // Generate a demo session for direct access
-                sessionId = 'demo_' + Math.random().toString(36).substr(2, 9);
-                console.log('🔄 Generated demo session for direct access:', sessionId);
+                // Chat not found - show error
+                showChatError('This chat link is no longer active or does not exist.');
+                isInitialized = true;
+                return;
             }
-        }
+        } else {
+            // Fallback to URL parameters (legacy mode)
+            const urlParams = new URLSearchParams(window.location.search);
+            let sessionId = urlParams.get('session');
+            const typeParam = urlParams.get('type');
+            const chatName = urlParams.get('name');
+            const welcomeMsg = urlParams.get('welcome');
+            const topics = urlParams.get('topics');
+            const questionsParam = urlParams.get('questions');
 
-        // Create session configuration from URL parameters
-        sessionConfig = {
-            id: sessionId,
-            type: typeParam || 'listening',
-            name: chatName || 'Feedback Session',
-            welcomeMessage: welcomeMsg || 'Welcome to this feedback session!',
-            topics: topics ? topics.split(',').map(t => t.trim()) : null,
-            questions: questionsParam ? JSON.parse(decodeURIComponent(questionsParam)) : null
-        };
-        
-        chatType = sessionConfig.type;
-        chatState.participantId = sessionId;
+            console.log('📋 URL params:', { sessionId, typeParam, chatName, welcomeMsg, topics, questionsParam });
+
+            // Allow direct access for testing or when using API-generated sessions
+            if (!sessionId) {
+                // Check if this is API-powered mode
+                if (typeof apiChatState !== 'undefined' && apiChatState.sessionId) {
+                    sessionId = apiChatState.sessionId;
+                    console.log('🔄 Using API-generated session:', sessionId);
+                } else {
+                    // Generate a demo session for direct access
+                    sessionId = 'demo_' + Math.random().toString(36).substr(2, 9);
+                    console.log('🔄 Generated demo session for direct access:', sessionId);
+                }
+            }
+
+            // Create session configuration from URL parameters
+            sessionConfig = {
+                id: sessionId,
+                type: typeParam || 'listening',
+                name: chatName || 'Feedback Session',
+                welcomeMessage: welcomeMsg || 'Welcome to this feedback session!',
+                topics: topics ? topics.split(',').map(t => t.trim()) : null,
+                questions: questionsParam ? JSON.parse(decodeURIComponent(questionsParam)) : null
+            };
+
+            chatType = sessionConfig.type;
+            chatState.participantId = sessionId;
+        }
 
         // Apply organization branding if available
         applyBranding();
@@ -658,7 +985,13 @@
 
     function setupListeningInterface() {
         document.getElementById('input-area').style.display = 'block';
-        
+
+        // Show submit area for listening chats
+        const submitArea = document.getElementById('chat-submit-area');
+        if (submitArea) {
+            submitArea.style.display = 'block';
+        }
+
         // Setup textarea auto-resize
         const textarea = document.getElementById('user-input');
         textarea.addEventListener('input', function() {
@@ -677,6 +1010,12 @@
 
     function setupChatSurveyInterface() {
         document.getElementById('input-area').style.display = 'block';
+
+        // Show submit area for chat surveys
+        const submitArea = document.getElementById('chat-submit-area');
+        if (submitArea) {
+            submitArea.style.display = 'block';
+        }
         
         // Similar to listening but with structured questions
         const textarea = document.getElementById('user-input');
@@ -857,6 +1196,7 @@
         messageDiv.innerHTML = `<div class="message-content">${text}</div>`;
         messagesContainer.appendChild(messageDiv);
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        userMessageCount++;  // Track message count for submit validation
     }
 
     function addBotMessage(text) {
@@ -878,6 +1218,7 @@
         messageDiv.innerHTML = `<div class="message-bubble">${text}</div>`;
         messagesContainer.appendChild(messageDiv);
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        userMessageCount++;  // Track message count for submit validation
 
         // Add to state
         chatState.messages.push({ sender: 'user', text: text, timestamp: Date.now() });
@@ -889,10 +1230,19 @@
     }
 
     function sendMessage() {
+        console.log('📨 sendMessage called');
+
         const input = document.getElementById('user-input');
         const message = input.value.trim();
 
-        if (!message) return;
+        console.log('📝 Message text:', message);
+        console.log('🔧 Chat type:', chatType);
+        console.log('💬 window.currentChat:', window.currentChat);
+
+        if (!message) {
+            console.log('⚠️ Empty message, returning');
+            return;
+        }
 
         // Add user message
         addUserMessage(message);
@@ -906,15 +1256,24 @@
 
         // Process based on chat type
         if (chatType === 'listening') {
+            console.log('🎧 Routing to handleListeningResponse');
             handleListeningResponse(message);
         } else if (chatType === 'chat') {
+            console.log('💬 Routing to handleChatSurveyResponse');
             handleChatSurveyResponse(message);
+        } else {
+            console.log('⚠️ Unknown chatType:', chatType);
         }
     }
 
     function handleListeningResponse(message) {
-        // Store response
+        console.log('🎧 handleListeningResponse called with:', message);
+
+        // Store response locally
         chatState.responses[`response_${Date.now()}`] = message;
+
+        // NOTE: Database save is handled by the enhanced sendMessage function
+        // to prevent duplicate saves
 
         // Simulate AI response
         setTimeout(() => {
@@ -1034,6 +1393,9 @@
             chatState.responses[question.id] = message;
             chatState.currentQuestionIndex++;
         }
+
+        // NOTE: Database save is handled by the enhanced sendMessage function
+        // to prevent duplicate saves
 
         // Show typing and ask next question
         setTimeout(() => {
@@ -1270,13 +1632,73 @@
     }
 
     function showTypingIndicator() {
-        document.getElementById('typing-indicator').classList.add('show');
+        const typingIndicator = document.getElementById('typing-indicator');
         const container = document.getElementById('chat-messages');
-        container.scrollTop = container.scrollHeight;
+        if (typingIndicator) {
+            typingIndicator.classList.add('show');
+            typingIndicator.style.display = 'flex';
+        }
+        if (container) {
+            container.scrollTop = container.scrollHeight;
+        }
     }
 
     function hideTypingIndicator() {
-        document.getElementById('typing-indicator').classList.remove('show');
+        const typingIndicator = document.getElementById('typing-indicator');
+        if (typingIndicator) {
+            typingIndicator.classList.remove('show');
+            typingIndicator.style.display = 'none';
+        }
+    }
+
+    // Submit chat / finalize session
+    async function submitChat() {
+        const submitBtn = document.getElementById('submitChatBtn');
+
+        if (!submitBtn) return;
+
+        // Check if there are any user messages using counter first, then DOM fallback
+        if (userMessageCount === 0) {
+            // Fallback: check DOM with correct selector (.message.user)
+            const userMessages = document.querySelectorAll('.message.user');
+            if (userMessages.length === 0) {
+                alert('Please send at least one message before submitting.');
+                return;
+            }
+        }
+
+        // Disable button and show loading
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="spinner">
+                <circle cx="12" cy="12" r="10"></circle>
+            </svg>
+            Submitting...
+        `;
+
+        // Small delay for UX
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        // Show success message
+        showSubmitSuccess();
+    }
+
+    function showSubmitSuccess() {
+        const chatContainer = document.getElementById('chat-container');
+
+        if (chatContainer) {
+            chatContainer.innerHTML = `
+                <div class="chat-submitted-message">
+                    <div style="font-size: 3rem; margin-bottom: 16px;">✅</div>
+                    <h2>Thank you for your feedback!</h2>
+                    <p>Your responses have been submitted successfully.</p>
+                    <p style="margin-top: 16px; font-size: 0.9rem; color: #9ca3af;">You can close this window now.</p>
+                </div>
+            `;
+        }
+
+        // Clear the session so if they come back they get a new session
+        sessionStorage.removeItem('chat_session_id');
     }
 
     async function endConversation() {
@@ -1354,11 +1776,11 @@
     <!-- Include Supabase library from CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- Include config for API endpoints -->
-    <script src="assets/js/config.js"></script>
+    <script src="/assets/js/config.js"></script>
     <!-- Include Supabase client -->
-    <script src="lib/supabase.js"></script>
+    <script src="/lib/supabase.js"></script>
     <!-- Include database functions -->
-    <script src="assets/js/database.js"></script>
+    <script src="/assets/js/database.js"></script>
 
     <!-- Real-time Chat API Integration -->
     <script>
@@ -1453,7 +1875,12 @@
                 const input = document.getElementById('user-input');
                 const message = input.value.trim();
 
-                if (!message || apiChatState.conversationComplete) return;
+                console.log('🚀 Enhanced sendMessage called with:', message);
+
+                if (!message || apiChatState.conversationComplete) {
+                    console.log('⚠️ Empty message or conversation complete, returning');
+                    return;
+                }
 
                 // Add user message to UI
                 addUserMessage(message);
@@ -1463,17 +1890,21 @@
                 // Show typing indicator
                 showTypingIndicator();
 
+                // ALWAYS save response to database regardless of mode
+                console.log('💾 Saving response to database from enhanced sendMessage...');
+                saveResponseToDatabase(message).then(saved => {
+                    console.log('✅ Database save result:', saved);
+                }).catch(err => {
+                    console.error('❌ Database save error:', err);
+                });
+
                 if (apiChatState.isRealTime) {
+                    console.log('🔴 Using real-time mode');
                     await handleRealTimeResponse(message);
-                } else if (originalSendMessage) {
-                    // Fallback to original functionality
-                    originalSendMessage();
                 } else {
-                    // Basic fallback response
-                    setTimeout(() => {
-                        hideTypingIndicator();
-                        addBotMessage("Thank you for your message. Is there anything else you'd like to share?");
-                    }, 1500);
+                    console.log('📦 Using standard mode - calling handleListeningResponse directly');
+                    // Call handleListeningResponse directly since originalSendMessage would see empty input
+                    handleListeningResponse(message);
                 }
             };
         }
