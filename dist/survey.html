@@ -149,7 +149,7 @@
 
         /* Page Header */
         .page-header {
-            background: #f8f5ff;
+            background: white;
             padding: 1.5rem 2rem;
             border-left: 4px solid #7c3aed;
             margin: 1rem 0;
@@ -466,6 +466,7 @@
 
         // Current state
         let currentSurvey = null;
+        let currentSurveyData = null; // Parsed survey.data for accessing ratingScale etc.
         let currentPageIndex = 0;
         let responses = {};
         let respondentId = null;
@@ -592,11 +593,16 @@
             let surveyData;
             try {
                 surveyData = typeof survey.data === 'string' ? JSON.parse(survey.data) : survey.data;
+                currentSurveyData = surveyData; // Store globally for access in render functions
             } catch (e) {
                 console.error('Error parsing survey data:', e);
                 showError('Error loading survey questions');
                 return;
             }
+
+            // Debug: Log rating scale settings
+            console.log('Survey rating_scale column:', survey.rating_scale);
+            console.log('Survey data ratingScale:', surveyData?.ratingScale);
 
             const pages = surveyData.pages || [surveyData];
             const currentPage = pages[currentPageIndex];
@@ -751,9 +757,37 @@
         }
 
         function renderRating(question, questionId) {
-            // Get scale from question or survey default
-            const scale = question.ratingScale?.points || currentSurvey.rating_scale?.points || 5;
-            const labels = question.ratingScale?.labels || currentSurvey.rating_scale?.labels || [];
+            // Get scale from question, survey data, or database column - check all possible locations
+            let scale = 5; // default
+            let labels = [];
+
+            // Priority 1: Question-level settings
+            if (question.ratingScale?.points) {
+                scale = question.ratingScale.points;
+                labels = question.ratingScale.labels || [];
+            } else if (question.scale?.points) {
+                scale = question.scale.points;
+                labels = question.scale.labels || [];
+            } else if (question.points) {
+                scale = question.points;
+            }
+            // Priority 2: Survey data (parsed JSON from data column)
+            else if (currentSurveyData?.ratingScale?.points) {
+                scale = currentSurveyData.ratingScale.points;
+                labels = currentSurveyData.ratingScale.labels || [];
+            }
+            // Priority 3: Database column rating_scale (may be JSON object or string)
+            else if (currentSurvey.rating_scale) {
+                const ratingScale = typeof currentSurvey.rating_scale === 'string'
+                    ? JSON.parse(currentSurvey.rating_scale)
+                    : currentSurvey.rating_scale;
+                if (ratingScale?.points) {
+                    scale = ratingScale.points;
+                    labels = ratingScale.labels || [];
+                }
+            }
+
+            console.log('Rendering rating with scale:', scale, 'labels:', labels);
 
             let html = '<div class="rating-scale">';
 

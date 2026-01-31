@@ -1996,7 +1996,7 @@
 
         .survey-builder-container .sb-page-card-header {
             padding: 20px 24px;
-            background: var(--sb-primary-light);
+            background: white;
         }
 
         .survey-builder-container .sb-page-card-header-top {
@@ -16597,7 +16597,7 @@ function sbRenderPreviewContent() {
     // Page instructions
     if (page.title || page.instructions) {
         html += `
-            <div class="sb-preview-page-instructions" style="background:var(--sb-primary-light);">
+            <div class="sb-preview-page-instructions" style="background:white;">
                 ${page.title ? `<h2 class="sb-preview-page-title">${page.title}</h2>` : ''}
                 ${page.instructions ? `<p class="sb-preview-page-text">${page.instructions}</p>` : ''}
             </div>
