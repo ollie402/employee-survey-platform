@@ -828,28 +828,50 @@ document.getElementById('login-form').addEventListener('submit', async function(
             .eq('auth_id', authData.user.id)
             .single();
 
+        let finalUserData = userData;
+
         if (userError || !userData) {
-            // User exists in Auth but not in users table - shouldn't happen but handle it
-            console.error('User not found in users table:', userError);
-            throw new Error('Account not properly configured. Please contact support.');
+            // User exists in Auth but not in users table - create record as fallback
+            console.warn('User not found in users table, creating record:', userError);
+
+            const { data: newUser, error: insertError } = await window.supabaseClient
+                .from('users')
+                .insert({
+                    auth_id: authData.user.id,
+                    email: authData.user.email,
+                    first_name: '',
+                    last_name: '',
+                    role: 'viewer',
+                    is_active: true
+                })
+                .select('*, organizations(*)')
+                .single();
+
+            if (insertError || !newUser) {
+                console.error('Failed to create user record:', insertError);
+                throw new Error('Account setup failed. Please try again or contact support.');
+            }
+
+            console.log('Created user record:', newUser);
+            finalUserData = newUser;
         }
 
         // Set current user with data from database
         currentUser = {
-            id: userData.id,
+            id: finalUserData.id,
             auth_id: authData.user.id,
-            name: `${userData.first_name} ${userData.last_name}`,
-            firstName: userData.first_name,
-            lastName: userData.last_name,
-            email: userData.email,
-            organization: userData.organizations?.name || 'Unknown',
-            organization_id: userData.organization_id,
-            role: userData.role,
-            access: userData.role,
-            sections: getSectionsForRole(userData.role),
-            badge: getBadgeForRole(userData.role),
-            badgeClass: getBadgeClassForRole(userData.role),
-            avatar: userData.first_name ? userData.first_name.charAt(0).toUpperCase() : '?'
+            name: `${finalUserData.first_name || ''} ${finalUserData.last_name || ''}`.trim() || finalUserData.email,
+            firstName: finalUserData.first_name || '',
+            lastName: finalUserData.last_name || '',
+            email: finalUserData.email,
+            organization: finalUserData.organizations?.name || 'Unknown',
+            organization_id: finalUserData.organization_id,
+            role: finalUserData.role || 'user',
+            access: finalUserData.role || 'user',
+            sections: getSectionsForRole(finalUserData.role || 'user'),
+            badge: getBadgeForRole(finalUserData.role || 'user'),
+            badgeClass: getBadgeClassForRole(finalUserData.role || 'user'),
+            avatar: finalUserData.first_name ? finalUserData.first_name.charAt(0).toUpperCase() : (finalUserData.email ? finalUserData.email.charAt(0).toUpperCase() : '?')
         };
 
         // Apply organization-specific branding

@@ -97,6 +97,78 @@ function showBlueLoginPage() {
 }
 
 /**
+ * Show signup confirmation screen
+ * Tells user to check their email to complete setup
+ */
+function showSignupConfirmation(email) {
+    // Hide all auth pages
+    document.querySelectorAll('.auth-page').forEach(page => {
+        page.classList.add('hidden');
+    });
+
+    // Hide login container
+    const loginContainer = document.getElementById('login-container');
+    if (loginContainer) {
+        loginContainer.classList.add('hidden');
+    }
+
+    // Keep auth header visible
+    const authHeader = document.getElementById('auth-header');
+    if (authHeader) {
+        authHeader.classList.remove('hidden');
+    }
+
+    // Create and show confirmation message
+    let confirmationDiv = document.getElementById('auth-signup-confirmation');
+    if (!confirmationDiv) {
+        confirmationDiv = document.createElement('div');
+        confirmationDiv.id = 'auth-signup-confirmation';
+        confirmationDiv.className = 'auth-page';
+        confirmationDiv.innerHTML = `
+            <div class="auth-container">
+                <div class="auth-form-wrapper">
+                    <div style="text-align: center; padding: 40px 20px;">
+                        <div style="width: 80px; height: 80px; background: #dcfce7; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px;">
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                        </div>
+                        <h2 style="color: #1e293b; font-size: 24px; font-weight: 600; margin: 0 0 12px;">Account Created!</h2>
+                        <p style="color: #64748b; font-size: 16px; line-height: 1.6; margin: 0 0 8px;">
+                            We've sent a welcome email to:
+                        </p>
+                        <p style="color: #1e293b; font-size: 18px; font-weight: 600; margin: 0 0 24px;">
+                            ${email}
+                        </p>
+                        <p style="color: #64748b; font-size: 15px; line-height: 1.6; margin: 0 0 32px;">
+                            Please check your email and click the link to complete your account setup.
+                        </p>
+                        <div style="padding: 20px; background: #f8fafc; border-radius: 8px; margin-bottom: 24px;">
+                            <p style="color: #64748b; font-size: 14px; margin: 0;">
+                                <strong>Didn't receive the email?</strong><br>
+                                Check your spam folder or <a href="#" onclick="showAuthPage('auth-signup-step1'); return false;" style="color: #7c3aed;">try signing up again</a>.
+                            </p>
+                        </div>
+                        <button onclick="showBlueLoginPage()" class="auth-btn auth-btn-secondary" style="width: 100%;">
+                            Go to Login
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(confirmationDiv);
+    } else {
+        // Update email in existing confirmation div
+        const emailP = confirmationDiv.querySelector('p[style*="font-weight: 600"]');
+        if (emailP) {
+            emailP.textContent = email;
+        }
+    }
+
+    confirmationDiv.classList.remove('hidden');
+}
+
+/**
  * Step 1: Validate email and proceed to step 2
  */
 function authGoToStep2(event) {
@@ -189,18 +261,68 @@ async function authCreateAccount(event) {
 
             console.log('Account created:', data);
 
-            // Check if email confirmation is required
-            if (data.user && !data.session) {
-                alert('Please check your email to confirm your account.');
-                showBlueLoginPage();
-            } else if (data.session) {
-                // Auto-confirmed, redirect to dashboard
-                if (typeof showDashboard === 'function') {
-                    showDashboard();
-                } else {
-                    alert('Account created successfully!');
+            // Create user record in users table
+            let userRecord = null;
+            if (data.user) {
+                try {
+                    const { data: insertedUser, error: insertError } = await supabaseClient
+                        .from('users')
+                        .insert({
+                            auth_id: data.user.id,
+                            email: data.user.email,
+                            first_name: '',
+                            last_name: '',
+                            role: 'viewer',
+                            is_active: true,
+                            setup_complete: false
+                        })
+                        .select()
+                        .single();
+
+                    if (insertError) {
+                        console.error('Error creating user record:', insertError);
+                    } else {
+                        console.log('User record created in users table:', insertedUser);
+                        userRecord = insertedUser;
+                    }
+                } catch (insertErr) {
+                    console.error('Exception creating user record:', insertErr);
+                }
+
+                // Send welcome email with setup link
+                try {
+                    const emailResponse = await fetch('/api/send-welcome-email', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            email: data.user.email,
+                            userId: userRecord?.id || data.user.id,
+                            authId: data.user.id
+                        })
+                    });
+
+                    const emailResult = await emailResponse.json();
+                    if (emailResult.success) {
+                        console.log('Welcome email sent successfully');
+
+                        // Store setup token in users table
+                        if (emailResult.setupToken && userRecord?.id) {
+                            await supabaseClient
+                                .from('users')
+                                .update({ setup_token: emailResult.setupToken })
+                                .eq('id', userRecord.id);
+                        }
+                    } else {
+                        console.error('Failed to send welcome email:', emailResult);
+                    }
+                } catch (emailError) {
+                    console.error('Error sending welcome email:', emailError);
+                    // Don't block signup if email fails
                 }
             }
+
+            // Show confirmation message - user needs to check email
+            showSignupConfirmation(data.user.email);
         } else {
             console.log('Account data:', { ...authSignupData, password: '***' });
             alert('Account created! (Demo - Supabase not configured)');
