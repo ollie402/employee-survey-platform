@@ -189,12 +189,37 @@ async function authCreateAccount(event) {
 
             console.log('Account created:', data);
 
+            // Create user record in users table
+            if (data.user) {
+                try {
+                    const { error: insertError } = await supabaseClient
+                        .from('users')
+                        .insert({
+                            auth_id: data.user.id,
+                            email: data.user.email,
+                            first_name: '',
+                            last_name: '',
+                            role: 'user',
+                            is_active: true
+                        });
+
+                    if (insertError) {
+                        console.error('Error creating user record:', insertError);
+                        // Don't throw - the auth account was created, just log the error
+                    } else {
+                        console.log('User record created in users table');
+                    }
+                } catch (insertErr) {
+                    console.error('Exception creating user record:', insertErr);
+                }
+            }
+
             // Check if email confirmation is required
             if (data.user && !data.session) {
                 alert('Please check your email to confirm your account.');
                 showBlueLoginPage();
             } else if (data.session) {
-                // Auto-confirmed, redirect to dashboard
+                // Auto-confirmed, show dashboard
                 if (typeof showDashboard === 'function') {
                     showDashboard();
                 } else {
