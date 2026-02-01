@@ -168,8 +168,8 @@ async function authCreateAccount(event) {
 
     // All validated - create account with Supabase
     try {
-        if (typeof supabase !== 'undefined') {
-            const { data, error } = await supabase.auth.signUp({
+        if (typeof supabaseClient !== 'undefined') {
+            const { data, error } = await supabaseClient.auth.signUp({
                 email: authSignupData.email,
                 password: password,
                 options: {
@@ -212,14 +212,14 @@ async function authSocialSignup(provider) {
     console.log('Social signup with:', provider);
 
     try {
-        if (typeof supabase !== 'undefined') {
+        if (typeof supabaseClient !== 'undefined') {
             const providerMap = {
                 'google': 'google',
                 'microsoft': 'azure',
                 'apple': 'apple'
             };
 
-            const { error } = await supabase.auth.signInWithOAuth({
+            const { error } = await supabaseClient.auth.signInWithOAuth({
                 provider: providerMap[provider] || provider,
                 options: {
                     redirectTo: window.location.origin
@@ -241,8 +241,8 @@ async function authSocialSignup(provider) {
  */
 function initAuthWizard() {
     // Check if user is already logged in
-    if (typeof supabase !== 'undefined') {
-        supabase.auth.getSession().then(({ data: { session } }) => {
+    if (typeof supabaseClient !== 'undefined') {
+        supabaseClient.auth.getSession().then(({ data: { session } }) => {
             if (session) {
                 // User is logged in, show dashboard
                 if (typeof showDashboard === 'function') {
