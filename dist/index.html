@@ -1996,7 +1996,7 @@
 
         .survey-builder-container .sb-page-card-header {
             padding: 20px 24px;
-            background: var(--sb-primary-light);
+            background: white;
         }
 
         .survey-builder-container .sb-page-card-header-top {
@@ -3307,6 +3307,369 @@
         .survey-builder-container .sb-icon-sm { width: 16px; height: 16px; }
         .survey-builder-container .sb-icon-lg { width: 24px; height: 24px; }
         .survey-builder-container .sb-icon-xl { width: 48px; height: 48px; }
+
+        /* Responses Panel */
+        .survey-builder-container #sb-responses-panel {
+            padding: 24px;
+            background: var(--sb-background);
+            min-height: calc(100vh - 200px);
+        }
+
+        .survey-builder-container .sb-responses-summary {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .survey-builder-container .sb-stat-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1.25rem;
+            text-align: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            min-width: 150px;
+        }
+
+        .survey-builder-container .sb-stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--sb-primary);
+        }
+
+        .survey-builder-container .sb-stat-label {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-top: 0.25rem;
+        }
+
+        .survey-builder-container .sb-responses-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .survey-builder-container .sb-view-toggle {
+            display: flex;
+            background: #f3f4f6;
+            border-radius: 8px;
+            padding: 4px;
+        }
+
+        .survey-builder-container .sb-toggle-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            background: transparent;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            color: #6b7280;
+            transition: all 0.2s;
+        }
+
+        .survey-builder-container .sb-toggle-btn.active {
+            background: white;
+            color: var(--sb-primary);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .survey-builder-container .sb-export-btn {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            background: var(--sb-primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .survey-builder-container .sb-export-btn:hover {
+            background: #6d28d9;
+        }
+
+        /* Raw Data Table */
+        .survey-builder-container .sb-responses-table-wrapper {
+            overflow-x: auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .survey-builder-container .sb-responses-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 600px;
+        }
+
+        .survey-builder-container .sb-responses-table th,
+        .survey-builder-container .sb-responses-table td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .survey-builder-container .sb-responses-table th {
+            background: #f9fafb;
+            font-weight: 600;
+            color: #374151;
+            font-size: 0.875rem;
+            white-space: nowrap;
+        }
+
+        .survey-builder-container .sb-responses-table td {
+            font-size: 0.875rem;
+            color: #4b5563;
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .survey-builder-container .sb-responses-table tr:hover {
+            background: #f9fafb;
+        }
+
+        .survey-builder-container .sb-status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .survey-builder-container .sb-status-completed {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .survey-builder-container .sb-status-in_progress,
+        .survey-builder-container .sb-status-partial {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .survey-builder-container .sb-no-responses {
+            text-align: center;
+            padding: 3rem;
+            color: #6b7280;
+        }
+
+        .survey-builder-container .sb-no-responses-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Analytics View */
+        .survey-builder-container .sb-analytics-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .survey-builder-container .sb-analytics-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .survey-builder-container .sb-analytics-header h4 {
+            margin: 0;
+            font-size: 1rem;
+            color: #1f2937;
+        }
+
+        .survey-builder-container .sb-response-count {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .survey-builder-container .sb-stat-highlight {
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .survey-builder-container .sb-mean-value {
+            display: block;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--sb-primary);
+        }
+
+        .survey-builder-container .sb-mean-label {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        /* Bar Charts */
+        .survey-builder-container .sb-bar-chart {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .survey-builder-container .sb-bar-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .survey-builder-container .sb-bar-label {
+            width: 40px;
+            text-align: center;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .survey-builder-container .sb-bar-container {
+            flex: 1;
+            height: 24px;
+            background: #f3f4f6;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .survey-builder-container .sb-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--sb-primary), #a78bfa);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .survey-builder-container .sb-bar-value {
+            width: 100px;
+            font-size: 0.875rem;
+            color: #6b7280;
+            text-align: right;
+        }
+
+        /* Horizontal Bar Chart */
+        .survey-builder-container .sb-horizontal-bar-chart {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .survey-builder-container .sb-hbar-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .survey-builder-container .sb-hbar-label {
+            font-size: 0.875rem;
+            color: #374151;
+            font-weight: 500;
+        }
+
+        .survey-builder-container .sb-hbar-container {
+            height: 32px;
+            background: #f3f4f6;
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .survey-builder-container .sb-hbar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--sb-primary), #a78bfa);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .survey-builder-container .sb-hbar-value {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #374151;
+        }
+
+        /* Text Responses */
+        .survey-builder-container .sb-text-responses {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .survey-builder-container .sb-text-response {
+            background: #f9fafb;
+            padding: 0.75rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            color: #4b5563;
+            font-style: italic;
+        }
+
+        .survey-builder-container .sb-more-responses {
+            text-align: center;
+            color: #6b7280;
+            font-size: 0.875rem;
+            padding: 0.5rem;
+        }
+
+        /* Calendar Analytics */
+        .survey-builder-container .sb-calendar-analytics {
+            padding: 0.5rem 0;
+        }
+
+        .survey-builder-container .sb-popular-dates {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .survey-builder-container .sb-date-bar-row {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .survey-builder-container .sb-date-label {
+            width: 100px;
+            font-size: 0.875rem;
+            color: #374151;
+            flex-shrink: 0;
+        }
+
+        .survey-builder-container .sb-date-bar-container {
+            flex: 1;
+            height: 24px;
+            background: #f3f4f6;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .survey-builder-container .sb-date-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #8b5cf6, #a78bfa);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .survey-builder-container .sb-date-count {
+            width: 80px;
+            font-size: 0.75rem;
+            color: #6b7280;
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        .survey-builder-container .sb-no-data {
+            color: #9ca3af;
+            font-style: italic;
+            text-align: center;
+            padding: 1rem;
+        }
 
         /* ============================================== */
         /* SURVEY BUILDER STYLES - END                    */
@@ -5292,8 +5655,8 @@ Thank you!</textarea>
                                     </div>
                                 </div>
                                 <div class="sb-builder-tabs">
-                                    <button class="sb-builder-tab active" data-tab="questions">Questions</button>
-                                    <button class="sb-builder-tab" data-tab="responses">Responses</button>
+                                    <button class="sb-builder-tab active" data-tab="questions" onclick="sbShowQuestionsTab()">Questions</button>
+                                    <button class="sb-builder-tab" data-tab="responses" onclick="sbShowResponsesTab()">Responses</button>
                                     <button class="sb-builder-tab" onclick="sbOpenSettings()">Settings</button>
                                 </div>
                             </header>
@@ -5315,6 +5678,52 @@ Thank you!</textarea>
                                 </div>
                             </div>
 
+                            <!-- Responses Panel -->
+                            <div id="sb-responses-panel" class="sb-hidden">
+                                <!-- Summary Stats -->
+                                <div class="sb-responses-summary">
+                                    <div class="sb-stat-card">
+                                        <div class="sb-stat-value" id="sb-total-responses">0</div>
+                                        <div class="sb-stat-label">Total Responses</div>
+                                    </div>
+                                    <div class="sb-stat-card">
+                                        <div class="sb-stat-value" id="sb-completion-rate">0%</div>
+                                        <div class="sb-stat-label">Completion Rate</div>
+                                    </div>
+                                    <div class="sb-stat-card">
+                                        <div class="sb-stat-value" id="sb-avg-time">-</div>
+                                        <div class="sb-stat-label">Avg. Time</div>
+                                    </div>
+                                </div>
+
+                                <!-- View Toggle -->
+                                <div class="sb-responses-controls">
+                                    <div class="sb-view-toggle">
+                                        <button class="sb-toggle-btn active" onclick="sbShowRawData(event)">Raw Data</button>
+                                        <button class="sb-toggle-btn" onclick="sbShowAnalytics(event)">Analytics</button>
+                                    </div>
+                                    <button class="sb-export-btn" onclick="sbExportResponsesCSV()">
+                                        <svg class="sb-icon-sm" viewBox="0 0 24 24" style="margin-right: 6px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                                        Export CSV
+                                    </button>
+                                </div>
+
+                                <!-- Raw Data View -->
+                                <div id="sb-raw-data-view">
+                                    <div class="sb-responses-table-wrapper">
+                                        <table class="sb-responses-table">
+                                            <thead id="sb-responses-header"></thead>
+                                            <tbody id="sb-responses-body"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <!-- Analytics View -->
+                                <div id="sb-analytics-view" class="sb-hidden">
+                                    <div id="sb-analytics-container"></div>
+                                </div>
+                            </div>
+
                             <!-- Floating Actions -->
                             <div class="sb-floating-actions" id="sb-floating-actions">
                                 <button class="sb-floating-action" onclick="sbAddQuestion('single')" title="Add question">
@@ -5331,6 +5740,9 @@ Thank you!</textarea>
                                 </button>
                                 <button class="sb-floating-action" onclick="sbAddQuestion('text')" title="Paragraph">
                                     <svg class="sb-icon" viewBox="0 0 24 24"><line x1="17" y1="10" x2="3" y2="10"></line><line x1="21" y1="6" x2="3" y2="6"></line><line x1="21" y1="14" x2="3" y2="14"></line><line x1="17" y1="18" x2="3" y2="18"></line></svg>
+                                </button>
+                                <button class="sb-floating-action" onclick="sbAddQuestion('calendar')" title="Calendar">
+                                    <svg class="sb-icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
                                 </button>
                             </div>
 
@@ -11682,7 +12094,8 @@ const sbQuestionTypeLabels = {
     rating: 'Linear Scale',
     single: 'Multiple Choice',
     multi: 'Checkboxes',
-    text: 'Paragraph'
+    text: 'Paragraph',
+    calendar: 'Calendar'
 };
 
 let sbSurveys = JSON.parse(localStorage.getItem('sbSurveys') || '[]');
@@ -11692,13 +12105,28 @@ let sbDraggedQuestionIndex = null;
 
 // Survey Builder Utility Functions
 function sbGenerateId() {
-    return Math.random().toString(36).substr(2, 9);
+    // Generate a proper UUID v4 for database primary keys
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        const r = Math.random() * 16 | 0;
+        const v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
+}
+
+function sbGenerateShortCode(length = 9) {
+    // Generate short alphanumeric code for URLs and internal IDs
+    const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    for (let i = 0; i < length; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
 }
 
 function sbCreateDefaultSurvey() {
     return {
-        id: sbGenerateId(),
-        public_code: sbGenerateId(), // Short code for public survey links
+        id: sbGenerateId(), // UUID for database primary key
+        public_code: sbGenerateShortCode(), // Short code for shareable URLs
         name: 'Untitled Survey',
         description: '',
         themeColor: 'purple',
@@ -11711,14 +12139,14 @@ function sbCreateDefaultSurvey() {
         endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
         landingPageContent: 'Thank you for taking the time to complete this survey. Your feedback is valuable to us.',
         thankYouContent: 'Your response has been recorded. Thank you for your feedback!',
-        pages: [{ id: sbGenerateId(), title: 'Page 1', instructions: '', questions: [], logic: [] }],
+        pages: [{ id: sbGenerateShortCode(), title: 'Page 1', instructions: '', questions: [], logic: [] }],
         createdAt: new Date().toISOString()
     };
 }
 
 function sbCreateDefaultQuestion(type) {
     const question = {
-        id: sbGenerateId(),
+        id: sbGenerateShortCode(),
         type,
         text: '',
         required: false,
@@ -14068,7 +14496,7 @@ function sbEditSurvey(id) {
     if (sbCurrentSurvey) {
         // Ensure old surveys have a public_code
         if (!sbCurrentSurvey.public_code) {
-            sbCurrentSurvey.public_code = sbGenerateId();
+            sbCurrentSurvey.public_code = sbGenerateShortCode();
         }
         sbCurrentPageIndex = 0;
         sbOpenBuilder();
@@ -14118,6 +14546,17 @@ function sbOpenBuilder() {
     document.getElementById('sb-dashboard-view').classList.add('sb-hidden');
     document.getElementById('sb-builder-view').classList.remove('sb-hidden');
     document.getElementById('sb-preview-view').classList.add('sb-hidden');
+
+    // Ensure responses panel is hidden and questions tab is active
+    document.getElementById('sb-responses-panel').classList.add('sb-hidden');
+    document.querySelector('.sb-builder-content').style.display = 'flex';
+    document.getElementById('sb-floating-actions').classList.remove('sb-hidden');
+    document.querySelector('.sb-save-bar').style.display = 'flex';
+
+    // Reset tab active states
+    document.querySelectorAll('.sb-builder-tab').forEach(tab => tab.classList.remove('active'));
+    document.querySelector('.sb-builder-tab[data-tab="questions"]').classList.add('active');
+
     sbApplyTheme(sbCurrentSurvey.themeColor);
     sbRenderBuilder();
 }
@@ -14125,6 +14564,431 @@ function sbOpenBuilder() {
 function sbGoToDashboard() {
     sbRenderDashboard();
 }
+
+// ============================================
+// SURVEY BUILDER - RESPONSES TAB
+// ============================================
+
+// Store current responses for export
+let sbCurrentResponses = [];
+
+// Show Questions Tab (default view)
+function sbShowQuestionsTab() {
+    // Update tab active states
+    document.querySelectorAll('.sb-builder-tab').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    document.querySelector('.sb-builder-tab[data-tab="questions"]').classList.add('active');
+
+    // Show questions content, hide responses
+    document.querySelector('.sb-builder-content').style.display = 'flex';
+    document.getElementById('sb-floating-actions').classList.remove('sb-hidden');
+    document.querySelector('.sb-save-bar').style.display = 'flex';
+    document.getElementById('sb-responses-panel').classList.add('sb-hidden');
+}
+
+// Show Responses Tab
+async function sbShowResponsesTab() {
+    if (!sbCurrentSurvey || !sbCurrentSurvey.id) {
+        alert('Please save your survey first to view responses.');
+        return;
+    }
+
+    // Update tab active states
+    document.querySelectorAll('.sb-builder-tab').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    document.querySelector('.sb-builder-tab[data-tab="responses"]').classList.add('active');
+
+    // Hide questions content, show responses panel
+    document.querySelector('.sb-builder-content').style.display = 'none';
+    document.getElementById('sb-floating-actions').classList.add('sb-hidden');
+    document.querySelector('.sb-save-bar').style.display = 'none';
+    document.getElementById('sb-responses-panel').classList.remove('sb-hidden');
+
+    // Fetch and display responses
+    try {
+        const { data: responses, error } = await window.supabaseClient
+            .from('survey_responses')
+            .select('*')
+            .eq('survey_id', sbCurrentSurvey.id)
+            .order('completed_at', { ascending: false });
+
+        if (error) {
+            console.error('Error fetching responses:', error);
+            sbCurrentResponses = [];
+        } else {
+            sbCurrentResponses = responses || [];
+        }
+
+        sbRenderResponsesPanel(sbCurrentResponses);
+    } catch (err) {
+        console.error('Failed to fetch responses:', err);
+        sbCurrentResponses = [];
+        sbRenderResponsesPanel([]);
+    }
+}
+
+// Render the responses panel
+function sbRenderResponsesPanel(responses) {
+    sbCalculateSummaryStats(responses);
+    sbRenderRawDataTable(responses);
+    sbRenderAnalytics(responses);
+}
+
+// Calculate and display summary stats
+function sbCalculateSummaryStats(responses) {
+    const total = responses.length;
+    const completed = responses.filter(r => r.completed_at).length;
+    const completionRate = total > 0 ? ((completed / total) * 100).toFixed(0) : 0;
+
+    document.getElementById('sb-total-responses').textContent = total;
+    document.getElementById('sb-completion-rate').textContent = `${completionRate}%`;
+    document.getElementById('sb-avg-time').textContent = '-';
+}
+
+// Get all questions from the current survey
+function sbGetAllQuestions() {
+    if (!sbCurrentSurvey || !sbCurrentSurvey.pages) return [];
+
+    const questions = [];
+    sbCurrentSurvey.pages.forEach(page => {
+        if (page.questions) {
+            questions.push(...page.questions);
+        }
+    });
+    return questions;
+}
+
+// Render raw data table
+function sbRenderRawDataTable(responses) {
+    const questions = sbGetAllQuestions();
+    const headerEl = document.getElementById('sb-responses-header');
+    const bodyEl = document.getElementById('sb-responses-body');
+
+    // Build header row
+    let headerHTML = '<tr><th>Submitted</th>';
+    questions.forEach((q, index) => {
+        const title = q.text || q.title || `Question ${index + 1}`;
+        const shortTitle = title.substring(0, 25) + (title.length > 25 ? '...' : '');
+        headerHTML += `<th title="${title}">Q${index + 1}: ${shortTitle}</th>`;
+    });
+    headerHTML += '</tr>';
+    headerEl.innerHTML = headerHTML;
+
+    // Build data rows
+    if (responses.length === 0) {
+        bodyEl.innerHTML = `
+            <tr>
+                <td colspan="${questions.length + 1}">
+                    <div class="sb-no-responses">
+                        <div class="sb-no-responses-icon">📭</div>
+                        <p>No responses yet</p>
+                        <p style="font-size: 0.875rem;">Responses will appear here once people complete your survey.</p>
+                    </div>
+                </td>
+            </tr>
+        `;
+        return;
+    }
+
+    let bodyHTML = '';
+    responses.forEach(response => {
+        const answers = response.responses || {};
+        const submittedDate = response.completed_at
+            ? new Date(response.completed_at).toLocaleString()
+            : 'In progress';
+
+        bodyHTML += `<tr><td>${submittedDate}</td>`;
+
+        questions.forEach(q => {
+            const answer = answers[q.id];
+            let displayAnswer = '-';
+
+            if (Array.isArray(answer)) {
+                displayAnswer = answer.join(', ');
+            } else if (answer !== undefined && answer !== null && answer !== '') {
+                displayAnswer = answer.toString();
+            }
+
+            bodyHTML += `<td title="${displayAnswer}">${displayAnswer}</td>`;
+        });
+
+        bodyHTML += '</tr>';
+    });
+
+    bodyEl.innerHTML = bodyHTML;
+}
+
+// Render analytics view
+function sbRenderAnalytics(responses) {
+    const questions = sbGetAllQuestions();
+    const container = document.getElementById('sb-analytics-container');
+
+    if (responses.length === 0) {
+        container.innerHTML = `
+            <div class="sb-no-responses">
+                <div class="sb-no-responses-icon">📊</div>
+                <p>No data to analyze yet</p>
+                <p style="font-size: 0.875rem;">Analytics will appear once you receive responses.</p>
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = '';
+
+    questions.forEach((question, qIndex) => {
+        const questionCard = document.createElement('div');
+        questionCard.className = 'sb-analytics-card';
+
+        // Get all answers for this question
+        const answers = responses
+            .map(r => r.responses?.[question.id])
+            .filter(a => a !== undefined && a !== null && a !== '');
+
+        const title = question.text || question.title || `Question ${qIndex + 1}`;
+
+        let analyticsHTML = `
+            <div class="sb-analytics-header">
+                <h4>Q${qIndex + 1}: ${title}</h4>
+                <span class="sb-response-count">${answers.length} responses</span>
+            </div>
+            <div class="sb-analytics-content">
+        `;
+
+        if (question.type === 'rating') {
+            // Rating: Show mean and distribution bar chart
+            const numericAnswers = answers.map(a => parseFloat(a)).filter(a => !isNaN(a));
+            const mean = numericAnswers.length > 0
+                ? (numericAnswers.reduce((a, b) => a + b, 0) / numericAnswers.length).toFixed(2)
+                : 'N/A';
+
+            // Count distribution
+            const distribution = {};
+            numericAnswers.forEach(a => {
+                distribution[a] = (distribution[a] || 0) + 1;
+            });
+
+            analyticsHTML += `
+                <div class="sb-stat-highlight">
+                    <span class="sb-mean-value">${mean}</span>
+                    <span class="sb-mean-label">Mean Average</span>
+                </div>
+                <div class="sb-distribution-chart">
+                    ${sbRenderBarChart(distribution, numericAnswers.length)}
+                </div>
+            `;
+        } else if (question.type === 'single' || question.type === 'multi') {
+            // Choice questions: Show percentage distribution
+            const distribution = {};
+            answers.forEach(a => {
+                if (Array.isArray(a)) {
+                    a.forEach(opt => distribution[opt] = (distribution[opt] || 0) + 1);
+                } else {
+                    distribution[a] = (distribution[a] || 0) + 1;
+                }
+            });
+
+            const options = question.options || Object.keys(distribution);
+
+            analyticsHTML += `
+                <div class="sb-distribution-chart">
+                    ${sbRenderHorizontalBarChart(distribution, answers.length, options)}
+                </div>
+            `;
+        } else if (question.type === 'text') {
+            // Text questions: Show list of responses
+            analyticsHTML += `
+                <div class="sb-text-responses">
+                    ${answers.slice(0, 10).map(a => `<div class="sb-text-response">"${a}"</div>`).join('')}
+                    ${answers.length > 10 ? `<div class="sb-more-responses">+ ${answers.length - 10} more responses</div>` : ''}
+                </div>
+            `;
+        } else if (question.type === 'calendar') {
+            // Calendar questions: Show date popularity chart
+            const dateCount = {};
+            answers.forEach(answer => {
+                // Answer could be a JSON array of dates or a comma-separated string
+                let dates = [];
+                try {
+                    dates = typeof answer === 'string' ? JSON.parse(answer) : answer;
+                } catch (e) {
+                    dates = answer.split(',').map(d => d.trim());
+                }
+                if (Array.isArray(dates)) {
+                    dates.forEach(date => {
+                        if (date) {
+                            dateCount[date] = (dateCount[date] || 0) + 1;
+                        }
+                    });
+                }
+            });
+
+            // Sort dates by count (most popular first)
+            const sortedDates = Object.entries(dateCount)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 10); // Show top 10 dates
+
+            if (sortedDates.length > 0) {
+                const maxCount = sortedDates[0][1];
+                analyticsHTML += `
+                    <div class="sb-calendar-analytics">
+                        <div class="sb-popular-dates">
+                            ${sortedDates.map(([date, count]) => {
+                                const percentage = Math.round((count / answers.length) * 100);
+                                const barWidth = Math.round((count / maxCount) * 100);
+                                return `
+                                    <div class="sb-date-bar-row">
+                                        <div class="sb-date-label">${date}</div>
+                                        <div class="sb-date-bar-container">
+                                            <div class="sb-date-bar" style="width: ${barWidth}%"></div>
+                                        </div>
+                                        <div class="sb-date-count">${count} (${percentage}%)</div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            } else {
+                analyticsHTML += '<p class="sb-no-data">No dates selected yet</p>';
+            }
+        } else {
+            // Default: show text responses
+            analyticsHTML += `
+                <div class="sb-text-responses">
+                    ${answers.slice(0, 10).map(a => `<div class="sb-text-response">${a}</div>`).join('')}
+                    ${answers.length > 10 ? `<div class="sb-more-responses">+ ${answers.length - 10} more responses</div>` : ''}
+                </div>
+            `;
+        }
+
+        analyticsHTML += '</div>';
+        questionCard.innerHTML = analyticsHTML;
+        container.appendChild(questionCard);
+    });
+}
+
+// Render vertical bar chart for rating questions
+function sbRenderBarChart(distribution, total) {
+    if (total === 0) return '<p>No data</p>';
+
+    const sortedKeys = Object.keys(distribution).sort((a, b) => parseFloat(a) - parseFloat(b));
+    let html = '<div class="sb-bar-chart">';
+
+    sortedKeys.forEach(key => {
+        const count = distribution[key];
+        const percentage = ((count / total) * 100).toFixed(1);
+        html += `
+            <div class="sb-bar-item">
+                <div class="sb-bar-label">${key}</div>
+                <div class="sb-bar-container">
+                    <div class="sb-bar-fill" style="width: ${percentage}%"></div>
+                </div>
+                <div class="sb-bar-value">${count} (${percentage}%)</div>
+            </div>
+        `;
+    });
+
+    html += '</div>';
+    return html;
+}
+
+// Render horizontal bar chart for choice questions
+function sbRenderHorizontalBarChart(distribution, total, options) {
+    if (total === 0) return '<p>No data</p>';
+
+    let html = '<div class="sb-horizontal-bar-chart">';
+
+    // Use options order if available
+    const keys = options.length > 0 ? options : Object.keys(distribution);
+
+    keys.forEach(key => {
+        const count = distribution[key] || 0;
+        const percentage = total > 0 ? ((count / total) * 100).toFixed(1) : 0;
+        html += `
+            <div class="sb-hbar-item">
+                <div class="sb-hbar-label">${key}</div>
+                <div class="sb-hbar-container">
+                    <div class="sb-hbar-fill" style="width: ${percentage}%"></div>
+                    <span class="sb-hbar-value">${percentage}% (${count})</span>
+                </div>
+            </div>
+        `;
+    });
+
+    html += '</div>';
+    return html;
+}
+
+// Toggle between Raw Data and Analytics views
+function sbShowRawData(event) {
+    document.getElementById('sb-raw-data-view').classList.remove('sb-hidden');
+    document.getElementById('sb-analytics-view').classList.add('sb-hidden');
+    document.querySelectorAll('.sb-toggle-btn').forEach(btn => btn.classList.remove('active'));
+    if (event && event.target) event.target.classList.add('active');
+}
+
+function sbShowAnalytics(event) {
+    document.getElementById('sb-raw-data-view').classList.add('sb-hidden');
+    document.getElementById('sb-analytics-view').classList.remove('sb-hidden');
+    document.querySelectorAll('.sb-toggle-btn').forEach(btn => btn.classList.remove('active'));
+    if (event && event.target) event.target.classList.add('active');
+}
+
+// Export responses to CSV
+function sbExportResponsesCSV() {
+    const questions = sbGetAllQuestions();
+    const responses = sbCurrentResponses;
+
+    if (responses.length === 0) {
+        alert('No responses to export');
+        return;
+    }
+
+    // Build CSV header
+    let csv = ['Submitted'];
+    questions.forEach((q, i) => {
+        const title = (q.text || q.title || `Question ${i + 1}`).replace(/"/g, '""');
+        csv.push(`"Q${i + 1}: ${title}"`);
+    });
+    let csvContent = csv.join(',') + '\n';
+
+    // Build CSV rows
+    responses.forEach(response => {
+        const row = [];
+        const submittedDate = response.completed_at
+            ? new Date(response.completed_at).toLocaleString()
+            : 'In progress';
+        row.push(`"${submittedDate}"`);
+
+        const answers = response.responses || {};
+        questions.forEach(q => {
+            let answer = answers[q.id];
+            if (Array.isArray(answer)) {
+                answer = answer.join('; ');
+            } else if (answer === undefined || answer === null) {
+                answer = '';
+            }
+            row.push(`"${String(answer).replace(/"/g, '""')}"`);
+        });
+
+        csvContent += row.join(',') + '\n';
+    });
+
+    // Download CSV
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `${sbCurrentSurvey.name || 'survey'}_responses_${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+    URL.revokeObjectURL(link.href);
+}
+
+// ============================================
+// END SURVEY BUILDER - RESPONSES TAB
+// ============================================
 
 function sbRenderBuilder() {
     document.getElementById('sb-builder-survey-name').textContent = sbCurrentSurvey.name || 'Untitled Survey';
@@ -14343,6 +15207,29 @@ function sbRenderQuestionCard(question, qIndex) {
         </div>
     ` : '';
 
+    const calendarHtml = question.type === 'calendar' ? `
+        <div style="margin-top:16px;padding:16px;background:#f9fafb;border-radius:8px;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+                <svg style="width:20px;height:20px;color:var(--sb-primary);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+                <span style="font-size:14px;color:var(--sb-text);">Calendar Date Picker</span>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(7, 1fr);gap:4px;margin-bottom:8px;">
+                ${['M','T','W','T','F','S','S'].map(d => `<div style="text-align:center;font-size:10px;color:var(--sb-text-secondary);font-weight:600;">${d}</div>`).join('')}
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(7, 1fr);gap:4px;">
+                ${[...Array(14)].map((_, i) => `<div style="aspect-ratio:1;background:${i === 5 || i === 9 ? 'var(--sb-primary)' : 'white'};color:${i === 5 || i === 9 ? 'white' : 'var(--sb-text-secondary)'};border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:11px;">${i + 1}</div>`).join('')}
+            </div>
+            <p style="margin-top:12px;font-size:12px;color:var(--sb-text-secondary);text-align:center;">
+                Respondents can select multiple dates
+            </p>
+        </div>
+    ` : '';
+
     return `
         <div class="sb-card sb-question-card"
              id="sb-question-${qIndex}"
@@ -14382,6 +15269,7 @@ function sbRenderQuestionCard(question, qIndex) {
                 ${optionsHtml}
                 ${ratingHtml}
                 ${textHtml}
+                ${calendarHtml}
             </div>
             <div class="sb-question-footer">
                 <button class="sb-btn-icon" onclick="sbDuplicateQuestion(${qIndex})" title="Duplicate">
@@ -14425,7 +15313,8 @@ function sbGetQuestionTypeIcon(type) {
         rating: '<svg class="sb-icon" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>',
         single: '<svg class="sb-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle></svg>',
         multi: '<svg class="sb-icon" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>',
-        text: '<svg class="sb-icon" viewBox="0 0 24 24"><line x1="17" y1="10" x2="3" y2="10"></line><line x1="21" y1="6" x2="3" y2="6"></line><line x1="21" y1="14" x2="3" y2="14"></line><line x1="17" y1="18" x2="3" y2="18"></line></svg>'
+        text: '<svg class="sb-icon" viewBox="0 0 24 24"><line x1="17" y1="10" x2="3" y2="10"></line><line x1="21" y1="6" x2="3" y2="6"></line><line x1="21" y1="14" x2="3" y2="14"></line><line x1="17" y1="18" x2="3" y2="18"></line></svg>',
+        calendar: '<svg class="sb-icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>'
     };
     return icons[type] || icons.single;
 }
@@ -14569,7 +15458,7 @@ function sbToggleRequired(qIndex, checked) {
 function sbDuplicateQuestion(qIndex) {
     const question = sbCurrentSurvey.pages[sbCurrentPageIndex].questions[qIndex];
     const newQuestion = JSON.parse(JSON.stringify(question));
-    newQuestion.id = sbGenerateId();
+    newQuestion.id = sbGenerateShortCode();
     sbCurrentSurvey.pages[sbCurrentPageIndex].questions.splice(qIndex + 1, 0, newQuestion);
     sbRenderBuilder();
 }
@@ -14622,7 +15511,7 @@ function sbSelectPage(index) {
 
 function sbAddPage() {
     sbCurrentSurvey.pages.push({
-        id: sbGenerateId(),
+        id: sbGenerateShortCode(),
         title: `Page ${sbCurrentSurvey.pages.length + 1}`,
         instructions: '',
         questions: [],
@@ -15683,7 +16572,7 @@ async function sbSyncSurveyToSupabase(survey) {
     // Prepare survey data for Supabase (snake_case columns)
     const surveyRecord = {
         id: survey.id,
-        public_code: survey.public_code || sbGenerateId(), // Ensure public_code exists for sharing
+        public_code: survey.public_code || sbGenerateShortCode(), // Ensure public_code exists for sharing
         name: survey.name || 'Untitled Survey',
         description: survey.description || '',
         theme_color: survey.themeColor || 'purple',
@@ -15840,7 +16729,7 @@ function sbRenderPreviewContent() {
     // Page instructions
     if (page.title || page.instructions) {
         html += `
-            <div class="sb-preview-page-instructions" style="background:var(--sb-primary-light);">
+            <div class="sb-preview-page-instructions" style="background:white;">
                 ${page.title ? `<h2 class="sb-preview-page-title">${page.title}</h2>` : ''}
                 ${page.instructions ? `<p class="sb-preview-page-text">${page.instructions}</p>` : ''}
             </div>

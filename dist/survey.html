@@ -149,7 +149,7 @@
 
         /* Page Header */
         .page-header {
-            background: #f8f5ff;
+            background: white;
             padding: 1.5rem 2rem;
             border-left: 4px solid #7c3aed;
             margin: 1rem 0;
@@ -279,6 +279,152 @@
             color: #666;
             text-align: center;
             word-break: break-word;
+        }
+
+        /* Calendar Question */
+        .calendar-question {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding: 0.5rem 0;
+        }
+
+        .calendar-month-year {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .calendar-nav-btn {
+            background: none;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            width: 36px;
+            height: 36px;
+            font-size: 1.25rem;
+            cursor: pointer;
+            color: #374151;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .calendar-nav-btn:hover {
+            background: #f3f4f6;
+            border-color: #7c3aed;
+            color: #7c3aed;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+            margin-bottom: 2px;
+        }
+
+        .calendar-day-header {
+            text-align: center;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #6b7280;
+            padding: 0.5rem 0;
+            text-transform: uppercase;
+        }
+
+        .calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #374151;
+            transition: all 0.15s;
+            border: 2px solid transparent;
+            background: white;
+        }
+
+        .calendar-day:hover:not(.empty) {
+            background: #f5f3ff;
+            border-color: #7c3aed;
+        }
+
+        .calendar-day.selected {
+            background: #7c3aed;
+            color: white;
+            border-color: #7c3aed;
+        }
+
+        .calendar-day.selected:hover {
+            background: #6d28d9;
+        }
+
+        .calendar-day.today:not(.selected) {
+            border-color: #7c3aed;
+            color: #7c3aed;
+            font-weight: 700;
+        }
+
+        .calendar-day.empty {
+            cursor: default;
+            background: transparent;
+        }
+
+        .calendar-selected-info {
+            text-align: center;
+            margin-top: 1rem;
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .calendar-selected-dates {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+            justify-content: center;
+        }
+
+        .calendar-date-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            background: #f5f3ff;
+            color: #7c3aed;
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .calendar-tag-remove {
+            background: none;
+            border: none;
+            color: #7c3aed;
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 0;
+            line-height: 1;
+            opacity: 0.7;
+        }
+
+        .calendar-tag-remove:hover {
+            opacity: 1;
         }
 
         /* Text Inputs */
@@ -466,10 +612,20 @@
 
         // Current state
         let currentSurvey = null;
+        let currentSurveyData = null; // Parsed survey.data for accessing ratingScale etc.
         let currentPageIndex = 0;
         let responses = {};
         let respondentId = null;
         let surveyStarted = false;
+
+        // Generate proper UUID v4 for database records
+        function generateUUID() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                const r = Math.random() * 16 | 0;
+                const v = c === 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
 
         // Get survey public code from URL
         function getSurveyCodeFromUrl() {
@@ -535,8 +691,8 @@
 
                 currentSurvey = survey;
 
-                // Generate anonymous respondent ID
-                respondentId = 'resp_' + Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
+                // Generate anonymous respondent ID (UUID format for database)
+                respondentId = generateUUID();
 
                 // Update page title
                 document.title = survey.name || 'Survey';
@@ -583,11 +739,16 @@
             let surveyData;
             try {
                 surveyData = typeof survey.data === 'string' ? JSON.parse(survey.data) : survey.data;
+                currentSurveyData = surveyData; // Store globally for access in render functions
             } catch (e) {
                 console.error('Error parsing survey data:', e);
                 showError('Error loading survey questions');
                 return;
             }
+
+            // Debug: Log rating scale settings
+            console.log('Survey rating_scale column:', survey.rating_scale);
+            console.log('Survey data ratingScale:', surveyData?.ratingScale);
 
             const pages = surveyData.pages || [surveyData];
             const currentPage = pages[currentPageIndex];
@@ -649,6 +810,9 @@
 
             // Restore any saved responses for this page
             restoreResponses();
+
+            // Initialize any calendar questions
+            initAllCalendars();
         }
 
         function renderQuestion(question, qIndex) {
@@ -685,6 +849,9 @@
                     break;
                 case 'dropdown':
                     html += renderDropdown(question, questionId);
+                    break;
+                case 'calendar':
+                    html += renderCalendar(question, questionId);
                     break;
                 default:
                     html += renderTextInput(question, questionId);
@@ -742,14 +909,75 @@
         }
 
         function renderRating(question, questionId) {
-            // Get scale from question or survey default
-            const scale = question.ratingScale?.points || currentSurvey.rating_scale?.points || 5;
-            const labels = question.ratingScale?.labels || currentSurvey.rating_scale?.labels || [];
+            // Get scale from question or survey defaults
+            let scale = 5; // default
+            let labels = [];
+
+            console.log('Question rating settings:', {
+                ratingScale: question.ratingScale,
+                ratingLabels: question.ratingLabels,
+                points: question.points
+            });
+
+            // Priority 1: Question-level settings (ratingScale as number, ratingLabels as array)
+            if (typeof question.ratingScale === 'number' && question.ratingScale > 0) {
+                scale = question.ratingScale;
+                labels = question.ratingLabels || [];
+            }
+            // Priority 1b: Question ratingScale as object with points
+            else if (question.ratingScale?.points) {
+                scale = question.ratingScale.points;
+                labels = question.ratingScale.labels || question.ratingLabels || [];
+            }
+            // Priority 1c: Direct points property
+            else if (typeof question.points === 'number' && question.points > 0) {
+                scale = question.points;
+                labels = question.ratingLabels || [];
+            }
+            // Priority 2: Survey data ratingScale (parsed JSON from data column)
+            else if (currentSurveyData?.ratingScale) {
+                if (typeof currentSurveyData.ratingScale === 'number') {
+                    scale = currentSurveyData.ratingScale;
+                    labels = currentSurveyData.ratingLabels || [];
+                } else if (currentSurveyData.ratingScale?.points) {
+                    scale = currentSurveyData.ratingScale.points;
+                    labels = currentSurveyData.ratingScale.labels || [];
+                }
+            }
+            // Priority 3: Database column rating_scale
+            else if (currentSurvey.rating_scale) {
+                const ratingScale = typeof currentSurvey.rating_scale === 'string'
+                    ? JSON.parse(currentSurvey.rating_scale)
+                    : currentSurvey.rating_scale;
+                if (typeof ratingScale === 'number') {
+                    scale = ratingScale;
+                } else if (ratingScale?.points) {
+                    scale = ratingScale.points;
+                    labels = ratingScale.labels || [];
+                }
+            }
+
+            console.log('Rendering rating with scale:', scale, 'labels:', labels);
 
             let html = '<div class="rating-scale">';
 
             for (let i = 1; i <= scale; i++) {
-                const label = labels[i - 1] || '';
+                // Show labels: first and last if not enough labels for all points, or all if they match
+                let label = '';
+                if (labels.length > 0) {
+                    if (labels.length >= scale) {
+                        // Enough labels for all points
+                        label = labels[i - 1] || '';
+                    } else if (labels.length >= 2) {
+                        // Only show first and last labels
+                        if (i === 1) {
+                            label = labels[0];
+                        } else if (i === scale) {
+                            label = labels[labels.length - 1];
+                        }
+                    }
+                }
+
                 html += `
                     <label class="rating-option">
                         <input type="radio" name="${questionId}" value="${i}" onchange="saveResponse('${questionId}', this.value)">
@@ -785,6 +1013,181 @@
 
             html += '</select>';
             return html;
+        }
+
+        // Calendar question rendering and logic
+        const calendarSelections = {}; // Store selected dates per question
+
+        function renderCalendar(question, questionId) {
+            const today = new Date();
+            const currentMonth = today.getMonth();
+            const currentYear = today.getFullYear();
+
+            return `
+                <div class="calendar-question" id="calendar-${questionId}"
+                     data-question-id="${questionId}"
+                     data-current-month="${currentMonth}"
+                     data-current-year="${currentYear}">
+                    <div class="calendar-header">
+                        <button type="button" class="calendar-nav-btn" onclick="calendarPrevMonth('${questionId}')">‹</button>
+                        <span class="calendar-month-year" id="calendar-title-${questionId}"></span>
+                        <button type="button" class="calendar-nav-btn" onclick="calendarNextMonth('${questionId}')">›</button>
+                    </div>
+                    <div class="calendar-grid">
+                        <div class="calendar-day-header">Mon</div>
+                        <div class="calendar-day-header">Tue</div>
+                        <div class="calendar-day-header">Wed</div>
+                        <div class="calendar-day-header">Thu</div>
+                        <div class="calendar-day-header">Fri</div>
+                        <div class="calendar-day-header">Sat</div>
+                        <div class="calendar-day-header">Sun</div>
+                    </div>
+                    <div class="calendar-days" id="calendar-days-${questionId}"></div>
+                    <div class="calendar-selected-info">
+                        <span id="calendar-count-${questionId}">0 dates selected</span>
+                    </div>
+                    <div class="calendar-selected-dates" id="calendar-selected-${questionId}"></div>
+                </div>
+            `;
+        }
+
+        function initCalendar(questionId) {
+            if (!calendarSelections[questionId]) {
+                calendarSelections[questionId] = new Set();
+            }
+            const container = document.getElementById(`calendar-${questionId}`);
+            if (!container) return;
+            const month = parseInt(container.dataset.currentMonth);
+            const year = parseInt(container.dataset.currentYear);
+            renderCalendarMonth(questionId, year, month);
+        }
+
+        function renderCalendarMonth(questionId, year, month) {
+            const container = document.getElementById(`calendar-${questionId}`);
+            if (!container) return;
+            container.dataset.currentMonth = month;
+            container.dataset.currentYear = year;
+
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                                'July', 'August', 'September', 'October', 'November', 'December'];
+            document.getElementById(`calendar-title-${questionId}`).textContent =
+                `${monthNames[month]} ${year}`;
+
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const startDayOfWeek = (firstDay.getDay() + 6) % 7; // Monday = 0
+            const daysInMonth = lastDay.getDate();
+
+            const daysContainer = document.getElementById(`calendar-days-${questionId}`);
+            let html = '';
+
+            // Empty cells before first day
+            for (let i = 0; i < startDayOfWeek; i++) {
+                html += '<div class="calendar-day empty"></div>';
+            }
+
+            // Day cells
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const isSelected = calendarSelections[questionId]?.has(dateStr);
+                const dateObj = new Date(year, month, day);
+                const isToday = dateObj.getTime() === today.getTime();
+
+                html += `<div class="calendar-day ${isSelected ? 'selected' : ''} ${isToday ? 'today' : ''}"
+                              onclick="toggleCalendarDate('${questionId}', '${dateStr}')"
+                              data-date="${dateStr}">
+                            ${day}
+                         </div>`;
+            }
+
+            daysContainer.innerHTML = html;
+        }
+
+        function toggleCalendarDate(questionId, dateStr) {
+            if (!calendarSelections[questionId]) {
+                calendarSelections[questionId] = new Set();
+            }
+
+            if (calendarSelections[questionId].has(dateStr)) {
+                calendarSelections[questionId].delete(dateStr);
+            } else {
+                calendarSelections[questionId].add(dateStr);
+            }
+
+            // Re-render current month
+            const container = document.getElementById(`calendar-${questionId}`);
+            const month = parseInt(container.dataset.currentMonth);
+            const year = parseInt(container.dataset.currentYear);
+            renderCalendarMonth(questionId, year, month);
+
+            // Update selected count and list
+            updateCalendarInfo(questionId);
+
+            // Save response
+            const selected = calendarSelections[questionId];
+            const dates = selected ? Array.from(selected).sort() : [];
+            responses[questionId] = dates;
+        }
+
+        function calendarPrevMonth(questionId) {
+            const container = document.getElementById(`calendar-${questionId}`);
+            let month = parseInt(container.dataset.currentMonth);
+            let year = parseInt(container.dataset.currentYear);
+
+            month--;
+            if (month < 0) {
+                month = 11;
+                year--;
+            }
+
+            renderCalendarMonth(questionId, year, month);
+        }
+
+        function calendarNextMonth(questionId) {
+            const container = document.getElementById(`calendar-${questionId}`);
+            let month = parseInt(container.dataset.currentMonth);
+            let year = parseInt(container.dataset.currentYear);
+
+            month++;
+            if (month > 11) {
+                month = 0;
+                year++;
+            }
+
+            renderCalendarMonth(questionId, year, month);
+        }
+
+        function updateCalendarInfo(questionId) {
+            const selected = calendarSelections[questionId];
+            const count = selected ? selected.size : 0;
+
+            document.getElementById(`calendar-count-${questionId}`).textContent =
+                `${count} date${count !== 1 ? 's' : ''} selected`;
+
+            const selectedContainer = document.getElementById(`calendar-selected-${questionId}`);
+            if (count > 0) {
+                const sortedDates = Array.from(selected).sort();
+                selectedContainer.innerHTML = sortedDates.map(date => {
+                    const d = new Date(date + 'T00:00:00');
+                    const formatted = d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+                    return `<span class="calendar-date-tag">
+                                ${formatted}
+                                <button type="button" class="calendar-tag-remove" onclick="toggleCalendarDate('${questionId}', '${date}')">×</button>
+                            </span>`;
+                }).join('');
+            } else {
+                selectedContainer.innerHTML = '';
+            }
+        }
+
+        function initAllCalendars() {
+            document.querySelectorAll('.calendar-question').forEach(cal => {
+                const questionId = cal.dataset.questionId;
+                initCalendar(questionId);
+            });
         }
 
         // Response handling
