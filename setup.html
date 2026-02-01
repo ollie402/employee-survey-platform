@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Your Setup - Realworld</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background-color: #f4f5f7;
+            min-height: 100vh;
+            color: #1e293b;
+        }
+
+        /* Header */
+        .setup-header {
+            background-color: #1e293b;
+            padding: 20px 40px;
+            text-align: center;
+        }
+
+        .setup-header h1 {
+            color: #ffffff;
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .setup-header h1 span {
+            color: #4ade80;
+        }
+
+        .setup-header p {
+            color: #94a3b8;
+            font-size: 12px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-top: 4px;
+        }
+
+        /* Progress Steps */
+        .progress-bar {
+            background: white;
+            padding: 24px 40px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .progress-steps {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .progress-step {
+            display: flex;
+            align-items: center;
+            color: #94a3b8;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .progress-step.active {
+            color: #7c3aed;
+        }
+
+        .progress-step.completed {
+            color: #16a34a;
+        }
+
+        .step-number {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 8px;
+            font-weight: 600;
+        }
+
+        .progress-step.active .step-number {
+            background: #7c3aed;
+            color: white;
+        }
+
+        .progress-step.completed .step-number {
+            background: #16a34a;
+            color: white;
+        }
+
+        .step-connector {
+            width: 60px;
+            height: 2px;
+            background: #e2e8f0;
+            margin: 0 16px;
+        }
+
+        .step-connector.completed {
+            background: #16a34a;
+        }
+
+        /* Main Content */
+        .setup-content {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .setup-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            padding: 40px;
+        }
+
+        .setup-card h2 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .setup-card .description {
+            color: #64748b;
+            font-size: 15px;
+            margin-bottom: 32px;
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #7c3aed;
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+        }
+
+        .form-group input:disabled {
+            background: #f3f4f6;
+            color: #9ca3af;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 24px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            accent-color: #7c3aed;
+        }
+
+        .checkbox-group label {
+            font-size: 15px;
+            color: #374151;
+            cursor: pointer;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 14px 32px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+
+        .btn-primary {
+            background: #7c3aed;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #6d28d9;
+        }
+
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+
+        .btn-success {
+            background: #4ade80;
+            color: #1e293b;
+        }
+
+        .btn-success:hover {
+            background: #22c55e;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 32px;
+        }
+
+        /* Plan Cards */
+        .plans-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        @media (max-width: 768px) {
+            .plans-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .plan-card {
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 24px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .plan-card:hover {
+            border-color: #7c3aed;
+        }
+
+        .plan-card.selected {
+            border-color: #7c3aed;
+            background: #faf5ff;
+        }
+
+        .plan-card.popular {
+            border-color: #4ade80;
+        }
+
+        .plan-card.popular::before {
+            content: 'Most Popular';
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #4ade80;
+            color: #1e293b;
+            padding: 4px 16px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .plan-name {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .plan-price {
+            font-size: 28px;
+            font-weight: 700;
+            color: #7c3aed;
+            margin-bottom: 4px;
+        }
+
+        .plan-price span {
+            font-size: 14px;
+            font-weight: 400;
+            color: #64748b;
+        }
+
+        .plan-description {
+            font-size: 13px;
+            color: #64748b;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .plan-features {
+            list-style: none;
+        }
+
+        .plan-features li {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            font-size: 14px;
+            color: #475569;
+            margin-bottom: 10px;
+        }
+
+        .plan-features li::before {
+            content: '✓';
+            color: #16a34a;
+            font-weight: 700;
+        }
+
+        .plan-select-btn {
+            width: 100%;
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: 2px solid #7c3aed;
+            background: white;
+            color: #7c3aed;
+            transition: all 0.2s;
+        }
+
+        .plan-select-btn:hover {
+            background: #7c3aed;
+            color: white;
+        }
+
+        .plan-card.selected .plan-select-btn {
+            background: #7c3aed;
+            color: white;
+        }
+
+        /* Payment Form */
+        .payment-summary {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 32px;
+        }
+
+        .payment-summary h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            font-size: 14px;
+        }
+
+        .summary-row.total {
+            border-top: 1px solid #e2e8f0;
+            margin-top: 8px;
+            padding-top: 16px;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .payment-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .payment-form .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .payment-note {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #64748b;
+            font-size: 13px;
+            margin-top: 16px;
+        }
+
+        .trial-note {
+            text-align: center;
+            color: #64748b;
+            font-size: 13px;
+            margin-top: 16px;
+        }
+
+        /* Success Screen */
+        .success-screen {
+            text-align: center;
+            padding: 60px 40px;
+        }
+
+        .success-icon {
+            width: 100px;
+            height: 100px;
+            background: #dcfce7;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+        }
+
+        .success-icon svg {
+            width: 50px;
+            height: 50px;
+            stroke: #16a34a;
+        }
+
+        .success-screen h2 {
+            font-size: 28px;
+            margin-bottom: 12px;
+        }
+
+        .success-screen p {
+            color: #64748b;
+            font-size: 16px;
+            margin-bottom: 32px;
+        }
+
+        /* Error Screen */
+        .error-screen {
+            text-align: center;
+            padding: 60px 40px;
+        }
+
+        .error-icon {
+            width: 100px;
+            height: 100px;
+            background: #fee2e2;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+        }
+
+        .error-icon svg {
+            width: 50px;
+            height: 50px;
+            stroke: #dc2626;
+        }
+
+        .error-screen h2 {
+            font-size: 28px;
+            margin-bottom: 12px;
+            color: #dc2626;
+        }
+
+        /* Loading */
+        .loading-screen {
+            text-align: center;
+            padding: 80px 40px;
+        }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid #e2e8f0;
+            border-top-color: #7c3aed;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 24px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Hide sections by default */
+        .setup-step {
+            display: none;
+        }
+
+        .setup-step.active {
+            display: block;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 640px) {
+            .setup-header {
+                padding: 16px 20px;
+            }
+
+            .progress-bar {
+                padding: 16px 20px;
+            }
+
+            .step-text {
+                display: none;
+            }
+
+            .step-connector {
+                width: 30px;
+            }
+
+            .setup-card {
+                padding: 24px;
+            }
+
+            .payment-form {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="setup-header">
+        <h1>real<span>W</span>orld</h1>
+        <p>Employee Surveys</p>
+    </header>
+
+    <!-- Progress Bar -->
+    <div class="progress-bar" id="progressBar">
+        <div class="progress-steps">
+            <div class="progress-step active" id="progressStep1">
+                <div class="step-number">1</div>
+                <span class="step-text">Organisation</span>
+            </div>
+            <div class="step-connector" id="connector1"></div>
+            <div class="progress-step" id="progressStep2">
+                <div class="step-number">2</div>
+                <span class="step-text">Choose Plan</span>
+            </div>
+            <div class="step-connector" id="connector2"></div>
+            <div class="progress-step" id="progressStep3">
+                <div class="step-number">3</div>
+                <span class="step-text">Complete</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="setup-content">
+        <!-- Loading State -->
+        <div class="setup-card" id="loadingScreen">
+            <div class="loading-screen">
+                <div class="spinner"></div>
+                <p>Verifying your setup link...</p>
+            </div>
+        </div>
+
+        <!-- Error State -->
+        <div class="setup-card setup-step" id="errorScreen">
+            <div class="error-screen">
+                <div class="error-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="15" y1="9" x2="9" y2="15"></line>
+                        <line x1="9" y1="9" x2="15" y2="15"></line>
+                    </svg>
+                </div>
+                <h2>Invalid Setup Link</h2>
+                <p id="errorMessage">This setup link is invalid or has expired.</p>
+                <a href="/" class="btn btn-primary">Go to Homepage</a>
+            </div>
+        </div>
+
+        <!-- Already Setup State -->
+        <div class="setup-card setup-step" id="alreadySetupScreen">
+            <div class="success-screen">
+                <div class="success-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                </div>
+                <h2>Already Set Up!</h2>
+                <p>Your account is already configured. You can log in to access your dashboard.</p>
+                <a href="/" class="btn btn-primary">Go to Login</a>
+            </div>
+        </div>
+
+        <!-- Step 1: Organisation Setup -->
+        <div class="setup-card setup-step" id="step1">
+            <h2>Set Up Your Organisation</h2>
+            <p class="description">Tell us about your organisation so we can tailor your experience.</p>
+
+            <div class="checkbox-group">
+                <input type="checkbox" id="personalUse" onchange="togglePersonalUse()">
+                <label for="personalUse">I'm using this for personal use</label>
+            </div>
+
+            <div id="orgFields">
+                <div class="form-group">
+                    <label for="orgName">Organisation Name</label>
+                    <input type="text" id="orgName" placeholder="Enter your organisation name">
+                </div>
+
+                <div class="form-group">
+                    <label for="orgSize">Organisation Size</label>
+                    <select id="orgSize">
+                        <option value="">Select size...</option>
+                        <option value="1-10">1-10 employees</option>
+                        <option value="11-50">11-50 employees</option>
+                        <option value="51-200">51-200 employees</option>
+                        <option value="201-500">201-500 employees</option>
+                        <option value="500+">500+ employees</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="industry">Industry (Optional)</label>
+                    <select id="industry">
+                        <option value="">Select industry...</option>
+                        <option value="healthcare">Healthcare</option>
+                        <option value="education">Education</option>
+                        <option value="fire-rescue">Fire & Rescue Services</option>
+                        <option value="local-government">Local Government</option>
+                        <option value="museums-heritage">Museums & Heritage</option>
+                        <option value="social-care">Social Care</option>
+                        <option value="technology">Technology</option>
+                        <option value="professional-services">Professional Services</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="goToStep2()">Next</button>
+            </div>
+        </div>
+
+        <!-- Step 2: Choose Plan -->
+        <div class="setup-card setup-step" id="step2">
+            <h2>Choose Your Plan</h2>
+            <p class="description">Select the access level that best fits your needs.</p>
+
+            <div class="plans-grid">
+                <!-- Start Listening -->
+                <div class="plan-card" onclick="selectPlan('start_listening')" id="plan-start_listening">
+                    <div class="plan-name">Start Listening</div>
+                    <div class="plan-price">£10<span>/month</span></div>
+                    <div class="plan-description">Best for small teams getting started</div>
+                    <ul class="plan-features">
+                        <li>Create employee surveys</li>
+                        <li>Basic analytics & reporting</li>
+                        <li>Up to 100 responses per survey</li>
+                        <li>1 admin user</li>
+                        <li>Email support</li>
+                    </ul>
+                    <button class="plan-select-btn">Select Plan</button>
+                </div>
+
+                <!-- Engage -->
+                <div class="plan-card popular" onclick="selectPlan('engage')" id="plan-engage">
+                    <div class="plan-name">Engage</div>
+                    <div class="plan-price">£25<span>/month</span></div>
+                    <div class="plan-description">Best for growing organisations</div>
+                    <ul class="plan-features">
+                        <li>Everything in Start Listening</li>
+                        <li>Unlimited responses</li>
+                        <li>Advanced analytics & AI insights</li>
+                        <li>Chat-based feedback collection</li>
+                        <li>Up to 5 admin users</li>
+                        <li>Priority support</li>
+                    </ul>
+                    <button class="plan-select-btn">Select Plan</button>
+                </div>
+
+                <!-- Enterprise -->
+                <div class="plan-card" onclick="selectPlan('enterprise')" id="plan-enterprise">
+                    <div class="plan-name">Enterprise</div>
+                    <div class="plan-price">Custom</div>
+                    <div class="plan-description">Best for large organisations</div>
+                    <ul class="plan-features">
+                        <li>Everything in Engage</li>
+                        <li>Unlimited admin users</li>
+                        <li>Custom branding</li>
+                        <li>API access</li>
+                        <li>Dedicated account manager</li>
+                        <li>SLA & onboarding support</li>
+                    </ul>
+                    <button class="plan-select-btn">Contact Us</button>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-secondary" onclick="goToStep1()">Back</button>
+                <button class="btn btn-primary" onclick="goToStep3()" id="step2NextBtn" disabled>Next</button>
+            </div>
+        </div>
+
+        <!-- Step 3: Payment -->
+        <div class="setup-card setup-step" id="step3">
+            <h2>Complete Your Setup</h2>
+            <p class="description">Review your choices and start your free trial.</p>
+
+            <div class="payment-summary">
+                <h3>Order Summary</h3>
+                <div class="summary-row">
+                    <span>Organisation</span>
+                    <span id="summaryOrg">-</span>
+                </div>
+                <div class="summary-row">
+                    <span>Plan</span>
+                    <span id="summaryPlan">-</span>
+                </div>
+                <div class="summary-row total">
+                    <span>Total (after trial)</span>
+                    <span id="summaryPrice">-</span>
+                </div>
+            </div>
+
+            <h3 style="margin-bottom: 20px;">Payment Details</h3>
+            <div class="payment-form">
+                <div class="form-group full-width">
+                    <label for="cardName">Cardholder Name</label>
+                    <input type="text" id="cardName" placeholder="Name on card">
+                </div>
+                <div class="form-group full-width">
+                    <label for="cardNumber">Card Number</label>
+                    <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19">
+                </div>
+                <div class="form-group">
+                    <label for="cardExpiry">Expiry Date</label>
+                    <input type="text" id="cardExpiry" placeholder="MM/YY" maxlength="5">
+                </div>
+                <div class="form-group">
+                    <label for="cardCvc">CVC</label>
+                    <input type="text" id="cardCvc" placeholder="123" maxlength="4">
+                </div>
+            </div>
+
+            <div class="payment-note">
+                <span>🔒</span>
+                <span>Payments are securely processed via Stripe</span>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-secondary" onclick="goToStep2FromStep3()">Back</button>
+                <button class="btn btn-success" onclick="completeSetup()" id="completeBtn">Start Free Trial</button>
+            </div>
+
+            <p class="trial-note">14-day free trial. Cancel anytime.</p>
+        </div>
+
+        <!-- Success Screen -->
+        <div class="setup-card setup-step" id="successScreen">
+            <div class="success-screen">
+                <div class="success-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                </div>
+                <h2>You're All Set!</h2>
+                <p>Your account is fully configured. You can now log in and start using Realworld.</p>
+                <a href="/" class="btn btn-success">Go to Login</a>
+            </div>
+        </div>
+    </main>
+
+    <!-- Supabase -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2.39.7/dist/umd/supabase.js"></script>
+
+    <script>
+        // Supabase configuration
+        const SUPABASE_URL = 'https://wdwpqdzndlaldpuzuxyo.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indkd3BxZHpuZGxhbGRwdXp1eHlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYyMzUyNjYsImV4cCI6MjA3MTgxMTI2Nn0.POnq8gaOkM4gDtzD9jCSC1mV4ymqurTW1wKTQz6CUCM';
+
+        let supabaseClient;
+        let currentUser = null;
+        let setupData = {
+            isPersonal: false,
+            orgName: '',
+            orgSize: '',
+            industry: '',
+            selectedPlan: null
+        };
+
+        // Plan details
+        const planDetails = {
+            start_listening: { name: 'Start Listening', price: '£10/month', role: 'viewer' },
+            engage: { name: 'Engage', price: '£25/month', role: 'survey_admin' },
+            enterprise: { name: 'Enterprise', price: 'Custom', role: 'org_admin' }
+        };
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Initialize Supabase
+            if (window.supabase && window.supabase.createClient) {
+                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                console.log('Supabase initialized');
+            } else {
+                showError('Failed to initialize. Please refresh the page.');
+                return;
+            }
+
+            // Verify token
+            await verifyToken();
+        });
+
+        async function verifyToken() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const token = urlParams.get('token');
+            const userId = urlParams.get('user');
+
+            if (!token || !userId) {
+                showError('Invalid setup link. Missing token or user ID.');
+                return;
+            }
+
+            try {
+                // Query users table to verify token
+                const { data: user, error } = await supabaseClient
+                    .from('users')
+                    .select('*')
+                    .eq('id', userId)
+                    .eq('setup_token', token)
+                    .single();
+
+                if (error || !user) {
+                    showError('Invalid or expired setup link.');
+                    return;
+                }
+
+                // Check if already setup
+                if (user.setup_complete) {
+                    showAlreadySetup();
+                    return;
+                }
+
+                // Valid token - store user and show step 1
+                currentUser = user;
+                hideLoading();
+                showStep(1);
+
+            } catch (err) {
+                console.error('Verification error:', err);
+                showError('An error occurred. Please try again.');
+            }
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingScreen').style.display = 'none';
+        }
+
+        function showError(message) {
+            hideLoading();
+            document.getElementById('errorMessage').textContent = message;
+            document.getElementById('errorScreen').classList.add('active');
+            document.getElementById('progressBar').style.display = 'none';
+        }
+
+        function showAlreadySetup() {
+            hideLoading();
+            document.getElementById('alreadySetupScreen').classList.add('active');
+            document.getElementById('progressBar').style.display = 'none';
+        }
+
+        function showStep(stepNum) {
+            // Hide all steps
+            document.querySelectorAll('.setup-step').forEach(step => {
+                step.classList.remove('active');
+            });
+
+            // Show current step
+            document.getElementById(`step${stepNum}`).classList.add('active');
+
+            // Update progress bar
+            for (let i = 1; i <= 3; i++) {
+                const stepEl = document.getElementById(`progressStep${i}`);
+                const connectorEl = document.getElementById(`connector${i - 1}`);
+
+                stepEl.classList.remove('active', 'completed');
+                if (connectorEl) connectorEl.classList.remove('completed');
+
+                if (i < stepNum) {
+                    stepEl.classList.add('completed');
+                    if (connectorEl) connectorEl.classList.add('completed');
+                } else if (i === stepNum) {
+                    stepEl.classList.add('active');
+                }
+            }
+        }
+
+        function togglePersonalUse() {
+            const isPersonal = document.getElementById('personalUse').checked;
+            const orgFields = document.getElementById('orgFields');
+
+            setupData.isPersonal = isPersonal;
+
+            if (isPersonal) {
+                orgFields.style.opacity = '0.5';
+                orgFields.querySelectorAll('input, select').forEach(el => {
+                    el.disabled = true;
+                });
+            } else {
+                orgFields.style.opacity = '1';
+                orgFields.querySelectorAll('input, select').forEach(el => {
+                    el.disabled = false;
+                });
+            }
+        }
+
+        function goToStep1() {
+            showStep(1);
+        }
+
+        function goToStep2() {
+            // Validate step 1
+            if (!setupData.isPersonal) {
+                const orgName = document.getElementById('orgName').value.trim();
+                if (!orgName) {
+                    alert('Please enter your organisation name or select personal use.');
+                    return;
+                }
+                setupData.orgName = orgName;
+                setupData.orgSize = document.getElementById('orgSize').value;
+                setupData.industry = document.getElementById('industry').value;
+            } else {
+                setupData.orgName = 'Personal';
+            }
+
+            showStep(2);
+        }
+
+        function selectPlan(planId) {
+            // Remove selected from all
+            document.querySelectorAll('.plan-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+
+            // Select this plan
+            document.getElementById(`plan-${planId}`).classList.add('selected');
+            setupData.selectedPlan = planId;
+
+            // Enable next button
+            document.getElementById('step2NextBtn').disabled = false;
+        }
+
+        function goToStep3() {
+            if (!setupData.selectedPlan) {
+                alert('Please select a plan.');
+                return;
+            }
+
+            // Update summary
+            document.getElementById('summaryOrg').textContent = setupData.orgName || 'Personal';
+            document.getElementById('summaryPlan').textContent = planDetails[setupData.selectedPlan].name;
+            document.getElementById('summaryPrice').textContent = planDetails[setupData.selectedPlan].price;
+
+            showStep(3);
+        }
+
+        function goToStep2FromStep3() {
+            showStep(2);
+        }
+
+        async function completeSetup() {
+            const btn = document.getElementById('completeBtn');
+            btn.disabled = true;
+            btn.textContent = 'Setting up...';
+
+            try {
+                // Get the role based on plan
+                const role = planDetails[setupData.selectedPlan].role;
+                let organizationId = null;
+
+                // Create organisation if not personal
+                if (!setupData.isPersonal && setupData.orgName) {
+                    const { data: org, error: orgError } = await supabaseClient
+                        .from('organizations')
+                        .insert({
+                            name: setupData.orgName,
+                            size: setupData.orgSize || null,
+                            industry: setupData.industry || null
+                        })
+                        .select()
+                        .single();
+
+                    if (orgError) {
+                        console.error('Error creating organization:', orgError);
+                    } else {
+                        organizationId = org.id;
+                    }
+                }
+
+                // Update user record
+                const updateData = {
+                    setup_complete: true,
+                    role: role,
+                    setup_token: null // Clear the token
+                };
+
+                if (organizationId) {
+                    updateData.organization_id = organizationId;
+                }
+
+                const { error: updateError } = await supabaseClient
+                    .from('users')
+                    .update(updateData)
+                    .eq('id', currentUser.id);
+
+                if (updateError) {
+                    throw updateError;
+                }
+
+                // Show success screen
+                document.getElementById('step3').classList.remove('active');
+                document.getElementById('successScreen').classList.add('active');
+                document.getElementById('progressBar').style.display = 'none';
+
+            } catch (err) {
+                console.error('Setup error:', err);
+                alert('An error occurred during setup. Please try again.');
+                btn.disabled = false;
+                btn.textContent = 'Start Free Trial';
+            }
+        }
+
+        // Format card number with spaces
+        document.getElementById('cardNumber')?.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\s/g, '').replace(/\D/g, '');
+            let formatted = value.match(/.{1,4}/g)?.join(' ') || value;
+            e.target.value = formatted;
+        });
+
+        // Format expiry date
+        document.getElementById('cardExpiry')?.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length >= 2) {
+                value = value.slice(0, 2) + '/' + value.slice(2);
+            }
+            e.target.value = value;
+        });
+    </script>
+</body>
+</html>
