@@ -15,6 +15,12 @@ let authSignupData = {
  * Also shows/hides the auth header appropriately
  */
 function showAuthPage(pageId) {
+    // IMPORTANT: Always hide the app container when showing auth pages
+    const appContainer = document.getElementById('app-container');
+    if (appContainer) {
+        appContainer.classList.add('hidden');
+    }
+
     // Hide all auth pages
     document.querySelectorAll('.auth-page').forEach(page => {
         page.classList.add('hidden');
@@ -246,6 +252,12 @@ function initAuthWizard() {
         return;
     }
     window.authCheckDone = true;
+
+    // IMPORTANT: Ensure app container is hidden until we confirm auth
+    const appContainer = document.getElementById('app-container');
+    if (appContainer) {
+        appContainer.classList.add('hidden');
+    }
 
     // Check if user is already logged in
     if (typeof supabaseClient !== 'undefined') {
