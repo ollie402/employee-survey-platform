@@ -11494,8 +11494,32 @@ function confirmUploadResponses() {
 }
 
 function showDashboard() {
-    // Return to dashboard view by reloading content
-    location.reload();
+    // Show the dashboard without reloading the page
+    // Hide auth wizard pages
+    document.querySelectorAll('.auth-page').forEach(page => {
+        page.classList.add('hidden');
+    });
+
+    // Hide auth header
+    const authHeader = document.getElementById('auth-header');
+    if (authHeader) {
+        authHeader.classList.add('hidden');
+    }
+
+    // Hide login container
+    const loginContainer = document.getElementById('login-container');
+    if (loginContainer) {
+        loginContainer.classList.add('hidden');
+    }
+
+    // Show the main app container
+    const appContainer = document.getElementById('app-container');
+    if (appContainer) {
+        appContainer.classList.remove('hidden');
+    }
+
+    // Show the home/dashboard section
+    showSection('home');
 }
 
 // ====== BRANDING COLOR CUSTOMIZATION FUNCTIONS ======
