@@ -13,6 +13,10 @@
     {
       "source": "/survey/:id",
       "destination": "/survey.html"
+    },
+    {
+      "source": "/setup",
+      "destination": "/setup.html"
     }
   ]
 }
