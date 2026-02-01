@@ -168,8 +168,8 @@ async function authCreateAccount(event) {
 
     // All validated - create account with Supabase
     try {
-        if (typeof supabase !== 'undefined') {
-            const { data, error } = await supabase.auth.signUp({
+        if (typeof supabaseClient !== 'undefined') {
+            const { data, error } = await supabaseClient.auth.signUp({
                 email: authSignupData.email,
                 password: password,
                 options: {
@@ -212,14 +212,14 @@ async function authSocialSignup(provider) {
     console.log('Social signup with:', provider);
 
     try {
-        if (typeof supabase !== 'undefined') {
+        if (typeof supabaseClient !== 'undefined') {
             const providerMap = {
                 'google': 'google',
                 'microsoft': 'azure',
                 'apple': 'apple'
             };
 
-            const { error } = await supabase.auth.signInWithOAuth({
+            const { error } = await supabaseClient.auth.signInWithOAuth({
                 provider: providerMap[provider] || provider,
                 options: {
                     redirectTo: window.location.origin
@@ -240,21 +240,43 @@ async function authSocialSignup(provider) {
  * Initialize auth wizard on page load
  */
 function initAuthWizard() {
+    // Prevent multiple auth checks (avoids any potential loops)
+    if (window.authCheckDone) {
+        console.log('Auth check already done, skipping');
+        return;
+    }
+    window.authCheckDone = true;
+
     // Check if user is already logged in
-    if (typeof supabase !== 'undefined') {
-        supabase.auth.getSession().then(({ data: { session } }) => {
-            if (session) {
-                // User is logged in, show dashboard
-                if (typeof showDashboard === 'function') {
-                    showDashboard();
-                }
-            } else {
-                // Not logged in, show auth wizard step 1
-                showAuthPage('auth-signup-step1');
-            }
-        });
+    if (typeof supabaseClient !== 'undefined') {
+        try {
+            supabaseClient.auth.getSession()
+                .then(({ data: { session } }) => {
+                    if (session) {
+                        // User is logged in, show dashboard
+                        console.log('Session found, showing dashboard');
+                        if (typeof showDashboard === 'function') {
+                            showDashboard();
+                        }
+                    } else {
+                        // Not logged in, show auth wizard step 1
+                        console.log('No session, showing auth wizard');
+                        showAuthPage('auth-signup-step1');
+                    }
+                })
+                .catch((error) => {
+                    // Handle errors gracefully - just show login page
+                    console.error('Error checking session:', error);
+                    showAuthPage('auth-signup-step1');
+                });
+        } catch (error) {
+            // Handle synchronous errors
+            console.error('Error in auth check:', error);
+            showAuthPage('auth-signup-step1');
+        }
     } else {
         // No Supabase, show step 1 by default
+        console.log('Supabase client not available, showing auth wizard');
         showAuthPage('auth-signup-step1');
     }
 }
