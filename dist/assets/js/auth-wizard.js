@@ -199,7 +199,7 @@ async function authCreateAccount(event) {
                             email: data.user.email,
                             first_name: '',
                             last_name: '',
-                            role: 'user',
+                            role: 'viewer',
                             is_active: true
                         });
 

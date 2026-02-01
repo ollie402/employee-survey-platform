@@ -841,7 +841,7 @@ document.getElementById('login-form').addEventListener('submit', async function(
                     email: authData.user.email,
                     first_name: '',
                     last_name: '',
-                    role: 'user',
+                    role: 'viewer',
                     is_active: true
                 })
                 .select('*, organizations(*)')
