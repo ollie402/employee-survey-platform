@@ -15163,6 +15163,13 @@ function sbRenderBuilderMain() {
     `;
 
     main.innerHTML = html;
+
+    // Initialize calendar previews for calendar questions
+    page.questions.forEach((question, qIndex) => {
+        if (question.type === 'calendar') {
+            sbInitCalendarPreview(qIndex);
+        }
+    });
 }
 
 function sbRenderQuestionCard(question, qIndex) {
@@ -15208,32 +15215,19 @@ function sbRenderQuestionCard(question, qIndex) {
     ` : '';
 
     const calendarHtml = question.type === 'calendar' ? `
-        <div style="margin-top:16px;max-width:280px;margin-left:auto;margin-right:auto;background:white;border:1px solid #e5e7eb;border-radius:8px;padding:12px;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+        <div id="sb-calendar-preview-${qIndex}" style="margin-top:16px;max-width:280px;margin-left:auto;margin-right:auto;background:white;border:1px solid #e5e7eb;border-radius:8px;padding:12px;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;padding:0 4px;">
-                <button style="background:none;border:none;width:24px;height:24px;font-size:14px;cursor:pointer;color:#6b7280;border-radius:50%;display:flex;align-items:center;justify-content:center;">‹</button>
-                <span style="font-size:13px;font-weight:600;color:#1f2937;">February 2026</span>
-                <button style="background:none;border:none;width:24px;height:24px;font-size:14px;cursor:pointer;color:#6b7280;border-radius:50%;display:flex;align-items:center;justify-content:center;">›</button>
+                <button onclick="sbCalendarPrevMonth(${qIndex})" style="background:none;border:none;width:24px;height:24px;font-size:14px;cursor:pointer;color:#6b7280;border-radius:50%;display:flex;align-items:center;justify-content:center;">‹</button>
+                <span id="sb-calendar-title-${qIndex}" style="font-size:13px;font-weight:600;color:#1f2937;"></span>
+                <button onclick="sbCalendarNextMonth(${qIndex})" style="background:none;border:none;width:24px;height:24px;font-size:14px;cursor:pointer;color:#6b7280;border-radius:50%;display:flex;align-items:center;justify-content:center;">›</button>
             </div>
             <div style="display:grid;grid-template-columns:repeat(7, 1fr);gap:0;margin-bottom:4px;">
                 ${['Su','Mo','Tu','We','Th','Fr','Sa'].map(d => `<div style="text-align:center;font-size:9px;color:#9ca3af;font-weight:600;padding:4px 0;text-transform:uppercase;">${d}</div>`).join('')}
             </div>
-            <div style="display:grid;grid-template-columns:repeat(7, 1fr);gap:2px;">
-                ${[...Array(14)].map((_, i) => {
-                    const isSelected = i === 5 || i === 9;
-                    const isToday = i === 0;
-                    let style = 'width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:11px;margin:1px auto;';
-                    if (isSelected) {
-                        style += 'background:#7c3aed;color:white;font-weight:600;';
-                    } else if (isToday) {
-                        style += 'border:2px solid #7c3aed;color:#7c3aed;font-weight:600;';
-                    } else {
-                        style += 'color:#374151;';
-                    }
-                    return `<div style="${style}">${i + 1}</div>`;
-                }).join('')}
+            <div id="sb-calendar-days-${qIndex}" style="display:grid;grid-template-columns:repeat(7, 1fr);gap:2px;">
             </div>
             <p style="margin-top:10px;padding-top:8px;border-top:1px solid #f3f4f6;font-size:11px;color:#6b7280;text-align:center;">
-                Respondents can select multiple dates
+                Click dates to test selection
             </p>
         </div>
     ` : '';
@@ -16932,6 +16926,94 @@ window.showSection = function(sectionName) {
         sbInitialize();
     }
 };
+
+// Calendar Preview State and Functions
+const sbCalendarState = {};
+
+function sbInitCalendarPreview(qIndex) {
+    if (!sbCalendarState[qIndex]) {
+        const now = new Date();
+        sbCalendarState[qIndex] = {
+            month: now.getMonth(),
+            year: now.getFullYear(),
+            selected: new Set()
+        };
+    }
+    sbRenderCalendarPreview(qIndex);
+}
+
+function sbRenderCalendarPreview(qIndex) {
+    const state = sbCalendarState[qIndex];
+    if (!state) return;
+
+    const titleEl = document.getElementById(`sb-calendar-title-${qIndex}`);
+    const daysEl = document.getElementById(`sb-calendar-days-${qIndex}`);
+    if (!titleEl || !daysEl) return;
+
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                        'July', 'August', 'September', 'October', 'November', 'December'];
+    titleEl.textContent = `${monthNames[state.month]} ${state.year}`;
+
+    const firstDay = new Date(state.year, state.month, 1);
+    const lastDay = new Date(state.year, state.month + 1, 0);
+    const startDayOfWeek = firstDay.getDay();
+    const daysInMonth = lastDay.getDate();
+
+    let html = '';
+
+    // Empty cells before first day
+    for (let i = 0; i < startDayOfWeek; i++) {
+        html += '<div style="width:28px;height:28px;margin:1px auto;"></div>';
+    }
+
+    // Day cells
+    for (let day = 1; day <= daysInMonth; day++) {
+        const dateStr = `${state.year}-${String(state.month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const isSelected = state.selected.has(dateStr);
+        let style = 'width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:11px;margin:1px auto;cursor:pointer;transition:all 0.15s;';
+        if (isSelected) {
+            style += 'background:#7c3aed;color:white;font-weight:600;';
+        } else {
+            style += 'color:#374151;';
+        }
+        html += `<div onclick="sbToggleCalendarDate(${qIndex}, '${dateStr}')" style="${style}">${day}</div>`;
+    }
+
+    daysEl.innerHTML = html;
+}
+
+function sbCalendarPrevMonth(qIndex) {
+    if (!sbCalendarState[qIndex]) sbInitCalendarPreview(qIndex);
+    const state = sbCalendarState[qIndex];
+    state.month--;
+    if (state.month < 0) {
+        state.month = 11;
+        state.year--;
+    }
+    sbRenderCalendarPreview(qIndex);
+}
+
+function sbCalendarNextMonth(qIndex) {
+    if (!sbCalendarState[qIndex]) sbInitCalendarPreview(qIndex);
+    const state = sbCalendarState[qIndex];
+    state.month++;
+    if (state.month > 11) {
+        state.month = 0;
+        state.year++;
+    }
+    sbRenderCalendarPreview(qIndex);
+}
+
+function sbToggleCalendarDate(qIndex, dateStr) {
+    if (!sbCalendarState[qIndex]) return;
+    const state = sbCalendarState[qIndex];
+    if (state.selected.has(dateStr)) {
+        state.selected.delete(dateStr);
+    } else {
+        state.selected.add(dateStr);
+    }
+    sbRenderCalendarPreview(qIndex);
+}
 
 // ============================================== //
 // SURVEY BUILDER JAVASCRIPT - END                //
