@@ -188,12 +188,8 @@ async function authCreateAccount(event) {
                 alert('Please check your email to confirm your account.');
                 showBlueLoginPage();
             } else if (data.session) {
-                // Auto-confirmed, redirect to dashboard
-                if (typeof showDashboard === 'function') {
-                    showDashboard();
-                } else {
-                    alert('Account created successfully!');
-                }
+                // Auto-confirmed, show the app
+                showAppAfterLogin();
             }
         } else {
             console.log('Account data:', { ...authSignupData, password: '***' });
@@ -240,22 +236,75 @@ async function authSocialSignup(provider) {
  * Initialize auth wizard on page load
  */
 function initAuthWizard() {
+    // Prevent multiple auth checks (avoids reload loops)
+    if (window.authCheckInProgress || window.authCheckComplete) {
+        console.log('Auth check already in progress or complete, skipping');
+        return;
+    }
+    window.authCheckInProgress = true;
+
     // Check if user is already logged in
     if (typeof supabaseClient !== 'undefined') {
-        supabaseClient.auth.getSession().then(({ data: { session } }) => {
-            if (session) {
-                // User is logged in, show dashboard
-                if (typeof showDashboard === 'function') {
-                    showDashboard();
+        supabaseClient.auth.getSession()
+            .then(({ data: { session } }) => {
+                window.authCheckComplete = true;
+                window.authCheckInProgress = false;
+
+                if (session) {
+                    // User is logged in, show the app
+                    console.log('User is logged in, showing app');
+                    showAppAfterLogin();
+                } else {
+                    // Not logged in, show auth wizard step 1
+                    showAuthPage('auth-signup-step1');
                 }
-            } else {
-                // Not logged in, show auth wizard step 1
+            })
+            .catch((error) => {
+                // Handle errors gracefully - don't reload, just show login
+                console.error('Error checking session:', error);
+                window.authCheckComplete = true;
+                window.authCheckInProgress = false;
                 showAuthPage('auth-signup-step1');
-            }
-        });
+            });
     } else {
         // No Supabase, show step 1 by default
+        window.authCheckComplete = true;
+        window.authCheckInProgress = false;
         showAuthPage('auth-signup-step1');
+    }
+}
+
+/**
+ * Show the main app after successful login
+ * This properly shows the app container without reloading
+ */
+function showAppAfterLogin() {
+    // Hide all auth pages
+    document.querySelectorAll('.auth-page').forEach(page => {
+        page.classList.add('hidden');
+    });
+
+    // Hide auth header
+    const authHeader = document.getElementById('auth-header');
+    if (authHeader) {
+        authHeader.classList.add('hidden');
+    }
+
+    // Hide login container
+    const loginContainer = document.getElementById('login-container');
+    if (loginContainer) {
+        loginContainer.classList.add('hidden');
+    }
+
+    // Show the main app container
+    const appContainer = document.getElementById('app-container');
+    if (appContainer) {
+        appContainer.classList.remove('hidden');
+    }
+
+    // Show the home/dashboard section
+    if (typeof showSection === 'function') {
+        showSection('home');
     }
 }
 
