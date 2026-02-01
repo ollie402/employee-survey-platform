@@ -15208,23 +15208,31 @@ function sbRenderQuestionCard(question, qIndex) {
     ` : '';
 
     const calendarHtml = question.type === 'calendar' ? `
-        <div style="margin-top:16px;padding:16px;background:#f9fafb;border-radius:8px;">
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
-                <svg style="width:20px;height:20px;color:var(--sb-primary);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                    <line x1="16" y1="2" x2="16" y2="6"></line>
-                    <line x1="8" y1="2" x2="8" y2="6"></line>
-                    <line x1="3" y1="10" x2="21" y2="10"></line>
-                </svg>
-                <span style="font-size:14px;color:var(--sb-text);">Calendar Date Picker</span>
+        <div style="margin-top:16px;max-width:280px;margin-left:auto;margin-right:auto;background:white;border:1px solid #e5e7eb;border-radius:8px;padding:12px;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;padding:0 4px;">
+                <button style="background:none;border:none;width:24px;height:24px;font-size:14px;cursor:pointer;color:#6b7280;border-radius:50%;display:flex;align-items:center;justify-content:center;">‹</button>
+                <span style="font-size:13px;font-weight:600;color:#1f2937;">February 2026</span>
+                <button style="background:none;border:none;width:24px;height:24px;font-size:14px;cursor:pointer;color:#6b7280;border-radius:50%;display:flex;align-items:center;justify-content:center;">›</button>
             </div>
-            <div style="display:grid;grid-template-columns:repeat(7, 1fr);gap:4px;margin-bottom:8px;">
-                ${['M','T','W','T','F','S','S'].map(d => `<div style="text-align:center;font-size:10px;color:var(--sb-text-secondary);font-weight:600;">${d}</div>`).join('')}
+            <div style="display:grid;grid-template-columns:repeat(7, 1fr);gap:0;margin-bottom:4px;">
+                ${['Su','Mo','Tu','We','Th','Fr','Sa'].map(d => `<div style="text-align:center;font-size:9px;color:#9ca3af;font-weight:600;padding:4px 0;text-transform:uppercase;">${d}</div>`).join('')}
             </div>
-            <div style="display:grid;grid-template-columns:repeat(7, 1fr);gap:4px;">
-                ${[...Array(14)].map((_, i) => `<div style="aspect-ratio:1;background:${i === 5 || i === 9 ? 'var(--sb-primary)' : 'white'};color:${i === 5 || i === 9 ? 'white' : 'var(--sb-text-secondary)'};border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:11px;">${i + 1}</div>`).join('')}
+            <div style="display:grid;grid-template-columns:repeat(7, 1fr);gap:2px;">
+                ${[...Array(14)].map((_, i) => {
+                    const isSelected = i === 5 || i === 9;
+                    const isToday = i === 0;
+                    let style = 'width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:11px;margin:1px auto;';
+                    if (isSelected) {
+                        style += 'background:#7c3aed;color:white;font-weight:600;';
+                    } else if (isToday) {
+                        style += 'border:2px solid #7c3aed;color:#7c3aed;font-weight:600;';
+                    } else {
+                        style += 'color:#374151;';
+                    }
+                    return `<div style="${style}">${i + 1}</div>`;
+                }).join('')}
             </div>
-            <p style="margin-top:12px;font-size:12px;color:var(--sb-text-secondary);text-align:center;">
+            <p style="margin-top:10px;padding-top:8px;border-top:1px solid #f3f4f6;font-size:11px;color:#6b7280;text-align:center;">
                 Respondents can select multiple dates
             </p>
         </div>
