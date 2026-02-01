@@ -244,53 +244,20 @@ async function authSocialSignup(provider) {
 
 /**
  * Initialize auth wizard on page load
+ * Always shows the login page - no automatic session resumption
  */
 function initAuthWizard() {
-    // Prevent multiple auth checks (avoids any potential loops)
-    if (window.authCheckDone) {
-        console.log('Auth check already done, skipping');
+    // Prevent multiple initializations
+    if (window.authInitDone) {
         return;
     }
-    window.authCheckDone = true;
+    window.authInitDone = true;
 
-    // IMPORTANT: Ensure app container is hidden until we confirm auth
-    const appContainer = document.getElementById('app-container');
-    if (appContainer) {
-        appContainer.classList.add('hidden');
-    }
+    console.log('Initializing auth wizard - showing login page');
 
-    // Check if user is already logged in
-    if (typeof supabaseClient !== 'undefined') {
-        try {
-            supabaseClient.auth.getSession()
-                .then(({ data: { session } }) => {
-                    if (session) {
-                        // User is logged in, show dashboard
-                        console.log('Session found, showing dashboard');
-                        if (typeof showDashboard === 'function') {
-                            showDashboard();
-                        }
-                    } else {
-                        // Not logged in, show auth wizard step 1
-                        console.log('No session, showing auth wizard');
-                        showAuthPage('auth-signup-step1');
-                    }
-                })
-                .catch((error) => {
-                    // Handle errors gracefully - just show login page
-                    console.error('Error checking session:', error);
-                    showAuthPage('auth-signup-step1');
-                });
-        } catch (error) {
-            // Handle synchronous errors
-            console.error('Error in auth check:', error);
-            showAuthPage('auth-signup-step1');
-        }
-    } else {
-        // No Supabase, show step 1 by default
-        console.log('Supabase client not available, showing auth wizard');
-        showAuthPage('auth-signup-step1');
-    }
+    // Always show the auth/login page on page load
+    // Users must actively log in - no session resumption
+    showAuthPage('auth-signup-step1');
 }
 
 // Initialize on DOM ready
