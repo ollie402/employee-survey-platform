@@ -175,7 +175,7 @@ async function loadUsers() {
         // Transform the data to include organization name
         const usersWithOrgNames = (data || []).map(user => ({
             ...user,
-            organization: user.organizations?.name || 'No Organization'
+            organization: user.organizations?.name || 'No Organisation'
         }));
         
         return usersWithOrgNames;

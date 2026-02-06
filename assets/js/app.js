@@ -21,7 +21,7 @@ const translations = {
         'client-user-startupx': 'Client User (StartupX)',
         'master-admin': 'Master Admin',
         'dashboard': 'Dashboard',
-        'organizations': 'Organizations',
+        'organizations': 'Organisations',
         'users': 'User Management',
         'branding': 'Branding',
         'start-listening': 'Start Listening',
@@ -35,18 +35,18 @@ const translations = {
         'participants': 'Participants',
         'data-management': 'Data Management',
         'ai-data-chat': 'AI Data Chat',
-        'active-organizations': 'Active Organizations',
+        'active-organizations': 'Active Organisations',
         'total-users': 'Total Users',
         'active-surveys': 'Active Surveys',
         'total-responses': 'Total Responses',
         'recent-activity': 'Recent Activity',
         'view-all': 'View All',
-        'organization': 'Organization',
+        'organization': 'Organisation',
         'activity': 'Activity',
         'user': 'User',
         'time': 'Time',
-        'add-organization': 'Add Organization',
-        'organization-name': 'Organization Name',
+        'add-organization': 'Add Organisation',
+        'organization-name': 'Organisation Name',
         'plan': 'Plan',
         'status': 'Status',
         'actions': 'Actions',
@@ -58,7 +58,7 @@ const translations = {
         'access': 'Access',
         'create-new-chat': 'Create New Chat',
         'profile-settings': 'Profile Settings',
-        'organization-settings': 'Organization Settings',
+        'organization-settings': 'Organisation Settings',
         'security': 'Security',
         'help-support': 'Help & Support',
         'sign-out': 'Sign Out',
@@ -1037,7 +1037,7 @@ function showSection(sectionName) {
     const breadcrumb = document.getElementById('breadcrumb');
     const sectionTitle = {
         'dashboard': translations[currentLanguage]['dashboard'] || 'Dashboard',
-        'organizations': translations[currentLanguage]['organizations'] || 'Organizations',
+        'organizations': translations[currentLanguage]['organizations'] || 'Organisations',
         'users': translations[currentLanguage]['users'] || 'User Management',
         'branding': translations[currentLanguage]['branding'] || 'Branding',
         'chat-feedback': translations[currentLanguage]['chat-feedback'] || 'Chat Feedback',
@@ -1111,7 +1111,7 @@ async function loadUsersTable() {
                 <td><input type="checkbox"></td>
                 <td>${user.name}</td>
                 <td>${user.email}</td>
-                <td>${user.organization || 'No Organization'}</td>
+                <td>${user.organization || 'No Organisation'}</td>
                 <td><span class="tag tag-pending">${user.role}</span></td>
                 <td><span class="tag tag-${user.status === 'active' ? 'success' : 'pending'}">${user.status || 'Active'}</span></td>
                 <td>${user.created_at ? new Date(user.created_at).toLocaleDateString() : 'Never'}</td>
@@ -1135,7 +1135,7 @@ async function loadOrganizationsTable() {
         const tbody = document.querySelector('#organizations-table tbody');
         
         if (organizations.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #6b7280;">No organizations found. Create your first organization using the "Add Organization" button.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #6b7280;">No organisations found. Create your first organisation using the "Add Organisation" button.</td></tr>';
             return;
         }
         
@@ -1306,7 +1306,7 @@ function showOrganizationSettings() {
     
     // Populate form with organization data
     const orgData = appState.organizationSettings || {};
-    document.getElementById('org-name').value = orgData.name || (currentUser?.name?.includes('TechCorp') ? 'TechCorp Ltd' : 'Realworld Organization');
+    document.getElementById('org-name').value = orgData.name || (currentUser?.name?.includes('TechCorp') ? 'TechCorp Ltd' : 'Realworld Organisation');
     document.getElementById('org-industry').value = orgData.industry || 'technology';
     document.getElementById('org-size').value = orgData.size || '51-200';
     document.getElementById('org-country').value = orgData.country || 'GB';
@@ -1392,7 +1392,7 @@ function handleOrganizationUpdate(event) {
     appState.organizationSettings = orgData;
     
     closeModal('organization-settings-modal');
-    showToast('Organization settings saved successfully!', 'success');
+    showToast('Organisation settings saved successfully!', 'success');
 }
 
 function handlePasswordChange(event) {
@@ -1751,7 +1751,7 @@ function initializeOrgPreview() {
         orgNameInput.addEventListener('input', function() {
             const preview = document.getElementById('org-preview-name');
             if (preview) {
-                preview.textContent = this.value || 'Organization Name';
+                preview.textContent = this.value || 'Organisation Name';
             }
         });
     }
@@ -1804,7 +1804,7 @@ function showCreateOrganizationModal() {
     modal.innerHTML = `
         <div class="modal-content" style="max-width: 800px; max-height: 90vh; overflow-y: auto;">
             <div class="modal-header">
-                <h3>Add New Organization</h3>
+                <h3>Add New Organisation</h3>
                 <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
             </div>
             <form onsubmit="createOrganization(event)">
@@ -1812,8 +1812,8 @@ function showCreateOrganizationModal() {
                 <div style="border-bottom: 1px solid var(--border-color); padding-bottom: 1.5rem; margin-bottom: 1.5rem;">
                     <h4 style="margin-bottom: 1rem; color: var(--primary-color);">📋 Basic Information</h4>
                     <div class="form-group">
-                        <label class="form-label">Organization Name</label>
-                        <input type="text" name="orgName" class="form-input" required placeholder="Enter organization name">
+                        <label class="form-label">Organisation Name</label>
+                        <input type="text" name="orgName" class="form-input" required placeholder="Enter organisation name">
                     </div>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                         <div class="form-group">
@@ -1842,7 +1842,7 @@ function showCreateOrganizationModal() {
 
                 <!-- Branding Section -->
                 <div style="padding-bottom: 1.5rem;">
-                    <h4 style="margin-bottom: 1rem; color: var(--primary-color);">🎨 Organization Branding</h4>
+                    <h4 style="margin-bottom: 1rem; color: var(--primary-color);">🎨 Organisation Branding</h4>
                     
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                         <div class="form-group">
@@ -1867,7 +1867,7 @@ function showCreateOrganizationModal() {
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label">Organization Logo</label>
+                        <label class="form-label">Organisation Logo</label>
                         <div class="file-upload-area" id="org-logo-upload-area" 
                              style="border: 2px dashed var(--border-color); border-radius: 8px; padding: 2rem; text-align: center; cursor: pointer; transition: all 0.3s;"
                              onclick="document.getElementById('org-logo-upload').click()"
@@ -1920,7 +1920,7 @@ function showCreateOrganizationModal() {
                                     R
                                 </div>
                             </div>
-                            <div id="org-preview-name" style="font-size: 1.25rem; font-weight: bold; margin-bottom: 0.5rem;">Organization Name</div>
+                            <div id="org-preview-name" style="font-size: 1.25rem; font-weight: bold; margin-bottom: 0.5rem;">Organisation Name</div>
                             <div id="org-preview-welcome" style="font-size: 0.875rem; color: var(--text-secondary);">Welcome! Your feedback helps us improve.</div>
                         </div>
                     </div>
@@ -1928,7 +1928,7 @@ function showCreateOrganizationModal() {
 
                 <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
                     <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').remove()">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Create Organization</button>
+                    <button type="submit" class="btn btn-primary">Create Organisation</button>
                 </div>
             </form>
         </div>
@@ -2001,10 +2001,10 @@ async function createOrganization(event) {
         table.appendChild(newRow);
         
         event.target.closest('.modal').remove();
-        showToast(`Organization "${orgData.name}" created successfully with custom branding!`, 'success');
+        showToast(`Organisation "${orgData.name}" created successfully with custom branding!`, 'success');
     } catch (error) {
         console.error('Error saving organization to database:', error);
-        showToast(`❌ Failed to create organization: ${error.message}`, 'error');
+        showToast(`❌ Failed to create organisation: ${error.message}`, 'error');
         event.target.closest('.modal').remove();
         return;
     }
@@ -2176,9 +2176,9 @@ function createNewSurvey() {
                     </select>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Organization</label>
+                    <label class="form-label">Organisation</label>
                     <select name="organization" class="form-select" id="survey-org-select">
-                        <option value="">Loading organizations...</option>
+                        <option value="">Loading organisations...</option>
                     </select>
                 </div>
                 <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
@@ -2200,15 +2200,15 @@ async function populateSurveyOrganizations() {
         const select = document.getElementById('survey-org-select');
         
         if (organizations.length > 0) {
-            select.innerHTML = '<option value="">Select Organization</option>' +
+            select.innerHTML = '<option value="">Select Organisation</option>' +
                 organizations.map(org => `<option value="${org.id}">${org.name}</option>`).join('');
         } else {
-            select.innerHTML = '<option value="" disabled>No organizations found</option>';
+            select.innerHTML = '<option value="" disabled>No organisations found</option>';
         }
     } catch (error) {
         console.error('Error loading organizations:', error);
         const select = document.getElementById('survey-org-select');
-        select.innerHTML = '<option value="" disabled>Error loading organizations</option>';
+        select.innerHTML = '<option value="" disabled>Error loading organisations</option>';
     }
 }
 
@@ -3907,13 +3907,13 @@ function initializeBrandingListeners() {
 function handleExportData(type) {
     const data = {
         organizations: [
-            ['Organization Name', 'Plan', 'Users', 'Status', 'Last Activity'],
+            ['Organisation Name', 'Plan', 'Users', 'Status', 'Last Activity'],
             ['TechCorp Ltd', 'Start + Keep Listening', '15', 'Active', '2 hours ago'],
             ['Global Industries', 'Start Listening', '8', 'Active', '4 hours ago'],
             ['StartupX', 'Keep Listening', '3', 'Active', '1 day ago']
         ],
         users: [
-            ['Name', 'Email', 'Organization', 'Access', 'Status', 'Last Login'],
+            ['Name', 'Email', 'Organisation', 'Access', 'Status', 'Last Login'],
             ['Sarah Johnson', 'sarah@techcorp.com', 'TechCorp Ltd', 'Start + Keep Listening', 'Active', '2 hours ago'],
             ['Mike Chen', 'mike@startupx.com', 'StartupX', 'Keep Listening', 'Active', '1 day ago'],
             ['Lisa Wang', 'lisa@global.com', 'Global Industries', 'Start Listening', 'Pending', 'Never']
@@ -4057,7 +4057,7 @@ function showActivityDetails(org, activity) {
             </div>
             <div>
                 <div class="form-group">
-                    <label class="form-label">Organization</label>
+                    <label class="form-label">Organisation</label>
                     <input type="text" class="form-input" value="${org}" readonly>
                 </div>
                 <div class="form-group">
@@ -4084,13 +4084,13 @@ function showOrganizationDetails(orgName) {
     modal.innerHTML = `
         <div class="modal-content" style="max-width: 700px;">
             <div class="modal-header">
-                <h3>${orgName} - Organization Details</h3>
+                <h3>${orgName} - Organisation Details</h3>
                 <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
             </div>
             <div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
                     <div>
-                        <h4>Organization Information</h4>
+                        <h4>Organisation Information</h4>
                         <div style="display: grid; gap: 1rem; margin: 1rem 0;">
                             <div><strong>Name:</strong> ${orgName}</div>
                             <div><strong>Plan:</strong> Start + Keep Listening</div>
@@ -4124,7 +4124,7 @@ function showOrganizationDetails(orgName) {
                 </div>
                 <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
                     <button class="btn btn-secondary" onclick="this.closest('.modal').remove()">Close</button>
-                    <button class="btn btn-primary" onclick="editOrganization('${orgName}')">Edit Organization</button>
+                    <button class="btn btn-primary" onclick="editOrganization('${orgName}')">Edit Organisation</button>
                 </div>
             </div>
         </div>
@@ -4144,7 +4144,7 @@ async function showCreateUserModal() {
     const organizations = await loadOrganizations() || [];
     
     // Build organization options HTML
-    let orgOptionsHTML = '<option value="">Select Organization</option>';
+    let orgOptionsHTML = '<option value="">Select Organisation</option>';
     
     // Add real organizations from database
     if (organizations.length > 0) {
@@ -4153,7 +4153,7 @@ async function showCreateUserModal() {
         });
     } else {
         // If no organizations exist, show helpful message
-        orgOptionsHTML += '<option value="" disabled>No organizations created yet</option>';
+        orgOptionsHTML += '<option value="" disabled>No organisations created yet</option>';
     }
     
     const modal = document.createElement('div');
@@ -4181,7 +4181,7 @@ async function showCreateUserModal() {
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                     <div class="form-group">
-                        <label class="form-label">Organization</label>
+                        <label class="form-label">Organisation</label>
                         <select name="organization" class="form-select" required>
                             ${orgOptionsHTML}
                         </select>
@@ -4192,7 +4192,7 @@ async function showCreateUserModal() {
                             <option value="">Select Role</option>
                             <option value="viewer">Viewer</option>
                             <option value="survey_admin">Survey Admin</option>
-                            <option value="org_admin">Organization Admin</option>
+                            <option value="org_admin">Organisation Admin</option>
                             <option value="super_admin">Super Admin</option>
                         </select>
                     </div>
@@ -4337,12 +4337,12 @@ function handleEditOrganization(orgName) {
     modal.innerHTML = `
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Edit Organization - ${orgName}</h3>
+                <h3>Edit Organisation - ${orgName}</h3>
                 <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
             </div>
             <form onsubmit="updateOrganization(event, '${orgName}')">
                 <div class="form-group">
-                    <label class="form-label">Organization Name</label>
+                    <label class="form-label">Organisation Name</label>
                     <input type="text" name="orgName" class="form-input" value="${orgName}" required>
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
@@ -4369,7 +4369,7 @@ function handleEditOrganization(orgName) {
                 </div>
                 <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
                     <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').remove()">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Update Organization</button>
+                    <button type="submit" class="btn btn-primary">Update Organisation</button>
                 </div>
             </form>
         </div>
@@ -4395,11 +4395,11 @@ function updateOrganization(event, oldName) {
     });
     
     event.target.closest('.modal').remove();
-    showToast(`Organization updated successfully!`, 'success');
+    showToast(`Organisation updated successfully!`, 'success');
 }
 
 function handleSuspendOrganization(orgName) {
-    if (confirm(`Are you sure you want to suspend "${orgName}"? This will disable all access for this organization.`)) {
+    if (confirm(`Are you sure you want to suspend "${orgName}"? This will disable all access for this organisation.`)) {
         // Find and update the row
         const table = document.querySelector('#organizations-table tbody');
         const rows = table.querySelectorAll('tr');
@@ -4409,7 +4409,7 @@ function handleSuspendOrganization(orgName) {
                 row.cells[4].textContent = 'Just suspended';
             }
         });
-        showToast(`Organization "${orgName}" has been suspended.`, 'warning');
+        showToast(`Organisation "${orgName}" has been suspended.`, 'warning');
     }
 }
 
@@ -4439,13 +4439,13 @@ async function handleDeleteOrganization(orgId, orgName) {
                     }
                 });
                 
-                showToast(`Organization "${displayName}" has been deleted.`, 'success');
+                showToast(`Organisation "${displayName}" has been deleted.`, 'success');
             } else {
-                showToast(`Failed to delete organization "${displayName}". It may not exist.`, 'error');
+                showToast(`Failed to delete organisation "${displayName}". It may not exist.`, 'error');
             }
         } catch (error) {
             console.error('Error deleting organization:', error);
-            showToast(`❌ Failed to delete organization: ${error.message}`, 'error');
+            showToast(`❌ Failed to delete organisation: ${error.message}`, 'error');
         }
     }
 }
@@ -4475,7 +4475,7 @@ function handleEditUser(userName) {
                             <option value="">Select Role</option>
                             <option value="viewer">Viewer</option>
                             <option value="survey_admin">Survey Admin</option>
-                            <option value="org_admin">Organization Admin</option>
+                            <option value="org_admin">Organisation Admin</option>
                             <option value="super_admin">Super Admin</option>
                         </select>
                     </div>
@@ -4599,7 +4599,7 @@ async function handleResendInvite(userName) {
     rows.forEach(row => {
         if (row.cells && row.cells[1] && row.cells[1].textContent === userName) {
             userEmail = row.cells[2] ? row.cells[2].textContent : '';
-            organization = row.cells[3] ? row.cells[3].textContent : 'Unknown Organization';
+            organization = row.cells[3] ? row.cells[3].textContent : 'Unknown Organisation';
         }
     });
     
@@ -4738,7 +4738,7 @@ function handleViewAll() {
                     <thead>
                         <tr>
                             <th>Time</th>
-                            <th>Organization</th>
+                            <th>Organisation</th>
                             <th>Activity</th>
                             <th>User</th>
                             <th>Type</th>
@@ -4866,7 +4866,7 @@ function generateNewReport() {
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Include Organizations</label>
+                    <label class="form-label">Include Organisations</label>
                     <div style="display: grid; gap: 0.5rem; margin-top: 0.5rem;">
                         <label class="checkbox-label"><input type="checkbox" name="orgs" value="techcorp" checked> TechCorp Ltd</label>
                         <label class="checkbox-label"><input type="checkbox" name="orgs" value="global" checked> Global Industries</label>
@@ -8081,7 +8081,7 @@ async function testEmailSetup() {
     const testData = {
         userEmail: yourTestEmail,
         userName: 'Test User',
-        organizationName: 'Test Organization',
+        organizationName: 'Test Organisation',
         temporaryPassword: 'TestPassword123!'
     };
     
