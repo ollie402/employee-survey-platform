@@ -4078,58 +4078,11 @@ function showActivityDetails(org, activity) {
     document.body.appendChild(modal);
 }
 
-function showOrganizationDetails(orgName) {
-    const modal = document.createElement('div');
-    modal.className = 'modal';
-    modal.innerHTML = `
-        <div class="modal-content" style="max-width: 700px;">
-            <div class="modal-header">
-                <h3>${orgName} - Organisation Details</h3>
-                <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
-            </div>
-            <div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
-                    <div>
-                        <h4>Organisation Information</h4>
-                        <div style="display: grid; gap: 1rem; margin: 1rem 0;">
-                            <div><strong>Name:</strong> ${orgName}</div>
-                            <div><strong>Plan:</strong> Start + Keep Listening</div>
-                            <div><strong>Users:</strong> 15</div>
-                            <div><strong>Status:</strong> <span class="tag tag-active">Active</span></div>
-                            <div><strong>Created:</strong> March 15, 2024</div>
-                            <div><strong>Last Activity:</strong> 2 hours ago</div>
-                        </div>
-                    </div>
-                    <div>
-                        <h4>Usage Statistics</h4>
-                        <div class="dashboard-grid">
-                            <div class="stat-card">
-                                <div class="stat-value">47</div>
-                                <div class="stat-label">Active Surveys</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-value">1,234</div>
-                                <div class="stat-label">Total Responses</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div style="margin-top: 2rem;">
-                    <h4>Recent Activity</h4>
-                    <div style="background: var(--bg-secondary); padding: 1rem; border-radius: 8px;">
-                        <div style="margin-bottom: 0.5rem;">• Survey "Q4 Feedback" published</div>
-                        <div style="margin-bottom: 0.5rem;">• 23 new responses received</div>
-                        <div style="margin-bottom: 0.5rem;">• User Sarah Johnson logged in</div>
-                    </div>
-                </div>
-                <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
-                    <button class="btn btn-secondary" onclick="this.closest('.modal').remove()">Close</button>
-                    <button class="btn btn-primary" onclick="editOrganization('${orgName}')">Edit Organisation</button>
-                </div>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(modal);
+// Note: showOrganizationDetails is implemented in index.html inline script with full Supabase integration
+// This stub is kept for backwards compatibility - the inline script version will override it
+function showOrganizationDetails(orgId) {
+    console.log('showOrganizationDetails called with:', orgId);
+    showToast('Loading organisation details...', 'info');
 }
 
 function showUserDetails(userName) {
@@ -4330,124 +4283,22 @@ async function createUser(event) {
     event.target.closest('.modal').remove();
 }
 
-// Edit/Delete/Suspend functions with real implementations
-function handleEditOrganization(orgName) {
-    const modal = document.createElement('div');
-    modal.className = 'modal';
-    modal.innerHTML = `
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Edit Organisation - ${orgName}</h3>
-                <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
-            </div>
-            <form onsubmit="updateOrganization(event, '${orgName}')">
-                <div class="form-group">
-                    <label class="form-label">Organisation Name</label>
-                    <input type="text" name="orgName" class="form-input" value="${orgName}" required>
-                </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                    <div class="form-group">
-                        <label class="form-label">Plan</label>
-                        <select name="plan" class="form-select">
-                            <option value="start">Start Listening</option>
-                            <option value="keep">Keep Listening</option>
-                            <option value="both" selected>Start + Keep Listening</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Status</label>
-                        <select name="status" class="form-select">
-                            <option value="active" selected>Active</option>
-                            <option value="suspended">Suspended</option>
-                            <option value="trial">Trial</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Notes</label>
-                    <textarea name="notes" class="form-input" rows="3" placeholder="Internal notes..."></textarea>
-                </div>
-                <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
-                    <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').remove()">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Update Organisation</button>
-                </div>
-            </form>
-        </div>
-    `;
-    document.body.appendChild(modal);
+// Note: These organisation action handlers are implemented in index.html inline script with full Supabase integration
+// These stubs are kept for backwards compatibility - the inline script versions will override them
+
+function handleEditOrganization(orgId) {
+    console.log('handleEditOrganization called with:', orgId);
+    showToast('Loading organisation for editing...', 'info');
 }
 
-function updateOrganization(event, oldName) {
-    event.preventDefault();
-    const formData = new FormData(event.target);
-    const newName = formData.get('orgName');
-    
-    // Find and update the row in the table
-    const table = document.querySelector('#organizations-table tbody');
-    const rows = table.querySelectorAll('tr');
-    rows.forEach(row => {
-        if (row.cells[0].textContent === oldName) {
-            row.cells[0].textContent = newName;
-            row.cells[1].innerHTML = `<span class="tag tag-active">${formData.get('plan')}</span>`;
-            row.cells[3].innerHTML = `<span class="tag tag-active">${formData.get('status')}</span>`;
-            row.cells[4].textContent = 'Just updated';
-        }
-    });
-    
-    event.target.closest('.modal').remove();
-    showToast(`Organisation updated successfully!`, 'success');
+function handleSuspendOrganization(orgId, currentStatus) {
+    console.log('handleSuspendOrganization called with:', orgId, currentStatus);
+    showToast('Processing...', 'info');
 }
 
-function handleSuspendOrganization(orgName) {
-    if (confirm(`Are you sure you want to suspend "${orgName}"? This will disable all access for this organisation.`)) {
-        // Find and update the row
-        const table = document.querySelector('#organizations-table tbody');
-        const rows = table.querySelectorAll('tr');
-        rows.forEach(row => {
-            if (row.cells[0].textContent === orgName) {
-                row.cells[3].innerHTML = '<span class="tag tag-inactive">Suspended</span>';
-                row.cells[4].textContent = 'Just suspended';
-            }
-        });
-        showToast(`Organisation "${orgName}" has been suspended.`, 'warning');
-    }
-}
-
-async function handleDeleteOrganization(orgId, orgName) {
-    const displayName = orgName || orgId;
-    if (confirm(`Are you sure you want to delete "${displayName}"? This action cannot be undone and will remove all associated data.`)) {
-        try {
-            // Delete from database
-            const deleted = await deleteOrganization(orgId);
-            
-            if (deleted) {
-                // Remove from local state
-                if (appState.organizations) {
-                    appState.organizations = appState.organizations.filter(org => 
-                        org.id !== orgId && org.name !== orgId
-                    );
-                    localStorage.setItem('organizations', JSON.stringify(appState.organizations));
-                }
-                
-                // Find and remove the row from UI
-                const table = document.querySelector('#organizations-table tbody');
-                const rows = table.querySelectorAll('tr');
-                rows.forEach(row => {
-                    if (row.cells[0].textContent === displayName || 
-                        row.onclick?.toString().includes(orgId)) {
-                        row.remove();
-                    }
-                });
-                
-                showToast(`Organisation "${displayName}" has been deleted.`, 'success');
-            } else {
-                showToast(`Failed to delete organisation "${displayName}". It may not exist.`, 'error');
-            }
-        } catch (error) {
-            console.error('Error deleting organization:', error);
-            showToast(`❌ Failed to delete organisation: ${error.message}`, 'error');
-        }
-    }
+async function handleDeleteOrganization(orgId) {
+    console.log('handleDeleteOrganization called with:', orgId);
+    showToast('Processing delete request...', 'info');
 }
 
 function handleEditUser(userName) {

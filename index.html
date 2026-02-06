@@ -5070,7 +5070,7 @@ Thank you!</textarea>
                         <div class="filters">
                             <div class="filter-group">
                                 <label class="filter-label">Search</label>
-                                <input type="text" class="form-input" placeholder="Search organizations..." 
+                                <input type="text" class="form-input" placeholder="Search organisations..."
                                        style="min-width: 200px;" oninput="filterOrganizations('search', this.value)">
                             </div>
                             <div class="filter-group">
@@ -8378,13 +8378,19 @@ async function loadOrganizationsData() {
             console.log(`Building grid row ${i+1}:`, org);
             
             // Create 5 grid cells for each organization (auto-wraps to next row)
+            const orgStatus = org.status || 'active';
+            const statusClass = orgStatus === 'active' ? 'tag-active' : (orgStatus === 'suspended' ? 'tag-warning' : 'tag-pending');
+            const statusText = orgStatus.charAt(0).toUpperCase() + orgStatus.slice(1);
+            const suspendBtnText = orgStatus === 'suspended' ? 'Activate' : 'Suspend';
+            const suspendBtnClass = orgStatus === 'suspended' ? 'btn-success' : 'btn-warning';
+
             gridHTML += '<div class="org-grid-cell" onclick="showOrganizationDetails(\'' + (org.id || 'temp') + '\')">' + (org.name || 'Unnamed') + '</div>';
             gridHTML += '<div class="org-grid-cell" onclick="showOrganizationDetails(\'' + (org.id || 'temp') + '\')">' + (org.user_count || 0) + '</div>';
-            gridHTML += '<div class="org-grid-cell" onclick="showOrganizationDetails(\'' + (org.id || 'temp') + '\')"><span class="tag tag-active">Active</span></div>';
+            gridHTML += '<div class="org-grid-cell" onclick="showOrganizationDetails(\'' + (org.id || 'temp') + '\')"><span class="tag ' + statusClass + '">' + statusText + '</span></div>';
             gridHTML += '<div class="org-grid-cell" onclick="showOrganizationDetails(\'' + (org.id || 'temp') + '\')">' + (org.created_at ? new Date(org.created_at).toLocaleDateString() : 'Today') + '</div>';
             gridHTML += '<div class="org-grid-cell" onclick="event.stopPropagation()">';
             gridHTML += '<button class="btn btn-secondary btn-sm" onclick="handleEditOrganization(\'' + (org.id || 'temp') + '\')">Edit</button> ';
-            gridHTML += '<button class="btn btn-warning btn-sm" onclick="handleSuspendOrganization(\'' + (org.id || 'temp') + '\')">Suspend</button> ';
+            gridHTML += '<button class="btn ' + suspendBtnClass + ' btn-sm" onclick="handleSuspendOrganization(\'' + (org.id || 'temp') + '\', \'' + orgStatus + '\')">' + suspendBtnText + '</button> ';
             gridHTML += '<button class="btn btn-danger btn-sm" onclick="handleDeleteOrganization(\'' + (org.id || 'temp') + '\')">Delete</button>';
             gridHTML += '</div>';
         }
@@ -8844,7 +8850,7 @@ async function handleCreateUser(event) {
 // Organization action handlers
 async function handleDeleteOrganization(orgId) {
     if (!orgId || orgId === 'temp') {
-        showToast('Invalid organization ID', 'error');
+        showToast('Invalid organisation ID', 'error');
         return;
     }
     
@@ -8884,40 +8890,229 @@ async function handleEditOrganization(orgId) {
         return;
     }
 
-    // TODO: Implement edit organisation modal
-    showToast('Edit functionality coming soon!', 'info');
+    try {
+        // Fetch the organisation data from Supabase
+        const { data: org, error } = await window.supabaseClient
+            .from('organizations')
+            .select('*')
+            .eq('id', orgId)
+            .single();
+
+        if (error || !org) {
+            showToast('Failed to load organisation data', 'error');
+            console.error('Error loading org:', error);
+            return;
+        }
+
+        // Create and show the edit modal
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.id = 'edit-organization-modal';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Edit Organisation</h3>
+                    <button class="close-btn" onclick="closeModal('edit-organization-modal')">&times;</button>
+                </div>
+                <form onsubmit="handleUpdateOrganization(event, '${orgId}')">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label class="form-label">Organisation Name *</label>
+                            <input type="text" id="edit-org-name" class="form-input" value="${org.name || ''}" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Industry</label>
+                            <select id="edit-org-industry" class="form-select">
+                                <option value="">Select Industry</option>
+                                <option value="technology" ${org.industry === 'technology' ? 'selected' : ''}>Technology</option>
+                                <option value="healthcare" ${org.industry === 'healthcare' ? 'selected' : ''}>Healthcare</option>
+                                <option value="finance" ${org.industry === 'finance' ? 'selected' : ''}>Finance</option>
+                                <option value="education" ${org.industry === 'education' ? 'selected' : ''}>Education</option>
+                                <option value="retail" ${org.industry === 'retail' ? 'selected' : ''}>Retail</option>
+                                <option value="manufacturing" ${org.industry === 'manufacturing' ? 'selected' : ''}>Manufacturing</option>
+                                <option value="other" ${org.industry === 'other' ? 'selected' : ''}>Other</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label class="form-label">Company Size</label>
+                            <select id="edit-org-size" class="form-select">
+                                <option value="">Select Size</option>
+                                <option value="1-10" ${org.size === '1-10' ? 'selected' : ''}>1-10 employees</option>
+                                <option value="11-50" ${org.size === '11-50' ? 'selected' : ''}>11-50 employees</option>
+                                <option value="51-200" ${org.size === '51-200' ? 'selected' : ''}>51-200 employees</option>
+                                <option value="201-1000" ${org.size === '201-1000' ? 'selected' : ''}>201-1000 employees</option>
+                                <option value="1000+" ${org.size === '1000+' ? 'selected' : ''}>1000+ employees</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Status</label>
+                            <select id="edit-org-status" class="form-select">
+                                <option value="active" ${org.status === 'active' ? 'selected' : ''}>Active</option>
+                                <option value="suspended" ${org.status === 'suspended' ? 'selected' : ''}>Suspended</option>
+                                <option value="trial" ${org.status === 'trial' ? 'selected' : ''}>Trial</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Website</label>
+                        <input type="url" id="edit-org-website" class="form-input" value="${org.website || ''}" placeholder="https://www.example.com">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Description</label>
+                        <textarea id="edit-org-description" class="form-input" rows="3" placeholder="Describe your organisation...">${org.description || ''}</textarea>
+                    </div>
+                    <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal('edit-organization-modal')">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        modal.style.display = 'flex';
+        setupModalCloseOnOutsideClick(modal);
+
+    } catch (error) {
+        console.error('Error in handleEditOrganization:', error);
+        showToast('Failed to open edit form: ' + error.message, 'error');
+    }
 }
 
-async function handleSuspendOrganization(orgId) {
+// Handle the update form submission
+async function handleUpdateOrganization(event, orgId) {
+    event.preventDefault();
+
+    const formData = {
+        name: document.getElementById('edit-org-name').value,
+        industry: document.getElementById('edit-org-industry').value,
+        size: document.getElementById('edit-org-size').value,
+        status: document.getElementById('edit-org-status').value,
+        website: document.getElementById('edit-org-website').value,
+        description: document.getElementById('edit-org-description').value
+    };
+
+    try {
+        const result = await updateOrganization(orgId, formData);
+        if (result) {
+            showToast('Organisation updated successfully!', 'success');
+            closeModal('edit-organization-modal');
+            loadOrganizationsData(); // Refresh the grid
+        } else {
+            showToast('Failed to update organisation', 'error');
+        }
+    } catch (error) {
+        console.error('Error updating organization:', error);
+        showToast('Failed to update organisation: ' + error.message, 'error');
+    }
+}
+
+async function handleSuspendOrganization(orgId, currentStatus) {
     if (!orgId || orgId === 'temp') {
         showToast('Invalid organisation ID', 'error');
         return;
     }
 
-    if (confirm('Are you sure you want to suspend this organisation?')) {
+    const isSuspended = currentStatus === 'suspended';
+    const newStatus = isSuspended ? 'active' : 'suspended';
+    const actionText = isSuspended ? 'activate' : 'suspend';
+    const successText = isSuspended ? 'activated' : 'suspended';
+
+    if (confirm('Are you sure you want to ' + actionText + ' this organisation?')) {
         try {
-            const result = await updateOrganization(orgId, { status: 'suspended' });
+            const result = await updateOrganization(orgId, { status: newStatus });
             if (result) {
-                showToast('Organisation suspended successfully!', 'success');
+                showToast('Organisation ' + successText + ' successfully!', 'success');
                 loadOrganizationsData(); // Refresh the grid
             } else {
-                showToast('Failed to suspend organisation', 'error');
+                showToast('Failed to ' + actionText + ' organisation', 'error');
             }
         } catch (error) {
-            console.error('Error suspending organization:', error);
-            showToast('Failed to suspend organisation: ' + error.message, 'error');
+            console.error('Error updating organization status:', error);
+            showToast('Failed to ' + actionText + ' organisation: ' + error.message, 'error');
         }
     }
 }
 
-function showOrganizationDetails(orgId) {
+async function showOrganizationDetails(orgId) {
     if (!orgId || orgId === 'temp') {
         showToast('Invalid organisation ID', 'error');
         return;
     }
 
-    // TODO: Implement organisation details modal
-    showToast('Organisation details coming soon!', 'info');
+    try {
+        // Fetch the organisation data from Supabase
+        const { data: org, error } = await window.supabaseClient
+            .from('organizations')
+            .select('*')
+            .eq('id', orgId)
+            .single();
+
+        if (error || !org) {
+            showToast('Failed to load organisation details', 'error');
+            console.error('Error loading org details:', error);
+            return;
+        }
+
+        // Get user count for this organisation
+        const { count: userCount } = await window.supabaseClient
+            .from('users')
+            .select('*', { count: 'exact', head: true })
+            .eq('organization_id', orgId);
+
+        const statusClass = org.status === 'active' ? 'tag-active' : (org.status === 'suspended' ? 'tag-warning' : 'tag-pending');
+        const statusText = (org.status || 'active').charAt(0).toUpperCase() + (org.status || 'active').slice(1);
+
+        // Create and show the details modal
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.id = 'org-details-modal';
+        modal.innerHTML = `
+            <div class="modal-content" style="max-width: 700px;">
+                <div class="modal-header">
+                    <h3>${org.name} - Organisation Details</h3>
+                    <button class="close-btn" onclick="closeModal('org-details-modal')">&times;</button>
+                </div>
+                <div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                        <div>
+                            <h4>Organisation Information</h4>
+                            <div style="display: grid; gap: 1rem; margin: 1rem 0;">
+                                <div><strong>Name:</strong> ${org.name || 'N/A'}</div>
+                                <div><strong>Industry:</strong> ${org.industry ? org.industry.charAt(0).toUpperCase() + org.industry.slice(1) : 'Not set'}</div>
+                                <div><strong>Size:</strong> ${org.size || 'Not set'}</div>
+                                <div><strong>Status:</strong> <span class="tag ${statusClass}">${statusText}</span></div>
+                                <div><strong>Website:</strong> ${org.website ? '<a href="' + org.website + '" target="_blank">' + org.website + '</a>' : 'Not set'}</div>
+                                <div><strong>Created:</strong> ${org.created_at ? new Date(org.created_at).toLocaleDateString() : 'Unknown'}</div>
+                            </div>
+                        </div>
+                        <div>
+                            <h4>Statistics</h4>
+                            <div class="dashboard-grid" style="grid-template-columns: 1fr;">
+                                <div class="stat-card">
+                                    <div class="stat-value">${userCount || 0}</div>
+                                    <div class="stat-label">Total Users</div>
+                                </div>
+                            </div>
+                            ${org.description ? '<div style="margin-top: 1rem;"><strong>Description:</strong><p style="margin-top: 0.5rem; color: var(--text-secondary);">' + org.description + '</p></div>' : ''}
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
+                        <button class="btn btn-secondary" onclick="closeModal('org-details-modal')">Close</button>
+                        <button class="btn btn-primary" onclick="closeModal('org-details-modal'); handleEditOrganization('${orgId}')">Edit Organisation</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        modal.style.display = 'flex';
+        setupModalCloseOnOutsideClick(modal);
+
+    } catch (error) {
+        console.error('Error in showOrganizationDetails:', error);
+        showToast('Failed to load organisation details: ' + error.message, 'error');
+    }
 }
 
 // User action handlers
