@@ -8343,7 +8343,7 @@ async function handleUserSubmit(event) {
 // Force remove any checkboxes from organizations table
 
 // Load organizations data from database - SIMPLIFIED VERSION
-async function loadOrganizationsData() {
+window.loadOrganizationsData = async function() {
     try {
         console.log('🔄 LOADING ORGANIZATIONS GRID');
         
@@ -8847,8 +8847,8 @@ async function handleCreateUser(event) {
     }
 }
 
-// Organization action handlers
-async function handleDeleteOrganization(orgId) {
+// Organization action handlers - explicitly assigned to window for global access
+window.handleDeleteOrganization = async function(orgId) {
     if (!orgId || orgId === 'temp') {
         showToast('Invalid organisation ID', 'error');
         return;
@@ -8884,7 +8884,7 @@ async function handleDeleteOrganization(orgId) {
     }
 }
 
-async function handleEditOrganization(orgId) {
+window.handleEditOrganization = async function(orgId) {
     if (!orgId || orgId === 'temp') {
         showToast('Invalid organisation ID', 'error');
         return;
@@ -8981,7 +8981,7 @@ async function handleEditOrganization(orgId) {
 }
 
 // Handle the update form submission
-async function handleUpdateOrganization(event, orgId) {
+window.handleUpdateOrganization = async function(event, orgId) {
     event.preventDefault();
 
     const formData = {
@@ -9008,7 +9008,7 @@ async function handleUpdateOrganization(event, orgId) {
     }
 }
 
-async function handleSuspendOrganization(orgId, currentStatus) {
+window.handleSuspendOrganization = async function(orgId, currentStatus) {
     if (!orgId || orgId === 'temp') {
         showToast('Invalid organisation ID', 'error');
         return;
@@ -9035,7 +9035,7 @@ async function handleSuspendOrganization(orgId, currentStatus) {
     }
 }
 
-async function showOrganizationDetails(orgId) {
+window.showOrganizationDetails = async function(orgId) {
     if (!orgId || orgId === 'temp') {
         showToast('Invalid organisation ID', 'error');
         return;

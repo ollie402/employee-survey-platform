@@ -4284,22 +4284,7 @@ async function createUser(event) {
 }
 
 // Note: These organisation action handlers are implemented in index.html inline script with full Supabase integration
-// These stubs are kept for backwards compatibility - the inline script versions will override them
-
-function handleEditOrganization(orgId) {
-    console.log('handleEditOrganization called with:', orgId);
-    showToast('Loading organisation for editing...', 'info');
-}
-
-function handleSuspendOrganization(orgId, currentStatus) {
-    console.log('handleSuspendOrganization called with:', orgId, currentStatus);
-    showToast('Processing...', 'info');
-}
-
-async function handleDeleteOrganization(orgId) {
-    console.log('handleDeleteOrganization called with:', orgId);
-    showToast('Processing delete request...', 'info');
-}
+// The real implementations are assigned to window.* in the inline script and will override these placeholders
 
 function handleEditUser(userName) {
     const modal = document.createElement('div');
