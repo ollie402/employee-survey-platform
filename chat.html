@@ -626,7 +626,7 @@
         <div class="input-area" id="input-area" style="display: none;">
             <div class="input-container">
                 <textarea id="user-input" placeholder="Type your message..." rows="1"></textarea>
-                <button class="send-button" id="send-button" onclick="sendMessage()">Send</button>
+                <button class="send-button" id="send-button" onclick="sendMessage()">Submit</button>
             </div>
         </div>
 
@@ -638,16 +638,6 @@
             </div>
         </div>
 
-        <!-- Submit Chat Area -->
-        <div class="chat-submit-area" id="chat-submit-area" style="display: none;">
-            <button id="submitChatBtn" class="btn-submit-chat" onclick="submitChat()">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="20 6 9 17 4 12"></polyline>
-                </svg>
-                Submit Feedback
-            </button>
-            <p class="submit-hint">Click when you're done to complete your feedback session</p>
-        </div>
     </div>
 
     <script>
@@ -986,12 +976,6 @@
     function setupListeningInterface() {
         document.getElementById('input-area').style.display = 'block';
 
-        // Show submit area for listening chats
-        const submitArea = document.getElementById('chat-submit-area');
-        if (submitArea) {
-            submitArea.style.display = 'block';
-        }
-
         // Setup textarea auto-resize
         const textarea = document.getElementById('user-input');
         textarea.addEventListener('input', function() {
@@ -1011,12 +995,6 @@
     function setupChatSurveyInterface() {
         document.getElementById('input-area').style.display = 'block';
 
-        // Show submit area for chat surveys
-        const submitArea = document.getElementById('chat-submit-area');
-        if (submitArea) {
-            submitArea.style.display = 'block';
-        }
-        
         // Similar to listening but with structured questions
         const textarea = document.getElementById('user-input');
         textarea.addEventListener('input', function() {
@@ -1887,25 +1865,26 @@
                 input.value = '';
                 input.style.height = 'auto';
 
-                // Show typing indicator
-                showTypingIndicator();
-
-                // ALWAYS save response to database regardless of mode
-                console.log('💾 Saving response to database from enhanced sendMessage...');
-                saveResponseToDatabase(message).then(saved => {
-                    console.log('✅ Database save result:', saved);
-                }).catch(err => {
-                    console.error('❌ Database save error:', err);
-                });
-
-                if (apiChatState.isRealTime) {
-                    console.log('🔴 Using real-time mode');
-                    await handleRealTimeResponse(message);
-                } else {
-                    console.log('📦 Using standard mode - calling handleListeningResponse directly');
-                    // Call handleListeningResponse directly since originalSendMessage would see empty input
-                    handleListeningResponse(message);
+                // Disable input while submitting
+                input.disabled = true;
+                const sendButton = document.getElementById('send-button');
+                if (sendButton) {
+                    sendButton.disabled = true;
+                    sendButton.textContent = 'Submitting...';
                 }
+
+                // Save response to database
+                console.log('💾 Saving response to database from enhanced sendMessage...');
+                try {
+                    const saved = await saveResponseToDatabase(message);
+                    console.log('✅ Database save result:', saved);
+                } catch (err) {
+                    console.error('❌ Database save error:', err);
+                }
+
+                // Mark conversation as complete and show success
+                apiChatState.conversationComplete = true;
+                showSubmitSuccess();
             };
         }
 
