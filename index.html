@@ -4767,7 +4767,7 @@
                             <div style="max-width: 900px;">
 
                                 <!-- Section 1: Manage Participants -->
-                                <div style="background: white; border-radius: 12px; padding: 32px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); margin-bottom: 24px;">
+                                <div id="participants-page-1" style="background: white; border-radius: 12px; padding: 32px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); margin-bottom: 24px;">
                                     <h3 style="margin: 0 0 24px 0; color: #1e293b;">Manage Participants</h3>
 
                                     <!-- Add Participant Row -->
@@ -4832,7 +4832,7 @@
                                 </div>
 
                                 <!-- Section 2: Manage Invites/Reminders -->
-                                <div style="background: white; border-radius: 12px; padding: 32px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);">
+                                <div id="participants-page-2" style="display: none; background: white; border-radius: 12px; padding: 32px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);">
                                     <h3 style="margin: 0 0 24px 0; color: #1e293b;">Manage Invites &amp; Reminders</h3>
 
                                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
@@ -4887,6 +4887,14 @@ Thank you!</textarea>
                                         </button>
                                     </div>
 
+                                </div>
+
+                                <!-- Page Navigator -->
+                                <div style="display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 24px;">
+                                    <button onclick="switchParticipantsPage('prev')" style="width: 36px; height: 36px; border: 1px solid #e2e8f0; border-radius: 8px; background: white; cursor: pointer; font-size: 16px; color: #64748b; display: flex; align-items: center; justify-content: center;">&lt;</button>
+                                    <button id="participants-page-btn-1" onclick="switchParticipantsPage(1)" style="width: 36px; height: 36px; border: none; border-radius: 50%; background: #6366f1; color: white; cursor: pointer; font-size: 14px; font-weight: 600;">1</button>
+                                    <button id="participants-page-btn-2" onclick="switchParticipantsPage(2)" style="width: 36px; height: 36px; border: 1px solid #e2e8f0; border-radius: 50%; background: white; color: #64748b; cursor: pointer; font-size: 14px; font-weight: 600;">2</button>
+                                    <button onclick="switchParticipantsPage('next')" style="width: 36px; height: 36px; border: 1px solid #e2e8f0; border-radius: 8px; background: white; cursor: pointer; font-size: 16px; color: #64748b; display: flex; align-items: center; justify-content: center;">&gt;</button>
                                 </div>
 
                             </div>
@@ -17466,6 +17474,27 @@ function goToParticipantPage(page) {
 function toggleParticipantSelection(index) {
     chatParticipantsData[index].selected = !chatParticipantsData[index].selected;
     updateSelectAllCheckbox();
+}
+
+// Switch between Participants sub-pages
+let currentParticipantsPage = 1;
+function switchParticipantsPage(page) {
+    if (page === 'prev') page = currentParticipantsPage > 1 ? currentParticipantsPage - 1 : 1;
+    if (page === 'next') page = currentParticipantsPage < 2 ? currentParticipantsPage + 1 : 2;
+    currentParticipantsPage = page;
+
+    document.getElementById('participants-page-1').style.display = page === 1 ? 'block' : 'none';
+    document.getElementById('participants-page-2').style.display = page === 2 ? 'block' : 'none';
+
+    // Update button styles
+    const btn1 = document.getElementById('participants-page-btn-1');
+    const btn2 = document.getElementById('participants-page-btn-2');
+    btn1.style.background = page === 1 ? '#6366f1' : 'white';
+    btn1.style.color = page === 1 ? 'white' : '#64748b';
+    btn1.style.border = page === 1 ? 'none' : '1px solid #e2e8f0';
+    btn2.style.background = page === 2 ? '#6366f1' : 'white';
+    btn2.style.color = page === 2 ? 'white' : '#64748b';
+    btn2.style.border = page === 2 ? 'none' : '1px solid #e2e8f0';
 }
 
 // Toggle select all participants
