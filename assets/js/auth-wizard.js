@@ -365,21 +365,194 @@ async function authSocialSignup(provider) {
 }
 
 /**
- * Initialize auth wizard on page load
- * Always shows the login page - no automatic session resumption
+ * Resume session and show dashboard
+ * Called when a valid session is found
  */
-function initAuthWizard() {
+async function resumeSession(session) {
+    console.log('Resuming session for:', session.user.email);
+
+    try {
+        // Get user details from our users table
+        const { data: userData, error: userError } = await window.supabaseClient
+            .from('users')
+            .select('*, organizations(*)')
+            .eq('auth_id', session.user.id)
+            .single();
+
+        if (userError || !userData) {
+            console.warn('User not found in users table during session resume');
+            // Still allow login, but with minimal data
+            window.currentUser = {
+                id: session.user.id,
+                auth_id: session.user.id,
+                name: session.user.email,
+                email: session.user.email,
+                role: 'viewer',
+                sections: ['keep-listening-section'],
+                badge: 'USER',
+                badgeClass: 'client-user',
+                avatar: session.user.email.charAt(0).toUpperCase()
+            };
+        } else {
+            // Set current user with data from database
+            window.currentUser = {
+                id: userData.id,
+                auth_id: session.user.id,
+                name: `${userData.first_name || ''} ${userData.last_name || ''}`.trim() || userData.email,
+                firstName: userData.first_name || '',
+                lastName: userData.last_name || '',
+                email: userData.email,
+                organization: userData.organizations?.name || 'Unknown',
+                organization_id: userData.organization_id,
+                role: userData.role || 'user',
+                access: userData.role || 'user',
+                sections: getSectionsForRole(userData.role || 'user'),
+                badge: getBadgeForRole(userData.role || 'user'),
+                badgeClass: getBadgeClassForRole(userData.role || 'user'),
+                avatar: userData.first_name ? userData.first_name.charAt(0).toUpperCase() : (userData.email ? userData.email.charAt(0).toUpperCase() : '?')
+            };
+        }
+
+        // Make currentUser available globally
+        if (typeof currentUser === 'undefined') {
+            window.currentUser = window.currentUser;
+        } else {
+            currentUser = window.currentUser;
+        }
+
+        // Update UI and show application
+        if (typeof updateUserInterface === 'function') {
+            updateUserInterface();
+        }
+        if (typeof showApplication === 'function') {
+            showApplication();
+        }
+
+        console.log('Session resumed successfully');
+    } catch (error) {
+        console.error('Error resuming session:', error);
+        // On error, show login page
+        showAuthPage('auth-signup-step1');
+    }
+}
+
+/**
+ * Initialize auth wizard on page load
+ * Checks for existing session before showing login
+ */
+async function initAuthWizard() {
     // Prevent multiple initializations
     if (window.authInitDone) {
         return;
     }
     window.authInitDone = true;
 
-    console.log('Initializing auth wizard - showing login page');
+    console.log('Initializing auth wizard - checking for existing session');
 
-    // Always show the auth/login page on page load
-    // Users must actively log in - no session resumption
-    showAuthPage('auth-signup-step1');
+    // Wait for Supabase client to be available
+    let attempts = 0;
+    while (!window.supabaseClient && attempts < 20) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        attempts++;
+    }
+
+    if (!window.supabaseClient) {
+        console.warn('Supabase client not available, showing login page');
+        showAuthPage('auth-signup-step1');
+        return;
+    }
+
+    try {
+        // Check for existing session BEFORE showing login page
+        const { data: { session }, error } = await window.supabaseClient.auth.getSession();
+
+        if (error) {
+            console.error('Error checking session:', error);
+            showAuthPage('auth-signup-step1');
+            return;
+        }
+
+        if (session) {
+            console.log('Found existing session, resuming...');
+            await resumeSession(session);
+        } else {
+            console.log('No existing session, showing login page');
+            showAuthPage('auth-signup-step1');
+        }
+
+        // Set up auth state change listener for session refresh and sign out
+        window.supabaseClient.auth.onAuthStateChange((event, session) => {
+            console.log('Auth state changed:', event);
+
+            if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+                if (session) {
+                    console.log('Session refreshed or signed in');
+                    // Only resume if we're currently on login page
+                    const loginContainer = document.getElementById('login-container');
+                    const authPages = document.querySelectorAll('.auth-page:not(.hidden)');
+                    if ((loginContainer && !loginContainer.classList.contains('hidden')) || authPages.length > 0) {
+                        resumeSession(session);
+                    }
+                }
+            } else if (event === 'SIGNED_OUT') {
+                console.log('User signed out');
+                // Clear current user
+                if (typeof currentUser !== 'undefined') {
+                    currentUser = null;
+                }
+                window.currentUser = null;
+                // Show login page
+                showAuthPage('auth-signup-step1');
+            }
+        });
+
+    } catch (error) {
+        console.error('Error during auth initialization:', error);
+        showAuthPage('auth-signup-step1');
+    }
+}
+
+// Helper functions (fallbacks if not defined in app.js)
+function getSectionsForRole(role) {
+    if (typeof window.getSectionsForRole === 'function') {
+        return window.getSectionsForRole(role);
+    }
+    const sections = {
+        'master_admin': ['master-admin-section', 'start-listening-section', 'keep-listening-section'],
+        'org_admin': ['start-listening-section', 'keep-listening-section'],
+        'admin': ['start-listening-section', 'keep-listening-section'],
+        'user': ['keep-listening-section'],
+        'viewer': ['keep-listening-section']
+    };
+    return sections[role] || sections['viewer'];
+}
+
+function getBadgeForRole(role) {
+    if (typeof window.getBadgeForRole === 'function') {
+        return window.getBadgeForRole(role);
+    }
+    const badges = {
+        'master_admin': 'MASTER',
+        'org_admin': 'ADMIN',
+        'admin': 'ADMIN',
+        'user': 'USER',
+        'viewer': 'USER'
+    };
+    return badges[role] || 'USER';
+}
+
+function getBadgeClassForRole(role) {
+    if (typeof window.getBadgeClassForRole === 'function') {
+        return window.getBadgeClassForRole(role);
+    }
+    const classes = {
+        'master_admin': 'master-admin',
+        'org_admin': 'org-admin',
+        'admin': 'admin',
+        'user': 'client-user',
+        'viewer': 'client-user'
+    };
+    return classes[role] || 'client-user';
 }
 
 // Initialize on DOM ready
