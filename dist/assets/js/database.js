@@ -98,20 +98,61 @@ async function saveOrganization(orgData) {
 
 async function updateOrganization(id, updates) {
     try {
-        const { data, error } = await window.supabaseClient
-            .from('organizations')
-            .update(updates)
-            .eq('id', id)
-            .select();
-        
-        if (error) {
-            console.error('Error updating organization:', error);
+        console.log('Attempting to update organization:', id, 'with updates:', updates);
+
+        // Only include fields that exist in the database table
+        // Based on saveOrganization, the table has: id, name, slug, description, status, created_at
+        const allowedFields = ['name', 'slug', 'description', 'status'];
+        const safeUpdates = {};
+
+        for (const key of allowedFields) {
+            if (updates[key] !== undefined && updates[key] !== null && updates[key] !== '') {
+                safeUpdates[key] = updates[key];
+            }
+        }
+
+        // If name is being updated, also update slug
+        if (safeUpdates.name) {
+            safeUpdates.slug = generateSlug(safeUpdates.name);
+        }
+
+        console.log('Safe updates (filtered to existing columns):', safeUpdates);
+
+        if (Object.keys(safeUpdates).length === 0) {
+            console.warn('No valid fields to update');
             return null;
         }
-        
-        return data ? data[0] : null;
+
+        const { data, error } = await window.supabaseClient
+            .from('organizations')
+            .update(safeUpdates)
+            .eq('id', id)
+            .select();
+
+        if (error) {
+            console.error('Error updating organization:', {
+                message: error.message,
+                details: error.details,
+                hint: error.hint,
+                code: error.code,
+                fullError: JSON.stringify(error, null, 2)
+            });
+            return null;
+        }
+
+        if (!data || data.length === 0) {
+            console.warn('Update returned no data - RLS policy may be blocking UPDATE or record does not exist');
+            return null;
+        }
+
+        console.log('Organization updated successfully:', data[0]);
+        return data[0];
     } catch (error) {
-        console.error('Update error:', error);
+        console.error('Update error:', {
+            message: error.message,
+            stack: error.stack,
+            fullError: JSON.stringify(error, null, 2)
+        });
         return null;
     }
 }
@@ -119,34 +160,80 @@ async function updateOrganization(id, updates) {
 async function deleteOrganization(id) {
     try {
         console.log('Database delete function called with ID:', id);
-        
+
         if (!id) {
             console.error('No ID provided for delete operation');
             return false;
         }
-        
+
+        // First verify the organization exists
+        const { data: existingOrg, error: checkError } = await window.supabaseClient
+            .from('organizations')
+            .select('id, name')
+            .eq('id', id)
+            .single();
+
+        if (checkError) {
+            console.error('Error checking if organization exists:', {
+                message: checkError.message,
+                details: checkError.details,
+                hint: checkError.hint,
+                code: checkError.code,
+                fullError: JSON.stringify(checkError, null, 2)
+            });
+
+            if (checkError.code === 'PGRST116') {
+                console.error('Organization with ID', id, 'does not exist in the database');
+                return false;
+            }
+        }
+
+        console.log('Organization found, attempting delete:', existingOrg);
+
         const { data, error } = await window.supabaseClient
             .from('organizations')
             .delete()
             .eq('id', id)
             .select(); // Select to see what was deleted
-        
+
         console.log('Delete operation result - data:', data, 'error:', error);
-        
+
         if (error) {
-            console.error('Error deleting organization:', error);
+            console.error('Error deleting organization:', {
+                message: error.message,
+                details: error.details,
+                hint: error.hint,
+                code: error.code,
+                fullError: JSON.stringify(error, null, 2)
+            });
+
+            // Check for RLS policy issues
+            if (error.code === '42501' || error.message?.includes('policy')) {
+                console.error('RLS POLICY ISSUE: The current user does not have permission to delete this organization.');
+                console.error('Check your Supabase RLS policies for the organizations table - DELETE may be restricted.');
+            }
+
             return false;
         }
-        
+
         if (!data || data.length === 0) {
-            console.warn('No rows were deleted. Organization with ID', id, 'might not exist');
+            console.warn('No rows were deleted. This could indicate:');
+            console.warn('1. RLS policy is blocking DELETE operations');
+            console.warn('2. The organization was already deleted');
+            console.warn('3. The ID format is incorrect');
+            console.warn('Organization ID attempted:', id);
+            console.warn('Check Supabase RLS policies: DELETE may require specific conditions (e.g., user must be admin)');
             return false;
         }
-        
+
         console.log('Successfully deleted organization:', data[0]);
         return true;
     } catch (error) {
-        console.error('Delete error:', error);
+        console.error('Delete error:', {
+            message: error.message,
+            stack: error.stack,
+            fullError: JSON.stringify(error, null, 2)
+        });
         return false;
     }
 }
@@ -175,7 +262,7 @@ async function loadUsers() {
         // Transform the data to include organization name
         const usersWithOrgNames = (data || []).map(user => ({
             ...user,
-            organization: user.organizations?.name || 'No Organization'
+            organization: user.organizations?.name || 'No Organisation'
         }));
         
         return usersWithOrgNames;
