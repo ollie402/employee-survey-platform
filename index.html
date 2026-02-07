@@ -4746,12 +4746,6 @@
 
                                 <!-- Right Column: Success Panel (hidden by default) -->
                                 <div id="chat-success-panel" style="display: none; flex: 1; max-width: 400px; background: white; border-radius: 12px; padding: 32px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);">
-                                    <div style="text-align: center; margin-bottom: 24px;">
-                                        <div style="font-size: 48px; margin-bottom: 12px;">🎉</div>
-                                        <h3 style="color: #1e293b; margin-bottom: 8px;">Chat Created!</h3>
-                                        <p style="color: #64748b; font-size: 14px;"><span id="successChatName">Your chat</span> is ready to collect feedback.</p>
-                                    </div>
-
                                     <div style="margin-bottom: 20px;">
                                         <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #1e293b;">Your Chat Link</label>
                                         <div style="display: flex; gap: 8px;">
@@ -4760,19 +4754,8 @@
                                         </div>
                                     </div>
 
-                                    <div style="background: #f0fdf4; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
-                                        <div style="font-weight: 600; color: #166534; margin-bottom: 8px;">💡 Next Steps:</div>
-                                        <ul style="margin: 0; padding-left: 20px; color: #166534; font-size: 14px;">
-                                            <li>Share the link with your audience</li>
-                                            <li>Monitor responses in the Responses tab</li>
-                                            <li>View analytics as feedback comes in</li>
-                                        </ul>
-                                    </div>
-
                                     <div style="display: flex; gap: 12px;">
-                                        <button onclick="closeSuccessPanel()" style="flex: 1; padding: 12px; background: #f1f5f9; color: #475569; border: none; border-radius: 8px; cursor: pointer; font-weight: 500;">Close</button>
                                         <button onclick="saveChatToDatabase()" id="save-chat-btn" style="flex: 1; padding: 12px; background: #10b981; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 500;">💾 Save Chat</button>
-                                        <button id="testChatBtn" onclick="testChat()" style="flex: 1; padding: 12px; background: #d6366c; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 500;">Test Chat</button>
                                     </div>
                                 </div>
 
@@ -8871,7 +8854,7 @@ window.handleDeleteOrganization = async function(orgId) {
                 loadOrganizationsData(); // Refresh the grid
                 loadUsersData(); // Refresh users table too
             } else {
-                showToast('Failed to delete organisation. It may not exist.', 'error');
+                showToast('Failed to delete organisation. Check console for details - this may be an RLS policy issue.', 'error');
             }
         }
     } catch (error) {
@@ -9000,11 +8983,11 @@ window.handleUpdateOrganization = async function(event, orgId) {
             closeModal('edit-organization-modal');
             loadOrganizationsData(); // Refresh the grid
         } else {
-            showToast('Failed to update organisation', 'error');
+            showToast('Failed to update organisation. Check console for details - this may be an RLS policy issue.', 'error');
         }
     } catch (error) {
         console.error('Error updating organization:', error);
-        showToast('Failed to update organisation: ' + error.message, 'error');
+        showToast('Failed to update organisation: ' + (error.message || 'Check console for details'), 'error');
     }
 }
 
@@ -9026,11 +9009,11 @@ window.handleSuspendOrganization = async function(orgId, currentStatus) {
                 showToast('Organisation ' + successText + ' successfully!', 'success');
                 loadOrganizationsData(); // Refresh the grid
             } else {
-                showToast('Failed to ' + actionText + ' organisation', 'error');
+                showToast('Failed to ' + actionText + ' organisation. Check console for details - this may be an RLS policy issue.', 'error');
             }
         } catch (error) {
             console.error('Error updating organization status:', error);
-            showToast('Failed to ' + actionText + ' organisation: ' + error.message, 'error');
+            showToast('Failed to ' + actionText + ' organisation: ' + (error.message || 'Check console for details'), 'error');
         }
     }
 }
