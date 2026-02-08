@@ -12505,6 +12505,9 @@ function openChatEditor(chatId = null) {
 
     showSection('chat-editor');
     showChatEditorTab('setup');
+
+    // Reset Getting Started checklist and re-evaluate
+    if (typeof gsReset === 'function') gsReset();
 }
 
 // Load existing chat data into the editor
@@ -17900,6 +17903,36 @@ function gsUpdateProgress() {
     const bar = document.getElementById('gs-progress-bar');
     if (label) label.textContent = done + '/6 complete';
     if (bar) bar.style.width = Math.round((done / 6) * 100) + '%';
+}
+
+function gsReset() {
+    // Force-reset all steps to uncompleted
+    for (let i = 1; i <= 6; i++) {
+        gsStepState[i - 1] = false;
+        const circle = document.getElementById('gs-circle-' + i);
+        const li = document.getElementById('gs-step-' + i);
+        if (circle) {
+            circle.style.background = '#6366f1';
+            circle.innerHTML = i;
+            circle.style.fontSize = '12px';
+        }
+        if (li) li.style.opacity = '1';
+    }
+
+    // Re-evaluate based on current field values
+    setTimeout(function() {
+        const chatName = document.getElementById('chat-setup-name');
+        const welcome = document.getElementById('chat-setup-welcome');
+        const successPanel = document.getElementById('chat-success-panel');
+
+        if (chatName && chatName.value.trim()) gsCompleteStep(1);
+        if (welcome && welcome.value.trim()) gsCompleteStep(2);
+        gsCompleteStep(3); // Access type always has a default
+        // Steps 4-6 only complete if chat was already created (link visible)
+        if (successPanel && successPanel.style.display !== 'none') gsCompleteStep(4);
+
+        gsUpdateProgress();
+    }, 100);
 }
 
 // Initialize Getting Started listeners
