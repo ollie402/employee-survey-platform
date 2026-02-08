@@ -4844,6 +4844,11 @@
                                         <!-- Pagination buttons will be populated by JavaScript -->
                                     </div>
 
+                                    <!-- Save Participants Button -->
+                                    <div style="display: flex; justify-content: flex-end; margin-top: 24px;">
+                                        <button onclick="saveParticipantsOnly(this)" id="save-participants-btn" style="padding: 12px 24px; background: #10b981; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 500; font-size: 14px;">💾 Save</button>
+                                    </div>
+
                                 </div>
 
                                 <!-- Section 2: Manage Invites/Reminders -->
@@ -17742,6 +17747,62 @@ async function saveParticipantsSettings() {
     } catch (error) {
         console.error('Error saving:', error);
         alert('Error saving: ' + error.message);
+    }
+}
+
+// Save participants only (from Manage Participants tab)
+async function saveParticipantsOnly(btn) {
+    const chatId = currentChatId || window.currentEditingChatId;
+    if (!chatId) {
+        alert('Please create and save the chat on the Setup tab first');
+        return;
+    }
+
+    if (!chatParticipantsData || chatParticipantsData.length === 0) {
+        alert('No participants to save');
+        return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Saving...';
+
+    try {
+        // Delete existing participants for this chat
+        await window.supabaseClient
+            .from('chat_participants')
+            .delete()
+            .eq('chat_id', chatId);
+
+        // Insert all current participants
+        const participantsToInsert = chatParticipantsData.map(p => ({
+            chat_id: chatId,
+            first_name: p.first_name,
+            surname: p.surname,
+            email: p.email,
+            unique_token: p.unique_token || Math.random().toString(36).substring(2, 10)
+        }));
+
+        const { error } = await window.supabaseClient
+            .from('chat_participants')
+            .insert(participantsToInsert);
+
+        if (error) throw error;
+
+        btn.textContent = '✓ Saved!';
+        btn.style.background = '#059669';
+        btn.disabled = true;
+        setTimeout(() => {
+            btn.innerHTML = '💾 Save';
+            btn.style.background = '#10b981';
+            btn.disabled = false;
+        }, 2000);
+
+    } catch (error) {
+        console.error('Error saving participants:', error);
+        alert('Error saving participants: ' + error.message);
+        btn.innerHTML = '💾 Save';
+        btn.style.background = '#10b981';
+        btn.disabled = false;
     }
 }
 
