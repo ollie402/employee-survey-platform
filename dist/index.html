@@ -12560,6 +12560,9 @@ async function loadChatIntoEditor(chatId) {
 
         console.log('Loaded chat into editor:', chat.name);
 
+        // Re-evaluate Getting Started checklist now that fields are populated
+        if (typeof gsReset === 'function') gsReset();
+
     } catch (error) {
         console.error('Error loading chat:', error);
         alert('Failed to load chat: ' + error.message);
@@ -17938,11 +17941,17 @@ function gsEvaluateState() {
         var welcome = document.getElementById('chat-setup-welcome');
         var successPanel = document.getElementById('chat-success-panel');
         var panelVisible = successPanel && successPanel.style.display !== 'none';
+        var isExisting = !!window.currentEditingChatId;
 
         if (chatName && chatName.value.trim()) gsCompleteByKey('name');
         if (welcome && welcome.value.trim()) gsCompleteByKey('welcome');
         gsCompleteByKey('access');
-        if (panelVisible) gsCompleteByKey('create');
+        if (panelVisible || isExisting) gsCompleteByKey('create');
+        if (isExisting) {
+            gsCompleteByKey('copyLink');
+            gsCompleteByKey('save');
+            gsCompleteByKey('goParticipants');
+        }
         if (typeof chatParticipantsData !== 'undefined' && chatParticipantsData.length > 0) gsCompleteByKey('addParticipants');
 
         gsUpdateProgress();
