@@ -4748,7 +4748,7 @@
                                     </div>
 
                                     <div style="display: flex; gap: 12px;">
-                                        <button onclick="saveChatToDatabase()" id="save-chat-btn" style="flex: 1; padding: 12px; background: #10b981; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 500;">💾 Save Chat</button>
+                                        <button onclick="saveChatToDatabase()" id="save-chat-btn" style="flex: 1; padding: 12px; background: #10b981; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 500;">💾 Save</button>
                                     </div>
                                 </div>
 
@@ -12459,7 +12459,7 @@ function openChatEditor(chatId = null) {
     // Reset save button state
     const saveBtn = document.getElementById('save-chat-btn');
     if (saveBtn) {
-        saveBtn.textContent = '💾 Save Chat';
+        saveBtn.textContent = '💾 Save';
         saveBtn.style.background = '#10b981';
         saveBtn.disabled = false;
     }
@@ -17793,47 +17793,84 @@ async function saveChatToDatabase() {
             }
         }
 
-        // Only send the fields that work - keep it minimal
-        const chatData = {
-            name: chatName,
-            welcome_message: welcomeMessage,
-            access_type: accessType,
-            user_id: user.id
-        };
+        const existingId = window.currentEditingChatId;
 
-        // Only add slug if we have a link code
-        if (linkCode) {
-            chatData.slug = linkCode;
+        if (existingId) {
+            // UPDATE existing chat — only update editable fields, keep slug unchanged
+            const updateData = {
+                name: chatName,
+                welcome_message: welcomeMessage,
+                access_type: accessType
+            };
+
+            console.log('Updating existing chat:', existingId, updateData);
+
+            const { data: updatedChat, error } = await window.supabaseClient
+                .from('listening_chats')
+                .update(updateData)
+                .eq('id', existingId)
+                .select()
+                .single();
+
+            if (error) {
+                console.error('Update error:', error);
+                throw error;
+            }
+
+            window.currentEditingChat = updatedChat;
+
+            const saveBtn = document.getElementById('save-chat-btn');
+            if (saveBtn) {
+                saveBtn.textContent = '✓ Saved!';
+                saveBtn.style.background = '#059669';
+                saveBtn.disabled = true;
+            }
+
+            console.log('Chat updated successfully:', updatedChat);
+            if (typeof gsCompleteByKey === 'function') gsCompleteByKey('save');
+            alert('Chat updated successfully!');
+
+        } else {
+            // INSERT new chat
+            const chatData = {
+                name: chatName,
+                welcome_message: welcomeMessage,
+                access_type: accessType,
+                user_id: user.id
+            };
+
+            if (linkCode) {
+                chatData.slug = linkCode;
+            }
+
+            console.log('Saving new chat with data:', chatData);
+
+            const { data: newChat, error } = await window.supabaseClient
+                .from('listening_chats')
+                .insert(chatData)
+                .select()
+                .single();
+
+            if (error) {
+                console.error('Insert error:', error);
+                throw error;
+            }
+
+            currentChatId = newChat.id;
+            window.currentEditingChatId = newChat.id;
+            window.currentEditingChat = newChat;
+
+            const saveBtn = document.getElementById('save-chat-btn');
+            if (saveBtn) {
+                saveBtn.textContent = '✓ Saved!';
+                saveBtn.style.background = '#059669';
+                saveBtn.disabled = true;
+            }
+
+            console.log('Chat saved successfully:', newChat);
+            if (typeof gsCompleteByKey === 'function') gsCompleteByKey('save');
+            alert('Chat saved successfully!');
         }
-
-        console.log('Saving chat with data:', chatData);
-
-        const { data: newChat, error } = await window.supabaseClient
-            .from('listening_chats')
-            .insert(chatData)
-            .select()
-            .single();
-
-        if (error) {
-            console.error('Insert error:', error);
-            throw error;
-        }
-
-        // Store the chat ID globally for participant saving later
-        currentChatId = newChat.id;
-        window.currentEditingChatId = newChat.id;
-
-        // Visual feedback - change button to show saved
-        const saveBtn = document.getElementById('save-chat-btn');
-        if (saveBtn) {
-            saveBtn.textContent = '✓ Saved!';
-            saveBtn.style.background = '#059669';
-            saveBtn.disabled = true;
-        }
-
-        console.log('Chat saved successfully:', newChat);
-        if (typeof gsCompleteByKey === 'function') gsCompleteByKey('save');
-        alert('Chat saved successfully!');
 
     } catch (error) {
         console.error('Error saving chat:', error);
@@ -17864,7 +17901,7 @@ const gsStepDefs = {
     copyLink:     { label: '<strong>Copy your link</strong> — Use the Copy button to share your chat link with participants', key: 'copyLink' },
     goParticipants: { label: '<strong>Go to Participants</strong> — Switch to the Participants tab to manage your audience', key: 'goParticipants' },
     addParticipants: { label: '<strong>Add participants</strong> — Add participant names and emails', key: 'addParticipants' },
-    save:         { label: '<strong>Save your chat</strong> — Click "Save Chat" to store your settings', key: 'save' }
+    save:         { label: '<strong>Save your chat</strong> — Click "Save" to store your settings', key: 'save' }
 };
 
 const gsAccessSteps = {
