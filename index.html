@@ -17274,15 +17274,6 @@ async function createChat() {
     await generateChatLink();
     if (typeof gsCompleteByKey === 'function') gsCompleteByKey('create');
 
-    // After chat is created, handle based on access type
-    if (accessType === 'closed' || accessType === 'combined') {
-        // For closed or combined, prompt to add participants
-        setTimeout(() => {
-            if (confirm('Chat created! Would you like to add participants now?')) {
-                showChatEditorTab('participants');
-            }
-        }, 800);
-    }
 }
 
 // Add a single participant from the Participants tab
