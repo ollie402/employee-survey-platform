@@ -4753,34 +4753,40 @@
                                 </div>
 
                                 <!-- How To Guide -->
-                                <div style="flex: 1; max-width: 400px; background: #FFF9E6; border: 1px solid #F0E0A0; border-radius: 12px; padding: 28px; align-self: flex-start;">
-                                    <h4 style="margin: 0 0 16px 0; color: #1e293b; font-size: 15px; display: flex; align-items: center; gap: 8px;">
-                                        💡 Getting Started
-                                    </h4>
+                                <div id="getting-started-box" style="flex: 1; max-width: 400px; background: #FFF9E6; border: 1px solid #F0E0A0; border-radius: 12px; padding: 28px; align-self: flex-start;">
+                                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+                                        <h4 style="margin: 0; color: #1e293b; font-size: 15px; display: flex; align-items: center; gap: 8px;">
+                                            💡 Getting Started
+                                        </h4>
+                                        <span id="gs-progress" style="font-size: 12px; font-weight: 600; color: #6366f1;">0/6 complete</span>
+                                    </div>
+                                    <div style="height: 4px; background: #e2e8f0; border-radius: 2px; margin-bottom: 16px; overflow: hidden;">
+                                        <div id="gs-progress-bar" style="height: 100%; width: 0%; background: #6366f1; border-radius: 2px; transition: width 0.3s ease;"></div>
+                                    </div>
                                     <ol style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 12px;">
-                                        <li style="display: flex; gap: 10px; align-items: flex-start; font-size: 13px; color: #334155; line-height: 1.5;">
-                                            <span style="flex-shrink: 0; width: 22px; height: 22px; background: #6366f1; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600;">1</span>
-                                            <span><strong>Name your chat</strong> — Enter a name in the Chat Name field</span>
+                                        <li id="gs-step-1" style="display: flex; gap: 10px; align-items: flex-start; font-size: 13px; color: #334155; line-height: 1.5; transition: opacity 0.3s;">
+                                            <span id="gs-circle-1" style="flex-shrink: 0; width: 22px; height: 22px; background: #6366f1; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; transition: background 0.3s;">1</span>
+                                            <span id="gs-text-1"><strong>Name your chat</strong> — Enter a name in the Chat Name field</span>
                                         </li>
-                                        <li style="display: flex; gap: 10px; align-items: flex-start; font-size: 13px; color: #334155; line-height: 1.5;">
-                                            <span style="flex-shrink: 0; width: 22px; height: 22px; background: #6366f1; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600;">2</span>
-                                            <span><strong>Set your welcome message</strong> — Customise the message respondents see when they open the chat</span>
+                                        <li id="gs-step-2" style="display: flex; gap: 10px; align-items: flex-start; font-size: 13px; color: #334155; line-height: 1.5; transition: opacity 0.3s;">
+                                            <span id="gs-circle-2" style="flex-shrink: 0; width: 22px; height: 22px; background: #6366f1; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; transition: background 0.3s;">2</span>
+                                            <span id="gs-text-2"><strong>Set your welcome message</strong> — Customise the message respondents see when they open the chat</span>
                                         </li>
-                                        <li style="display: flex; gap: 10px; align-items: flex-start; font-size: 13px; color: #334155; line-height: 1.5;">
-                                            <span style="flex-shrink: 0; width: 22px; height: 22px; background: #6366f1; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600;">3</span>
-                                            <span><strong>Choose access type</strong> — Select who can access your chat link</span>
+                                        <li id="gs-step-3" style="display: flex; gap: 10px; align-items: flex-start; font-size: 13px; color: #334155; line-height: 1.5; transition: opacity 0.3s;">
+                                            <span id="gs-circle-3" style="flex-shrink: 0; width: 22px; height: 22px; background: #6366f1; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; transition: background 0.3s;">3</span>
+                                            <span id="gs-text-3"><strong>Choose access type</strong> — Select who can access your chat link</span>
                                         </li>
-                                        <li style="display: flex; gap: 10px; align-items: flex-start; font-size: 13px; color: #334155; line-height: 1.5;">
-                                            <span style="flex-shrink: 0; width: 22px; height: 22px; background: #6366f1; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600;">4</span>
-                                            <span><strong>Create your chat</strong> — Click the "Create Chat" button to generate your unique link</span>
+                                        <li id="gs-step-4" style="display: flex; gap: 10px; align-items: flex-start; font-size: 13px; color: #334155; line-height: 1.5; transition: opacity 0.3s;">
+                                            <span id="gs-circle-4" style="flex-shrink: 0; width: 22px; height: 22px; background: #6366f1; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; transition: background 0.3s;">4</span>
+                                            <span id="gs-text-4"><strong>Create your chat</strong> — Click the "Create Chat" button to generate your unique link</span>
                                         </li>
-                                        <li style="display: flex; gap: 10px; align-items: flex-start; font-size: 13px; color: #334155; line-height: 1.5;">
-                                            <span style="flex-shrink: 0; width: 22px; height: 22px; background: #6366f1; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600;">5</span>
-                                            <span><strong>Copy your link</strong> — Use the Copy button to share your chat link with participants</span>
+                                        <li id="gs-step-5" style="display: flex; gap: 10px; align-items: flex-start; font-size: 13px; color: #334155; line-height: 1.5; transition: opacity 0.3s;">
+                                            <span id="gs-circle-5" style="flex-shrink: 0; width: 22px; height: 22px; background: #6366f1; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; transition: background 0.3s;">5</span>
+                                            <span id="gs-text-5"><strong>Copy your link</strong> — Use the Copy button to share your chat link with participants</span>
                                         </li>
-                                        <li style="display: flex; gap: 10px; align-items: flex-start; font-size: 13px; color: #334155; line-height: 1.5;">
-                                            <span style="flex-shrink: 0; width: 22px; height: 22px; background: #6366f1; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600;">6</span>
-                                            <span><strong>Save your chat</strong> — Click "Save Chat" to store your settings</span>
+                                        <li id="gs-step-6" style="display: flex; gap: 10px; align-items: flex-start; font-size: 13px; color: #334155; line-height: 1.5; transition: opacity 0.3s;">
+                                            <span id="gs-circle-6" style="flex-shrink: 0; width: 22px; height: 22px; background: #6366f1; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; transition: background 0.3s;">6</span>
+                                            <span id="gs-text-6"><strong>Save your chat</strong> — Click "Save Chat" to store your settings</span>
                                         </li>
                                     </ol>
                                 </div>
@@ -17278,6 +17284,7 @@ async function createChat() {
     // Call the existing generateChatLink function which handles saving and link generation
     // The access type is now read from the dropdown
     await generateChatLink();
+    if (typeof gsCompleteStep === 'function') gsCompleteStep(4);
 
     // After chat is created, handle based on access type
     if (accessType === 'closed' || accessType === 'combined') {
@@ -17836,6 +17843,7 @@ async function saveChatToDatabase() {
         }
 
         console.log('Chat saved successfully:', newChat);
+        if (typeof gsCompleteStep === 'function') gsCompleteStep(6);
         alert('Chat saved successfully!');
 
     } catch (error) {
@@ -17851,8 +17859,81 @@ function copyGeneratedLink() {
         linkInput.select();
         document.execCommand('copy');
         alert('Link copied to clipboard!');
+        if (typeof gsCompleteStep === 'function') gsCompleteStep(5);
     }
 }
+
+// Getting Started checklist logic
+const gsStepState = [false, false, false, false, false, false];
+
+function gsCompleteStep(step) {
+    if (gsStepState[step - 1]) return;
+    gsStepState[step - 1] = true;
+    const circle = document.getElementById('gs-circle-' + step);
+    const li = document.getElementById('gs-step-' + step);
+    if (circle) {
+        circle.style.background = '#10b981';
+        circle.innerHTML = '✓';
+        circle.style.fontSize = '13px';
+    }
+    if (li) li.style.opacity = '0.6';
+    gsUpdateProgress();
+}
+
+function gsUncompleteStep(step) {
+    if (!gsStepState[step - 1]) return;
+    gsStepState[step - 1] = false;
+    const circle = document.getElementById('gs-circle-' + step);
+    const li = document.getElementById('gs-step-' + step);
+    if (circle) {
+        circle.style.background = '#6366f1';
+        circle.innerHTML = step;
+        circle.style.fontSize = '12px';
+    }
+    if (li) li.style.opacity = '1';
+    gsUpdateProgress();
+}
+
+function gsUpdateProgress() {
+    const done = gsStepState.filter(Boolean).length;
+    const label = document.getElementById('gs-progress');
+    const bar = document.getElementById('gs-progress-bar');
+    if (label) label.textContent = done + '/6 complete';
+    if (bar) bar.style.width = Math.round((done / 6) * 100) + '%';
+}
+
+// Initialize Getting Started listeners
+(function initGettingStarted() {
+    // Wait for DOM elements to be available
+    function setup() {
+        const chatNameInput = document.getElementById('chat-setup-name');
+        const welcomeInput = document.getElementById('chat-setup-welcome');
+        const accessSelect = document.getElementById('chat-access-type');
+
+        if (!chatNameInput) { setTimeout(setup, 500); return; }
+
+        // Step 1: Chat name — tick when non-empty, untick when cleared
+        chatNameInput.addEventListener('input', function() {
+            if (this.value.trim()) gsCompleteStep(1);
+            else gsUncompleteStep(1);
+        });
+
+        // Step 2: Welcome message — pre-tick since default text exists
+        if (welcomeInput && welcomeInput.value.trim()) gsCompleteStep(2);
+        if (welcomeInput) {
+            welcomeInput.addEventListener('input', function() {
+                if (this.value.trim()) gsCompleteStep(2);
+                else gsUncompleteStep(2);
+            });
+        }
+
+        // Step 3: Access type — pre-tick since default selection exists
+        gsCompleteStep(3);
+
+        gsUpdateProgress();
+    }
+    setup();
+})();
 
 // Test chat function
 function testChat() {
