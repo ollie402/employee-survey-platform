@@ -4763,31 +4763,8 @@
                                     <div style="height: 4px; background: #e2e8f0; border-radius: 2px; margin-bottom: 16px; overflow: hidden;">
                                         <div id="gs-progress-bar" style="height: 100%; width: 0%; background: #6366f1; border-radius: 2px; transition: width 0.3s ease;"></div>
                                     </div>
-                                    <ol style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 12px;">
-                                        <li id="gs-step-1" style="display: flex; gap: 10px; align-items: flex-start; font-size: 13px; color: #334155; line-height: 1.5; transition: opacity 0.3s;">
-                                            <span id="gs-circle-1" style="flex-shrink: 0; width: 22px; height: 22px; background: #6366f1; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; transition: background 0.3s;">1</span>
-                                            <span id="gs-text-1"><strong>Name your chat</strong> — Enter a name in the Chat Name field</span>
-                                        </li>
-                                        <li id="gs-step-2" style="display: flex; gap: 10px; align-items: flex-start; font-size: 13px; color: #334155; line-height: 1.5; transition: opacity 0.3s;">
-                                            <span id="gs-circle-2" style="flex-shrink: 0; width: 22px; height: 22px; background: #6366f1; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; transition: background 0.3s;">2</span>
-                                            <span id="gs-text-2"><strong>Set your welcome message</strong> — Customise the message respondents see when they open the chat</span>
-                                        </li>
-                                        <li id="gs-step-3" style="display: flex; gap: 10px; align-items: flex-start; font-size: 13px; color: #334155; line-height: 1.5; transition: opacity 0.3s;">
-                                            <span id="gs-circle-3" style="flex-shrink: 0; width: 22px; height: 22px; background: #6366f1; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; transition: background 0.3s;">3</span>
-                                            <span id="gs-text-3"><strong>Choose access type</strong> — Select who can access your chat link</span>
-                                        </li>
-                                        <li id="gs-step-4" style="display: flex; gap: 10px; align-items: flex-start; font-size: 13px; color: #334155; line-height: 1.5; transition: opacity 0.3s;">
-                                            <span id="gs-circle-4" style="flex-shrink: 0; width: 22px; height: 22px; background: #6366f1; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; transition: background 0.3s;">4</span>
-                                            <span id="gs-text-4"><strong>Create your chat</strong> — Click the "Create Chat" button to generate your unique link</span>
-                                        </li>
-                                        <li id="gs-step-5" style="display: flex; gap: 10px; align-items: flex-start; font-size: 13px; color: #334155; line-height: 1.5; transition: opacity 0.3s;">
-                                            <span id="gs-circle-5" style="flex-shrink: 0; width: 22px; height: 22px; background: #6366f1; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; transition: background 0.3s;">5</span>
-                                            <span id="gs-text-5"><strong>Copy your link</strong> — Use the Copy button to share your chat link with participants</span>
-                                        </li>
-                                        <li id="gs-step-6" style="display: flex; gap: 10px; align-items: flex-start; font-size: 13px; color: #334155; line-height: 1.5; transition: opacity 0.3s;">
-                                            <span id="gs-circle-6" style="flex-shrink: 0; width: 22px; height: 22px; background: #6366f1; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; transition: background 0.3s;">6</span>
-                                            <span id="gs-text-6"><strong>Save your chat</strong> — Click "Save Chat" to store your settings</span>
-                                        </li>
+                                    <ol id="gs-steps-list" style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 12px;">
+                                        <!-- Steps rendered dynamically by JavaScript -->
                                     </ol>
                                 </div>
 
@@ -12624,6 +12601,11 @@ function showChatEditorTab(tabName) {
     if (tabName === 'analytics' && window.currentEditingChatId) {
         loadChatAnalytics(window.currentEditingChatId);
     }
+
+    // Getting Started: tick "Go to Participants" when Participants tab is opened
+    if (tabName === 'participants' && typeof gsCompleteByKey === 'function') {
+        gsCompleteByKey('goParticipants');
+    }
 }
 
 // ============================================================================
@@ -17287,7 +17269,7 @@ async function createChat() {
     // Call the existing generateChatLink function which handles saving and link generation
     // The access type is now read from the dropdown
     await generateChatLink();
-    if (typeof gsCompleteStep === 'function') gsCompleteStep(4);
+    if (typeof gsCompleteByKey === 'function') gsCompleteByKey('create');
 
     // After chat is created, handle based on access type
     if (accessType === 'closed' || accessType === 'combined') {
@@ -17338,6 +17320,7 @@ function addNewParticipant() {
     document.getElementById('participant-email-new').value = '';
 
     renderParticipantsTable();
+    if (typeof gsCompleteByKey === 'function') gsCompleteByKey('addParticipants');
 }
 
 // Validate email format
@@ -17846,7 +17829,7 @@ async function saveChatToDatabase() {
         }
 
         console.log('Chat saved successfully:', newChat);
-        if (typeof gsCompleteStep === 'function') gsCompleteStep(6);
+        if (typeof gsCompleteByKey === 'function') gsCompleteByKey('save');
         alert('Chat saved successfully!');
 
     } catch (error) {
@@ -17862,108 +17845,147 @@ function copyGeneratedLink() {
         linkInput.select();
         document.execCommand('copy');
         alert('Link copied to clipboard!');
-        if (typeof gsCompleteStep === 'function') gsCompleteStep(5);
+        if (typeof gsCompleteByKey === 'function') gsCompleteByKey('copyLink');
     }
 }
 
-// Getting Started checklist logic
-const gsStepState = [false, false, false, false, false, false];
+// Getting Started checklist logic — dynamic per access type
+let gsStepState = [];
+let gsCurrentSteps = [];
+
+const gsStepDefs = {
+    name:         { label: '<strong>Name your chat</strong> — Enter a name in the Chat Name field', key: 'name' },
+    welcome:      { label: '<strong>Set your welcome message</strong> — Customise the message respondents see when they open the chat', key: 'welcome' },
+    access:       { label: '<strong>Choose access type</strong> — Select who can access your chat link', key: 'access' },
+    create:       { label: '<strong>Create your chat</strong> — Click the "Create Chat" button to generate your unique link', key: 'create' },
+    copyLink:     { label: '<strong>Copy your link</strong> — Use the Copy button to share your chat link with participants', key: 'copyLink' },
+    goParticipants: { label: '<strong>Go to Participants</strong> — Switch to the Participants tab to manage your audience', key: 'goParticipants' },
+    addParticipants: { label: '<strong>Add participants</strong> — Add participant names and emails', key: 'addParticipants' },
+    save:         { label: '<strong>Save your chat</strong> — Click "Save Chat" to store your settings', key: 'save' }
+};
+
+const gsAccessSteps = {
+    open:     ['name', 'welcome', 'access', 'create', 'copyLink', 'save'],
+    closed:   ['name', 'welcome', 'access', 'create', 'goParticipants', 'addParticipants', 'save'],
+    combined: ['name', 'welcome', 'access', 'create', 'copyLink', 'goParticipants', 'addParticipants', 'save']
+};
+
+function gsRenderSteps(stepKeys) {
+    gsCurrentSteps = stepKeys;
+    gsStepState = new Array(stepKeys.length).fill(false);
+    const list = document.getElementById('gs-steps-list');
+    if (!list) return;
+    list.innerHTML = stepKeys.map(function(key, i) {
+        var num = i + 1;
+        var def = gsStepDefs[key];
+        return '<li id="gs-step-' + num + '" style="display:flex;gap:10px;align-items:flex-start;font-size:13px;color:#334155;line-height:1.5;transition:opacity 0.3s;">' +
+            '<span id="gs-circle-' + num + '" style="flex-shrink:0;width:22px;height:22px;background:#6366f1;color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;transition:background 0.3s;">' + num + '</span>' +
+            '<span id="gs-text-' + num + '">' + def.label + '</span></li>';
+    }).join('');
+    gsUpdateProgress();
+}
 
 function gsCompleteStep(step) {
+    if (step < 1 || step > gsCurrentSteps.length) return;
     if (gsStepState[step - 1]) return;
     gsStepState[step - 1] = true;
-    const circle = document.getElementById('gs-circle-' + step);
-    const li = document.getElementById('gs-step-' + step);
-    if (circle) {
-        circle.style.background = '#10b981';
-        circle.innerHTML = '✓';
-        circle.style.fontSize = '13px';
-    }
+    var circle = document.getElementById('gs-circle-' + step);
+    var li = document.getElementById('gs-step-' + step);
+    if (circle) { circle.style.background = '#10b981'; circle.innerHTML = '✓'; circle.style.fontSize = '13px'; }
     if (li) li.style.opacity = '0.6';
     gsUpdateProgress();
 }
 
 function gsUncompleteStep(step) {
+    if (step < 1 || step > gsCurrentSteps.length) return;
     if (!gsStepState[step - 1]) return;
     gsStepState[step - 1] = false;
-    const circle = document.getElementById('gs-circle-' + step);
-    const li = document.getElementById('gs-step-' + step);
-    if (circle) {
-        circle.style.background = '#6366f1';
-        circle.innerHTML = step;
-        circle.style.fontSize = '12px';
-    }
+    var circle = document.getElementById('gs-circle-' + step);
+    var li = document.getElementById('gs-step-' + step);
+    if (circle) { circle.style.background = '#6366f1'; circle.innerHTML = step; circle.style.fontSize = '12px'; }
     if (li) li.style.opacity = '1';
     gsUpdateProgress();
 }
 
-function gsUpdateProgress() {
-    const done = gsStepState.filter(Boolean).length;
-    const label = document.getElementById('gs-progress');
-    const bar = document.getElementById('gs-progress-bar');
-    if (label) label.textContent = done + '/6 complete';
-    if (bar) bar.style.width = Math.round((done / 6) * 100) + '%';
+function gsCompleteByKey(key) {
+    var idx = gsCurrentSteps.indexOf(key);
+    if (idx !== -1) gsCompleteStep(idx + 1);
 }
 
-function gsReset() {
-    // Force-reset all steps to uncompleted
-    for (let i = 1; i <= 6; i++) {
-        gsStepState[i - 1] = false;
-        const circle = document.getElementById('gs-circle-' + i);
-        const li = document.getElementById('gs-step-' + i);
-        if (circle) {
-            circle.style.background = '#6366f1';
-            circle.innerHTML = i;
-            circle.style.fontSize = '12px';
-        }
-        if (li) li.style.opacity = '1';
-    }
+function gsUncompleteByKey(key) {
+    var idx = gsCurrentSteps.indexOf(key);
+    if (idx !== -1) gsUncompleteStep(idx + 1);
+}
 
-    // Re-evaluate based on current field values
+function gsUpdateProgress() {
+    var total = gsCurrentSteps.length;
+    var done = gsStepState.filter(Boolean).length;
+    var label = document.getElementById('gs-progress');
+    var bar = document.getElementById('gs-progress-bar');
+    if (label) label.textContent = done + '/' + total + ' complete';
+    if (bar) bar.style.width = (total > 0 ? Math.round((done / total) * 100) : 0) + '%';
+}
+
+function gsRebuildForAccessType(accessType) {
+    var keys = gsAccessSteps[accessType] || gsAccessSteps.open;
+    gsRenderSteps(keys);
+    gsEvaluateState();
+}
+
+function gsEvaluateState() {
     setTimeout(function() {
-        const chatName = document.getElementById('chat-setup-name');
-        const welcome = document.getElementById('chat-setup-welcome');
-        const successPanel = document.getElementById('chat-success-panel');
+        var chatName = document.getElementById('chat-setup-name');
+        var welcome = document.getElementById('chat-setup-welcome');
+        var successPanel = document.getElementById('chat-success-panel');
+        var panelVisible = successPanel && successPanel.style.display !== 'none';
 
-        if (chatName && chatName.value.trim()) gsCompleteStep(1);
-        if (welcome && welcome.value.trim()) gsCompleteStep(2);
-        gsCompleteStep(3); // Access type always has a default
-        // Steps 4-6 only complete if chat was already created (link visible)
-        if (successPanel && successPanel.style.display !== 'none') gsCompleteStep(4);
+        if (chatName && chatName.value.trim()) gsCompleteByKey('name');
+        if (welcome && welcome.value.trim()) gsCompleteByKey('welcome');
+        gsCompleteByKey('access');
+        if (panelVisible) gsCompleteByKey('create');
+        if (typeof chatParticipantsData !== 'undefined' && chatParticipantsData.length > 0) gsCompleteByKey('addParticipants');
 
         gsUpdateProgress();
     }, 100);
 }
 
+function gsReset() {
+    var accessType = (document.getElementById('chat-access-type') || {}).value || 'open';
+    gsRebuildForAccessType(accessType);
+}
+
 // Initialize Getting Started listeners
 (function initGettingStarted() {
-    // Wait for DOM elements to be available
     function setup() {
-        const chatNameInput = document.getElementById('chat-setup-name');
-        const welcomeInput = document.getElementById('chat-setup-welcome');
-        const accessSelect = document.getElementById('chat-access-type');
+        var chatNameInput = document.getElementById('chat-setup-name');
+        var welcomeInput = document.getElementById('chat-setup-welcome');
+        var accessSelect = document.getElementById('chat-access-type');
 
         if (!chatNameInput) { setTimeout(setup, 500); return; }
 
-        // Step 1: Chat name — tick when non-empty, untick when cleared
+        // Step 1: Chat name
         chatNameInput.addEventListener('input', function() {
-            if (this.value.trim()) gsCompleteStep(1);
-            else gsUncompleteStep(1);
+            if (this.value.trim()) gsCompleteByKey('name');
+            else gsUncompleteByKey('name');
         });
 
-        // Step 2: Welcome message — pre-tick since default text exists
-        if (welcomeInput && welcomeInput.value.trim()) gsCompleteStep(2);
+        // Step 2: Welcome message
         if (welcomeInput) {
             welcomeInput.addEventListener('input', function() {
-                if (this.value.trim()) gsCompleteStep(2);
-                else gsUncompleteStep(2);
+                if (this.value.trim()) gsCompleteByKey('welcome');
+                else gsUncompleteByKey('welcome');
             });
         }
 
-        // Step 3: Access type — pre-tick since default selection exists
-        gsCompleteStep(3);
+        // Listen for access type changes — rebuild checklist
+        if (accessSelect) {
+            accessSelect.addEventListener('change', function() {
+                gsRebuildForAccessType(this.value);
+            });
+        }
 
-        gsUpdateProgress();
+        // Initial render
+        gsRebuildForAccessType((accessSelect || {}).value || 'open');
     }
     setup();
 })();
