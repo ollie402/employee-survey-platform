@@ -12457,7 +12457,8 @@ function openChatEditor(chatId = null) {
         successPanel.style.display = 'none';
     }
 
-    // Clear the editing ID and chat object
+    // Clear ALL chat identity state so new chats don't overwrite existing ones
+    currentChatId = null;
     window.currentEditingChatId = null;
     window.currentEditingChat = null;
 
@@ -12478,6 +12479,9 @@ function openChatEditor(chatId = null) {
         // Reset dropdown to default
         const accessDropdown = document.getElementById('chat-access-type');
         if (accessDropdown) accessDropdown.value = 'open';
+        // Clear generated link from previous chat
+        const generatedLinkInput = document.getElementById('generatedChatLink');
+        if (generatedLinkInput) generatedLinkInput.value = '';
         // Clear participants data for new chat
         chatParticipantsData = [];
     } else {
