@@ -2397,6 +2397,17 @@
             to { transform: rotate(360deg); }
         }
 
+        .btn-spinner {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: sb-spin 0.6s linear infinite;
+            vertical-align: middle;
+        }
+
         /* Question Type Selector */
         .survey-builder-container .sb-question-type-selector {
             position: relative;
@@ -4730,7 +4741,7 @@
 
                                     <!-- Create Chat Button -->
                                     <div style="margin-bottom: 24px;">
-                                        <button onclick="createChat()" style="padding: 14px 32px; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 15px;">
+                                        <button id="create-chat-btn" onclick="createChat(this)" style="padding: 14px 32px; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 15px;">
                                             ✨ Create Chat
                                         </button>
                                     </div>
@@ -17267,7 +17278,7 @@ const participantsPerPage = 10;
 let currentChatId = null;
 
 // Create chat based on selected access type
-async function createChat() {
+async function createChat(btn) {
     const chatName = document.getElementById('chat-setup-name').value.trim();
     const welcomeMessage = document.getElementById('chat-setup-welcome').value.trim();
     const accessType = document.getElementById('chat-access-type').value;
@@ -17278,11 +17289,26 @@ async function createChat() {
         return;
     }
 
-    // Call the existing generateChatLink function which handles saving and link generation
-    // The access type is now read from the dropdown
-    await generateChatLink();
-    if (typeof gsCompleteByKey === 'function') gsCompleteByKey('create');
+    // Show spinner and disable button
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span class="btn-spinner"></span> Creating...';
+    }
 
+    try {
+        // Call the existing generateChatLink function which handles saving and link generation
+        // The access type is now read from the dropdown
+        await generateChatLink();
+        if (typeof gsCompleteByKey === 'function') gsCompleteByKey('create');
+    } catch (error) {
+        console.error('Error creating chat:', error);
+    } finally {
+        // Restore button
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '✨ Create Chat';
+        }
+    }
 }
 
 // Add a single participant from the Participants tab
