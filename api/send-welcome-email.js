@@ -24,7 +24,7 @@ export default async function handler(req, res) {
 
     // Generate setup token
     const setupToken = crypto.randomUUID();
-    const setupLink = `${BASE_URL}/setup?token=${setupToken}&user=${userId}`;
+    const setupLink = `${BASE_URL}/onboarding.html?email=${encodeURIComponent(email)}&token=${setupToken}`;
 
     try {
         // Send branded email
@@ -37,7 +37,7 @@ export default async function handler(req, res) {
             body: JSON.stringify({
                 to: [email],
                 sender: `${SMTP2GO_SENDER_NAME} <${SMTP2GO_SENDER_EMAIL}>`,
-                subject: 'Welcome to Realworld - Complete Your Account Setup',
+                subject: 'Complete your Realworld setup',
                 html_body: generateWelcomeEmailHTML(email, setupLink),
                 text_body: generateWelcomeEmailText(email, setupLink),
             }),
@@ -63,91 +63,41 @@ export default async function handler(req, res) {
 }
 
 function generateWelcomeEmailHTML(email, setupLink) {
-    return `
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    </head>
-    <body style="margin: 0; padding: 0; background-color: #f4f5f7; font-family: Arial, Helvetica, sans-serif;">
-        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #f4f5f7; padding: 40px 0;">
-            <tr>
-                <td align="center">
-                    <table role="presentation" width="600" cellspacing="0" cellpadding="0" style="background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
-
-                        <!-- Header with dark background matching the platform -->
-                        <tr>
-                            <td style="background-color: #1e293b; padding: 30px 40px; text-align: center;">
-                                <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 700; letter-spacing: 1px;">
-                                    real<span style="color: #4ade80;">W</span>orld
-                                </h1>
-                                <p style="color: #94a3b8; margin: 5px 0 0; font-size: 12px; letter-spacing: 2px; text-transform: uppercase;">Employee Surveys</p>
-                            </td>
-                        </tr>
-
-                        <!-- Main content -->
-                        <tr>
-                            <td style="padding: 40px;">
-                                <h2 style="color: #1e293b; margin: 0 0 15px; font-size: 22px;">Welcome to Realworld!</h2>
-
-                                <p style="color: #475569; font-size: 15px; line-height: 1.6; margin: 0 0 20px;">
-                                    Your account has been created with the email address <strong>${email}</strong>.
-                                </p>
-
-                                <p style="color: #475569; font-size: 15px; line-height: 1.6; margin: 0 0 25px;">
-                                    To get started, please complete your account setup by choosing your access level and setting up your organisation.
-                                </p>
-
-                                <!-- CTA Button -->
-                                <table role="presentation" cellspacing="0" cellpadding="0" style="margin: 30px auto;">
-                                    <tr>
-                                        <td style="background-color: #4ade80; border-radius: 8px;">
-                                            <a href="${setupLink}" target="_blank" style="display: inline-block; padding: 14px 40px; color: #1e293b; text-decoration: none; font-size: 16px; font-weight: 700;">
-                                                Complete Account Setup
-                                            </a>
-                                        </td>
-                                    </tr>
-                                </table>
-
-                                <p style="color: #94a3b8; font-size: 13px; line-height: 1.6; margin: 25px 0 0;">
-                                    If the button doesn't work, copy and paste this link into your browser:<br>
-                                    <a href="${setupLink}" style="color: #7c3aed; word-break: break-all;">${setupLink}</a>
-                                </p>
-                            </td>
-                        </tr>
-
-                        <!-- Footer -->
-                        <tr>
-                            <td style="background-color: #f8fafc; padding: 25px 40px; border-top: 1px solid #e2e8f0;">
-                                <p style="color: #94a3b8; font-size: 12px; margin: 0; text-align: center;">
-                                    &copy; 2026 Realworld Employee Surveys. All rights reserved.<br>
-                                    This email was sent because an account was created with this email address.<br>
-                                    If you didn't create this account, please ignore this email.
-                                </p>
-                            </td>
-                        </tr>
-
-                    </table>
-                </td>
-            </tr>
-        </table>
-    </body>
-    </html>
-    `;
+    return `<!DOCTYPE html>
+<html>
+<body style="font-family: sans-serif; background: #f4f5f7; padding: 40px 20px; margin: 0;">
+  <div style="max-width: 480px; margin: 0 auto; background: white; border-radius: 12px; padding: 40px;">
+    <div style="margin-bottom: 28px;">
+      <span style="background: linear-gradient(135deg, #6c47ff, #9b7fff); color: white; font-weight: 700; font-size: 18px; padding: 8px 16px; border-radius: 8px; display: inline-block;">R</span>
+      <span style="font-weight: 700; font-size: 18px; margin-left: 10px;">Realworld</span>
+    </div>
+    <h1 style="font-size: 24px; font-weight: 700; margin: 0 0 12px;">Welcome to Realworld!</h1>
+    <p style="color: #64748b; font-size: 15px; line-height: 1.6; margin: 0 0 28px;">
+      Your account has been created. Click the button below to choose your plan and complete your setup.
+    </p>
+    <a href="${setupLink}" style="display: inline-block; background: #6c47ff; color: white; font-weight: 600; font-size: 15px; padding: 14px 32px; border-radius: 8px; text-decoration: none;">
+      Complete Setup
+    </a>
+    <p style="color: #94a3b8; font-size: 13px; margin-top: 24px; line-height: 1.6;">
+      If the button doesn't work, copy and paste this link into your browser:<br>
+      <a href="${setupLink}" style="color: #7c3aed; word-break: break-all;">${setupLink}</a>
+    </p>
+    <p style="color: #94a3b8; font-size: 13px; margin-top: 24px;">
+      If you didn't create this account, you can safely ignore this email.
+    </p>
+  </div>
+</body>
+</html>`;
 }
 
 function generateWelcomeEmailText(email, setupLink) {
-    return `Welcome to Realworld Employee Surveys!
+    return `Welcome to Realworld!
 
-Your account has been created with the email address ${email}.
+Your account has been created. Visit the link below to choose your plan and complete your setup:
 
-To get started, please complete your account setup by visiting:
 ${setupLink}
 
-Choose your access level and set up your organisation to start using the platform.
-
-If you didn't create this account, please ignore this email.
+If you didn't create this account, you can safely ignore this email.
 
 © 2026 Realworld Employee Surveys`;
 }
