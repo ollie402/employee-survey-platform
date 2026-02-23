@@ -5,7 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Realworld Employee Survey Platform</title>
     <link rel="stylesheet" href="assets/css/styles.css">
+    <!-- Quill.js Rich Text Editor -->
+    <link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet">
     <style>
+        /* Quill editor styling */
+        #email-invite-editor .ql-editor,
+        #email-reminder-editor .ql-editor {
+            min-height: 180px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+        #email-invite-editor + .ql-tooltip,
+        #email-reminder-editor + .ql-tooltip {
+            z-index: 10001;
+        }
+        /* Ensure Quill toolbar and container look clean */
+        #participants-page-2 .ql-toolbar.ql-snow {
+            border: 1px solid #e2e8f0;
+            border-radius: 8px 8px 0 0;
+            background: #f8fafc;
+        }
+        #participants-page-2 .ql-container.ql-snow {
+            border: 1px solid #e2e8f0;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+        }
+
         /* Fix dropdown visibility issues */
         .dropdown-menu {
             position: absolute !important;
@@ -4912,25 +4937,14 @@
                                         <div>
                                             <div style="margin-bottom: 20px;">
                                                 <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #1e293b;">Email Invite Text</label>
-                                                <textarea id="email-invite-template" rows="5" placeholder="Enter your invite email text..." style="width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; resize: vertical; box-sizing: border-box;">Hi {first_name},
-
-You've been invited to share your feedback with us. Please click the link below to participate:
-
-{link}
-
-Thank you for your time!</textarea>
+                                                <div id="email-invite-editor" style="min-height: 180px; background: #fff; border: 1px solid #e2e8f0; border-radius: 0 0 8px 8px;"></div>
                                                 <p style="margin-top: 6px; font-size: 12px; color: #64748b;">Use {first_name}, {surname}, {email}, {link} as placeholders.</p>
                                             </div>
 
                                             <div>
                                                 <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #1e293b;">Email Reminder Text</label>
-                                                <textarea id="email-reminder-template" rows="5" placeholder="Enter your reminder email text..." style="width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; resize: vertical; box-sizing: border-box;">Hi {first_name},
-
-This is a friendly reminder to share your feedback with us. Your input is valuable!
-
-{link}
-
-Thank you!</textarea>
+                                                <div id="email-reminder-editor" style="min-height: 180px; background: #fff; border: 1px solid #e2e8f0; border-radius: 0 0 8px 8px;"></div>
+                                                <p style="margin-top: 6px; font-size: 12px; color: #64748b;">Use {first_name}, {surname}, {email}, {link} as placeholders.</p>
                                             </div>
                                         </div>
 
@@ -6267,6 +6281,8 @@ Thank you!</textarea>
         </div>
     </div>
 
+<!-- Quill.js Rich Text Editor -->
+<script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
 <!-- Supabase JavaScript library -->
 <script src="https://unpkg.com/@supabase/supabase-js@2.39.7/dist/umd/supabase.js"></script>
 <!-- Supabase client configuration -->
@@ -6285,6 +6301,161 @@ Thank you!</textarea>
 if (!window.chatTemplates) {
     window.chatTemplates = [];
 }
+
+// --- Quill Rich Text Editor Initialization ---
+var quillInviteEditor = null;
+var quillReminderEditor = null;
+
+function initQuillEditors() {
+    if (quillInviteEditor) return; // already initialized
+
+    // Custom image handler that supports both upload and URL
+    function quillImageHandler() {
+        const input = document.createElement('input');
+        input.setAttribute('type', 'file');
+        input.setAttribute('accept', 'image/*');
+        input.style.display = 'none';
+
+        // Create a modal for choosing upload or URL
+        const modal = document.createElement('div');
+        modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);z-index:10000;display:flex;align-items:center;justify-content:center;';
+        modal.innerHTML = `
+            <div style="background:#fff;border-radius:12px;padding:24px;max-width:400px;width:90%;box-shadow:0 4px 20px rgba(0,0,0,0.15);">
+                <h3 style="margin:0 0 16px;color:#1e293b;font-size:16px;">Insert Image</h3>
+                <button id="quill-img-upload-btn" style="width:100%;padding:10px;margin-bottom:10px;background:#10b981;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:14px;">Upload from computer</button>
+                <div style="text-align:center;color:#94a3b8;font-size:12px;margin-bottom:10px;">or</div>
+                <input id="quill-img-url-input" type="text" placeholder="Paste image URL..." style="width:100%;padding:10px;border:1px solid #e2e8f0;border-radius:8px;font-size:14px;box-sizing:border-box;margin-bottom:10px;">
+                <div style="display:flex;gap:8px;justify-content:flex-end;">
+                    <button id="quill-img-cancel-btn" style="padding:8px 16px;background:#f1f5f9;border:none;border-radius:8px;cursor:pointer;font-size:13px;">Cancel</button>
+                    <button id="quill-img-url-btn" style="padding:8px 16px;background:#3b82f6;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;">Insert URL</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+
+        const editor = this.quill;
+
+        modal.querySelector('#quill-img-cancel-btn').onclick = () => modal.remove();
+        modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
+
+        modal.querySelector('#quill-img-upload-btn').onclick = () => {
+            input.click();
+        };
+
+        input.onchange = () => {
+            const file = input.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const range = editor.getSelection(true);
+                    editor.insertEmbed(range.index, 'image', e.target.result);
+                    editor.setSelection(range.index + 1);
+                };
+                reader.readAsDataURL(file);
+            }
+            modal.remove();
+        };
+
+        modal.querySelector('#quill-img-url-btn').onclick = () => {
+            const url = modal.querySelector('#quill-img-url-input').value.trim();
+            if (url) {
+                const range = editor.getSelection(true);
+                editor.insertEmbed(range.index, 'image', url);
+                editor.setSelection(range.index + 1);
+            }
+            modal.remove();
+        };
+
+        // Allow Enter key to submit URL
+        modal.querySelector('#quill-img-url-input').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') modal.querySelector('#quill-img-url-btn').click();
+        });
+    }
+
+    const toolbarOptions = [
+        ['bold', 'italic', 'underline'],
+        [{ 'color': [] }, { 'background': [] }],
+        [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+        [{ 'align': [] }],
+        ['image'],
+        ['undo', 'redo']
+    ];
+
+    // Custom undo/redo icons
+    var icons = Quill.import('ui/icons');
+    icons['undo'] = '<svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M12.5 8c-2.65 0-5.05 1.04-6.83 2.73L3 8v9h9l-2.83-2.83A7.004 7.004 0 0 1 19.5 15c0 3.87-3.13 7-7 7v2a9 9 0 0 0 0-18z"/></svg>';
+    icons['redo'] = '<svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M18.4 10.6C16.55 9 14.15 8 11.5 8a9 9 0 0 0 0 18v-2c-3.87 0-7-3.13-7-7a7.004 7.004 0 0 1 10.33-6.17L12 13.5h9v-9l-2.6 2.6z"/></svg>';
+
+    var quillConfig = {
+        theme: 'snow',
+        modules: {
+            toolbar: {
+                container: toolbarOptions,
+                handlers: {
+                    image: quillImageHandler,
+                    undo: function () { this.quill.history.undo(); },
+                    redo: function () { this.quill.history.redo(); }
+                }
+            },
+            history: { delay: 1000, maxStack: 100, userOnly: true }
+        },
+        placeholder: 'Enter your email text...'
+    };
+
+    quillInviteEditor = new Quill('#email-invite-editor', quillConfig);
+    quillReminderEditor = new Quill('#email-reminder-editor', Object.assign({}, quillConfig, {
+        modules: {
+            toolbar: {
+                container: toolbarOptions,
+                handlers: {
+                    image: quillImageHandler,
+                    undo: function () { this.quill.history.undo(); },
+                    redo: function () { this.quill.history.redo(); }
+                }
+            },
+            history: { delay: 1000, maxStack: 100, userOnly: true }
+        }
+    }));
+
+    // Set default content
+    var defaultInvite = '<p>Hi {first_name},</p><p><br></p><p>You\'ve been invited to share your feedback with us. Please click the link below to participate:</p><p><br></p><p>{link}</p><p><br></p><p>Thank you for your time!</p>';
+    var defaultReminder = '<p>Hi {first_name},</p><p><br></p><p>This is a friendly reminder to share your feedback with us. Your input is valuable!</p><p><br></p><p>{link}</p><p><br></p><p>Thank you!</p>';
+
+    quillInviteEditor.root.innerHTML = defaultInvite;
+    quillReminderEditor.root.innerHTML = defaultReminder;
+}
+
+// Helper to get HTML from Quill editors
+function getInviteEditorHTML() {
+    if (quillInviteEditor) return quillInviteEditor.root.innerHTML;
+    var el = document.getElementById('email-invite-template');
+    return el ? el.value : '';
+}
+
+function getReminderEditorHTML() {
+    if (quillReminderEditor) return quillReminderEditor.root.innerHTML;
+    var el = document.getElementById('email-reminder-template');
+    return el ? el.value : '';
+}
+
+// Helper to set HTML into Quill editors
+function setInviteEditorHTML(html) {
+    if (quillInviteEditor) { quillInviteEditor.root.innerHTML = html; return; }
+    var el = document.getElementById('email-invite-template');
+    if (el) el.value = html;
+}
+
+function setReminderEditorHTML(html) {
+    if (quillReminderEditor) { quillReminderEditor.root.innerHTML = html; return; }
+    var el = document.getElementById('email-reminder-template');
+    if (el) el.value = html;
+}
+
+// Initialize editors once DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    // Small delay to ensure the containers are in the DOM
+    setTimeout(initQuillEditors, 300);
+});
 
 // UPDATE createNewChatWidget() function to include template selection
 function createNewChatWidget() {
@@ -12618,6 +12789,10 @@ async function loadChatIntoEditor(chatId) {
             }
         }
 
+        // Load email template content into Quill editors
+        if (chat.email_invite_text) setInviteEditorHTML(chat.email_invite_text);
+        if (chat.email_reminder_text) setReminderEditorHTML(chat.email_reminder_text);
+
         console.log('Loaded chat into editor:', chat.name);
 
         // Re-evaluate Getting Started checklist now that fields are populated
@@ -17782,7 +17957,9 @@ async function saveListeningAll(btn) {
                 welcome_message: welcomeMessage,
                 access_type: accessType,
                 user_id: user.id,
-                slug: linkCode
+                slug: linkCode,
+                email_invite_text: getInviteEditorHTML(),
+                email_reminder_text: getReminderEditorHTML()
             };
 
             const { data: newChat, error } = await window.supabaseClient
@@ -17802,7 +17979,9 @@ async function saveListeningAll(btn) {
             const updateData = {
                 name: chatName,
                 welcome_message: welcomeMessage,
-                access_type: accessType
+                access_type: accessType,
+                email_invite_text: getInviteEditorHTML(),
+                email_reminder_text: getReminderEditorHTML()
             };
 
             const { data: updatedChat, error } = await window.supabaseClient
