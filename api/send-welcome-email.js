@@ -67,22 +67,18 @@ function generateWelcomeEmailHTML(email, setupLink) {
 <html>
 <body style="font-family: sans-serif; background: #f4f5f7; padding: 40px 20px; margin: 0;">
   <div style="max-width: 480px; margin: 0 auto; background: white; border-radius: 12px; padding: 40px;">
-    <div style="margin-bottom: 28px;">
-      <span style="background: linear-gradient(135deg, #6c47ff, #9b7fff); color: white; font-weight: 700; font-size: 18px; padding: 8px 16px; border-radius: 8px; display: inline-block;">R</span>
-      <span style="font-weight: 700; font-size: 18px; margin-left: 10px;">Realworld</span>
+    <div style="margin-bottom: 28px; display: flex; align-items: center;">
+      <span style="background: linear-gradient(135deg, #6c47ff, #9b7fff); color: white; font-weight: 700; font-size: 18px; padding: 8px 14px; border-radius: 8px; display: inline-block;">R</span>
+      <span style="font-weight: 700; font-size: 18px; margin-left: 10px; color: #0f1117;">Realworld</span>
     </div>
-    <h1 style="font-size: 24px; font-weight: 700; margin: 0 0 12px;">Welcome to Realworld!</h1>
-    <p style="color: #64748b; font-size: 15px; line-height: 1.6; margin: 0 0 28px;">
+    <h1 style="font-size: 24px; font-weight: 700; margin-bottom: 12px; color: #0f1117;">Welcome to Realworld!</h1>
+    <p style="color: #64748b; font-size: 15px; line-height: 1.6; margin-bottom: 28px;">
       Your account has been created. Click the button below to choose your plan and complete your setup.
     </p>
     <a href="${setupLink}" style="display: inline-block; background: #6c47ff; color: white; font-weight: 600; font-size: 15px; padding: 14px 32px; border-radius: 8px; text-decoration: none;">
       Complete Setup
     </a>
-    <p style="color: #94a3b8; font-size: 13px; margin-top: 24px; line-height: 1.6;">
-      If the button doesn't work, copy and paste this link into your browser:<br>
-      <a href="${setupLink}" style="color: #7c3aed; word-break: break-all;">${setupLink}</a>
-    </p>
-    <p style="color: #94a3b8; font-size: 13px; margin-top: 24px;">
+    <p style="color: #94a3b8; font-size: 13px; margin-top: 28px; line-height: 1.5;">
       If you didn't create this account, you can safely ignore this email.
     </p>
   </div>
