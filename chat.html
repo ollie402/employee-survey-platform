@@ -1882,6 +1882,24 @@
                     console.error('❌ Database save error:', err);
                 }
 
+                // Trigger submission notification (fire-and-forget, don't block the UI)
+                try {
+                    const chat = window.currentChat;
+                    if (chat && chat.id) {
+                        fetch('/api/notify-submission', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                chatId: chat.id,
+                                chatName: chat.name || 'Feedback Session',
+                                submittedAt: new Date().toISOString()
+                            })
+                        }).catch(err => console.error('Notification trigger error:', err));
+                    }
+                } catch (err) {
+                    console.error('Error triggering notification:', err);
+                }
+
                 // Mark conversation as complete and show success
                 apiChatState.conversationComplete = true;
                 showSubmitSuccess();

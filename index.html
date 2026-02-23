@@ -4804,6 +4804,19 @@
                                         </select>
                                     </div>
 
+                                    <!-- Submission Notifications -->
+                                    <div style="margin-bottom: 24px;">
+                                        <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #1e293b;">Submission Notifications</label>
+                                        <select id="chat-notification-frequency" style="width: 100%; padding: 12px 16px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; background: white; cursor: pointer; color: #1e293b;">
+                                            <option value="">Use my default setting</option>
+                                            <option value="instant">Every submission (instant)</option>
+                                            <option value="daily">Daily digest</option>
+                                            <option value="weekly">Weekly digest</option>
+                                            <option value="never">Never</option>
+                                        </select>
+                                        <p style="margin-top: 6px; font-size: 12px; color: #64748b;">Override your global notification setting for this specific chat.</p>
+                                    </div>
+
                                     <!-- Create Chat Button -->
                                     <div style="margin-bottom: 24px;">
                                         <button id="create-chat-btn" onclick="createChat(this)" style="padding: 14px 32px; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 15px;">
@@ -5969,6 +5982,16 @@
                 <div class="form-group">
                     <label class="form-label">Bio / Description</label>
                     <textarea id="profile-bio" class="form-input" rows="3" placeholder="Tell us about yourself..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Chat Submission Notifications</label>
+                    <select id="profile-notification-frequency" class="form-select">
+                        <option value="instant">Every submission (instant)</option>
+                        <option value="daily">Daily digest</option>
+                        <option value="weekly">Weekly digest</option>
+                        <option value="never">Never</option>
+                    </select>
+                    <small style="color: #64748b; font-size: 12px; margin-top: 4px; display: block;">Controls how often you receive email notifications when someone submits a response to your chats.</small>
                 </div>
                 <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
                     <button type="button" class="btn btn-secondary" onclick="closeModal('profile-settings-modal')">Cancel</button>
@@ -12701,6 +12724,9 @@ function openChatEditor(chatId = null) {
         // Reset dropdown to default
         const accessDropdown = document.getElementById('chat-access-type');
         if (accessDropdown) accessDropdown.value = 'open';
+        // Reset notification dropdown to default
+        const notifDropdown = document.getElementById('chat-notification-frequency');
+        if (notifDropdown) notifDropdown.value = '';
         // Clear generated link from previous chat
         const generatedLinkInput = document.getElementById('generatedChatLink');
         if (generatedLinkInput) generatedLinkInput.value = '';
@@ -12759,6 +12785,12 @@ async function loadChatIntoEditor(chatId) {
             } else {
                 accessTypeDropdown.value = 'open';
             }
+        }
+
+        // Set notification frequency dropdown
+        const notifDropdown = document.getElementById('chat-notification-frequency');
+        if (notifDropdown) {
+            notifDropdown.value = chat.notification_frequency || '';
         }
 
         // Handle panel display based on access type
@@ -17920,6 +17952,7 @@ async function saveListeningAll(btn) {
     const chatName = document.getElementById('chat-setup-name').value.trim();
     const welcomeMessage = document.getElementById('chat-setup-welcome').value.trim();
     const accessType = document.getElementById('chat-access-type').value;
+    const notifFreq = document.getElementById('chat-notification-frequency').value || null;
 
     if (!chatName) {
         alert('Please enter a chat name on the Setup tab first');
@@ -17959,7 +17992,8 @@ async function saveListeningAll(btn) {
                 user_id: user.id,
                 slug: linkCode,
                 email_invite_text: getInviteEditorHTML(),
-                email_reminder_text: getReminderEditorHTML()
+                email_reminder_text: getReminderEditorHTML(),
+                notification_frequency: notifFreq
             };
 
             const { data: newChat, error } = await window.supabaseClient
@@ -17981,7 +18015,8 @@ async function saveListeningAll(btn) {
                 welcome_message: welcomeMessage,
                 access_type: accessType,
                 email_invite_text: getInviteEditorHTML(),
-                email_reminder_text: getReminderEditorHTML()
+                email_reminder_text: getReminderEditorHTML(),
+                notification_frequency: notifFreq
             };
 
             const { data: updatedChat, error } = await window.supabaseClient
