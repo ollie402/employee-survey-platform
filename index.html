@@ -14146,6 +14146,7 @@ async function saveListeningChat() {
                 .insert({
                     organization_id: userData.organization_id,
                     created_by: userData.id,
+                    user_id: user.id,
                     name: chatName,
                     welcome_message: welcomeMessage,
                     access_type: accessType,
@@ -17974,6 +17975,17 @@ async function saveListeningAll(btn) {
 
         let chatId = currentChatId || window.currentEditingChatId;
 
+        // Look up users table record for created_by and organization_id
+        let userRecord = null;
+        try {
+            const { data: ud } = await window.supabaseClient
+                .from('users')
+                .select('id, organization_id')
+                .eq('auth_id', user.id)
+                .single();
+            userRecord = ud;
+        } catch (e) { console.warn('Could not look up user record:', e); }
+
         // --- Create or update chat ---
         if (!chatId) {
             // NEW CHAT: extract slug from generated link or generate one
@@ -17990,6 +18002,8 @@ async function saveListeningAll(btn) {
                 welcome_message: welcomeMessage,
                 access_type: accessType,
                 user_id: user.id,
+                created_by: userRecord ? userRecord.id : null,
+                organization_id: userRecord ? userRecord.organization_id : null,
                 slug: linkCode,
                 email_invite_text: getInviteEditorHTML(),
                 email_reminder_text: getReminderEditorHTML(),
@@ -18100,12 +18114,24 @@ async function saveParticipantsSettings() {
             // Generate a simple slug/link code
             const linkCode = Math.random().toString(36).substring(2, 10);
 
-            // Only send fields that work
+            // Look up users table record for created_by and organization_id
+            let userRecord = null;
+            try {
+                const { data: ud } = await window.supabaseClient
+                    .from('users')
+                    .select('id, organization_id')
+                    .eq('auth_id', user.id)
+                    .single();
+                userRecord = ud;
+            } catch (e) { console.warn('Could not look up user record:', e); }
+
             const chatData = {
                 name: chatName,
                 welcome_message: welcomeMessage,
                 access_type: accessType,
                 user_id: user.id,
+                created_by: userRecord ? userRecord.id : null,
+                organization_id: userRecord ? userRecord.organization_id : null,
                 slug: linkCode
             };
 
@@ -18312,12 +18338,24 @@ async function saveChatToDatabase() {
             alert('Chat updated successfully!');
 
         } else {
-            // INSERT new chat
+            // INSERT new chat — look up users table for created_by and organization_id
+            let userRecord = null;
+            try {
+                const { data: ud } = await window.supabaseClient
+                    .from('users')
+                    .select('id, organization_id')
+                    .eq('auth_id', user.id)
+                    .single();
+                userRecord = ud;
+            } catch (e) { console.warn('Could not look up user record:', e); }
+
             const chatData = {
                 name: chatName,
                 welcome_message: welcomeMessage,
                 access_type: accessType,
-                user_id: user.id
+                user_id: user.id,
+                created_by: userRecord ? userRecord.id : null,
+                organization_id: userRecord ? userRecord.organization_id : null
             };
 
             if (linkCode) {

@@ -1883,21 +1883,34 @@
                 }
 
                 // Trigger submission notification (fire-and-forget, don't block the UI)
+                console.log('[notify] Starting notification trigger...');
                 try {
                     const chat = window.currentChat;
+                    console.log('[notify] currentChat:', chat ? { id: chat.id, name: chat.name, user_id: chat.user_id, created_by: chat.created_by } : 'NULL');
                     if (chat && chat.id) {
+                        const notifyPayload = {
+                            chatId: chat.id,
+                            chatName: chat.name || 'Feedback Session',
+                            submittedAt: new Date().toISOString()
+                        };
+                        console.log('[notify] Sending fetch to /api/notify-submission with:', JSON.stringify(notifyPayload));
                         fetch('/api/notify-submission', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                chatId: chat.id,
-                                chatName: chat.name || 'Feedback Session',
-                                submittedAt: new Date().toISOString()
-                            })
-                        }).catch(err => console.error('Notification trigger error:', err));
+                            body: JSON.stringify(notifyPayload)
+                        })
+                        .then(resp => {
+                            console.log('[notify] API response status:', resp.status);
+                            return resp.json().then(data => {
+                                console.log('[notify] API response body:', JSON.stringify(data));
+                            });
+                        })
+                        .catch(err => console.error('[notify] Fetch error:', err));
+                    } else {
+                        console.warn('[notify] Skipped - no chat loaded. window.currentChat:', window.currentChat);
                     }
                 } catch (err) {
-                    console.error('Error triggering notification:', err);
+                    console.error('[notify] Error in notification trigger:', err);
                 }
 
                 // Mark conversation as complete and show success

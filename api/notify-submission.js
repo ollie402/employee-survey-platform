@@ -34,9 +34,10 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Step 1: Fetch the chat record
+    // Step 1: Fetch the chat record (include both user_id and created_by)
+    console.log('[notify] Step 1: Fetching chat record for id:', chatId);
     const chatResponse = await fetch(
-      `${SUPABASE_URL}/rest/v1/listening_chats?id=eq.${chatId}&select=user_id,notification_frequency,last_digest_sent_at,name`,
+      `${SUPABASE_URL}/rest/v1/listening_chats?id=eq.${chatId}&select=user_id,created_by,notification_frequency,last_digest_sent_at,name`,
       {
         headers: {
           'apikey': SUPABASE_SERVICE_ROLE_KEY,
@@ -45,32 +46,74 @@ export default async function handler(req, res) {
         }
       }
     );
-    const chats = await chatResponse.json();
-    if (!chats || chats.length === 0) {
-      return res.status(404).json({ error: 'Chat not found' });
+    const chatText = await chatResponse.text();
+    console.log('[notify] Chat query response:', chatText);
+    let chats;
+    try { chats = JSON.parse(chatText); } catch (e) {
+      return res.status(500).json({ error: 'Failed to parse chat response', raw: chatText });
+    }
+    if (!Array.isArray(chats) || chats.length === 0) {
+      return res.status(404).json({ error: 'Chat not found', raw: chatText });
     }
     const chat = chats[0];
+    console.log('[notify] Chat record:', JSON.stringify(chat));
 
-    if (!chat.user_id) {
-      return res.status(400).json({ error: 'Chat has no creator reference' });
+    if (!chat.user_id && !chat.created_by) {
+      return res.status(400).json({ error: 'Chat has no creator reference (both user_id and created_by are null)' });
     }
 
-    // Step 2: Look up the creator in the users table (user_id = auth user ID)
-    const userResponse = await fetch(
-      `${SUPABASE_URL}/rest/v1/users?auth_id=eq.${chat.user_id}&select=email,notification_frequency`,
-      {
-        headers: {
-          'apikey': SUPABASE_SERVICE_ROLE_KEY,
-          'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
-          'Content-Type': 'application/json'
+    // Step 2: Look up the creator in the users table
+    // Try user_id (auth UID) first via auth_id column, then fall back to created_by (users table ID) via id column
+    let creator = null;
+
+    if (chat.user_id) {
+      console.log('[notify] Step 2a: Looking up user by auth_id =', chat.user_id);
+      const userResponse = await fetch(
+        `${SUPABASE_URL}/rest/v1/users?auth_id=eq.${chat.user_id}&select=email,notification_frequency`,
+        {
+          headers: {
+            'apikey': SUPABASE_SERVICE_ROLE_KEY,
+            'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+            'Content-Type': 'application/json'
+          }
         }
-      }
-    );
-    const users = await userResponse.json();
-    if (!users || users.length === 0) {
-      return res.status(404).json({ error: 'Chat creator not found in users table' });
+      );
+      const userText = await userResponse.text();
+      console.log('[notify] User lookup by auth_id response:', userText);
+      try {
+        const users = JSON.parse(userText);
+        if (Array.isArray(users) && users.length > 0) {
+          creator = users[0];
+        }
+      } catch (e) { console.error('[notify] Failed to parse user response:', e); }
     }
-    const creator = users[0];
+
+    if (!creator && chat.created_by) {
+      console.log('[notify] Step 2b: Falling back to lookup by users.id =', chat.created_by);
+      const userResponse = await fetch(
+        `${SUPABASE_URL}/rest/v1/users?id=eq.${chat.created_by}&select=email,notification_frequency`,
+        {
+          headers: {
+            'apikey': SUPABASE_SERVICE_ROLE_KEY,
+            'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      const userText = await userResponse.text();
+      console.log('[notify] User lookup by id response:', userText);
+      try {
+        const users = JSON.parse(userText);
+        if (Array.isArray(users) && users.length > 0) {
+          creator = users[0];
+        }
+      } catch (e) { console.error('[notify] Failed to parse user response:', e); }
+    }
+
+    if (!creator) {
+      return res.status(404).json({ error: 'Chat creator not found in users table', user_id: chat.user_id, created_by: chat.created_by });
+    }
+    console.log('[notify] Creator found:', creator.email);
 
     if (!creator.email) {
       return res.status(400).json({ error: 'Creator has no email address' });
@@ -79,6 +122,7 @@ export default async function handler(req, res) {
     // Step 3: Determine effective notification frequency
     // Per-chat override takes priority; if null, use user's global default
     const effectiveFrequency = chat.notification_frequency || creator.notification_frequency || 'instant';
+    console.log('[notify] Step 3: Effective frequency:', effectiveFrequency, '(chat:', chat.notification_frequency, ', user:', creator.notification_frequency, ')');
 
     if (effectiveFrequency === 'never') {
       return res.status(200).json({ success: true, action: 'skipped', reason: 'Notifications disabled' });
@@ -86,8 +130,10 @@ export default async function handler(req, res) {
 
     // Step 4: Handle based on frequency
     if (effectiveFrequency === 'instant') {
-      await sendInstantEmail(creator.email, chatName, submittedAt, BASE_URL, SMTP2GO_API_KEY, SMTP2GO_SENDER_EMAIL, SMTP2GO_SENDER_NAME);
-      return res.status(200).json({ success: true, action: 'sent_instant' });
+      console.log('[notify] Step 4: Sending instant email to', creator.email);
+      const emailResult = await sendInstantEmail(creator.email, chatName, submittedAt, BASE_URL, SMTP2GO_API_KEY, SMTP2GO_SENDER_EMAIL, SMTP2GO_SENDER_NAME);
+      console.log('[notify] Email send result:', JSON.stringify(emailResult));
+      return res.status(200).json({ success: true, action: 'sent_instant', emailResult });
     }
 
     // Daily or weekly digest
@@ -124,7 +170,9 @@ export default async function handler(req, res) {
 
       // Send digest email
       const periodLabel = effectiveFrequency === 'daily' ? 'daily' : 'weekly';
-      await sendDigestEmail(creator.email, chatName, responseCount, periodLabel, BASE_URL, SMTP2GO_API_KEY, SMTP2GO_SENDER_EMAIL, SMTP2GO_SENDER_NAME);
+      console.log('[notify] Sending', periodLabel, 'digest to', creator.email, 'with', responseCount, 'responses');
+      const digestResult = await sendDigestEmail(creator.email, chatName, responseCount, periodLabel, BASE_URL, SMTP2GO_API_KEY, SMTP2GO_SENDER_EMAIL, SMTP2GO_SENDER_NAME);
+      console.log('[notify] Digest email result:', JSON.stringify(digestResult));
 
       // Update last_digest_sent_at
       await fetch(
@@ -191,7 +239,7 @@ async function sendInstantEmail(email, chatName, submittedAt, baseUrl, apiKey, s
 </body>
 </html>`;
 
-  await fetch('https://api.smtp2go.com/v3/email/send', {
+  const response = await fetch('https://api.smtp2go.com/v3/email/send', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -204,6 +252,9 @@ async function sendInstantEmail(email, chatName, submittedAt, baseUrl, apiKey, s
       html_body: htmlBody,
     }),
   });
+  const data = await response.json();
+  console.log('[notify] SMTP2GO instant response:', JSON.stringify(data));
+  return { ok: response.ok, succeeded: data.data?.succeeded > 0, status: response.status, data };
 }
 
 // Send a digest notification email
@@ -238,7 +289,7 @@ async function sendDigestEmail(email, chatName, count, periodLabel, baseUrl, api
 </body>
 </html>`;
 
-  await fetch('https://api.smtp2go.com/v3/email/send', {
+  const response = await fetch('https://api.smtp2go.com/v3/email/send', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -251,4 +302,7 @@ async function sendDigestEmail(email, chatName, count, periodLabel, baseUrl, api
       html_body: htmlBody,
     }),
   });
+  const data = await response.json();
+  console.log('[notify] SMTP2GO digest response:', JSON.stringify(data));
+  return { ok: response.ok, succeeded: data.data?.succeeded > 0, status: response.status, data };
 }
