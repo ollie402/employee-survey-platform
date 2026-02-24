@@ -5,7 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Realworld Employee Survey Platform</title>
     <link rel="stylesheet" href="assets/css/styles.css">
+    <!-- Quill.js Rich Text Editor -->
+    <link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet">
     <style>
+        /* Quill editor styling */
+        #email-invite-editor .ql-editor,
+        #email-reminder-editor .ql-editor {
+            min-height: 180px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+        #email-invite-editor + .ql-tooltip,
+        #email-reminder-editor + .ql-tooltip {
+            z-index: 10001;
+        }
+        /* Ensure Quill toolbar and container look clean */
+        #participants-page-2 .ql-toolbar.ql-snow {
+            border: 1px solid #e2e8f0;
+            border-radius: 8px 8px 0 0;
+            background: #f8fafc;
+        }
+        #participants-page-2 .ql-container.ql-snow {
+            border: 1px solid #e2e8f0;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+        }
+
         /* Fix dropdown visibility issues */
         .dropdown-menu {
             position: absolute !important;
@@ -3752,6 +3777,7 @@
         }
 
         .chats-container .chat-card {
+            position: relative;
             background: var(--chat-surface);
             border-radius: 8px;
             box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15);
@@ -3790,29 +3816,68 @@
             gap: 8px;
         }
 
-        .chats-container .chat-card-actions {
-            display: flex;
-            gap: 8px;
-            margin-top: 16px;
-        }
-
-        .chats-container .chat-card-action {
+        .chats-container .chat-card-menu-btn {
+            position: absolute;
+            top: 16px;
+            right: 12px;
+            width: 28px;
+            height: 28px;
             display: flex;
             align-items: center;
-            gap: 6px;
-            padding: 6px 12px;
-            border: 1px solid var(--chat-border);
-            border-radius: 16px;
+            justify-content: center;
+            border: none;
+            border-radius: 50%;
             background: transparent;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 18px;
             color: var(--chat-text-secondary);
             font-family: inherit;
-            transition: all 0.2s;
+            transition: background 0.2s;
+            z-index: 2;
         }
 
-        .chats-container .chat-card-action:hover {
-            background: var(--chat-primary-light);
+        .chats-container .chat-card-menu-btn:hover {
+            background: rgba(0,0,0,0.08);
+        }
+
+        .chats-container .chat-card-dropdown {
+            display: none;
+            position: absolute;
+            top: 44px;
+            right: 12px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+            min-width: 150px;
+            z-index: 10;
+            overflow: hidden;
+        }
+
+        .chats-container .chat-card-dropdown.open {
+            display: block;
+        }
+
+        .chats-container .chat-card-dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            padding: 10px 16px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 13px;
+            color: #333;
+            font-family: inherit;
+            transition: background 0.15s;
+        }
+
+        .chats-container .chat-card-dropdown-item:hover {
+            background: #f1f3f4;
+        }
+
+        .chats-container .chat-card-dropdown-item svg {
+            flex-shrink: 0;
         }
 
         .chats-container .new-chat-card {
@@ -4649,7 +4714,7 @@
                 <div id="listen-section" class="hidden">
                     <div class="chats-container">
                         <main class="chat-dashboard-main">
-                            <h1 class="chat-dashboard-section-title">Recent chats</h1>
+                            <h1 class="chat-dashboard-section-title">My chats</h1>
                             <div class="chats-grid-container">
                                 <div class="chats-grid" id="chats-grid">
                                     <!-- New Chat Card -->
@@ -4737,6 +4802,19 @@
                                             <option value="closed">🔒 Closed Access - Only invited participants via unique links</option>
                                             <option value="combined">🔗 Combined Access - Public link AND invited participants</option>
                                         </select>
+                                    </div>
+
+                                    <!-- Submission Notifications -->
+                                    <div style="margin-bottom: 24px;">
+                                        <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #1e293b;">Submission Notifications</label>
+                                        <select id="chat-notification-frequency" style="width: 100%; padding: 12px 16px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; background: white; cursor: pointer; color: #1e293b;">
+                                            <option value="">Use my default setting</option>
+                                            <option value="instant">Every submission (instant)</option>
+                                            <option value="daily">Daily digest</option>
+                                            <option value="weekly">Weekly digest</option>
+                                            <option value="never">Never</option>
+                                        </select>
+                                        <p style="margin-top: 6px; font-size: 12px; color: #64748b;">Override your global notification setting for this specific chat.</p>
                                     </div>
 
                                     <!-- Create Chat Button -->
@@ -4872,25 +4950,14 @@
                                         <div>
                                             <div style="margin-bottom: 20px;">
                                                 <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #1e293b;">Email Invite Text</label>
-                                                <textarea id="email-invite-template" rows="5" placeholder="Enter your invite email text..." style="width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; resize: vertical; box-sizing: border-box;">Hi {first_name},
-
-You've been invited to share your feedback with us. Please click the link below to participate:
-
-{link}
-
-Thank you for your time!</textarea>
+                                                <div id="email-invite-editor" style="min-height: 180px; background: #fff; border: 1px solid #e2e8f0; border-radius: 0 0 8px 8px;"></div>
                                                 <p style="margin-top: 6px; font-size: 12px; color: #64748b;">Use {first_name}, {surname}, {email}, {link} as placeholders.</p>
                                             </div>
 
                                             <div>
                                                 <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #1e293b;">Email Reminder Text</label>
-                                                <textarea id="email-reminder-template" rows="5" placeholder="Enter your reminder email text..." style="width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; resize: vertical; box-sizing: border-box;">Hi {first_name},
-
-This is a friendly reminder to share your feedback with us. Your input is valuable!
-
-{link}
-
-Thank you!</textarea>
+                                                <div id="email-reminder-editor" style="min-height: 180px; background: #fff; border: 1px solid #e2e8f0; border-radius: 0 0 8px 8px;"></div>
+                                                <p style="margin-top: 6px; font-size: 12px; color: #64748b;">Use {first_name}, {surname}, {email}, {link} as placeholders.</p>
                                             </div>
                                         </div>
 
@@ -5916,6 +5983,16 @@ Thank you!</textarea>
                     <label class="form-label">Bio / Description</label>
                     <textarea id="profile-bio" class="form-input" rows="3" placeholder="Tell us about yourself..."></textarea>
                 </div>
+                <div class="form-group">
+                    <label class="form-label">Chat Submission Notifications</label>
+                    <select id="profile-notification-frequency" class="form-select">
+                        <option value="instant">Every submission (instant)</option>
+                        <option value="daily">Daily digest</option>
+                        <option value="weekly">Weekly digest</option>
+                        <option value="never">Never</option>
+                    </select>
+                    <small style="color: #64748b; font-size: 12px; margin-top: 4px; display: block;">Controls how often you receive email notifications when someone submits a response to your chats.</small>
+                </div>
                 <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
                     <button type="button" class="btn btn-secondary" onclick="closeModal('profile-settings-modal')">Cancel</button>
                     <button type="submit" class="btn btn-primary">Save Changes</button>
@@ -6227,6 +6304,8 @@ Thank you!</textarea>
         </div>
     </div>
 
+<!-- Quill.js Rich Text Editor -->
+<script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
 <!-- Supabase JavaScript library -->
 <script src="https://unpkg.com/@supabase/supabase-js@2.39.7/dist/umd/supabase.js"></script>
 <!-- Supabase client configuration -->
@@ -6245,6 +6324,161 @@ Thank you!</textarea>
 if (!window.chatTemplates) {
     window.chatTemplates = [];
 }
+
+// --- Quill Rich Text Editor Initialization ---
+var quillInviteEditor = null;
+var quillReminderEditor = null;
+
+function initQuillEditors() {
+    if (quillInviteEditor) return; // already initialized
+
+    // Custom image handler that supports both upload and URL
+    function quillImageHandler() {
+        const input = document.createElement('input');
+        input.setAttribute('type', 'file');
+        input.setAttribute('accept', 'image/*');
+        input.style.display = 'none';
+
+        // Create a modal for choosing upload or URL
+        const modal = document.createElement('div');
+        modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);z-index:10000;display:flex;align-items:center;justify-content:center;';
+        modal.innerHTML = `
+            <div style="background:#fff;border-radius:12px;padding:24px;max-width:400px;width:90%;box-shadow:0 4px 20px rgba(0,0,0,0.15);">
+                <h3 style="margin:0 0 16px;color:#1e293b;font-size:16px;">Insert Image</h3>
+                <button id="quill-img-upload-btn" style="width:100%;padding:10px;margin-bottom:10px;background:#10b981;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:14px;">Upload from computer</button>
+                <div style="text-align:center;color:#94a3b8;font-size:12px;margin-bottom:10px;">or</div>
+                <input id="quill-img-url-input" type="text" placeholder="Paste image URL..." style="width:100%;padding:10px;border:1px solid #e2e8f0;border-radius:8px;font-size:14px;box-sizing:border-box;margin-bottom:10px;">
+                <div style="display:flex;gap:8px;justify-content:flex-end;">
+                    <button id="quill-img-cancel-btn" style="padding:8px 16px;background:#f1f5f9;border:none;border-radius:8px;cursor:pointer;font-size:13px;">Cancel</button>
+                    <button id="quill-img-url-btn" style="padding:8px 16px;background:#3b82f6;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;">Insert URL</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+
+        const editor = this.quill;
+
+        modal.querySelector('#quill-img-cancel-btn').onclick = () => modal.remove();
+        modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
+
+        modal.querySelector('#quill-img-upload-btn').onclick = () => {
+            input.click();
+        };
+
+        input.onchange = () => {
+            const file = input.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const range = editor.getSelection(true);
+                    editor.insertEmbed(range.index, 'image', e.target.result);
+                    editor.setSelection(range.index + 1);
+                };
+                reader.readAsDataURL(file);
+            }
+            modal.remove();
+        };
+
+        modal.querySelector('#quill-img-url-btn').onclick = () => {
+            const url = modal.querySelector('#quill-img-url-input').value.trim();
+            if (url) {
+                const range = editor.getSelection(true);
+                editor.insertEmbed(range.index, 'image', url);
+                editor.setSelection(range.index + 1);
+            }
+            modal.remove();
+        };
+
+        // Allow Enter key to submit URL
+        modal.querySelector('#quill-img-url-input').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') modal.querySelector('#quill-img-url-btn').click();
+        });
+    }
+
+    const toolbarOptions = [
+        ['bold', 'italic', 'underline'],
+        [{ 'color': [] }, { 'background': [] }],
+        [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+        [{ 'align': [] }],
+        ['image'],
+        ['undo', 'redo']
+    ];
+
+    // Custom undo/redo icons
+    var icons = Quill.import('ui/icons');
+    icons['undo'] = '<svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M12.5 8c-2.65 0-5.05 1.04-6.83 2.73L3 8v9h9l-2.83-2.83A7.004 7.004 0 0 1 19.5 15c0 3.87-3.13 7-7 7v2a9 9 0 0 0 0-18z"/></svg>';
+    icons['redo'] = '<svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M18.4 10.6C16.55 9 14.15 8 11.5 8a9 9 0 0 0 0 18v-2c-3.87 0-7-3.13-7-7a7.004 7.004 0 0 1 10.33-6.17L12 13.5h9v-9l-2.6 2.6z"/></svg>';
+
+    var quillConfig = {
+        theme: 'snow',
+        modules: {
+            toolbar: {
+                container: toolbarOptions,
+                handlers: {
+                    image: quillImageHandler,
+                    undo: function () { this.quill.history.undo(); },
+                    redo: function () { this.quill.history.redo(); }
+                }
+            },
+            history: { delay: 1000, maxStack: 100, userOnly: true }
+        },
+        placeholder: 'Enter your email text...'
+    };
+
+    quillInviteEditor = new Quill('#email-invite-editor', quillConfig);
+    quillReminderEditor = new Quill('#email-reminder-editor', Object.assign({}, quillConfig, {
+        modules: {
+            toolbar: {
+                container: toolbarOptions,
+                handlers: {
+                    image: quillImageHandler,
+                    undo: function () { this.quill.history.undo(); },
+                    redo: function () { this.quill.history.redo(); }
+                }
+            },
+            history: { delay: 1000, maxStack: 100, userOnly: true }
+        }
+    }));
+
+    // Set default content
+    var defaultInvite = '<p>Hi {first_name},</p><p><br></p><p>You\'ve been invited to share your feedback with us. Please click the link below to participate:</p><p><br></p><p>{link}</p><p><br></p><p>Thank you for your time!</p>';
+    var defaultReminder = '<p>Hi {first_name},</p><p><br></p><p>This is a friendly reminder to share your feedback with us. Your input is valuable!</p><p><br></p><p>{link}</p><p><br></p><p>Thank you!</p>';
+
+    quillInviteEditor.root.innerHTML = defaultInvite;
+    quillReminderEditor.root.innerHTML = defaultReminder;
+}
+
+// Helper to get HTML from Quill editors
+function getInviteEditorHTML() {
+    if (quillInviteEditor) return quillInviteEditor.root.innerHTML;
+    var el = document.getElementById('email-invite-template');
+    return el ? el.value : '';
+}
+
+function getReminderEditorHTML() {
+    if (quillReminderEditor) return quillReminderEditor.root.innerHTML;
+    var el = document.getElementById('email-reminder-template');
+    return el ? el.value : '';
+}
+
+// Helper to set HTML into Quill editors
+function setInviteEditorHTML(html) {
+    if (quillInviteEditor) { quillInviteEditor.root.innerHTML = html; return; }
+    var el = document.getElementById('email-invite-template');
+    if (el) el.value = html;
+}
+
+function setReminderEditorHTML(html) {
+    if (quillReminderEditor) { quillReminderEditor.root.innerHTML = html; return; }
+    var el = document.getElementById('email-reminder-template');
+    if (el) el.value = html;
+}
+
+// Initialize editors once DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    // Small delay to ensure the containers are in the DOM
+    setTimeout(initQuillEditors, 300);
+});
 
 // UPDATE createNewChatWidget() function to include template selection
 function createNewChatWidget() {
@@ -12490,6 +12724,9 @@ function openChatEditor(chatId = null) {
         // Reset dropdown to default
         const accessDropdown = document.getElementById('chat-access-type');
         if (accessDropdown) accessDropdown.value = 'open';
+        // Reset notification dropdown to default
+        const notifDropdown = document.getElementById('chat-notification-frequency');
+        if (notifDropdown) notifDropdown.value = '';
         // Clear generated link from previous chat
         const generatedLinkInput = document.getElementById('generatedChatLink');
         if (generatedLinkInput) generatedLinkInput.value = '';
@@ -12550,6 +12787,12 @@ async function loadChatIntoEditor(chatId) {
             }
         }
 
+        // Set notification frequency dropdown
+        const notifDropdown = document.getElementById('chat-notification-frequency');
+        if (notifDropdown) {
+            notifDropdown.value = chat.notification_frequency || '';
+        }
+
         // Handle panel display based on access type
         const successPanel = document.getElementById('chat-success-panel');
         const participantPanel = document.getElementById('participant-entry-panel');
@@ -12577,6 +12820,10 @@ async function loadChatIntoEditor(chatId) {
                 generatedChatLink.value = 'https://rworldfeedback.co.uk/chat/' + chat.slug;
             }
         }
+
+        // Load email template content into Quill editors
+        if (chat.email_invite_text) setInviteEditorHTML(chat.email_invite_text);
+        if (chat.email_reminder_text) setReminderEditorHTML(chat.email_reminder_text);
 
         console.log('Loaded chat into editor:', chat.name);
 
@@ -13615,7 +13862,7 @@ function copyChatLink(slug) {
     const link = 'https://rworldfeedback.co.uk/chat/' + slug;
     navigator.clipboard.writeText(link).then(() => {
         // Show brief feedback
-        const btn = document.querySelector(`.chat-card[data-chat-slug="${slug}"] .chat-card-action`);
+        const btn = document.querySelector(`.chat-card[data-chat-slug="${slug}"] .chat-card-dropdown-item`);
         if (btn) {
             const originalText = btn.innerHTML;
             btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Copied!';
@@ -13899,6 +14146,7 @@ async function saveListeningChat() {
                 .insert({
                     organization_id: userData.organization_id,
                     created_by: userData.id,
+                    user_id: user.id,
                     name: chatName,
                     welcome_message: welcomeMessage,
                     access_type: accessType,
@@ -13981,32 +14229,60 @@ function createChatCardHTML(chat) {
     return `
         <div class="chat-card" data-chat-id="${chat.id}" data-chat-slug="${chat.slug}" onclick="openChatEditor('${chat.id}')">
             <div class="chat-card-header"></div>
+            <button class="chat-card-menu-btn" onclick="event.stopPropagation(); toggleChatCardMenu(this)" aria-label="More options">&#8942;</button>
+            <div class="chat-card-dropdown">
+                <button class="chat-card-dropdown-item" onclick="event.stopPropagation(); closeChatCardMenus(); copyChatLink('${chat.slug}')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                    </svg>
+                    Copy link
+                </button>
+                <button class="chat-card-dropdown-item" onclick="event.stopPropagation(); closeChatCardMenus(); openChatEditor('${chat.id}')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                    </svg>
+                    Edit
+                </button>
+                <button class="chat-card-dropdown-item" onclick="event.stopPropagation(); closeChatCardMenus(); deleteListeningChat('${chat.id}')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 6h18"></path>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path>
+                        <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    </svg>
+                    Delete
+                </button>
+            </div>
             <div class="chat-card-body">
                 <div class="chat-card-title">${chat.name}</div>
                 <div class="chat-card-meta">
                     <span>Opened ${formatChatDate(chat.created_at)}</span>
                 </div>
-                <div class="chat-card-actions">
-                    <button class="chat-card-action" onclick="event.stopPropagation(); copyChatLink('${chat.slug}')">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
-                            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
-                        </svg>
-                        Copy link
-                    </button>
-                    <button class="chat-card-action" onclick="event.stopPropagation(); deleteListeningChat('${chat.id}')">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M3 6h18"></path>
-                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path>
-                            <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                        </svg>
-                        Delete
-                    </button>
-                </div>
             </div>
         </div>
     `;
 }
+
+// Close all open chat card dropdown menus
+function closeChatCardMenus() {
+    document.querySelectorAll('.chat-card-dropdown.open').forEach(d => d.classList.remove('open'));
+}
+
+// Toggle a specific chat card's dropdown menu
+function toggleChatCardMenu(btn) {
+    const dropdown = btn.nextElementSibling;
+    const isOpen = dropdown.classList.contains('open');
+    closeChatCardMenus();
+    if (!isOpen) {
+        dropdown.classList.add('open');
+    }
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function() {
+    closeChatCardMenus();
+});
 
 // Maximum visible tiles before stacking (not counting blank card)
 const MAX_VISIBLE_TILES = 8;
@@ -17677,6 +17953,7 @@ async function saveListeningAll(btn) {
     const chatName = document.getElementById('chat-setup-name').value.trim();
     const welcomeMessage = document.getElementById('chat-setup-welcome').value.trim();
     const accessType = document.getElementById('chat-access-type').value;
+    const notifFreq = document.getElementById('chat-notification-frequency').value || null;
 
     if (!chatName) {
         alert('Please enter a chat name on the Setup tab first');
@@ -17698,6 +17975,17 @@ async function saveListeningAll(btn) {
 
         let chatId = currentChatId || window.currentEditingChatId;
 
+        // Look up users table record for created_by and organization_id
+        let userRecord = null;
+        try {
+            const { data: ud } = await window.supabaseClient
+                .from('users')
+                .select('id, organization_id')
+                .eq('auth_id', user.id)
+                .single();
+            userRecord = ud;
+        } catch (e) { console.warn('Could not look up user record:', e); }
+
         // --- Create or update chat ---
         if (!chatId) {
             // NEW CHAT: extract slug from generated link or generate one
@@ -17714,7 +18002,12 @@ async function saveListeningAll(btn) {
                 welcome_message: welcomeMessage,
                 access_type: accessType,
                 user_id: user.id,
-                slug: linkCode
+                created_by: userRecord ? userRecord.id : null,
+                organization_id: userRecord ? userRecord.organization_id : null,
+                slug: linkCode,
+                email_invite_text: getInviteEditorHTML(),
+                email_reminder_text: getReminderEditorHTML(),
+                notification_frequency: notifFreq
             };
 
             const { data: newChat, error } = await window.supabaseClient
@@ -17734,7 +18027,10 @@ async function saveListeningAll(btn) {
             const updateData = {
                 name: chatName,
                 welcome_message: welcomeMessage,
-                access_type: accessType
+                access_type: accessType,
+                email_invite_text: getInviteEditorHTML(),
+                email_reminder_text: getReminderEditorHTML(),
+                notification_frequency: notifFreq
             };
 
             const { data: updatedChat, error } = await window.supabaseClient
@@ -17818,12 +18114,24 @@ async function saveParticipantsSettings() {
             // Generate a simple slug/link code
             const linkCode = Math.random().toString(36).substring(2, 10);
 
-            // Only send fields that work
+            // Look up users table record for created_by and organization_id
+            let userRecord = null;
+            try {
+                const { data: ud } = await window.supabaseClient
+                    .from('users')
+                    .select('id, organization_id')
+                    .eq('auth_id', user.id)
+                    .single();
+                userRecord = ud;
+            } catch (e) { console.warn('Could not look up user record:', e); }
+
             const chatData = {
                 name: chatName,
                 welcome_message: welcomeMessage,
                 access_type: accessType,
                 user_id: user.id,
+                created_by: userRecord ? userRecord.id : null,
+                organization_id: userRecord ? userRecord.organization_id : null,
                 slug: linkCode
             };
 
@@ -18030,12 +18338,24 @@ async function saveChatToDatabase() {
             alert('Chat updated successfully!');
 
         } else {
-            // INSERT new chat
+            // INSERT new chat — look up users table for created_by and organization_id
+            let userRecord = null;
+            try {
+                const { data: ud } = await window.supabaseClient
+                    .from('users')
+                    .select('id, organization_id')
+                    .eq('auth_id', user.id)
+                    .single();
+                userRecord = ud;
+            } catch (e) { console.warn('Could not look up user record:', e); }
+
             const chatData = {
                 name: chatName,
                 welcome_message: welcomeMessage,
                 access_type: accessType,
-                user_id: user.id
+                user_id: user.id,
+                created_by: userRecord ? userRecord.id : null,
+                organization_id: userRecord ? userRecord.organization_id : null
             };
 
             if (linkCode) {
