@@ -1885,19 +1885,26 @@
                 // Trigger submission notification (fire-and-forget, don't block the UI)
                 try {
                     const chat = window.currentChat;
+                    console.log('[notify] Attempting notification trigger. currentChat:', chat ? { id: chat.id, name: chat.name } : 'null');
                     if (chat && chat.id) {
+                        const notifyPayload = {
+                            chatId: chat.id,
+                            chatName: chat.name || 'Feedback Session',
+                            submittedAt: new Date().toISOString()
+                        };
+                        console.log('[notify] Sending notification request:', JSON.stringify(notifyPayload));
                         fetch('/api/notify-submission', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                chatId: chat.id,
-                                chatName: chat.name || 'Feedback Session',
-                                submittedAt: new Date().toISOString()
-                            })
-                        }).catch(err => console.error('Notification trigger error:', err));
+                            body: JSON.stringify(notifyPayload)
+                        })
+                        .then(resp => resp.json().then(data => console.log('[notify] API response:', resp.status, data)))
+                        .catch(err => console.error('[notify] Notification trigger error:', err));
+                    } else {
+                        console.warn('[notify] Skipped - no chat loaded or missing chat.id');
                     }
                 } catch (err) {
-                    console.error('Error triggering notification:', err);
+                    console.error('[notify] Error triggering notification:', err);
                 }
 
                 // Mark conversation as complete and show success
