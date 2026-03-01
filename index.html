@@ -4234,10 +4234,12 @@
           padding: 16px 22px;
           border-top: 1px solid var(--rw-border);
           display: flex; gap: 10px;
+          justify-content: flex-end;
         }
         .rw-btn-save {
-          flex: 1;
+          flex: 0 1 auto;
           padding: 11px 20px;
+          max-width: 220px;
           background: linear-gradient(135deg, #6c63ff, #8b5cf6);
           color: #fff;
           border: none; border-radius: 9px;
@@ -4387,6 +4389,24 @@
         .rw-check-icon.pending { border: 2px solid var(--rw-border); background: #f8fafc; }
         .rw-check-text strong { font-size: 12.5px; font-weight: 500; color: var(--rw-text); display: block; }
         .rw-check-text span { font-size: 11px; color: var(--rw-text-soft); }
+
+        /* Chat link card: always visible in the grid, never collapse */
+        #chat-success-panel.rw-card { display: block !important; }
+
+        /* Placeholder state: when JS sets display:none, show card greyed-out instead */
+        #chat-success-panel[style*="display: none"] .rw-link-panel,
+        #chat-success-panel[style*="display:none"] .rw-link-panel {
+          opacity: 0.35; pointer-events: none;
+        }
+        #chat-success-panel[style*="display: none"] .rw-link-actions,
+        #chat-success-panel[style*="display:none"] .rw-link-actions {
+          pointer-events: none; opacity: 0.35;
+        }
+        #chat-success-panel[style*="display: none"] .rw-card-subtitle::after,
+        #chat-success-panel[style*="display:none"] .rw-card-subtitle::after {
+          content: ' — create a chat first';
+          font-style: italic;
+        }
     </style>
 </head>
 <body>
