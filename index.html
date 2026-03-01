@@ -4232,23 +4232,30 @@
 
         .rw-save-section {
           padding: 16px 22px;
-          border-top: 1px solid var(--rw-border);
-          display: flex; gap: 10px;
-          justify-content: flex-end;
+          border-top: 1px solid #e8edf5;
+          display: flex;
+          flex-direction: row;
+          gap: 10px;
+          align-items: center;
         }
         .rw-btn-save {
-          flex: 0 1 auto;
+          flex: 1;
           padding: 11px 20px;
-          max-width: 220px;
           background: linear-gradient(135deg, #6c63ff, #8b5cf6);
           color: #fff;
-          border: none; border-radius: 9px;
+          border: none;
+          border-radius: 9px;
           font-family: inherit;
-          font-size: 13.5px; font-weight: 600;
+          font-size: 13.5px;
+          font-weight: 600;
           cursor: pointer;
-          display: flex; align-items: center; justify-content: center; gap: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
           box-shadow: 0 4px 14px rgba(108,99,255,0.35);
           transition: all 0.15s;
+          width: 100%;
         }
         .rw-btn-save:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(108,99,255,0.4); }
         .rw-btn-save svg { width: 15px; }
@@ -4311,24 +4318,43 @@
           overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
           flex: 1; padding: 0;
         }
-        .rw-link-actions { display: flex; gap: 8px; }
+        .rw-link-actions {
+          display: flex;
+          flex-direction: row;
+          gap: 8px;
+          align-items: center;
+        }
         .rw-btn-copy {
-          flex: 1; padding: 8px;
-          background: var(--rw-accent2); color: #fff;
-          border: none; border-radius: 7px;
-          font-family: inherit; font-size: 12.5px; font-weight: 600;
+          flex: 1;
+          padding: 9px;
+          background: #6c63ff;
+          color: #fff;
+          border: none;
+          border-radius: 7px;
+          font-family: inherit;
+          font-size: 12.5px;
+          font-weight: 600;
           cursor: pointer;
-          display: flex; align-items: center; justify-content: center; gap: 6px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 6px;
           transition: opacity 0.15s;
         }
         .rw-btn-copy:hover { opacity: 0.88; }
         .rw-btn-qr {
-          padding: 8px 11px;
+          width: 38px;
+          height: 38px;
+          flex-shrink: 0;
+          padding: 0;
           background: rgba(255,255,255,0.1);
           border: 1px solid rgba(255,255,255,0.15);
-          border-radius: 7px; color: rgba(255,255,255,0.75);
+          border-radius: 7px;
+          color: rgba(255,255,255,0.75);
           cursor: pointer;
-          display: flex; align-items: center; justify-content: center;
+          display: flex;
+          align-items: center;
+          justify-content: center;
           transition: background 0.15s;
         }
         .rw-btn-qr:hover { background: rgba(255,255,255,0.18); }
