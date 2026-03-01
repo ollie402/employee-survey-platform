@@ -4444,6 +4444,14 @@
           content: ' — create a chat first';
           font-style: italic;
         }
+
+        /* Disabled state for link panel when Closed access is selected */
+        .rw-link-panel-disabled {
+          opacity: 0.4;
+          filter: grayscale(1);
+          pointer-events: none;
+          user-select: none;
+        }
     </style>
 </head>
 <body>
@@ -13009,6 +13017,7 @@ function openChatEditor(chatId = null) {
         if (generatedLinkInput) generatedLinkInput.value = '';
         // Clear participants data for new chat
         chatParticipantsData = [];
+        if (typeof updateLinkPanelForAccessType === 'function') updateLinkPanelForAccessType();
     } else {
         // Existing chat - load from database
         loadChatIntoEditor(chatId);
@@ -13063,6 +13072,7 @@ async function loadChatIntoEditor(chatId) {
                 accessTypeDropdown.value = 'open';
             }
         }
+        if (typeof updateLinkPanelForAccessType === 'function') updateLinkPanelForAccessType();
 
         // Set notification frequency dropdown
         const notifDropdown = document.getElementById('chat-notification-frequency');
@@ -14130,6 +14140,23 @@ function initChatSuccessPanel() {
 
 // Initialize chat success panel when DOM is ready
 document.addEventListener('DOMContentLoaded', initChatSuccessPanel);
+
+// Toggle link panel disabled state based on access type
+function updateLinkPanelForAccessType() {
+    var sel = document.getElementById('chat-access-type');
+    var panel = document.querySelector('#chat-success-panel .rw-link-panel');
+    if (!sel || !panel) return;
+    if (sel.value === 'closed') {
+        panel.classList.add('rw-link-panel-disabled');
+    } else {
+        panel.classList.remove('rw-link-panel-disabled');
+    }
+}
+document.addEventListener('DOMContentLoaded', function() {
+    var sel = document.getElementById('chat-access-type');
+    if (sel) sel.addEventListener('change', updateLinkPanelForAccessType);
+    updateLinkPanelForAccessType();
+});
 
 // Initialize participant entry panel when DOM is ready
 document.addEventListener('DOMContentLoaded', initParticipantEntryPanel);
