@@ -4241,8 +4241,8 @@
         .rw-btn-save {
           flex: 1;
           padding: 11px 20px;
-          background: linear-gradient(135deg, #6c63ff, #8b5cf6);
-          color: #fff;
+          background: linear-gradient(135deg, #6c63ff, #8b5cf6) !important;
+          color: #fff !important;
           border: none;
           border-radius: 9px;
           font-family: inherit;
@@ -4327,8 +4327,8 @@
         .rw-btn-copy {
           flex: 1;
           padding: 9px;
-          background: #6c63ff;
-          color: #fff;
+          background: #6c63ff !important;
+          color: #fff !important;
           border: none;
           border-radius: 7px;
           font-family: inherit;
@@ -5164,7 +5164,7 @@
                                       <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                                       Create Chat
                                     </button>
-                                    <button onclick="saveListeningAll(this)" id="save-chat-btn" class="rw-btn-save">
+                                    <button onclick="saveListeningAll(this)" id="save-chat-btn" class="rw-btn-save" style="flex:1; padding:11px 20px; background:linear-gradient(135deg,#6c63ff,#8b5cf6) !important; color:#fff !important; border:none; border-radius:9px; font-size:13.5px; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; box-shadow:0 4px 14px rgba(108,99,255,0.35); width:100%;">
                                       <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                                       Save Changes
                                     </button>
@@ -5195,7 +5195,7 @@
                                         <input type="text" id="generatedChatLink" readonly>
                                       </div>
                                       <div class="rw-link-actions">
-                                        <button onclick="copyGeneratedLink()" id="copyLinkBtn" class="rw-btn-copy">
+                                        <button onclick="copyGeneratedLink()" id="copyLinkBtn" class="rw-btn-copy" style="flex:1; padding:9px; background:#6c63ff !important; color:#fff !important; border:none; border-radius:7px; font-size:12.5px; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;">
                                           <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
                                           Copy Link
                                         </button>
