@@ -4258,7 +4258,12 @@
           width: 100%;
         }
         .rw-btn-save:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(108,99,255,0.4); }
-        .rw-btn-save svg { width: 15px; }
+        .rw-btn-save svg { width: 15px; height: 15px; flex-shrink: 0; }
+        /* Override JS-set green backgrounds on save button */
+        #save-chat-btn.rw-btn-save {
+          background: linear-gradient(135deg, #6c63ff, #8b5cf6) !important;
+          color: #fff !important;
+        }
 
         .rw-btn-create {
           padding: 11px 18px;
@@ -4316,7 +4321,7 @@
           font-size: 11.5px; color: rgba(255,255,255,0.85);
           background: transparent; border: none; outline: none;
           overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-          flex: 1; padding: 0;
+          flex: 1; padding: 0; min-width: 0;
         }
         .rw-link-actions {
           display: flex;
@@ -4341,6 +4346,12 @@
           gap: 6px;
           transition: opacity 0.15s;
         }
+        .rw-btn-copy svg { width: 14px; height: 14px; flex-shrink: 0; }
+        /* Override JS-set backgrounds on copy link button */
+        #copyLinkBtn.rw-btn-copy {
+          background: #6c63ff !important;
+          color: #fff !important;
+        }
         .rw-btn-copy:hover { opacity: 0.88; }
         .rw-btn-qr {
           width: 38px;
@@ -4358,7 +4369,7 @@
           transition: background 0.15s;
         }
         .rw-btn-qr:hover { background: rgba(255,255,255,0.18); }
-        .rw-btn-qr svg { width: 14px; }
+        .rw-btn-qr svg { width: 14px; height: 14px; }
 
         /* Notification status row */
         .rw-notif-row {
@@ -5196,11 +5207,11 @@
                                       </div>
                                       <div class="rw-link-actions">
                                         <button onclick="copyGeneratedLink()" id="copyLinkBtn" class="rw-btn-copy" style="flex:1; padding:9px; background:#6c63ff !important; color:#fff !important; border:none; border-radius:7px; font-size:12.5px; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;">
-                                          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+                                          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:14px;height:14px;flex-shrink:0;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
                                           Copy Link
                                         </button>
-                                        <button class="rw-btn-qr" title="QR Code (coming soon)">
-                                          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
+                                        <button class="rw-btn-qr" title="QR Code (coming soon)" style="width:38px;height:38px;flex-shrink:0;padding:0;">
+                                          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
                                         </button>
                                       </div>
                                     </div>
