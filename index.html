@@ -5177,9 +5177,9 @@
                                         Access Type
                                       </label>
                                       <select id="chat-access-type">
-                                          <option value="open">🌐 Open Access - Anyone with the link can respond</option>
-                                          <option value="closed">🔒 Closed Access - Only invited participants via unique links</option>
-                                          <option value="combined">🔗 Combined Access - Public link AND invited participants</option>
+                                          <option value="open">Open Access - Anyone with the link can respond</option>
+                                          <option value="closed">Closed Access - Only invited participants via unique links</option>
+                                          <option value="combined">Combined Access - Public link AND invited participants</option>
                                       </select>
                                     </div>
                                     <div class="rw-field">
@@ -5256,7 +5256,7 @@
                                 <div class="rw-card" id="getting-started-box">
                                   <div class="rw-checklist-header">
                                     <div class="rw-checklist-title-row">
-                                      <div class="rw-checklist-title">💡 Getting Started</div>
+                                      <div class="rw-checklist-title">Getting Started</div>
                                       <span id="gs-progress" class="rw-progress-fraction">0/6 complete</span>
                                     </div>
                                     <div class="rw-progress-bar-bg">
@@ -5299,7 +5299,7 @@
 
                                     <!-- Paste from Excel Button -->
                                     <button onclick="openExcelPasteModal()" style="margin-bottom: 24px; padding: 10px 16px; background: #f8fafc; color: #1e293b; border: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer; font-size: 14px;">
-                                        📋 Paste from Excel
+                                        Paste from Excel
                                     </button>
 
                                     <!-- Table Controls Row -->
@@ -5315,7 +5315,7 @@
                                                 <option value="reminder">Reminder</option>
                                             </select>
                                             <button onclick="sendInvitesToSelected()" style="padding: 10px 16px; background: #d6366c; color: white; border: none; border-radius: 8px; font-weight: 500; cursor: pointer;">
-                                                ✉️ Send to Selected
+                                                Send to Selected
                                             </button>
                                         </div>
                                     </div>
@@ -5350,7 +5350,7 @@
 
                                     <!-- Save Participants Button -->
                                     <div style="display: flex; justify-content: flex-end; margin-top: 24px;">
-                                        <button onclick="saveListeningAll(this)" id="save-participants-btn" style="padding: 12px 24px; background: #10b981; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 500; font-size: 14px;">💾 Save</button>
+                                        <button onclick="saveListeningAll(this)" id="save-participants-btn" style="padding: 12px 24px; background: #10b981; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 500; font-size: 14px;">Save</button>
                                     </div>
 
                                 </div>
@@ -5396,7 +5396,7 @@
                                     <!-- Save Button -->
                                     <div style="margin-top: 24px; text-align: right;">
                                         <button onclick="saveListeningAll(this)" style="padding: 12px 24px; background: #10b981; color: white; border: none; border-radius: 8px; font-weight: 500; cursor: pointer; font-size: 14px;">
-                                            💾 Save
+                                            Save
                                         </button>
                                     </div>
 
@@ -13021,7 +13021,7 @@ function openChatEditor(chatId = null) {
     // Reset save button state
     const saveBtn = document.getElementById('save-chat-btn');
     if (saveBtn) {
-        saveBtn.textContent = '💾 Save';
+        saveBtn.textContent = 'Save';
         saveBtn.style.background = '#10b981';
         saveBtn.disabled = false;
     }
@@ -17939,7 +17939,7 @@ async function createChat(btn) {
         // Restore button
         if (btn) {
             btn.disabled = false;
-            btn.innerHTML = '✨ Create Chat';
+            btn.innerHTML = 'Create Chat';
         }
     }
 }
@@ -18604,7 +18604,7 @@ async function saveParticipantsOnly(btn) {
         btn.style.background = '#059669';
         btn.disabled = true;
         setTimeout(() => {
-            btn.innerHTML = '💾 Save';
+            btn.innerHTML = 'Save';
             btn.style.background = '#10b981';
             btn.disabled = false;
         }, 2000);
@@ -18612,7 +18612,7 @@ async function saveParticipantsOnly(btn) {
     } catch (error) {
         console.error('Error saving participants:', error);
         alert('Error saving participants: ' + error.message);
-        btn.innerHTML = '💾 Save';
+        btn.innerHTML = 'Save';
         btn.style.background = '#10b981';
         btn.disabled = false;
     }
