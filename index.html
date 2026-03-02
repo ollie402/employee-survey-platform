@@ -4452,6 +4452,32 @@
           pointer-events: none;
           user-select: none;
         }
+
+        /* Disabled state for Participants tab when Open Access is selected */
+        .rw-tab-wrapper { position: relative; display: inline-flex; }
+        .rw-tab-disabled {
+          opacity: 0.4;
+          pointer-events: none;
+          user-select: none;
+          cursor: not-allowed;
+        }
+        .rw-tab-hint {
+          display: none;
+          position: absolute;
+          top: 100%;
+          left: 50%;
+          transform: translateX(-50%);
+          white-space: nowrap;
+          font-size: 10px;
+          color: var(--rw-text-soft, #64748b);
+          background: #f1f5f9;
+          padding: 2px 8px;
+          border-radius: 4px;
+          z-index: 10;
+          margin-top: -2px;
+          font-style: italic;
+        }
+        .rw-tab-wrapper.rw-tab-disabled-wrapper .rw-tab-hint { display: block; }
     </style>
 </head>
 <body>
@@ -5087,7 +5113,7 @@
                     <!-- Tab Navigation -->
                     <div style="display: flex; gap: 0; border-bottom: 1px solid #e2e8f0; background: white;">
                         <button class="chat-editor-tab active" onclick="showChatEditorTab('setup')" data-tab="setup" style="padding: 16px 24px; border: none; background: none; cursor: pointer; font-size: 14px; color: #3b82f6; border-bottom: 2px solid #3b82f6; font-weight: 500;">Setup</button>
-                        <button class="chat-editor-tab" onclick="showChatEditorTab('participants')" data-tab="participants" style="padding: 16px 24px; border: none; background: none; cursor: pointer; font-size: 14px; color: #64748b; border-bottom: 2px solid transparent;">Participants</button>
+                        <span class="rw-tab-wrapper" id="participants-tab-wrapper"><button class="chat-editor-tab" onclick="showChatEditorTab('participants')" data-tab="participants" style="padding: 16px 24px; border: none; background: none; cursor: pointer; font-size: 14px; color: #64748b; border-bottom: 2px solid transparent;">Participants</button><span class="rw-tab-hint">Not needed for Open Access</span></span>
                         <button class="chat-editor-tab" onclick="showChatEditorTab('responses')" data-tab="responses" style="padding: 16px 24px; border: none; background: none; cursor: pointer; font-size: 14px; color: #64748b; border-bottom: 2px solid transparent;">Responses</button>
                         <button class="chat-editor-tab" onclick="showChatEditorTab('analytics')" data-tab="analytics" style="padding: 16px 24px; border: none; background: none; cursor: pointer; font-size: 14px; color: #64748b; border-bottom: 2px solid transparent;">Analytics</button>
                     </div>
@@ -13125,6 +13151,14 @@ async function loadChatIntoEditor(chatId) {
 
 // Show Chat Editor tab
 function showChatEditorTab(tabName) {
+    // Guard: redirect to setup if participants tab is disabled
+    if (tabName === 'participants') {
+        var partTab = document.querySelector('.chat-editor-tab[data-tab="participants"]');
+        if (partTab && partTab.classList.contains('rw-tab-disabled')) {
+            tabName = 'setup';
+        }
+    }
+
     // Hide all tab contents
     document.querySelectorAll('.chat-editor-tab-content').forEach(content => {
         content.style.display = 'none';
@@ -14141,21 +14175,40 @@ function initChatSuccessPanel() {
 // Initialize chat success panel when DOM is ready
 document.addEventListener('DOMContentLoaded', initChatSuccessPanel);
 
-// Toggle link panel disabled state based on access type
-function updateLinkPanelForAccessType() {
+// Toggle link panel + participants tab disabled state based on access type
+function updateLinkPanelForAccessType() { updateTabAndLinkState(); }
+function updateTabAndLinkState() {
     var sel = document.getElementById('chat-access-type');
-    var panel = document.querySelector('#chat-success-panel .rw-link-panel');
-    if (!sel || !panel) return;
-    if (sel.value === 'closed') {
-        panel.classList.add('rw-link-panel-disabled');
-    } else {
-        panel.classList.remove('rw-link-panel-disabled');
+    var linkPanel = document.querySelector('#chat-success-panel .rw-link-panel');
+    var partTab = document.querySelector('.chat-editor-tab[data-tab="participants"]');
+    var partWrapper = document.getElementById('participants-tab-wrapper');
+    if (!sel) return;
+    var v = sel.value;
+
+    // Link panel: disabled for closed, enabled for open/combined
+    if (linkPanel) {
+        if (v === 'closed') {
+            linkPanel.classList.add('rw-link-panel-disabled');
+        } else {
+            linkPanel.classList.remove('rw-link-panel-disabled');
+        }
+    }
+
+    // Participants tab: disabled for open, enabled for closed/combined
+    if (partTab) {
+        if (v === 'open') {
+            partTab.classList.add('rw-tab-disabled');
+            if (partWrapper) partWrapper.classList.add('rw-tab-disabled-wrapper');
+        } else {
+            partTab.classList.remove('rw-tab-disabled');
+            if (partWrapper) partWrapper.classList.remove('rw-tab-disabled-wrapper');
+        }
     }
 }
 document.addEventListener('DOMContentLoaded', function() {
     var sel = document.getElementById('chat-access-type');
-    if (sel) sel.addEventListener('change', updateLinkPanelForAccessType);
-    updateLinkPanelForAccessType();
+    if (sel) sel.addEventListener('change', updateTabAndLinkState);
+    updateTabAndLinkState();
 });
 
 // Initialize participant entry panel when DOM is ready
