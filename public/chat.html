@@ -3,279 +3,2147 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Feedback Chat - Realworld</title>
-    <link rel="stylesheet" href="assets/css/styles.css">
+    <title>Workplace Insights - Realworld</title>
     <style>
-        .chat-container {
-            min-height: 100vh;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 1rem;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        
-        .chat-window {
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-            width: 100%;
-            max-width: 500px;
-            height: 600px;
+
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --primary-color: #667eea;
+            --primary-hover: #5a67d8;
+            --secondary-color: #764ba2;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8f9fa;
+            --border-color: #e5e7eb;
+        }
+
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg-secondary);
+            min-height: 100vh;
+        }
+
+        /* Full Page Layout */
+        .chat-container {
             display: flex;
             flex-direction: column;
-            overflow: hidden;
+            height: 100vh;
+            background: var(--bg-secondary);
         }
-        
+
+        /* Header */
         .chat-header {
-            background: var(--primary-color);
-            color: white;
-            padding: 1.5rem;
-            text-align: center;
+            background: var(--primary-gradient);
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            flex-shrink: 0;
+            z-index: 10;
         }
-        
+
+        .chat-header-logo {
+            display: flex;
+            align-items: center;
+        }
+
+        .chat-header-logo img {
+            height: 28px;
+            width: auto;
+        }
+
+        .chat-header-divider {
+            width: 1px;
+            height: 24px;
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .chat-header-info {
+            flex: 1;
+        }
+
         .chat-header h2 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: white;
             margin: 0;
-            font-size: 1.25rem;
         }
-        
+
         .chat-header p {
-            margin: 0.5rem 0 0 0;
-            opacity: 0.9;
-            font-size: 0.875rem;
+            display: none;
         }
-        
+
+        .session-info {
+            display: none;
+        }
+
+        .progress-bar {
+            display: none;
+        }
+
+        /* Chat Messages Area */
         .chat-messages {
             flex: 1;
             overflow-y: auto;
-            padding: 1.5rem;
-            background: #f8f9fa;
+            padding: 24px;
+            background: var(--bg-secondary);
         }
-        
-        .chat-input-area {
-            padding: 1rem;
-            border-top: 1px solid #e0e0e0;
-            background: white;
+
+        .chat-messages-inner {
+            max-width: 800px;
+            margin: 0 auto;
         }
-        
-        .chat-input-group {
-            display: flex;
-            gap: 0.5rem;
-        }
-        
-        .chat-input {
-            flex: 1;
-            padding: 0.75rem;
-            border: 1px solid #ddd;
-            border-radius: 24px;
-            outline: none;
-            font-size: 0.875rem;
-        }
-        
-        .chat-send-btn {
-            padding: 0.75rem 1.5rem;
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 24px;
-            cursor: pointer;
-            font-weight: 500;
-            transition: all 0.2s;
-        }
-        
-        .chat-send-btn:hover {
-            background: #1d4ed8;
-            transform: translateY(-1px);
-        }
-        
+
         .message {
-            margin-bottom: 1rem;
-            animation: slideIn 0.3s ease-out;
+            margin-bottom: 16px;
+            display: flex;
+            animation: fadeIn 0.3s ease-in;
         }
-        
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.bot {
+            justify-content: flex-start;
+        }
+
         .message.user {
-            text-align: right;
+            justify-content: flex-end;
         }
-        
+
         .message-bubble {
-            display: inline-block;
-            padding: 0.75rem 1rem;
-            border-radius: 12px;
-            max-width: 80%;
+            max-width: 70%;
+            padding: 14px 18px;
+            border-radius: 16px;
             word-wrap: break-word;
+            line-height: 1.5;
+            font-size: 0.9375rem;
         }
-        
+
         .message.bot .message-bubble {
             background: white;
-            color: #333;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            color: var(--text-primary);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            border-bottom-left-radius: 4px;
         }
-        
+
         .message.user .message-bubble {
-            background: var(--primary-color);
+            background: var(--primary-gradient);
             color: white;
+            border-bottom-right-radius: 4px;
         }
-        
+
+        /* Typing Indicator */
         .typing-indicator {
             display: none;
-            padding: 0.75rem 1rem;
+            padding: 14px 18px;
             background: white;
-            border-radius: 12px;
-            display: inline-block;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            border-radius: 16px;
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            width: fit-content;
         }
-        
+
         .typing-indicator.show {
             display: inline-block;
         }
-        
+
         .typing-indicator span {
             display: inline-block;
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            background: #999;
+            background: var(--text-secondary);
             margin: 0 2px;
             animation: typing 1.4s infinite;
         }
-        
+
         .typing-indicator span:nth-child(2) {
             animation-delay: 0.2s;
         }
-        
+
         .typing-indicator span:nth-child(3) {
             animation-delay: 0.4s;
         }
-        
+
         @keyframes typing {
             0%, 60%, 100% {
                 transform: translateY(0);
+                opacity: 0.7;
             }
             30% {
-                transform: translateY(-10px);
+                transform: translateY(-8px);
+                opacity: 1;
             }
         }
-        
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
+
+        /* Input Area */
+        .input-area {
+            background: white;
+            padding: 16px 24px;
+            border-top: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+
+        .input-container {
+            max-width: 800px;
+            margin: 0 auto;
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+        }
+
+        .input-container textarea {
+            flex: 1;
+            padding: 14px 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            resize: none;
+            font-family: inherit;
+            font-size: 1rem;
+            max-height: 120px;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            line-height: 1.4;
+        }
+
+        .input-container textarea:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .send-button {
+            padding: 14px 28px;
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            border-radius: 24px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.1s;
+            white-space: nowrap;
+        }
+
+        .send-button:hover {
+            opacity: 0.9;
+        }
+
+        .send-button:active {
+            transform: scale(0.98);
+        }
+
+        .send-button:disabled {
+            background: #d1d5db;
+            cursor: not-allowed;
+            opacity: 1;
+        }
+
+        /* Sentiment Indicator - Hidden */
+        .sentiment-indicator {
+            display: none;
+        }
+
+        /* Completion Screen */
+        .completion-screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem;
+            text-align: center;
+            background: white;
+            max-width: 500px;
+            margin: auto;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .completion-screen.show {
+            display: flex;
+            flex: 1;
+            margin: 24px;
+        }
+
+        .completion-icon {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .completion-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
+        }
+
+        .completion-message {
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            font-size: 1.0625rem;
+            line-height: 1.6;
+        }
+
+        .completion-button {
+            padding: 14px 32px;
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            border-radius: 24px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .completion-button:hover {
+            opacity: 0.9;
+        }
+
+        /* Loading State */
+        .loading-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background: var(--primary-gradient);
+        }
+
+        .loader {
+            width: 48px;
+            height: 48px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: white;
+            margin-top: 1.25rem;
+            font-size: 1.0625rem;
+            font-weight: 500;
+        }
+
+        /* Pulse Survey Styles */
+        .question-container {
+            background: white;
+            padding: 24px;
+            border-radius: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+
+        .question-text {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 1.25rem;
+            color: var(--text-primary);
+        }
+
+        .options-container {
+            display: grid;
+            gap: 10px;
+        }
+
+        .option-button {
+            padding: 14px 18px;
+            background: white;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9375rem;
+        }
+
+        .option-button:hover {
+            border-color: var(--primary-color);
+            background: #f8f7ff;
+        }
+
+        .option-button.selected {
+            border-color: var(--primary-color);
+            background: var(--primary-gradient);
+            color: white;
+        }
+
+        .scale-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .scale-button {
+            flex: 1;
+            padding: 14px 8px;
+            background: white;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .scale-button:hover {
+            border-color: var(--primary-color);
+            background: #f8f7ff;
+        }
+
+        .scale-button.selected {
+            border-color: var(--primary-color);
+            background: var(--primary-gradient);
+            color: white;
+        }
+
+        .navigation-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1.5rem;
+            gap: 12px;
+        }
+
+        .nav-button {
+            padding: 14px 24px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9375rem;
+        }
+
+        .nav-button.prev {
+            background: #f1f3f5;
+            color: var(--text-primary);
+        }
+
+        .nav-button.prev:hover {
+            background: #e9ecef;
+        }
+
+        .nav-button.next {
+            background: var(--primary-gradient);
+            color: white;
+        }
+
+        .nav-button.next:hover {
+            opacity: 0.9;
+        }
+
+        .nav-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Sentiment colors (kept for functionality) */
+        .sentiment-positive { color: var(--success-color); }
+        .sentiment-neutral { color: var(--warning-color); }
+        .sentiment-negative { color: var(--danger-color); }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .chat-header {
+                padding: 14px 16px;
             }
-            to {
-                opacity: 1;
-                transform: translateY(0);
+
+            .chat-header-logo img {
+                height: 24px;
             }
+
+            .chat-header h2 {
+                font-size: 1rem;
+            }
+
+            .chat-messages {
+                padding: 16px;
+            }
+
+            .message-bubble {
+                max-width: 85%;
+                padding: 12px 16px;
+            }
+
+            .input-area {
+                padding: 12px 16px;
+            }
+
+            .input-container textarea {
+                padding: 12px 16px;
+            }
+
+            .send-button {
+                padding: 12px 20px;
+            }
+
+            .completion-screen.show {
+                margin: 16px;
+                padding: 2rem;
+            }
+        }
+
+        /* Submit Chat Area */
+        .chat-submit-area {
+            padding: 16px 24px;
+            text-align: center;
+            background: #f8f9fa;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .btn-submit-chat {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 32px;
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-submit-chat:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+        }
+
+        .btn-submit-chat:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .submit-hint {
+            margin: 8px 0 0 0;
+            font-size: 0.85rem;
+            color: #6b7280;
+        }
+
+        .chat-submitted-message {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 60px 24px;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+        }
+
+        .chat-submitted-message h2 {
+            color: #166534;
+            margin: 0 0 8px 0;
+            font-size: 1.75rem;
+        }
+
+        .chat-submitted-message p {
+            color: #6b7280;
+            margin: 0;
+            font-size: 1rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .btn-submit-chat .spinner {
+            animation: spin 1s linear infinite;
+        }
+
+        /* Access Denied Screen */
+        .access-denied-screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: var(--bg-secondary);
+            padding: 32px;
+            text-align: center;
+        }
+        .access-denied-card {
+            background: var(--bg-primary);
+            border-radius: 16px;
+            padding: 48px 40px;
+            max-width: 460px;
+            width: 100%;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+        }
+        .access-denied-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+        }
+        .access-denied-icon svg {
+            width: 28px;
+            height: 28px;
+            color: var(--primary-color);
+        }
+        .access-denied-card h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0 0 12px;
+        }
+        .access-denied-card p {
+            font-size: 0.9375rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin: 0;
         }
     </style>
 </head>
 <body>
-    <div class="chat-container">
-        <div class="chat-window">
-            <div class="chat-header">
-                <h2 id="chat-title">Feedback Chat</h2>
-                <p id="chat-subtitle">Share your thoughts with us</p>
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen">
+        <img src="/assets/images/rworld-in-line-logo-white.svg" alt="Realworld" style="height: 40px; margin-bottom: 2rem;">
+        <div class="loader"></div>
+        <div class="loading-text">Loading your session...</div>
+    </div>
+
+    <!-- Access Denied Screen -->
+    <div id="access-denied-screen" class="access-denied-screen">
+        <div class="access-denied-card">
+            <img src="/assets/images/rworld-in-line-logo-white.svg" alt="Realworld" style="height: 32px; margin-bottom: 32px; filter: brightness(0) saturate(100%) invert(30%) sepia(60%) saturate(600%) hue-rotate(210deg);">
+            <div class="access-denied-icon">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
             </div>
-            
-            <div class="chat-messages" id="chat-messages">
-                <!-- Messages will be added here dynamically -->
-            </div>
-            
-            <div class="chat-input-area">
-                <div class="chat-input-group">
-                    <input 
-                        type="text" 
-                        id="user-input" 
-                        class="chat-input" 
-                        placeholder="Type your message here..."
-                        onkeypress="if(event.key==='Enter') sendMessage()"
-                    >
-                    <button class="chat-send-btn" onclick="sendMessage()">Send</button>
-                </div>
-            </div>
+            <h2>This chat is invite only</h2>
+            <p>If you believe you should have access, please contact the person who sent you this link.</p>
         </div>
     </div>
-    
+
+    <!-- Main Chat Container -->
+    <div id="chat-container" class="chat-container" style="display: none;">
+        <div class="chat-header">
+            <div class="chat-header-logo">
+                <img src="/assets/images/rworld-in-line-logo-white.svg" alt="Realworld">
+            </div>
+            <div class="chat-header-divider"></div>
+            <div class="chat-header-info">
+                <h2 id="chat-title">Loading...</h2>
+            </div>
+            <div class="session-info" id="session-info"></div>
+            <p id="chat-subtitle" style="display:none;">Please wait...</p>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+        </div>
+
+        <div class="sentiment-indicator" id="sentiment-indicator">
+            Sentiment: <span id="sentiment-value" class="sentiment-value">Analyzing...</span>
+        </div>
+
+        <div class="chat-messages" id="chat-messages">
+            <div class="typing-indicator" id="typing-indicator">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+
+        <!-- Completion Screen -->
+        <div class="completion-screen" id="completion-screen">
+            <div class="completion-icon">✅</div>
+            <div class="completion-title">Thank You!</div>
+            <div class="completion-message" id="completion-message">Your feedback has been submitted successfully.</div>
+            <button class="completion-button" onclick="window.close()">Close</button>
+        </div>
+
+        <!-- Input Area (for Listening and Chat modes) -->
+        <div class="input-area" id="input-area" style="display: none;">
+            <div class="input-container">
+                <textarea id="user-input" placeholder="Type your message..." rows="1"></textarea>
+                <button class="send-button" id="send-button" onclick="sendMessage()">Submit</button>
+            </div>
+        </div>
+
+        <!-- Navigation Area (for Pulse Survey mode) -->
+        <div class="input-area" id="navigation-area" style="display: none;">
+            <div class="navigation-buttons">
+                <button class="nav-button prev" id="prev-button" onclick="previousQuestion()" disabled>Previous</button>
+                <button class="nav-button next" id="next-button" onclick="nextQuestion()">Next</button>
+            </div>
+        </div>
+
+    </div>
+
     <script>
-        // Parse URL parameters
-        const urlParams = new URLSearchParams(window.location.search);
-        const sessionId = urlParams.get('id');
-        const sessionName = urlParams.get('name') || 'Feedback Chat';
-        const welcomeMsg = urlParams.get('welcome') || 'Welcome! How can we help you today?';
-        
-        // Set page title and header
-        document.getElementById('chat-title').textContent = sessionName;
-        document.title = sessionName + ' - Realworld';
-        
-        // Initialize chat with welcome message
-        window.addEventListener('DOMContentLoaded', function() {
-            addMessage('bot', welcomeMsg);
-        });
-        
-        function addMessage(sender, text) {
-            const messagesContainer = document.getElementById('chat-messages');
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${sender}`;
-            
-            const bubbleDiv = document.createElement('div');
-            bubbleDiv.className = 'message-bubble';
-            bubbleDiv.textContent = text;
-            
-            messageDiv.appendChild(bubbleDiv);
-            messagesContainer.appendChild(messageDiv);
-            
-            // Scroll to bottom
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    // Global Variables
+    let sessionConfig = null;
+    let chatType = 'listening';
+    let userMessageCount = 0;  // Track number of user messages sent
+    let chatState = {
+        messages: [],
+        responses: {},
+        currentQuestionIndex: 0,
+        startTime: Date.now(),
+        isComplete: false,
+        sentiment: 'neutral',
+        participantId: null
+    };
+
+    // Prevent double initialization
+    let isInitialized = false;
+
+    // Get slug from URL path (e.g., /chat/abc123xyz -> abc123xyz)
+    function getChatSlugFromURL() {
+        const path = window.location.pathname;
+        const matches = path.match(/\/chat\/([a-zA-Z0-9]+)/);
+        return matches ? matches[1] : null;
+    }
+
+    // Load chat data from database using slug
+    async function loadChatFromSlug(slug) {
+        // Wait for Supabase to be ready (up to 5 seconds)
+        let attempts = 0;
+        const maxAttempts = 50;
+        while (!window.supabaseClient && attempts < maxAttempts) {
+            console.log('Waiting for Supabase client... attempt', attempts + 1);
+            await new Promise(resolve => setTimeout(resolve, 100));
+            attempts++;
         }
-        
-        function sendMessage() {
-            const input = document.getElementById('user-input');
-            const message = input.value.trim();
-            
-            if (!message) return;
-            
-            // Add user message
-            addMessage('user', message);
-            input.value = '';
-            
-            // Show typing indicator
-            showTypingIndicator();
-            
-            // Simulate bot response (replace with actual AI integration later)
-            setTimeout(() => {
-                hideTypingIndicator();
-                const responses = [
-                    "Thank you for your feedback! I've recorded your response.",
-                    "That's interesting! Can you tell me more about that?",
-                    "I understand. Your input is valuable to us.",
-                    "Thank you for sharing. Is there anything else you'd like to add?"
-                ];
-                const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-                addMessage('bot', randomResponse);
-            }, 1000 + Math.random() * 1000);
+
+        if (!window.supabaseClient) {
+            console.error('Supabase client not available after', maxAttempts, 'attempts');
+            return null;
         }
-        
-        function showTypingIndicator() {
-            const messagesContainer = document.getElementById('chat-messages');
-            const typingDiv = document.createElement('div');
-            typingDiv.className = 'message bot';
-            typingDiv.id = 'typing-indicator';
-            typingDiv.innerHTML = `
-                <div class="typing-indicator show">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </div>
-            `;
-            messagesContainer.appendChild(typingDiv);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+        console.log('Supabase client is ready');
+
+        try {
+            const { data: chat, error } = await window.supabaseClient
+                .from('listening_chats')
+                .select('*')
+                .eq('slug', slug)
+                .eq('is_active', true)
+                .single();
+
+            if (error || !chat) {
+                console.error('Chat not found or not active:', error);
+                return null;
+            }
+
+            // Store chat data for later use
+            window.currentChat = chat;
+            console.log('Chat loaded from database:', chat.name);
+
+            return chat;
+
+        } catch (error) {
+            console.error('Error loading chat:', error);
+            return null;
         }
-        
-        function hideTypingIndicator() {
-            const indicator = document.getElementById('typing-indicator');
-            if (indicator) {
-                indicator.remove();
+    }
+
+    // Generate or retrieve session ID for grouping messages
+    function getOrCreateSessionId() {
+        let sessionId = sessionStorage.getItem('chat_session_id');
+        if (!sessionId) {
+            sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
+            sessionStorage.setItem('chat_session_id', sessionId);
+        }
+        return sessionId;
+    }
+
+    // Save response to database
+    async function saveResponseToDatabase(messageText) {
+        console.log('📤 saveResponseToDatabase called with:', messageText);
+
+        const chat = window.currentChat;
+        console.log('📋 Current chat object:', chat);
+
+        if (!chat || !chat.id) {
+            console.error('❌ No chat loaded - cannot save response. window.currentChat:', window.currentChat);
+            return false;
+        }
+
+        if (!window.supabaseClient) {
+            console.error('❌ Supabase client not available');
+            return false;
+        }
+
+        const sessionId = getOrCreateSessionId();
+        console.log('🔑 Session ID:', sessionId);
+
+        const insertData = {
+            chat_id: chat.id,
+            session_id: sessionId,
+            response_text: messageText,
+            participant_name: null,
+            participant_email: null,
+            is_read: false,
+            submitted_at: new Date().toISOString()
+        };
+        console.log('📝 Insert data:', insertData);
+
+        try {
+            console.log('⏳ Attempting to insert into chat_responses...');
+
+            const { data, error } = await window.supabaseClient
+                .from('chat_responses')
+                .insert(insertData)
+                .select()
+                .single();
+
+            if (error) {
+                console.error('❌ Supabase insert error:', error);
+                throw error;
+            }
+
+            console.log('✅ Response saved to database:', data);
+            return true;
+
+        } catch (error) {
+            console.error('❌ Error saving response to database:', error);
+            console.error('Error details:', JSON.stringify(error, null, 2));
+            return false;
+        }
+    }
+
+    // Show error message when chat cannot be loaded
+    function showChatError(message) {
+        const loadingScreen = document.getElementById('loading-screen');
+        const chatContainer = document.getElementById('chat-container');
+
+        if (loadingScreen) loadingScreen.style.display = 'none';
+        if (chatContainer) chatContainer.style.display = 'flex';
+
+        document.getElementById('chat-title').textContent = 'Chat Unavailable';
+        document.getElementById('chat-subtitle').textContent = message;
+
+        const inputArea = document.getElementById('input-area');
+        const userInput = document.getElementById('user-input');
+        const sendButton = document.getElementById('send-button');
+
+        if (inputArea) inputArea.style.display = 'none';
+        if (userInput) userInput.disabled = true;
+        if (sendButton) sendButton.disabled = true;
+    }
+
+    function showAccessDenied() {
+        var loading = document.getElementById('loading-screen');
+        var chat = document.getElementById('chat-container');
+        var denied = document.getElementById('access-denied-screen');
+        if (loading) loading.style.display = 'none';
+        if (chat) chat.style.display = 'none';
+        if (denied) denied.style.display = 'flex';
+    }
+
+    // Initialize on page load
+    window.addEventListener('DOMContentLoaded', initializeChat);
+
+    // Failsafe: Force show chat after 8 seconds if still loading (increased for async db load)
+    setTimeout(async () => {
+        const loadingScreen = document.getElementById('loading-screen');
+        const chatContainer = document.getElementById('chat-container');
+
+        if (loadingScreen && loadingScreen.style.display !== 'none') {
+            console.warn('⚠️ Failsafe triggered - forcing chat to show');
+            loadingScreen.style.display = 'none';
+            if (chatContainer) {
+                chatContainer.style.display = 'flex';
+            }
+
+            // Initialize if not already done
+            if (!isInitialized) {
+                console.log('🆘 Failsafe initialization');
+                await initializeChat();
             }
         }
+    }, 8000);
+
+    async function initializeChat() {
+        console.log('🔄 initializeChat() called, isInitialized:', isInitialized);
+
+        // Prevent double initialization
+        if (isInitialized) {
+            console.log('Chat already initialized, skipping...');
+            return;
+        }
+
+        console.log('🚀 Starting chat initialization...');
+
+        // First, check if there's a slug in the URL path (e.g., /chat/abc123xyz)
+        const slug = getChatSlugFromURL();
+
+        if (slug) {
+            console.log('🔗 Found slug in URL path:', slug);
+
+            // Load chat from database
+            const chat = await loadChatFromSlug(slug);
+
+            if (chat) {
+                // Enforce access type: block closed chats on the public link
+                var accessType = (chat.access_type || '').toLowerCase();
+                console.log('Access type check:', accessType, '| Chat:', chat.name, '| ID:', chat.id);
+                if (accessType === 'closed' || accessType === 'invite_only') {
+                    console.log('Blocked: chat is invite-only, showing access denied screen');
+                    showAccessDenied();
+                    isInitialized = true;
+                    return;
+                }
+
+                // Create session configuration from database chat
+                sessionConfig = {
+                    id: chat.id,
+                    type: 'listening',
+                    name: chat.name || 'Feedback Session',
+                    welcomeMessage: chat.welcome_message || 'Welcome to this feedback session!',
+                    topics: null,
+                    questions: null,
+                    slug: chat.slug,
+                    organizationId: chat.organization_id
+                };
+
+                chatType = 'listening';
+                chatState.participantId = 'participant_' + Math.random().toString(36).substr(2, 9);
+
+                console.log('✅ Chat loaded from database:', sessionConfig.name);
+            } else {
+                // Chat not found - show error
+                showChatError('This chat link is no longer active or does not exist.');
+                isInitialized = true;
+                return;
+            }
+        } else {
+            // Fallback to URL parameters (legacy mode)
+            const urlParams = new URLSearchParams(window.location.search);
+            let sessionId = urlParams.get('session');
+            const typeParam = urlParams.get('type');
+            const chatName = urlParams.get('name');
+            const welcomeMsg = urlParams.get('welcome');
+            const topics = urlParams.get('topics');
+            const questionsParam = urlParams.get('questions');
+
+            console.log('📋 URL params:', { sessionId, typeParam, chatName, welcomeMsg, topics, questionsParam });
+
+            // Allow direct access for testing or when using API-generated sessions
+            if (!sessionId) {
+                // Check if this is API-powered mode
+                if (typeof apiChatState !== 'undefined' && apiChatState.sessionId) {
+                    sessionId = apiChatState.sessionId;
+                    console.log('🔄 Using API-generated session:', sessionId);
+                } else {
+                    // Generate a demo session for direct access
+                    sessionId = 'demo_' + Math.random().toString(36).substr(2, 9);
+                    console.log('🔄 Generated demo session for direct access:', sessionId);
+                }
+            }
+
+            // Create session configuration from URL parameters
+            sessionConfig = {
+                id: sessionId,
+                type: typeParam || 'listening',
+                name: chatName || 'Feedback Session',
+                welcomeMessage: welcomeMsg || 'Welcome to this feedback session!',
+                topics: topics ? topics.split(',').map(t => t.trim()) : null,
+                questions: questionsParam ? JSON.parse(decodeURIComponent(questionsParam)) : null
+            };
+
+            chatType = sessionConfig.type;
+            chatState.participantId = sessionId;
+        }
+
+        // Universal access type gate — runs regardless of how the chat was loaded
+        var loadedChat = window.currentChat;
+        if (loadedChat && loadedChat.access_type) {
+            var at = loadedChat.access_type.toLowerCase();
+            console.log('[Access Gate] access_type =', at, '| chat =', loadedChat.name, '| id =', loadedChat.id);
+            if (at === 'closed' || at === 'invite_only') {
+                console.log('[Access Gate] BLOCKED — showing access denied');
+                showAccessDenied();
+                isInitialized = true;
+                return;
+            }
+        }
+
+        // Apply organization branding if available
+        applyBranding();
+
+        // Initialize based on chat type
+        setupChatInterface();
+
+        console.log('🎨 Setting up UI elements...');
+
+        // Hide loading screen and show chat
+        const loadingScreen = document.getElementById('loading-screen');
+        const chatContainer = document.getElementById('chat-container');
+
+        console.log('📱 Elements found:', { loadingScreen: !!loadingScreen, chatContainer: !!chatContainer });
+
+        if (loadingScreen) {
+            loadingScreen.style.display = 'none';
+            console.log('✅ Loading screen hidden');
+        }
+
+        if (chatContainer) {
+            chatContainer.style.display = 'flex';
+            console.log('✅ Chat container shown');
+        }
+
+        // Start the appropriate chat flow
+        console.log('🎬 Starting chat flow...');
+        startChat();
+
+        // Mark as initialized to prevent duplicates
+        isInitialized = true;
+        console.log('✅ Chat initialization complete!');
+    }
+
+    function applyBranding() {
+        // Apply custom colors if configured
+        const orgBranding = localStorage.getItem('orgBranding');
+        if (orgBranding) {
+            const branding = JSON.parse(orgBranding);
+            if (branding.primaryColor) {
+                document.documentElement.style.setProperty('--primary-color', branding.primaryColor);
+            }
+            if (branding.secondaryColor) {
+                document.documentElement.style.setProperty('--secondary-color', branding.secondaryColor);
+            }
+        }
+    }
+
+    function setupChatInterface() {
+        // Set header content
+        document.getElementById('chat-title').textContent = sessionConfig.name || 'Feedback Session';
+        document.getElementById('chat-subtitle').textContent = sessionConfig.welcomeMessage || 'Welcome!';
+
+        // Configure interface based on chat type
+        switch (chatType) {
+            case 'listening':
+                setupListeningInterface();
+                break;
+            case 'chat':
+                setupChatSurveyInterface();
+                break;
+            case 'pulse':
+                setupPulseSurveyInterface();
+                break;
+        }
+
+        // Show session info
+        if (sessionConfig.enableSentiment) {
+            document.getElementById('sentiment-indicator').classList.add('show');
+        }
+
+        // Set session info display
+        const sessionInfo = document.getElementById('session-info');
+        sessionInfo.textContent = chatType.charAt(0).toUpperCase() + chatType.slice(1);
+    }
+
+    function setupListeningInterface() {
+        document.getElementById('input-area').style.display = 'block';
+
+        // Setup textarea auto-resize
+        const textarea = document.getElementById('user-input');
+        textarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+        });
+
+        // Enter key handling
+        textarea.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+    }
+
+    function setupChatSurveyInterface() {
+        document.getElementById('input-area').style.display = 'block';
+
+        // Similar to listening but with structured questions
+        const textarea = document.getElementById('user-input');
+        textarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+        });
+
+        textarea.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+    }
+
+    function setupPulseSurveyInterface() {
+        document.getElementById('navigation-area').style.display = 'block';
+        document.getElementById('input-area').style.display = 'none';
+    }
+
+    function startChat() {
+        // Clear any existing messages first
+        const messagesContainer = document.getElementById('chat-messages');
+        messagesContainer.innerHTML = '';
+        
+        // Show welcome message based on chat type
+        setTimeout(() => {
+            const welcomeMsg = sessionConfig.welcomeMessage || "Welcome to this feedback session!";
+            addBotMessage(welcomeMsg);
+            
+            // Handle different chat types
+            if (chatType === 'pulse' && sessionConfig.questions) {
+                // For pulse surveys with specific questions
+                setTimeout(() => {
+                    startPulseSurvey();
+                }, 1500);
+            } else if (chatType === 'chat' && sessionConfig.topics) {
+                // For guided chat with topics
+                setTimeout(() => {
+                    addBotMessage(`I'd like to explore some areas with you: ${sessionConfig.topics.join(', ')}. What would you like to talk about first?`);
+                }, 1500);
+            } else {
+                // For listening chat - just wait for user input
+                setTimeout(() => {
+                    addBotMessage("Feel free to share whatever is on your mind about your work experience.");
+                }, 1500);
+            }
+        }, 1000);
+    }
+
+    function startPulseSurvey() {
+        if (!sessionConfig.questions || sessionConfig.questions.length === 0) {
+            addBotMessage("No questions configured for this survey.");
+            return;
+        }
+        
+        // Start with first question
+        askPulseQuestion(0);
+    }
+    
+    function askPulseQuestion(questionIndex) {
+        if (questionIndex >= sessionConfig.questions.length) {
+            addBotMessage("Thank you for completing the survey! Your responses have been recorded.");
+            return;
+        }
+        
+        const question = sessionConfig.questions[questionIndex];
+        addBotMessage(`${questionIndex + 1}. ${question.text}`);
+        
+        // Add response options based on question type
+        setTimeout(() => {
+            createQuestionInput(question, questionIndex);
+        }, 1000);
+    }
+    
+    function createQuestionInput(question, questionIndex) {
+        const messagesContainer = document.getElementById('chat-messages');
+        const inputDiv = document.createElement('div');
+        inputDiv.className = 'question-input';
+        inputDiv.style.cssText = 'margin: 1rem 0; padding: 1rem; background: #f8f9fa; border-radius: 8px;';
+        
+        if (question.type === 'rating') {
+            // Rating scale 1-5
+            inputDiv.innerHTML = `
+                <div style="display: flex; gap: 1rem; justify-content: center;">
+                    ${[1,2,3,4,5].map(num => `
+                        <button class="rating-btn" data-value="${num}" style="
+                            padding: 0.5rem 1rem; 
+                            border: 1px solid #ccc; 
+                            border-radius: 6px; 
+                            background: white; 
+                            cursor: pointer;
+                        " onclick="submitAnswer(${questionIndex}, ${num})">${num}</button>
+                    `).join('')}
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: #666; margin-top: 0.5rem;">
+                    <span>Poor</span><span>Excellent</span>
+                </div>
+            `;
+        } else if (question.type === 'yes-no') {
+            inputDiv.innerHTML = `
+                <div style="display: flex; gap: 1rem; justify-content: center;">
+                    <button onclick="submitAnswer(${questionIndex}, 'Yes')" style="padding: 0.75rem 1.5rem; border: 1px solid #ccc; border-radius: 6px; background: white; cursor: pointer;">Yes</button>
+                    <button onclick="submitAnswer(${questionIndex}, 'No')" style="padding: 0.75rem 1.5rem; border: 1px solid #ccc; border-radius: 6px; background: white; cursor: pointer;">No</button>
+                </div>
+            `;
+        } else if (question.type === 'multiple-choice' && question.options) {
+            inputDiv.innerHTML = `
+                <div style="display: grid; gap: 0.5rem;">
+                    ${question.options.map((option, i) => `
+                        <button onclick="submitAnswer(${questionIndex}, '${option}')" style="
+                            padding: 0.75rem; 
+                            border: 1px solid #ccc; 
+                            border-radius: 6px; 
+                            background: white; 
+                            cursor: pointer; 
+                            text-align: left;
+                        ">${option}</button>
+                    `).join('')}
+                </div>
+            `;
+        } else {
+            // Text input
+            inputDiv.innerHTML = `
+                <div style="display: flex; gap: 1rem;">
+                    <input type="text" id="text-answer-${questionIndex}" placeholder="Type your answer..." style="
+                        flex: 1; 
+                        padding: 0.75rem; 
+                        border: 1px solid #ccc; 
+                        border-radius: 6px;
+                    ">
+                    <button onclick="submitTextAnswer(${questionIndex})" style="
+                        padding: 0.75rem 1.5rem; 
+                        background: var(--primary-color); 
+                        color: white; 
+                        border: none; 
+                        border-radius: 6px; 
+                        cursor: pointer;
+                    ">Submit</button>
+                </div>
+            `;
+        }
+        
+        messagesContainer.appendChild(inputDiv);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+    
+    function submitAnswer(questionIndex, answer) {
+        // Add user's answer as a message
+        addUserMessage(answer);
+        
+        // Remove the input interface
+        const questionInput = document.querySelector('.question-input');
+        if (questionInput) {
+            questionInput.remove();
+        }
+        
+        // Move to next question
+        setTimeout(() => {
+            askPulseQuestion(questionIndex + 1);
+        }, 1000);
+    }
+    
+    function submitTextAnswer(questionIndex) {
+        const input = document.getElementById(`text-answer-${questionIndex}`);
+        const answer = input.value.trim();
+        
+        if (answer) {
+            submitAnswer(questionIndex, answer);
+        }
+    }
+    
+    function addUserMessage(text) {
+        const messagesContainer = document.getElementById('chat-messages');
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'message user';
+        messageDiv.innerHTML = `<div class="message-content">${text}</div>`;
+        messagesContainer.appendChild(messageDiv);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        userMessageCount++;  // Track message count for submit validation
+    }
+
+    function addBotMessage(text) {
+        const messagesContainer = document.getElementById('chat-messages');
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'message bot';
+        messageDiv.innerHTML = `<div class="message-bubble">${text}</div>`;
+        messagesContainer.appendChild(messageDiv);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+        // Add to state
+        chatState.messages.push({ sender: 'bot', text: text, timestamp: Date.now() });
+    }
+
+    function addUserMessage(text) {
+        const messagesContainer = document.getElementById('chat-messages');
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'message user';
+        messageDiv.innerHTML = `<div class="message-bubble">${text}</div>`;
+        messagesContainer.appendChild(messageDiv);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        userMessageCount++;  // Track message count for submit validation
+
+        // Add to state
+        chatState.messages.push({ sender: 'user', text: text, timestamp: Date.now() });
+
+        // Update sentiment if enabled
+        if (sessionConfig.enableSentiment) {
+            updateSentiment(text);
+        }
+    }
+
+    function sendMessage() {
+        console.log('📨 sendMessage called');
+
+        const input = document.getElementById('user-input');
+        const message = input.value.trim();
+
+        console.log('📝 Message text:', message);
+        console.log('🔧 Chat type:', chatType);
+        console.log('💬 window.currentChat:', window.currentChat);
+
+        if (!message) {
+            console.log('⚠️ Empty message, returning');
+            return;
+        }
+
+        // Add user message
+        addUserMessage(message);
+
+        // Clear input
+        input.value = '';
+        input.style.height = 'auto';
+
+        // Show typing indicator
+        showTypingIndicator();
+
+        // Process based on chat type
+        if (chatType === 'listening') {
+            console.log('🎧 Routing to handleListeningResponse');
+            handleListeningResponse(message);
+        } else if (chatType === 'chat') {
+            console.log('💬 Routing to handleChatSurveyResponse');
+            handleChatSurveyResponse(message);
+        } else {
+            console.log('⚠️ Unknown chatType:', chatType);
+        }
+    }
+
+    function handleListeningResponse(message) {
+        console.log('🎧 handleListeningResponse called with:', message);
+
+        // Store response locally
+        chatState.responses[`response_${Date.now()}`] = message;
+
+        // NOTE: Database save is handled by the enhanced sendMessage function
+        // to prevent duplicate saves
+
+        // Simulate AI response
+        setTimeout(() => {
+            hideTypingIndicator();
+
+            // Generate contextual response based on message content
+            const response = generateContextualResponse(message);
+            addBotMessage(response);
+
+            // Check if conversation should end
+            if (Object.keys(chatState.responses).length >= 5) {
+                setTimeout(() => {
+                    endConversation();
+                }, 2000);
+            }
+        }, 1500);
+    }
+
+    function generateContextualResponse(message) {
+        const messageLower = message.toLowerCase();
+
+        // Detect management/supervisor related feedback
+        const managementKeywords = ['manager', 'supervisor', 'boss', 'management', 'lead', 'director'];
+        const negativeKeywords = ['bad', 'mean', 'terrible', 'awful', 'horrible', 'unfair', 'rude', 'disrespectful', 'difficult'];
+        const positiveKeywords = ['good', 'great', 'excellent', 'supportive', 'helpful', 'understanding', 'fair'];
+
+        const hasManagementMention = managementKeywords.some(keyword => messageLower.includes(keyword));
+        const hasNegativeWords = negativeKeywords.some(keyword => messageLower.includes(keyword));
+        const hasPositiveWords = positiveKeywords.some(keyword => messageLower.includes(keyword));
+
+        // Management-related responses
+        if (hasManagementMention && hasNegativeWords) {
+            const managementPrompts = [
+                "I hear that you're having challenges with your manager. Can you help me understand what specific behaviors or situations are causing difficulty? This can help identify areas for improvement.",
+                "It sounds like there are some concerns about your manager's approach. What specific examples can you share that might help us understand the situation better?",
+                "I understand you're experiencing difficulties with management. Could you describe particular instances or patterns that have been problematic? Your feedback can help create positive changes.",
+                "Thank you for sharing that feedback about your manager. What specific actions or communication styles would you find more supportive in your role?",
+                "I appreciate you being open about management concerns. Can you tell me more about what changes would help improve your working relationship?"
+            ];
+            return managementPrompts[Math.floor(Math.random() * managementPrompts.length)];
+        } else if (hasManagementMention && hasPositiveWords) {
+            const positiveManagementPrompts = [
+                "That's wonderful to hear about your manager! What specific qualities or actions make them effective? This helps us understand what good management looks like.",
+                "It's great that you have a positive relationship with your manager. What do they do that you find most supportive?",
+                "I'm glad to hear positive feedback about management. What aspects of their leadership style work well for you?"
+            ];
+            return positiveManagementPrompts[Math.floor(Math.random() * positiveManagementPrompts.length)];
+        }
+
+        // Work environment and culture
+        else if (messageLower.includes('culture') || messageLower.includes('environment') || messageLower.includes('workplace')) {
+            const culturePrompts = [
+                "Workplace culture is so important. Can you tell me more about what aspects of the culture you'd like to see improved?",
+                "I appreciate your thoughts on the work environment. What changes would make the biggest positive impact?",
+                "Thank you for sharing about the workplace culture. What elements would you add or change to make it better?"
+            ];
+            return culturePrompts[Math.floor(Math.random() * culturePrompts.length)];
+        }
+
+        // Workload and stress
+        else if (messageLower.includes('stress') || messageLower.includes('overwhelmed') || messageLower.includes('workload') || messageLower.includes('busy')) {
+            const workloadPrompts = [
+                "It sounds like workload might be a concern. Can you help me understand what would make your work more manageable?",
+                "I hear you about stress levels. What specific support or changes would help you feel more balanced?",
+                "Workload balance is important. What would need to change to help you feel more effective and less overwhelmed?"
+            ];
+            return workloadPrompts[Math.floor(Math.random() * workloadPrompts.length)];
+        }
+
+        // Communication issues
+        else if (messageLower.includes('communication') || messageLower.includes('meetings') || messageLower.includes('information')) {
+            const communicationPrompts = [
+                "Communication is key to a good work experience. What improvements would help you stay better informed and connected?",
+                "I appreciate your feedback about communication. What changes would make information sharing more effective?",
+                "Thank you for bringing up communication. What would better communication look like in your day-to-day work?"
+            ];
+            return communicationPrompts[Math.floor(Math.random() * communicationPrompts.length)];
+        }
+
+        // Generic negative feedback
+        else if (hasNegativeWords) {
+            const negativePrompts = [
+                "I can hear that something isn't working well for you. Could you help me understand the specific situation so we can identify ways to improve it?",
+                "It sounds like there are some challenges. What particular changes would make the biggest difference in your work experience?",
+                "I appreciate you sharing that concern. Can you tell me more about what's happening and what improvements you'd like to see?"
+            ];
+            return negativePrompts[Math.floor(Math.random() * negativePrompts.length)];
+        }
+
+        // Generic positive feedback
+        else if (hasPositiveWords) {
+            const positivePrompts = [
+                "That's great to hear! What specifically is working well? Understanding this helps us maintain and build on positive aspects.",
+                "I'm glad things are going well in that area. Can you tell me more about what makes it effective?",
+                "It's wonderful to hear positive feedback. What other aspects of your work experience are you satisfied with?"
+            ];
+            return positivePrompts[Math.floor(Math.random() * positivePrompts.length)];
+        }
+
+        // Default responses for neutral or unclear feedback
+        else {
+            const defaultPrompts = [
+                "Thank you for sharing that. Can you help me understand how this impacts your daily work experience?",
+                "I appreciate your input. What changes or improvements would make the biggest difference for you?",
+                "That's valuable feedback. Is there anything specific you'd like to see addressed or improved?",
+                "I understand. What aspects of your work experience would you most like to focus on?",
+                "Thank you for that perspective. What would make your work environment even better?"
+            ];
+            return defaultPrompts[Math.floor(Math.random() * defaultPrompts.length)];
+        }
+    }
+
+    function handleChatSurveyResponse(message) {
+        // Store response for current question
+        if (sessionConfig.template && chatState.currentQuestionIndex < sessionConfig.template.questions.length) {
+            const question = sessionConfig.template.questions[chatState.currentQuestionIndex];
+            chatState.responses[question.id] = message;
+            chatState.currentQuestionIndex++;
+        }
+
+        // NOTE: Database save is handled by the enhanced sendMessage function
+        // to prevent duplicate saves
+
+        // Show typing and ask next question
+        setTimeout(() => {
+            hideTypingIndicator();
+            askNextChatQuestion();
+        }, 1500);
+    }
+
+    function askNextChatQuestion() {
+        if (!sessionConfig.template || chatState.currentQuestionIndex >= sessionConfig.template.questions.length) {
+            endConversation();
+            return;
+        }
+
+        const question = sessionConfig.template.questions[chatState.currentQuestionIndex];
+        addBotMessage(question.text);
+        updateProgress();
+    }
+
+    function showPulseQuestion(index) {
+        const messagesContainer = document.getElementById('chat-messages');
+        
+        // Default questions if no template
+        const defaultQuestions = [
+            {
+                id: 'q1',
+                type: 'scale',
+                text: 'How satisfied are you with your current work environment?',
+                scale: 5
+            },
+            {
+                id: 'q2',
+                type: 'multiple-choice',
+                text: 'What best describes your team dynamics?',
+                options: ['Excellent', 'Good', 'Neutral', 'Needs Improvement', 'Poor']
+            },
+            {
+                id: 'q3',
+                type: 'text',
+                text: 'What would you like to see improved?'
+            }
+        ];
+
+        const questions = sessionConfig.template?.questions || defaultQuestions;
+        
+        if (index >= questions.length) {
+            endConversation();
+            return;
+        }
+
+        const question = questions[index];
+        chatState.currentQuestionIndex = index;
+
+        // Clear previous question
+        messagesContainer.innerHTML = '';
+
+        // Create question container
+        const questionDiv = document.createElement('div');
+        questionDiv.className = 'question-container';
+        
+        const questionText = document.createElement('div');
+        questionText.className = 'question-text';
+        questionText.textContent = question.text;
+        questionDiv.appendChild(questionText);
+
+        // Add appropriate input based on question type
+        if (question.type === 'scale') {
+            const scaleContainer = document.createElement('div');
+            scaleContainer.className = 'scale-container';
+            
+            for (let i = 1; i <= (question.scale || 5); i++) {
+                const button = document.createElement('button');
+                button.className = 'scale-button';
+                button.textContent = i;
+                button.onclick = () => selectScale(question.id, i, button);
+                scaleContainer.appendChild(button);
+            }
+            
+            questionDiv.appendChild(scaleContainer);
+        } else if (question.type === 'multiple-choice') {
+            const optionsContainer = document.createElement('div');
+            optionsContainer.className = 'options-container';
+            
+            question.options.forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'option-button';
+                button.textContent = option;
+                button.onclick = () => selectOption(question.id, option, button);
+                optionsContainer.appendChild(button);
+            });
+            
+            questionDiv.appendChild(optionsContainer);
+        } else if (question.type === 'text') {
+            const textarea = document.createElement('textarea');
+            textarea.className = 'form-input';
+            textarea.placeholder = 'Type your answer here...';
+            textarea.rows = 4;
+            textarea.style.width = '100%';
+            textarea.style.marginTop = '1rem';
+            textarea.id = `response_${question.id}`;
+            questionDiv.appendChild(textarea);
+        }
+
+        messagesContainer.appendChild(questionDiv);
+        updateProgress();
+        updateNavigationButtons();
+    }
+
+    function selectScale(questionId, value, button) {
+        // Clear previous selection
+        button.parentElement.querySelectorAll('.scale-button').forEach(btn => {
+            btn.classList.remove('selected');
+        });
+        
+        // Select this button
+        button.classList.add('selected');
+        
+        // Store response
+        chatState.responses[questionId] = value;
+        
+        // Enable next button
+        document.getElementById('next-button').disabled = false;
+    }
+
+    function selectOption(questionId, option, button) {
+        // Clear previous selection
+        button.parentElement.querySelectorAll('.option-button').forEach(btn => {
+            btn.classList.remove('selected');
+        });
+        
+        // Select this button
+        button.classList.add('selected');
+        
+        // Store response
+        chatState.responses[questionId] = option;
+        
+        // Enable next button
+        document.getElementById('next-button').disabled = false;
+    }
+
+    function nextQuestion() {
+        // Save text response if current question is text type
+        const questions = sessionConfig.template?.questions || getDefaultQuestions();
+        const currentQuestion = questions[chatState.currentQuestionIndex];
+        
+        if (currentQuestion.type === 'text') {
+            const textarea = document.getElementById(`response_${currentQuestion.id}`);
+            if (textarea && textarea.value.trim()) {
+                chatState.responses[currentQuestion.id] = textarea.value.trim();
+            }
+        }
+
+        // Move to next question
+        showPulseQuestion(chatState.currentQuestionIndex + 1);
+    }
+
+    function previousQuestion() {
+        if (chatState.currentQuestionIndex > 0) {
+            showPulseQuestion(chatState.currentQuestionIndex - 1);
+        }
+    }
+
+    function updateNavigationButtons() {
+        const prevButton = document.getElementById('prev-button');
+        const nextButton = document.getElementById('next-button');
+        const questions = sessionConfig.template?.questions || getDefaultQuestions();
+        
+        prevButton.disabled = chatState.currentQuestionIndex === 0;
+        
+        // Check if current question has been answered
+        const currentQuestion = questions[chatState.currentQuestionIndex];
+        const hasResponse = chatState.responses[currentQuestion.id] !== undefined;
+        
+        if (chatState.currentQuestionIndex === questions.length - 1) {
+            nextButton.textContent = 'Submit';
+        } else {
+            nextButton.textContent = 'Next';
+        }
+        
+        // Disable next if no response for required questions
+        if (currentQuestion.type !== 'text') {
+            nextButton.disabled = !hasResponse;
+        }
+    }
+
+    function getDefaultQuestions() {
+        return [
+            {
+                id: 'q1',
+                type: 'scale',
+                text: 'How satisfied are you with your current work environment?',
+                scale: 5
+            },
+            {
+                id: 'q2',
+                type: 'multiple-choice',
+                text: 'What best describes your team dynamics?',
+                options: ['Excellent', 'Good', 'Neutral', 'Needs Improvement', 'Poor']
+            },
+            {
+                id: 'q3',
+                type: 'text',
+                text: 'What would you like to see improved?'
+            }
+        ];
+    }
+
+    function updateProgress() {
+        const progressFill = document.getElementById('progress-fill');
+        const questions = sessionConfig.template?.questions || getDefaultQuestions();
+        const progress = ((chatState.currentQuestionIndex + 1) / questions.length) * 100;
+        progressFill.style.width = progress + '%';
+    }
+
+    function updateSentiment(text) {
+        // Simple sentiment analysis (in real app, would use AI)
+        const positiveWords = ['good', 'great', 'excellent', 'happy', 'satisfied', 'love', 'awesome'];
+        const negativeWords = ['bad', 'poor', 'terrible', 'unhappy', 'dissatisfied', 'hate', 'awful'];
+        
+        const textLower = text.toLowerCase();
+        let sentiment = 'neutral';
+        
+        if (positiveWords.some(word => textLower.includes(word))) {
+            sentiment = 'positive';
+        } else if (negativeWords.some(word => textLower.includes(word))) {
+            sentiment = 'negative';
+        }
+        
+        chatState.sentiment = sentiment;
+        
+        const sentimentValue = document.getElementById('sentiment-value');
+        sentimentValue.textContent = sentiment.charAt(0).toUpperCase() + sentiment.slice(1);
+        sentimentValue.className = `sentiment-value sentiment-${sentiment}`;
+    }
+
+    function showTypingIndicator() {
+        const typingIndicator = document.getElementById('typing-indicator');
+        const container = document.getElementById('chat-messages');
+        if (typingIndicator) {
+            typingIndicator.classList.add('show');
+            typingIndicator.style.display = 'flex';
+        }
+        if (container) {
+            container.scrollTop = container.scrollHeight;
+        }
+    }
+
+    function hideTypingIndicator() {
+        const typingIndicator = document.getElementById('typing-indicator');
+        if (typingIndicator) {
+            typingIndicator.classList.remove('show');
+            typingIndicator.style.display = 'none';
+        }
+    }
+
+    // Submit chat / finalize session
+    async function submitChat() {
+        const submitBtn = document.getElementById('submitChatBtn');
+
+        if (!submitBtn) return;
+
+        // Check if there are any user messages using counter first, then DOM fallback
+        if (userMessageCount === 0) {
+            // Fallback: check DOM with correct selector (.message.user)
+            const userMessages = document.querySelectorAll('.message.user');
+            if (userMessages.length === 0) {
+                alert('Please send at least one message before submitting.');
+                return;
+            }
+        }
+
+        // Disable button and show loading
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="spinner">
+                <circle cx="12" cy="12" r="10"></circle>
+            </svg>
+            Submitting...
+        `;
+
+        // Small delay for UX
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        // Show success message
+        showSubmitSuccess();
+    }
+
+    function showSubmitSuccess() {
+        const chatContainer = document.getElementById('chat-container');
+
+        if (chatContainer) {
+            chatContainer.innerHTML = `
+                <div class="chat-submitted-message">
+                    <div style="font-size: 3rem; margin-bottom: 16px;">✅</div>
+                    <h2>Thank you for your feedback!</h2>
+                    <p>Your responses have been submitted successfully.</p>
+                    <p style="margin-top: 16px; font-size: 0.9rem; color: #9ca3af;">You can close this window now.</p>
+                </div>
+            `;
+        }
+
+        // Clear the session so if they come back they get a new session
+        sessionStorage.removeItem('chat_session_id');
+    }
+
+    async function endConversation() {
+        // Save session data
+        const sessionData = {
+            sessionId: sessionConfig.id,
+            chatType: chatType,
+            responses: chatState.responses,
+            messages: chatState.messages,
+            sentiment: chatState.sentiment,
+            duration: Date.now() - chatState.startTime,
+            completedAt: new Date().toISOString(),
+            participantId: chatState.participantId
+        };
+
+        // Save to database using new chat response format
+        try {
+            const chatResponseData = {
+                sessionId: sessionConfig.id,
+                participantId: chatState.participantId || 'anonymous',
+                chatType: chatType,
+                messages: chatState.messages,
+                responses: chatState.responses,
+                sentiment: chatState.sentiment,
+                duration: Date.now() - chatState.startTime,
+                startTime: chatState.startTime,
+                completedAt: Date.now()
+            };
+
+            // Save chat response to database
+            const savedResponse = await saveChatResponse(chatResponseData);
+            console.log('Chat response saved to database:', savedResponse);
+        } catch (error) {
+            console.error('Error saving chat response to database:', error);
+            // Continue with local storage as fallback
+        }
+
+        // Store completed session (local fallback)
+        const completedSessions = JSON.parse(localStorage.getItem('completedSessions') || '[]');
+        completedSessions.push(sessionData);
+        localStorage.setItem('completedSessions', JSON.stringify(completedSessions));
+
+        // Update widget response count
+        const widgets = JSON.parse(localStorage.getItem('activeWidgets') || '[]');
+        const widget = widgets.find(w => w.id === sessionConfig.id);
+        if (widget) {
+            widget.responses = (widget.responses || 0) + 1;
+            widget.lastActivity = 'Just now';
+            localStorage.setItem('activeWidgets', JSON.stringify(widgets));
+        }
+
+        // Show completion screen
+        document.getElementById('chat-messages').style.display = 'none';
+        document.getElementById('input-area').style.display = 'none';
+        document.getElementById('navigation-area').style.display = 'none';
+        document.getElementById('sentiment-indicator').style.display = 'none';
+        
+        const completionMessage = sessionConfig.closingMessage || 
+            'Thank you for your valuable feedback! Your responses have been recorded.';
+        document.getElementById('completion-message').textContent = completionMessage;
+        document.getElementById('completion-screen').classList.add('show');
+    }
+
+    function showError(message) {
+        document.getElementById('loading-screen').innerHTML = `
+            <div style="text-align: center; color: white;">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">⚠️</div>
+                <div style="font-size: 1.25rem; margin-bottom: 1rem;">Error</div>
+                <div>${message}</div>
+            </div>
+        `;
+    }
+    </script>
+
+    <!-- Include Supabase library from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Include config for API endpoints -->
+    <script src="/assets/js/config.js"></script>
+    <!-- Include Supabase client -->
+    <script src="/lib/supabase.js"></script>
+    <!-- Include database functions -->
+    <script src="/assets/js/database.js"></script>
+
+    <!-- Real-time Chat API Integration -->
+    <script>
+        // Enhanced chat state with API integration
+        let apiChatState = {
+            sessionId: null,
+            participantId: null,
+            currentStep: 0,
+            isRealTime: false,
+            apiBaseUrl: null,
+            conversationComplete: false
+        };
+
+        // Initialize API integration when page loads - but only if chat hasn't already been initialized
+        document.addEventListener('DOMContentLoaded', function() {
+            // Wait a moment to see if the main chat initializes first
+            setTimeout(() => {
+                if (!isInitialized) {
+                    initializeAPIChat();
+                }
+            }, 500);
+        });
+
+        // Initialize API-powered chat functionality
+        async function initializeAPIChat() {
+            console.log('🔄 API Chat initialization started...');
+
+            // Get session ID from URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            apiChatState.sessionId = urlParams.get('session') || urlParams.get('id') || generateSessionId();
+            apiChatState.participantId = urlParams.get('participant') || generateParticipantId();
+
+            // If no session ID in URL, this is a direct access - allow API to generate demo session
+            if (!urlParams.get('session') && !urlParams.get('id')) {
+                console.log('🔄 Direct access detected, creating demo session:', apiChatState.sessionId);
+            }
+
+            // Set API base URL from config
+            apiChatState.apiBaseUrl = window.APP_CONFIG ? window.APP_CONFIG.API_BASE_URL : 'http://localhost:3001/api';
+
+            // Try to establish API connection - but don't block the chat if it fails
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 2000); // 2 second timeout
+
+                const response = await fetch(`${apiChatState.apiBaseUrl}/chat-session?sessionId=${apiChatState.sessionId}&step=0`, {
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+
+                if (response.ok) {
+                    const data = await response.json();
+                    apiChatState.isRealTime = true;
+                    console.log('✅ Real-time chat API connected');
+
+                    // Initialize the main chat interface if not already done
+                    if (!isInitialized) {
+                        initializeChat();
+                    }
+
+                    // Start with API-powered conversation
+                    if (data.conversation && data.conversation.botMessage) {
+                        setTimeout(() => {
+                            addBotMessage(data.conversation.botMessage);
+                            updateInputPlaceholder(data.conversation.placeholder);
+                        }, 1000);
+                    }
+                } else {
+                    throw new Error('API response not ok');
+                }
+            } catch (error) {
+                console.log('⚠️ API connection failed, using fallback chat:', error.message);
+                apiChatState.isRealTime = false;
+
+                // Initialize the main chat interface if not already done
+                if (!isInitialized) {
+                    initializeChat();
+                }
+            }
+        }
+
+        // Enhanced sendMessage function with API integration
+        let originalSendMessage = null;
+
+        // Store original sendMessage if it exists, otherwise create a fallback
+        function enhanceSendMessage() {
+            if (typeof sendMessage === 'function') {
+                originalSendMessage = sendMessage;
+            }
+
+            window.sendMessage = async function() {
+                const input = document.getElementById('user-input');
+                const message = input.value.trim();
+
+                console.log('🚀 Enhanced sendMessage called with:', message);
+
+                if (!message || apiChatState.conversationComplete) {
+                    console.log('⚠️ Empty message or conversation complete, returning');
+                    return;
+                }
+
+                // Add user message to UI
+                addUserMessage(message);
+                input.value = '';
+                input.style.height = 'auto';
+
+                // Disable input while submitting
+                input.disabled = true;
+                const sendButton = document.getElementById('send-button');
+                if (sendButton) {
+                    sendButton.disabled = true;
+                    sendButton.textContent = 'Submitting...';
+                }
+
+                // Save response to database
+                console.log('💾 Saving response to database from enhanced sendMessage...');
+                try {
+                    const saved = await saveResponseToDatabase(message);
+                    console.log('✅ Database save result:', saved);
+                } catch (err) {
+                    console.error('❌ Database save error:', err);
+                }
+
+                // Trigger submission notification (fire-and-forget, don't block the UI)
+                console.log('[notify] Starting notification trigger...');
+                try {
+                    const chat = window.currentChat;
+                    console.log('[notify] currentChat:', chat ? { id: chat.id, name: chat.name, user_id: chat.user_id, created_by: chat.created_by } : 'NULL');
+                    if (chat && chat.id) {
+                        const notifyPayload = {
+                            chatId: chat.id,
+                            chatName: chat.name || 'Feedback Session',
+                            submittedAt: new Date().toISOString()
+                        };
+                        console.log('[notify] Sending fetch to /api/notify-submission with:', JSON.stringify(notifyPayload));
+                        fetch('/api/notify-submission', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(notifyPayload)
+                        })
+                        .then(resp => {
+                            console.log('[notify] API response status:', resp.status);
+                            return resp.json().then(data => {
+                                console.log('[notify] API response body:', JSON.stringify(data));
+                            });
+                        })
+                        .catch(err => console.error('[notify] Fetch error:', err));
+                    } else {
+                        console.warn('[notify] Skipped - no chat loaded. window.currentChat:', window.currentChat);
+                    }
+                } catch (err) {
+                    console.error('[notify] Error in notification trigger:', err);
+                }
+
+                // Mark conversation as complete and show success
+                apiChatState.conversationComplete = true;
+                showSubmitSuccess();
+            };
+        }
+
+        // Try to enhance sendMessage immediately, and also after initialization
+        enhanceSendMessage();
+        setTimeout(enhanceSendMessage, 1000);
+
+        // Handle response using real-time API
+        async function handleRealTimeResponse(userResponse) {
+            try {
+                // First, save the response
+                const responseData = {
+                    sessionId: apiChatState.sessionId,
+                    participantId: apiChatState.participantId,
+                    step: apiChatState.currentStep,
+                    response: userResponse,
+                    responseType: 'text',
+                    timestamp: new Date().toISOString()
+                };
+
+                // Save response to API
+                const saveResponse = await fetch(`${apiChatState.apiBaseUrl}/chat-response`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(responseData)
+                });
+
+                if (saveResponse.ok) {
+                    const saveData = await saveResponse.json();
+                    console.log('Response saved:', saveData);
+                }
+
+                // Get next conversation step
+                const nextStepResponse = await fetch(`${apiChatState.apiBaseUrl}/chat-session`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        sessionId: apiChatState.sessionId,
+                        step: apiChatState.currentStep,
+                        userResponse: userResponse,
+                        participantId: apiChatState.participantId
+                    })
+                });
+
+                if (nextStepResponse.ok) {
+                    const nextData = await nextStepResponse.json();
+
+                    setTimeout(() => {
+                        hideTypingIndicator();
+
+                        if (nextData.botResponse) {
+                            addBotMessage(nextData.botResponse);
+                        }
+
+                        if (nextData.isComplete) {
+                            apiChatState.conversationComplete = true;
+                            setTimeout(() => {
+                                showCompletionMessage();
+                            }, 2000);
+                        } else {
+                            apiChatState.currentStep = nextData.nextStep;
+
+                            // Update input placeholder if available
+                            if (nextData.conversation && nextData.conversation.placeholder) {
+                                updateInputPlaceholder(nextData.conversation.placeholder);
+                            }
+                        }
+                    }, 1500);
+                } else {
+                    throw new Error('Failed to get next conversation step');
+                }
+
+            } catch (error) {
+                console.error('Real-time chat error:', error);
+                hideTypingIndicator();
+
+                // Fallback to static response
+                setTimeout(() => {
+                    addBotMessage("Thank you for your response. Is there anything else you'd like to share?");
+                }, 1500);
+            }
+        }
+
+        // Update input placeholder
+        function updateInputPlaceholder(placeholder) {
+            const input = document.getElementById('user-input');
+            if (input && placeholder) {
+                input.placeholder = placeholder;
+            }
+        }
+
+        // Show completion message
+        function showCompletionMessage() {
+            addBotMessage("Thank you so much for taking the time to share your thoughts! Your feedback is invaluable and will help create a better workplace. Have a great day! 🌟");
+
+            // Disable input
+            const input = document.getElementById('user-input');
+            const sendButton = document.getElementById('send-button');
+            if (input) {
+                input.disabled = true;
+                input.placeholder = "Conversation completed - thank you!";
+            }
+            if (sendButton) {
+                sendButton.disabled = true;
+            }
+        }
+
+        // Generate session ID if not provided
+        function generateSessionId() {
+            return 'session_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
+        }
+
+        // Generate participant ID
+        function generateParticipantId() {
+            return 'participant_' + Math.random().toString(36).substr(2, 9);
+        }
+
+        // Add visual indicator for real-time mode
+        function addRealTimeIndicator() {
+            if (apiChatState.isRealTime) {
+                const indicator = document.createElement('div');
+                indicator.innerHTML = '🟢 Real-time';
+                indicator.style.cssText = `
+                    position: fixed; bottom: 10px; left: 10px; z-index: 1000;
+                    background: rgba(0,0,0,0.7); color: white; padding: 4px 8px;
+                    font-size: 12px; border-radius: 4px;
+                `;
+                document.body.appendChild(indicator);
+            }
+        }
+
+        // Call indicator after API initialization
+        setTimeout(addRealTimeIndicator, 2000);
     </script>
 </body>
 </html>
