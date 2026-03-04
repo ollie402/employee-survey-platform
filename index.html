@@ -4444,6 +4444,40 @@
           content: ' — create a chat first';
           font-style: italic;
         }
+
+        /* Disabled state for link panel when Closed access is selected */
+        .rw-link-panel-disabled {
+          opacity: 0.4;
+          filter: grayscale(1);
+          pointer-events: none;
+          user-select: none;
+        }
+
+        /* Disabled state for Participants tab when Open Access is selected */
+        .rw-tab-wrapper { position: relative; display: inline-flex; }
+        .rw-tab-disabled {
+          opacity: 0.4;
+          pointer-events: none;
+          user-select: none;
+          cursor: not-allowed;
+        }
+        .rw-tab-hint {
+          display: none;
+          position: absolute;
+          top: 100%;
+          left: 50%;
+          transform: translateX(-50%);
+          white-space: nowrap;
+          font-size: 10px;
+          color: var(--rw-text-soft, #64748b);
+          background: #f1f5f9;
+          padding: 2px 8px;
+          border-radius: 4px;
+          z-index: 10;
+          margin-top: -2px;
+          font-style: italic;
+        }
+        .rw-tab-wrapper.rw-tab-disabled-wrapper .rw-tab-hint { display: block; }
     </style>
 </head>
 <body>
@@ -5079,7 +5113,7 @@
                     <!-- Tab Navigation -->
                     <div style="display: flex; gap: 0; border-bottom: 1px solid #e2e8f0; background: white;">
                         <button class="chat-editor-tab active" onclick="showChatEditorTab('setup')" data-tab="setup" style="padding: 16px 24px; border: none; background: none; cursor: pointer; font-size: 14px; color: #3b82f6; border-bottom: 2px solid #3b82f6; font-weight: 500;">Setup</button>
-                        <button class="chat-editor-tab" onclick="showChatEditorTab('participants')" data-tab="participants" style="padding: 16px 24px; border: none; background: none; cursor: pointer; font-size: 14px; color: #64748b; border-bottom: 2px solid transparent;">Participants</button>
+                        <span class="rw-tab-wrapper" id="participants-tab-wrapper"><button class="chat-editor-tab" onclick="showChatEditorTab('participants')" data-tab="participants" style="padding: 16px 24px; border: none; background: none; cursor: pointer; font-size: 14px; color: #64748b; border-bottom: 2px solid transparent;">Participants</button><span class="rw-tab-hint">Not needed for Open Access</span></span>
                         <button class="chat-editor-tab" onclick="showChatEditorTab('responses')" data-tab="responses" style="padding: 16px 24px; border: none; background: none; cursor: pointer; font-size: 14px; color: #64748b; border-bottom: 2px solid transparent;">Responses</button>
                         <button class="chat-editor-tab" onclick="showChatEditorTab('analytics')" data-tab="analytics" style="padding: 16px 24px; border: none; background: none; cursor: pointer; font-size: 14px; color: #64748b; border-bottom: 2px solid transparent;">Analytics</button>
                     </div>
@@ -5143,9 +5177,9 @@
                                         Access Type
                                       </label>
                                       <select id="chat-access-type">
-                                          <option value="open">🌐 Open Access - Anyone with the link can respond</option>
-                                          <option value="closed">🔒 Closed Access - Only invited participants via unique links</option>
-                                          <option value="combined">🔗 Combined Access - Public link AND invited participants</option>
+                                          <option value="open">Open Access - Anyone with the link can respond</option>
+                                          <option value="closed">Closed Access - Only invited participants via unique links</option>
+                                          <option value="combined">Combined Access - Public link AND invited participants</option>
                                       </select>
                                     </div>
                                     <div class="rw-field">
@@ -5222,7 +5256,7 @@
                                 <div class="rw-card" id="getting-started-box">
                                   <div class="rw-checklist-header">
                                     <div class="rw-checklist-title-row">
-                                      <div class="rw-checklist-title">💡 Getting Started</div>
+                                      <div class="rw-checklist-title">Getting Started</div>
                                       <span id="gs-progress" class="rw-progress-fraction">0/6 complete</span>
                                     </div>
                                     <div class="rw-progress-bar-bg">
@@ -5265,7 +5299,7 @@
 
                                     <!-- Paste from Excel Button -->
                                     <button onclick="openExcelPasteModal()" style="margin-bottom: 24px; padding: 10px 16px; background: #f8fafc; color: #1e293b; border: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer; font-size: 14px;">
-                                        📋 Paste from Excel
+                                        Paste from Excel
                                     </button>
 
                                     <!-- Table Controls Row -->
@@ -5281,7 +5315,7 @@
                                                 <option value="reminder">Reminder</option>
                                             </select>
                                             <button onclick="sendInvitesToSelected()" style="padding: 10px 16px; background: #d6366c; color: white; border: none; border-radius: 8px; font-weight: 500; cursor: pointer;">
-                                                ✉️ Send to Selected
+                                                Send to Selected
                                             </button>
                                         </div>
                                     </div>
@@ -5316,7 +5350,7 @@
 
                                     <!-- Save Participants Button -->
                                     <div style="display: flex; justify-content: flex-end; margin-top: 24px;">
-                                        <button onclick="saveListeningAll(this)" id="save-participants-btn" style="padding: 12px 24px; background: #10b981; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 500; font-size: 14px;">💾 Save</button>
+                                        <button onclick="saveListeningAll(this)" id="save-participants-btn" style="padding: 12px 24px; background: #10b981; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 500; font-size: 14px;">Save</button>
                                     </div>
 
                                 </div>
@@ -5362,7 +5396,7 @@
                                     <!-- Save Button -->
                                     <div style="margin-top: 24px; text-align: right;">
                                         <button onclick="saveListeningAll(this)" style="padding: 12px 24px; background: #10b981; color: white; border: none; border-radius: 8px; font-weight: 500; cursor: pointer; font-size: 14px;">
-                                            💾 Save
+                                            Save
                                         </button>
                                     </div>
 
@@ -12987,7 +13021,7 @@ function openChatEditor(chatId = null) {
     // Reset save button state
     const saveBtn = document.getElementById('save-chat-btn');
     if (saveBtn) {
-        saveBtn.textContent = '💾 Save';
+        saveBtn.textContent = 'Save';
         saveBtn.style.background = '#10b981';
         saveBtn.disabled = false;
     }
@@ -13009,6 +13043,7 @@ function openChatEditor(chatId = null) {
         if (generatedLinkInput) generatedLinkInput.value = '';
         // Clear participants data for new chat
         chatParticipantsData = [];
+        if (typeof updateLinkPanelForAccessType === 'function') updateLinkPanelForAccessType();
     } else {
         // Existing chat - load from database
         loadChatIntoEditor(chatId);
@@ -13063,6 +13098,7 @@ async function loadChatIntoEditor(chatId) {
                 accessTypeDropdown.value = 'open';
             }
         }
+        if (typeof updateLinkPanelForAccessType === 'function') updateLinkPanelForAccessType();
 
         // Set notification frequency dropdown
         const notifDropdown = document.getElementById('chat-notification-frequency');
@@ -13115,6 +13151,14 @@ async function loadChatIntoEditor(chatId) {
 
 // Show Chat Editor tab
 function showChatEditorTab(tabName) {
+    // Guard: redirect to setup if participants tab is disabled
+    if (tabName === 'participants') {
+        var partTab = document.querySelector('.chat-editor-tab[data-tab="participants"]');
+        if (partTab && partTab.classList.contains('rw-tab-disabled')) {
+            tabName = 'setup';
+        }
+    }
+
     // Hide all tab contents
     document.querySelectorAll('.chat-editor-tab-content').forEach(content => {
         content.style.display = 'none';
@@ -14130,6 +14174,42 @@ function initChatSuccessPanel() {
 
 // Initialize chat success panel when DOM is ready
 document.addEventListener('DOMContentLoaded', initChatSuccessPanel);
+
+// Toggle link panel + participants tab disabled state based on access type
+function updateLinkPanelForAccessType() { updateTabAndLinkState(); }
+function updateTabAndLinkState() {
+    var sel = document.getElementById('chat-access-type');
+    var linkPanel = document.querySelector('#chat-success-panel .rw-link-panel');
+    var partTab = document.querySelector('.chat-editor-tab[data-tab="participants"]');
+    var partWrapper = document.getElementById('participants-tab-wrapper');
+    if (!sel) return;
+    var v = sel.value;
+
+    // Link panel: disabled for closed, enabled for open/combined
+    if (linkPanel) {
+        if (v === 'closed') {
+            linkPanel.classList.add('rw-link-panel-disabled');
+        } else {
+            linkPanel.classList.remove('rw-link-panel-disabled');
+        }
+    }
+
+    // Participants tab: disabled for open, enabled for closed/combined
+    if (partTab) {
+        if (v === 'open') {
+            partTab.classList.add('rw-tab-disabled');
+            if (partWrapper) partWrapper.classList.add('rw-tab-disabled-wrapper');
+        } else {
+            partTab.classList.remove('rw-tab-disabled');
+            if (partWrapper) partWrapper.classList.remove('rw-tab-disabled-wrapper');
+        }
+    }
+}
+document.addEventListener('DOMContentLoaded', function() {
+    var sel = document.getElementById('chat-access-type');
+    if (sel) sel.addEventListener('change', updateTabAndLinkState);
+    updateTabAndLinkState();
+});
 
 // Initialize participant entry panel when DOM is ready
 document.addEventListener('DOMContentLoaded', initParticipantEntryPanel);
@@ -17859,7 +17939,7 @@ async function createChat(btn) {
         // Restore button
         if (btn) {
             btn.disabled = false;
-            btn.innerHTML = '✨ Create Chat';
+            btn.innerHTML = 'Create Chat';
         }
     }
 }
@@ -18524,7 +18604,7 @@ async function saveParticipantsOnly(btn) {
         btn.style.background = '#059669';
         btn.disabled = true;
         setTimeout(() => {
-            btn.innerHTML = '💾 Save';
+            btn.innerHTML = 'Save';
             btn.style.background = '#10b981';
             btn.disabled = false;
         }, 2000);
@@ -18532,7 +18612,7 @@ async function saveParticipantsOnly(btn) {
     } catch (error) {
         console.error('Error saving participants:', error);
         alert('Error saving participants: ' + error.message);
-        btn.innerHTML = '💾 Save';
+        btn.innerHTML = 'Save';
         btn.style.background = '#10b981';
         btn.disabled = false;
     }
