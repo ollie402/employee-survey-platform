@@ -976,6 +976,19 @@
             chatState.participantId = sessionId;
         }
 
+        // Universal access type gate — runs regardless of how the chat was loaded
+        var loadedChat = window.currentChat;
+        if (loadedChat && loadedChat.access_type) {
+            var at = loadedChat.access_type.toLowerCase();
+            console.log('[Access Gate] access_type =', at, '| chat =', loadedChat.name, '| id =', loadedChat.id);
+            if (at === 'closed' || at === 'invite_only') {
+                console.log('[Access Gate] BLOCKED — showing access denied');
+                showAccessDenied();
+                isInitialized = true;
+                return;
+            }
+        }
+
         // Apply organization branding if available
         applyBranding();
 

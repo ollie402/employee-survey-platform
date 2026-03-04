@@ -577,6 +577,53 @@
         .btn-submit-chat .spinner {
             animation: spin 1s linear infinite;
         }
+
+        /* Access Denied Screen */
+        .access-denied-screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: var(--bg-secondary);
+            padding: 32px;
+            text-align: center;
+        }
+        .access-denied-card {
+            background: var(--bg-primary);
+            border-radius: 16px;
+            padding: 48px 40px;
+            max-width: 460px;
+            width: 100%;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+        }
+        .access-denied-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+        }
+        .access-denied-icon svg {
+            width: 28px;
+            height: 28px;
+            color: var(--primary-color);
+        }
+        .access-denied-card h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0 0 12px;
+        }
+        .access-denied-card p {
+            font-size: 0.9375rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin: 0;
+        }
     </style>
 </head>
 <body>
@@ -585,6 +632,18 @@
         <img src="/assets/images/rworld-in-line-logo-white.svg" alt="Realworld" style="height: 40px; margin-bottom: 2rem;">
         <div class="loader"></div>
         <div class="loading-text">Loading your session...</div>
+    </div>
+
+    <!-- Access Denied Screen -->
+    <div id="access-denied-screen" class="access-denied-screen">
+        <div class="access-denied-card">
+            <img src="/assets/images/rworld-in-line-logo-white.svg" alt="Realworld" style="height: 32px; margin-bottom: 32px; filter: brightness(0) saturate(100%) invert(30%) sepia(60%) saturate(600%) hue-rotate(210deg);">
+            <div class="access-denied-icon">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+            </div>
+            <h2>This chat is invite only</h2>
+            <p>If you believe you should have access, please contact the person who sent you this link.</p>
+        </div>
     </div>
 
     <!-- Main Chat Container -->
@@ -793,6 +852,15 @@
         if (sendButton) sendButton.disabled = true;
     }
 
+    function showAccessDenied() {
+        var loading = document.getElementById('loading-screen');
+        var chat = document.getElementById('chat-container');
+        var denied = document.getElementById('access-denied-screen');
+        if (loading) loading.style.display = 'none';
+        if (chat) chat.style.display = 'none';
+        if (denied) denied.style.display = 'flex';
+    }
+
     // Initialize on page load
     window.addEventListener('DOMContentLoaded', initializeChat);
 
@@ -837,6 +905,16 @@
             const chat = await loadChatFromSlug(slug);
 
             if (chat) {
+                // Enforce access type: block closed chats on the public link
+                var accessType = (chat.access_type || '').toLowerCase();
+                console.log('Access type check:', accessType, '| Chat:', chat.name, '| ID:', chat.id);
+                if (accessType === 'closed' || accessType === 'invite_only') {
+                    console.log('Blocked: chat is invite-only, showing access denied screen');
+                    showAccessDenied();
+                    isInitialized = true;
+                    return;
+                }
+
                 // Create session configuration from database chat
                 sessionConfig = {
                     id: chat.id,
@@ -896,6 +974,19 @@
 
             chatType = sessionConfig.type;
             chatState.participantId = sessionId;
+        }
+
+        // Universal access type gate — runs regardless of how the chat was loaded
+        var loadedChat = window.currentChat;
+        if (loadedChat && loadedChat.access_type) {
+            var at = loadedChat.access_type.toLowerCase();
+            console.log('[Access Gate] access_type =', at, '| chat =', loadedChat.name, '| id =', loadedChat.id);
+            if (at === 'closed' || at === 'invite_only') {
+                console.log('[Access Gate] BLOCKED — showing access denied');
+                showAccessDenied();
+                isInitialized = true;
+                return;
+            }
         }
 
         // Apply organization branding if available
@@ -1880,6 +1971,37 @@
                     console.log('✅ Database save result:', saved);
                 } catch (err) {
                     console.error('❌ Database save error:', err);
+                }
+
+                // Trigger submission notification (fire-and-forget, don't block the UI)
+                console.log('[notify] Starting notification trigger...');
+                try {
+                    const chat = window.currentChat;
+                    console.log('[notify] currentChat:', chat ? { id: chat.id, name: chat.name, user_id: chat.user_id, created_by: chat.created_by } : 'NULL');
+                    if (chat && chat.id) {
+                        const notifyPayload = {
+                            chatId: chat.id,
+                            chatName: chat.name || 'Feedback Session',
+                            submittedAt: new Date().toISOString()
+                        };
+                        console.log('[notify] Sending fetch to /api/notify-submission with:', JSON.stringify(notifyPayload));
+                        fetch('/api/notify-submission', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(notifyPayload)
+                        })
+                        .then(resp => {
+                            console.log('[notify] API response status:', resp.status);
+                            return resp.json().then(data => {
+                                console.log('[notify] API response body:', JSON.stringify(data));
+                            });
+                        })
+                        .catch(err => console.error('[notify] Fetch error:', err));
+                    } else {
+                        console.warn('[notify] Skipped - no chat loaded. window.currentChat:', window.currentChat);
+                    }
+                } catch (err) {
+                    console.error('[notify] Error in notification trigger:', err);
                 }
 
                 // Mark conversation as complete and show success
