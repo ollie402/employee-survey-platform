@@ -907,7 +907,9 @@
             if (chat) {
                 // Enforce access type: block closed chats on the public link
                 var accessType = (chat.access_type || '').toLowerCase();
+                console.log('Access type check:', accessType, '| Chat:', chat.name, '| ID:', chat.id);
                 if (accessType === 'closed' || accessType === 'invite_only') {
+                    console.log('Blocked: chat is invite-only, showing access denied screen');
                     showAccessDenied();
                     isInitialized = true;
                     return;

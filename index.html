@@ -13044,6 +13044,9 @@ function openChatEditor(chatId = null) {
         // Clear participants data for new chat
         chatParticipantsData = [];
         if (typeof updateLinkPanelForAccessType === 'function') updateLinkPanelForAccessType();
+        // Show Create Chat button for new chats
+        var createBtn = document.getElementById('create-chat-btn');
+        if (createBtn) { createBtn.style.display = ''; createBtn.textContent = 'Create Chat'; }
     } else {
         // Existing chat - load from database
         loadChatIntoEditor(chatId);
@@ -13099,6 +13102,10 @@ async function loadChatIntoEditor(chatId) {
             }
         }
         if (typeof updateLinkPanelForAccessType === 'function') updateLinkPanelForAccessType();
+
+        // Hide Create Chat button for existing chats — Save is the primary action
+        var createBtn = document.getElementById('create-chat-btn');
+        if (createBtn) createBtn.style.display = 'none';
 
         // Set notification frequency dropdown
         const notifDropdown = document.getElementById('chat-notification-frequency');
@@ -17919,6 +17926,15 @@ async function createChat(btn) {
     if (!chatName) {
         alert('Please enter a chat name');
         document.getElementById('chat-setup-name').focus();
+        return;
+    }
+
+    var existingId = currentChatId || window.currentEditingChatId;
+
+    // If chat already exists, update it via saveListeningAll instead of creating new
+    if (existingId) {
+        var saveBtn = document.getElementById('save-chat-btn');
+        if (saveBtn) await saveListeningAll(saveBtn);
         return;
     }
 
