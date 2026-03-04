@@ -31,6 +31,36 @@
             border-top: none;
             border-radius: 0 0 8px 8px;
         }
+        /* Email subject row – Gmail-style bar above Quill toolbar */
+        .email-subject-row {
+            display: flex;
+            align-items: center;
+            border: 1px solid #e2e8f0;
+            border-bottom: none;
+            border-radius: 8px 8px 0 0;
+            background: #f8fafc;
+            padding: 6px 12px;
+        }
+        .email-subject-label {
+            font-weight: 600;
+            font-size: 13px;
+            color: #64748b;
+            margin-right: 8px;
+            white-space: nowrap;
+        }
+        .email-subject-input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            font-size: 14px;
+            color: #1e293b;
+            outline: none;
+            padding: 4px 0;
+            font-family: inherit;
+        }
+        .email-subject-row + .ql-toolbar.ql-snow {
+            border-radius: 0;
+        }
 
         /* Fix dropdown visibility issues */
         .dropdown-menu {
@@ -5365,12 +5395,22 @@
                                         <div>
                                             <div style="margin-bottom: 20px;">
                                                 <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #1e293b;">Email Invite Text</label>
+                                                <div class="email-subject-row" id="invite-subject-row">
+                                                    <span class="email-subject-label">Subject:</span>
+                                                    <input type="text" id="email-invite-subject" class="email-subject-input"
+                                                           value="You've been invited to share your feedback" placeholder="Email subject line">
+                                                </div>
                                                 <div id="email-invite-editor" style="min-height: 180px; background: #fff; border: 1px solid #e2e8f0; border-radius: 0 0 8px 8px;"></div>
                                                 <p style="margin-top: 6px; font-size: 12px; color: #64748b;">Use {first_name}, {surname}, {email}, {link} as placeholders.</p>
                                             </div>
 
                                             <div>
                                                 <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #1e293b;">Email Reminder Text</label>
+                                                <div class="email-subject-row" id="reminder-subject-row">
+                                                    <span class="email-subject-label">Subject:</span>
+                                                    <input type="text" id="email-reminder-subject" class="email-subject-input"
+                                                           value="A reminder to share your feedback" placeholder="Email subject line">
+                                                </div>
                                                 <div id="email-reminder-editor" style="min-height: 180px; background: #fff; border: 1px solid #e2e8f0; border-radius: 0 0 8px 8px;"></div>
                                                 <p style="margin-top: 6px; font-size: 12px; color: #64748b;">Use {first_name}, {surname}, {email}, {link} as placeholders.</p>
                                             </div>
@@ -13145,6 +13185,12 @@ async function loadChatIntoEditor(chatId) {
         if (chat.email_invite_text) setInviteEditorHTML(chat.email_invite_text);
         if (chat.email_reminder_text) setReminderEditorHTML(chat.email_reminder_text);
 
+        // Load email subject lines
+        var invSubj = document.getElementById('email-invite-subject');
+        if (invSubj) invSubj.value = chat.email_invite_subject || "You've been invited to share your feedback";
+        var remSubj = document.getElementById('email-reminder-subject');
+        if (remSubj) remSubj.value = chat.email_reminder_subject || 'A reminder to share your feedback';
+
         console.log('Loaded chat into editor:', chat.name);
 
         // Re-evaluate Getting Started checklist now that fields are populated
@@ -14400,7 +14446,7 @@ async function sendInviteEmails(chatId, chatName, chatSlug) {
                     },
                     body: JSON.stringify({
                         to: participant.email,
-                        subject: `You're invited to share your feedback - ${chatName}`,
+                        subject: (document.getElementById('email-invite-subject')?.value?.trim()) || "You've been invited to share your feedback",
                         htmlBody: htmlBody,
                         textBody: textBody
                     })
@@ -18292,7 +18338,9 @@ async function sendInvitesToSelected() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     to: participant.email,
-                    subject: isReminder ? `Reminder: Share your feedback - ${chat.name}` : `You're invited to share your feedback - ${chat.name}`,
+                    subject: isReminder
+                        ? (document.getElementById('email-reminder-subject')?.value?.trim() || 'A reminder to share your feedback')
+                        : (document.getElementById('email-invite-subject')?.value?.trim() || "You've been invited to share your feedback"),
                     htmlBody: htmlBody,
                     textBody: textBody
                 })
@@ -18380,6 +18428,8 @@ async function saveListeningAll(btn) {
                 slug: linkCode,
                 email_invite_text: getInviteEditorHTML(),
                 email_reminder_text: getReminderEditorHTML(),
+                email_invite_subject: document.getElementById('email-invite-subject').value.trim() || "You've been invited to share your feedback",
+                email_reminder_subject: document.getElementById('email-reminder-subject').value.trim() || 'A reminder to share your feedback',
                 notification_frequency: notifFreq
             };
 
@@ -18403,6 +18453,8 @@ async function saveListeningAll(btn) {
                 access_type: accessType,
                 email_invite_text: getInviteEditorHTML(),
                 email_reminder_text: getReminderEditorHTML(),
+                email_invite_subject: document.getElementById('email-invite-subject').value.trim() || "You've been invited to share your feedback",
+                email_reminder_subject: document.getElementById('email-reminder-subject').value.trim() || 'A reminder to share your feedback',
                 notification_frequency: notifFreq
             };
 
