@@ -5749,22 +5749,24 @@
                               </div>
 
                               <div class="rw-right-col">
-                                <div class="rw-card" id="engage-chat-success-panel" style="display: none;">
+
+                                <!-- Your Chat Link Card (always visible) -->
+                                <div class="rw-card" id="engage-chat-success-panel">
                                   <div class="rw-card-header">
                                     <div class="rw-card-header-icon green">
                                       <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
                                     </div>
                                     <div>
                                       <div class="rw-card-title">Your Chat Link</div>
-                                      <div class="rw-card-subtitle">Share this with your participants</div>
+                                      <div class="rw-card-subtitle" id="engage-link-card-subtitle">Share this with your participants — <em>create a chat first</em></div>
                                     </div>
                                   </div>
                                   <div class="rw-card-body">
-                                    <div class="rw-link-panel">
+                                    <div class="rw-link-panel rw-link-panel-disabled" id="engage-link-panel">
                                       <div class="rw-link-panel-label">Participant URL</div>
                                       <div class="rw-link-display">
                                         <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
-                                        <input type="text" id="engageGeneratedChatLink" readonly>
+                                        <input type="text" id="engageGeneratedChatLink" readonly placeholder="https://rworldfeedback.co.uk/chat/...">
                                       </div>
                                       <div class="rw-link-actions">
                                         <button onclick="copyEngageGeneratedLink()" id="engageCopyLinkBtn" class="rw-btn-copy" style="flex:1; padding:9px; background:#6c63ff !important; color:#fff !important; border:none; border-radius:7px; font-size:12.5px; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;">
@@ -19824,15 +19826,23 @@ function setEngageReminderEditorHTML(html) { if (engageReminderQuill) engageRemi
 function updateEngageLinkPanelForAccessType() { updateEngageTabAndLinkState(); }
 function updateEngageTabAndLinkState() {
     var sel = document.getElementById('engage-chat-access-type');
-    var linkPanel = document.querySelector('#engage-chat-success-panel .rw-link-panel');
+    var linkPanel = document.getElementById('engage-link-panel');
     var partTab = document.querySelector('.engage-chat-editor-tab[data-tab="participants"]');
     var partWrapper = document.getElementById('engage-participants-tab-wrapper');
     if (!sel) return;
     var v = sel.value;
+
+    // Link panel: disabled if no chat exists yet OR if access type is closed
+    var chatExists = !!(engageCurrentChatId || window.engageCurrentEditingChatId);
     if (linkPanel) {
-        if (v === 'closed') { linkPanel.classList.add('rw-link-panel-disabled'); }
-        else { linkPanel.classList.remove('rw-link-panel-disabled'); }
+        if (!chatExists || v === 'closed') {
+            linkPanel.classList.add('rw-link-panel-disabled');
+        } else {
+            linkPanel.classList.remove('rw-link-panel-disabled');
+        }
     }
+
+    // Participants tab: disabled for open, enabled for closed/combined
     if (partTab) {
         if (v === 'open') {
             partTab.classList.add('rw-tab-disabled');
@@ -19842,6 +19852,23 @@ function updateEngageTabAndLinkState() {
             if (partWrapper) partWrapper.classList.remove('rw-tab-disabled-wrapper');
         }
     }
+}
+
+// Reset the Engage link panel to its initial "create a chat first" disabled state
+function engageResetLinkPanel() {
+    var linkPanel = document.getElementById('engage-link-panel');
+    var subtitle = document.getElementById('engage-link-card-subtitle');
+    if (linkPanel) linkPanel.classList.add('rw-link-panel-disabled');
+    if (subtitle) subtitle.innerHTML = 'Share this with your participants — <em>create a chat first</em>';
+}
+
+// Activate the Engage link panel after a chat is created or loaded
+function engageActivateLinkPanel() {
+    var linkPanel = document.getElementById('engage-link-panel');
+    var subtitle = document.getElementById('engage-link-card-subtitle');
+    if (subtitle) subtitle.textContent = 'Share this with your participants';
+    // Let the access-type logic decide whether to keep it disabled (e.g. closed access)
+    updateEngageTabAndLinkState();
 }
 
 // --- Load engage chats from database ---
@@ -20012,9 +20039,6 @@ function copyEngageChatLink(slug) {
 
 // --- Open engage chat editor ---
 function openEngageChatEditor(chatId = null) {
-    const successPanel = document.getElementById('engage-chat-success-panel');
-    if (successPanel) successPanel.style.display = 'none';
-
     engageCurrentChatId = null;
     window.engageCurrentEditingChatId = null;
     window.engageCurrentEditingChat = null;
@@ -20033,7 +20057,8 @@ function openEngageChatEditor(chatId = null) {
         const generatedLinkInput = document.getElementById('engageGeneratedChatLink');
         if (generatedLinkInput) generatedLinkInput.value = '';
         engageParticipantsData = [];
-        updateEngageLinkPanelForAccessType();
+        // Reset link panel to disabled "create a chat first" state
+        engageResetLinkPanel();
         var createBtn = document.getElementById('engage-create-chat-btn');
         if (createBtn) { createBtn.style.display = ''; createBtn.textContent = 'Create Chat'; }
     } else {
@@ -20079,15 +20104,16 @@ async function loadEngageChatIntoEditor(chatId) {
         const notifDropdown = document.getElementById('engage-chat-notification-frequency');
         if (notifDropdown) notifDropdown.value = chat.notification_frequency || '';
 
-        const successPanel = document.getElementById('engage-chat-success-panel');
         const generatedChatLink = document.getElementById('engageGeneratedChatLink');
 
+        // Always populate the link
+        if (generatedChatLink) generatedChatLink.value = 'https://rworldfeedback.co.uk/chat/' + chat.slug;
+
+        // Activate the link panel (chat exists) and let access-type logic handle disabled state
+        engageActivateLinkPanel();
+
         if (chat.access_type === 'invite_only' || chat.access_type === 'closed') {
-            if (successPanel) successPanel.style.display = 'none';
             await loadEngageExistingParticipants(chatId);
-        } else {
-            if (successPanel) successPanel.style.display = 'block';
-            if (generatedChatLink) generatedChatLink.value = 'https://rworldfeedback.co.uk/chat/' + chat.slug;
         }
 
         if (chat.email_invite_text) setEngageInviteEditorHTML(chat.email_invite_text);
@@ -20172,12 +20198,12 @@ function getEngageSelectedAccessType() {
 }
 
 function showEngageSuccessPanelWithLink(chatName) {
-    const successPanel = document.getElementById('engage-chat-success-panel');
     const generatedChatLink = document.getElementById('engageGeneratedChatLink');
     const uniqueId = generateUniqueId();
     const chatLink = 'https://rworldfeedback.co.uk/chat/' + uniqueId;
     if (generatedChatLink) generatedChatLink.value = chatLink;
-    if (successPanel) successPanel.style.display = 'block';
+    // Activate the link panel (removes disabled state, updates subtitle)
+    engageActivateLinkPanel();
 }
 
 // --- Save engage all ---
@@ -20234,6 +20260,15 @@ async function saveEngageAll(btn) {
             engageCurrentChatId = newChat.id;
             window.engageCurrentEditingChatId = newChat.id;
             window.engageCurrentEditingChat = newChat;
+
+            // Populate the link and activate the panel
+            var genLink = document.getElementById('engageGeneratedChatLink');
+            if (genLink) genLink.value = 'https://rworldfeedback.co.uk/chat/' + newChat.slug;
+            engageActivateLinkPanel();
+
+            // Hide Create button now that chat exists
+            var createBtnEl = document.getElementById('engage-create-chat-btn');
+            if (createBtnEl) createBtnEl.style.display = 'none';
         } else {
             const updateData = {
                 name: chatName, welcome_message: welcomeMessage, access_type: accessType,
@@ -20273,12 +20308,17 @@ async function saveEngageAll(btn) {
 // --- Copy engage generated link ---
 function copyEngageGeneratedLink() {
     const linkInput = document.getElementById('engageGeneratedChatLink');
-    if (linkInput) {
-        linkInput.select();
-        document.execCommand('copy');
-        alert('Link copied to clipboard!');
-        if (typeof engageGsCompleteByKey === 'function') engageGsCompleteByKey('copyLink');
+    if (!linkInput || !linkInput.value) return;
+    linkInput.select();
+    document.execCommand('copy');
+    // Show "Copied!" feedback on the button
+    var btn = document.getElementById('engageCopyLinkBtn');
+    if (btn) {
+        var origHTML = btn.innerHTML;
+        btn.innerHTML = '<svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:14px;height:14px;flex-shrink:0;"><polyline points="20 6 9 17 4 12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></polyline></svg> Copied!';
+        setTimeout(function() { btn.innerHTML = origHTML; }, 2000);
     }
+    if (typeof engageGsCompleteByKey === 'function') engageGsCompleteByKey('copyLink');
 }
 
 // --- Engage participants functions ---
