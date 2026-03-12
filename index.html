@@ -4260,6 +4260,38 @@
         .rw-field textarea { resize: vertical; min-height: 110px; line-height: 1.6; }
         .rw-field .rw-hint { font-size: 11.5px; color: var(--rw-text-soft); margin-top: 5px; }
 
+        /* Engage Topics tag input */
+        .rw-tags-input-wrap {
+          display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+          padding: 8px 10px; min-height: 44px;
+          border: 1.5px solid var(--rw-border); border-radius: 8px;
+          background: #fafbfc; cursor: text;
+          transition: all 0.15s;
+        }
+        .rw-tags-input-wrap:focus-within {
+          border-color: var(--rw-accent2); background: #fff;
+          box-shadow: 0 0 0 3px rgba(108,99,255,0.08);
+        }
+        .rw-tag {
+          display: inline-flex; align-items: center; gap: 4px;
+          background: #eef2ff; color: #4338ca; border-radius: 5px;
+          padding: 3px 8px; font-size: 12.5px; font-weight: 500;
+          line-height: 1.4; white-space: nowrap;
+        }
+        .rw-tag-remove {
+          background: none; border: none; cursor: pointer;
+          color: #6366f1; font-size: 14px; line-height: 1;
+          padding: 0 0 0 2px; display: flex; align-items: center;
+        }
+        .rw-tag-remove:hover { color: #dc2626; }
+        .rw-tags-text-input {
+          flex: 1; min-width: 120px; border: none; outline: none;
+          background: transparent; font-family: inherit;
+          font-size: 13.5px; color: var(--rw-text);
+          padding: 2px 0;
+        }
+        .rw-tags-text-input::placeholder { color: #94a3b8; }
+
         .rw-save-section {
           padding: 16px 22px;
           border-top: 1px solid #e8edf5;
@@ -5686,6 +5718,18 @@
                                       </label>
                                       <textarea id="engage-chat-setup-welcome" rows="4" placeholder="Hi! Thanks for taking the time to share your feedback with us.">Hi! Thanks for taking the time to share your feedback with us. Please feel free to tell us about your experience or any suggestions you might have.</textarea>
                                       <div class="rw-hint">This message will appear when participants first open the chat.</div>
+                                    </div>
+                                    <div class="rw-field">
+                                      <label>
+                                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+                                        Topics to Cover
+                                      </label>
+                                      <div class="rw-tags-input-wrap" id="engage-topics-wrap" onclick="document.getElementById('engage-topics-input').focus()">
+                                        <input type="text" class="rw-tags-text-input" id="engage-topics-input"
+                                               placeholder="Work-life balance, Management support, Career development"
+                                               onkeydown="handleEngageTopicKeydown(event)">
+                                      </div>
+                                      <div class="rw-hint">Specify the topics you'd like to explore. The AI will use these to guide participants during the chat.</div>
                                     </div>
                                   </div>
                                 </div>
@@ -19854,6 +19898,61 @@ function updateEngageTabAndLinkState() {
     }
 }
 
+// --- Engage Topics tag input ---
+let engageTopicsData = [];
+
+function handleEngageTopicKeydown(e) {
+    if (e.key === 'Enter' || e.key === ',') {
+        e.preventDefault();
+        var input = e.target;
+        var val = input.value.replace(/,/g, '').trim();
+        if (val && !engageTopicsData.includes(val)) {
+            engageTopicsData.push(val);
+            renderEngageTopicTags();
+        }
+        input.value = '';
+    } else if (e.key === 'Backspace' && !e.target.value && engageTopicsData.length > 0) {
+        engageTopicsData.pop();
+        renderEngageTopicTags();
+    }
+}
+
+function removeEngageTopic(index) {
+    engageTopicsData.splice(index, 1);
+    renderEngageTopicTags();
+}
+
+function renderEngageTopicTags() {
+    var wrap = document.getElementById('engage-topics-wrap');
+    var input = document.getElementById('engage-topics-input');
+    if (!wrap || !input) return;
+    // Remove existing tags
+    wrap.querySelectorAll('.rw-tag').forEach(function(t) { t.remove(); });
+    // Insert tags before the input
+    engageTopicsData.forEach(function(topic, i) {
+        var tag = document.createElement('span');
+        tag.className = 'rw-tag';
+        tag.innerHTML = escapeHtmlText(topic) + '<button type="button" class="rw-tag-remove" onclick="removeEngageTopic(' + i + ')">&times;</button>';
+        wrap.insertBefore(tag, input);
+    });
+    // Update placeholder
+    input.placeholder = engageTopicsData.length > 0 ? '' : 'Work-life balance, Management support, Career development';
+}
+
+function getEngageTopicsJSON() {
+    return engageTopicsData.length > 0 ? JSON.stringify(engageTopicsData) : null;
+}
+
+function setEngageTopicsFromData(data) {
+    if (!data) { engageTopicsData = []; }
+    else if (typeof data === 'string') {
+        try { engageTopicsData = JSON.parse(data); } catch (e) { engageTopicsData = data.split(',').map(function(s) { return s.trim(); }).filter(Boolean); }
+    } else if (Array.isArray(data)) {
+        engageTopicsData = data.slice();
+    } else { engageTopicsData = []; }
+    renderEngageTopicTags();
+}
+
 // Reset the Engage link panel to its initial "create a chat first" disabled state
 function engageResetLinkPanel() {
     var linkPanel = document.getElementById('engage-link-panel');
@@ -20059,6 +20158,7 @@ function openEngageChatEditor(chatId = null) {
         engageParticipantsData = [];
         // Reset link panel to disabled "create a chat first" state
         engageResetLinkPanel();
+        setEngageTopicsFromData(null);
         var createBtn = document.getElementById('engage-create-chat-btn');
         if (createBtn) { createBtn.style.display = ''; createBtn.textContent = 'Create Chat'; }
     } else {
@@ -20123,6 +20223,8 @@ async function loadEngageChatIntoEditor(chatId) {
         if (invSubj) invSubj.value = chat.email_invite_subject || "You've been invited to share your feedback";
         var remSubj = document.getElementById('engage-email-reminder-subject');
         if (remSubj) remSubj.value = chat.email_reminder_subject || 'A reminder to share your feedback';
+
+        setEngageTopicsFromData(chat.engage_topics);
 
         console.log('Loaded engage chat into editor:', chat.name);
 
@@ -20250,7 +20352,8 @@ async function saveEngageAll(btn) {
                 email_reminder_text: getEngageReminderEditorHTML(),
                 email_invite_subject: document.getElementById('engage-email-invite-subject').value.trim() || "You've been invited to share your feedback",
                 email_reminder_subject: document.getElementById('engage-email-reminder-subject').value.trim() || 'A reminder to share your feedback',
-                notification_frequency: notifFreq
+                notification_frequency: notifFreq,
+                engage_topics: getEngageTopicsJSON()
             };
 
             const { data: newChat, error } = await window.supabaseClient.from('engage_chats').insert(chatData).select().single();
@@ -20276,7 +20379,8 @@ async function saveEngageAll(btn) {
                 email_reminder_text: getEngageReminderEditorHTML(),
                 email_invite_subject: document.getElementById('engage-email-invite-subject').value.trim() || "You've been invited to share your feedback",
                 email_reminder_subject: document.getElementById('engage-email-reminder-subject').value.trim() || 'A reminder to share your feedback',
-                notification_frequency: notifFreq
+                notification_frequency: notifFreq,
+                engage_topics: getEngageTopicsJSON()
             };
             const { data: updatedChat, error } = await window.supabaseClient.from('engage_chats').update(updateData).eq('id', chatId).select().single();
             if (error) throw error;
