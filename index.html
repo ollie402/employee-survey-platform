@@ -5650,6 +5650,17 @@
                         <div id="chat-editor-tab-analytics" class="chat-editor-tab-content" style="display: none;">
                             <div style="max-width: 1200px;">
 
+                                <!-- TEST: Claude API verification button (temporary) -->
+                                <div id="claude-test-section" style="margin-bottom: 20px; padding: 16px; background: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px;">
+                                    <div style="display: flex; align-items: center; gap: 12px;">
+                                        <button onclick="testClaudeAnalysis()" style="padding: 10px 20px; background: #7c3aed; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                                            Test Claude API
+                                        </button>
+                                        <span style="color: #92400e; font-size: 14px;">Temporary test — calls /api/analyse with this chat's responses and logs result to console</span>
+                                    </div>
+                                    <pre id="claude-test-output" style="margin-top: 12px; padding: 12px; background: #1e1e1e; color: #d4d4d4; border-radius: 6px; font-size: 13px; overflow-x: auto; display: none; white-space: pre-wrap;"></pre>
+                                </div>
+
                                 <!-- Loading State -->
                                 <div id="analytics-loading" class="analytics-loading" style="display: none;">
                                     <div class="analytics-loading-spinner"></div>
@@ -15484,91 +15495,155 @@ document.addEventListener('DOMContentLoaded', initSaveChatButton);
 // AI ANALYSIS CONFIGURATION & FUNCTIONS
 // ============================================================================
 
-const AI_SERVER_URL = 'http://localhost:8080';  // Change for production
+// OLD: localhost:8080 Flask/Railway AI server — disabled, replaced by Claude API via /api/analyse
+// const AI_SERVER_URL = 'http://localhost:8080';
 
 /**
  * Check if AI server is available
+ * OLD: Called localhost:8080/health — now disabled
  */
-async function checkAIServerHealth() {
-    try {
-        const response = await fetch(`${AI_SERVER_URL}/health`, {
-            method: 'GET'
-        });
-        const data = await response.json();
-        return data.status === 'healthy';
-    } catch (error) {
-        console.log('AI server not available:', error.message);
-        return false;
-    }
-}
+// async function checkAIServerHealth() {
+//     try {
+//         const response = await fetch(`${AI_SERVER_URL}/health`, {
+//             method: 'GET'
+//         });
+//         const data = await response.json();
+//         return data.status === 'healthy';
+//     } catch (error) {
+//         console.log('AI server not available:', error.message);
+//         return false;
+//     }
+// }
 
 /**
  * Analyze a single response
+ * OLD: Called localhost:8080/analyze — now disabled
  */
-async function analyzeResponse(responseId, responseText) {
-    try {
-        const response = await fetch(`${AI_SERVER_URL}/analyze`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                text: responseText,
-                response_id: responseId
-            })
-        });
-
-        if (!response.ok) {
-            throw new Error(`AI server error: ${response.status}`);
-        }
-
-        const result = await response.json();
-
-        if (!result.success) {
-            throw new Error(result.error || 'Analysis failed');
-        }
-
-        return result.data;
-
-    } catch (error) {
-        console.error('Error analyzing response:', error);
-        throw error;
-    }
-}
+// async function analyzeResponse(responseId, responseText) {
+//     try {
+//         const response = await fetch(`${AI_SERVER_URL}/analyze`, {
+//             method: 'POST',
+//             headers: {
+//                 'Content-Type': 'application/json'
+//             },
+//             body: JSON.stringify({
+//                 text: responseText,
+//                 response_id: responseId
+//             })
+//         });
+//         if (!response.ok) {
+//             throw new Error(`AI server error: ${response.status}`);
+//         }
+//         const result = await response.json();
+//         if (!result.success) {
+//             throw new Error(result.error || 'Analysis failed');
+//         }
+//         return result.data;
+//     } catch (error) {
+//         console.error('Error analyzing response:', error);
+//         throw error;
+//     }
+// }
 
 /**
  * Analyze multiple responses at once
+ * OLD: Called localhost:8080/analyze-batch — now disabled
  */
-async function analyzeResponsesBatch(responses) {
+// async function analyzeResponsesBatch(responses) {
+//     try {
+//         const response = await fetch(`${AI_SERVER_URL}/analyze-batch`, {
+//             method: 'POST',
+//             headers: {
+//                 'Content-Type': 'application/json'
+//             },
+//             body: JSON.stringify({
+//                 responses: responses.map(r => ({
+//                     id: r.id,
+//                     text: r.response_text
+//                 }))
+//             })
+//         });
+//         if (!response.ok) {
+//             throw new Error(`AI server error: ${response.status}`);
+//         }
+//         const result = await response.json();
+//         if (!result.success) {
+//             throw new Error(result.error || 'Batch analysis failed');
+//         }
+//         return result.results;
+//     } catch (error) {
+//         console.error('Error in batch analysis:', error);
+//         throw error;
+//     }
+// }
+
+/**
+ * NEW: Analyse responses using Claude API via /api/analyse
+ */
+async function analyseWithClaude(responses) {
     try {
-        const response = await fetch(`${AI_SERVER_URL}/analyze-batch`, {
+        const response = await fetch('/api/analyse', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
                 responses: responses.map(r => ({
-                    id: r.id,
-                    text: r.response_text
+                    message: r.response_text || r.text || r.message || ''
                 }))
             })
         });
 
         if (!response.ok) {
-            throw new Error(`AI server error: ${response.status}`);
+            const err = await response.json();
+            throw new Error(err.error || `API error: ${response.status}`);
         }
 
-        const result = await response.json();
-
-        if (!result.success) {
-            throw new Error(result.error || 'Batch analysis failed');
-        }
-
-        return result.results;
-
+        return await response.json();
     } catch (error) {
-        console.error('Error in batch analysis:', error);
+        console.error('Error calling Claude API:', error);
         throw error;
+    }
+}
+
+/**
+ * TEST: Temporary function to verify Claude API connection
+ * Fetches current chat's responses and sends them to /api/analyse
+ */
+async function testClaudeAnalysis() {
+    const outputEl = document.getElementById('claude-test-output');
+    outputEl.style.display = 'block';
+    outputEl.textContent = 'Loading responses from database...';
+
+    try {
+        if (!window.currentEditingChatId) {
+            outputEl.textContent = 'Error: No chat selected. Open a Listen chat first.';
+            return;
+        }
+
+        const { data: responses, error } = await window.supabaseClient
+            .from('chat_responses')
+            .select('id, response_text')
+            .eq('chat_id', window.currentEditingChatId);
+
+        if (error) throw error;
+
+        if (!responses || responses.length === 0) {
+            outputEl.textContent = 'No responses found for this chat.';
+            return;
+        }
+
+        outputEl.textContent = `Found ${responses.length} response(s). Sending to Claude API...`;
+
+        const result = await analyseWithClaude(responses);
+
+        console.log('Claude API test result:', result);
+        outputEl.textContent = JSON.stringify(result, null, 2);
+
+    } catch (err) {
+        console.error('Claude API test failed:', err);
+        outputEl.textContent = 'ERROR: ' + err.message;
+        outputEl.style.color = '#ef4444';
     }
 }
 
@@ -15608,46 +15683,94 @@ async function saveAnalysisToDatabase(analysisData) {
 
 /**
  * Analyze a single response and save to database
+ * OLD: Used localhost:8080 analyzeResponse() — now disabled
+ */
+// async function analyzeAndSaveSingle(responseId, responseText, buttonElement) {
+//     if (buttonElement) {
+//         buttonElement.disabled = true;
+//         buttonElement.innerHTML = '⏳ Analyzing...';
+//     }
+//     try {
+//         const analysis = await analyzeResponse(responseId, responseText);
+//         await saveAnalysisToDatabase(analysis);
+//         updateResponseRowWithAnalysis(responseId, analysis);
+//         if (buttonElement) {
+//             buttonElement.innerHTML = '✅ Done';
+//             buttonElement.style.background = '#10b981';
+//         }
+//         return analysis;
+//     } catch (error) {
+//         if (buttonElement) {
+//             buttonElement.disabled = false;
+//             buttonElement.innerHTML = '🔍 Retry';
+//             buttonElement.style.background = '#ef4444';
+//         }
+//         alert('Analysis failed: ' + error.message);
+//         throw error;
+//     }
+// }
+
+/**
+ * Stub: single response analysis — will be re-implemented with Claude later
  */
 async function analyzeAndSaveSingle(responseId, responseText, buttonElement) {
-    // Show loading state
-    if (buttonElement) {
-        buttonElement.disabled = true;
-        buttonElement.innerHTML = '⏳ Analyzing...';
-    }
-
-    try {
-        // Get AI analysis
-        const analysis = await analyzeResponse(responseId, responseText);
-
-        // Save to database
-        await saveAnalysisToDatabase(analysis);
-
-        // Update the row UI
-        updateResponseRowWithAnalysis(responseId, analysis);
-
-        // Show success
-        if (buttonElement) {
-            buttonElement.innerHTML = '✅ Done';
-            buttonElement.style.background = '#10b981';
-        }
-
-        return analysis;
-
-    } catch (error) {
-        // Show error
-        if (buttonElement) {
-            buttonElement.disabled = false;
-            buttonElement.innerHTML = '🔍 Retry';
-            buttonElement.style.background = '#ef4444';
-        }
-        alert('Analysis failed: ' + error.message);
-        throw error;
-    }
+    alert('Single response analysis is being migrated to Claude AI. Use "Analyze All with AI" for now.');
 }
 
 /**
  * Analyze all unanalyzed responses for current chat
+ * OLD: Used localhost:8080 Flask server — now disabled
+ */
+// async function analyzeAllUnanalyzedResponses() {
+//     if (!window.currentEditingChatId) {
+//         alert('No chat selected');
+//         return;
+//     }
+//     try {
+//         const isHealthy = await checkAIServerHealth();
+//         if (!isHealthy) {
+//             alert('AI server is not available. Make sure it is running on localhost:8080');
+//             return;
+//         }
+//         const { data: allResponses, error: fetchError } = await window.supabaseClient
+//             .from('chat_responses')
+//             .select('id, response_text')
+//             .eq('chat_id', window.currentEditingChatId);
+//         if (fetchError) throw fetchError;
+//         const { data: existingAnalyses } = await window.supabaseClient
+//             .from('chat_response_analysis')
+//             .select('response_id')
+//             .in('response_id', allResponses.map(r => r.id));
+//         const analyzedIds = new Set((existingAnalyses || []).map(a => a.response_id));
+//         const unanalyzedResponses = allResponses.filter(r => !analyzedIds.has(r.id));
+//         if (unanalyzedResponses.length === 0) {
+//             alert('All responses have already been analyzed!');
+//             return;
+//         }
+//         const confirmMsg = `Analyze ${unanalyzedResponses.length} response(s)? This may take a moment.`;
+//         if (!confirm(confirmMsg)) return;
+//         showAnalysisProgressModal(unanalyzedResponses.length);
+//         const results = await analyzeResponsesBatch(unanalyzedResponses);
+//         let completed = 0;
+//         for (const result of results) {
+//             if (result.analysis) {
+//                 await saveAnalysisToDatabase(result.analysis);
+//             }
+//             completed++;
+//             updateAnalysisProgress(completed, unanalyzedResponses.length);
+//         }
+//         hideAnalysisProgressModal();
+//         loadChatResponses(window.currentEditingChatId);
+//         alert(`Successfully analyzed ${completed} response(s)!`);
+//     } catch (error) {
+//         console.error('Error in bulk analysis:', error);
+//         hideAnalysisProgressModal();
+//         alert('Bulk analysis failed: ' + error.message);
+//     }
+// }
+
+/**
+ * NEW: Analyze all responses for current chat using Claude API
  */
 async function analyzeAllUnanalyzedResponses() {
     if (!window.currentEditingChatId) {
@@ -15656,14 +15779,6 @@ async function analyzeAllUnanalyzedResponses() {
     }
 
     try {
-        // Check if AI server is available
-        const isHealthy = await checkAIServerHealth();
-        if (!isHealthy) {
-            alert('AI server is not available. Make sure it is running on localhost:8080');
-            return;
-        }
-
-        // Get responses that don't have analysis yet
         const { data: allResponses, error: fetchError } = await window.supabaseClient
             .from('chat_responses')
             .select('id, response_text')
@@ -15671,51 +15786,29 @@ async function analyzeAllUnanalyzedResponses() {
 
         if (fetchError) throw fetchError;
 
-        // Get existing analyses
-        const { data: existingAnalyses } = await window.supabaseClient
-            .from('chat_response_analysis')
-            .select('response_id')
-            .in('response_id', allResponses.map(r => r.id));
-
-        const analyzedIds = new Set((existingAnalyses || []).map(a => a.response_id));
-        const unanalyzedResponses = allResponses.filter(r => !analyzedIds.has(r.id));
-
-        if (unanalyzedResponses.length === 0) {
-            alert('All responses have already been analyzed!');
+        if (!allResponses || allResponses.length === 0) {
+            alert('No responses to analyse.');
             return;
         }
 
-        const confirmMsg = `Analyze ${unanalyzedResponses.length} response(s)? This may take a moment.`;
+        const confirmMsg = `Analyse ${allResponses.length} response(s) with Claude AI? This may take a moment.`;
         if (!confirm(confirmMsg)) return;
 
-        // Show progress modal
-        showAnalysisProgressModal(unanalyzedResponses.length);
+        showAnalysisProgressModal(allResponses.length);
+        updateAnalysisProgress(0, allResponses.length, 'Sending to Claude API...');
 
-        // Analyze in batches
-        const results = await analyzeResponsesBatch(unanalyzedResponses);
+        const result = await analyseWithClaude(allResponses);
 
-        // Save each result
-        let completed = 0;
-        for (const result of results) {
-            if (result.analysis) {
-                await saveAnalysisToDatabase(result.analysis);
-            }
-            completed++;
-            updateAnalysisProgress(completed, unanalyzedResponses.length);
-        }
-
-        // Close progress modal
+        updateAnalysisProgress(allResponses.length, allResponses.length, 'Done!');
         hideAnalysisProgressModal();
 
-        // Reload responses to show analysis
-        loadChatResponses(window.currentEditingChatId);
-
-        alert(`Successfully analyzed ${completed} response(s)!`);
+        console.log('Claude analysis result:', result);
+        alert(`Analysis complete!\n\nSentiment: ${result.overall_sentiment}\nScore: ${result.sentiment_score}\nThemes: ${result.key_themes.join(', ')}\n\nSummary: ${result.summary}`);
 
     } catch (error) {
-        console.error('Error in bulk analysis:', error);
+        console.error('Error in Claude analysis:', error);
         hideAnalysisProgressModal();
-        alert('Bulk analysis failed: ' + error.message);
+        alert('Analysis failed: ' + error.message);
     }
 }
 
