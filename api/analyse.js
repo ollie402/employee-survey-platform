@@ -1,6 +1,6 @@
-const Anthropic = require('@anthropic-ai/sdk');
+import Anthropic from '@anthropic-ai/sdk';
 
-module.exports = async (req, res) => {
+export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   const { responses } = req.body;
@@ -12,7 +12,7 @@ module.exports = async (req, res) => {
     const responseText = responses.map((r, i) => `Response ${i + 1}: ${r.message}`).join('\n');
 
     const message = await client.messages.create({
-      model: 'claude-sonnet-4-20250514',
+      model: 'claude-opus-4-6',
       max_tokens: 1024,
       messages: [
         {
@@ -35,8 +35,9 @@ ${responseText}`
     const raw = message.content[0].text;
     const parsed = JSON.parse(raw);
     res.status(200).json(parsed);
+
   } catch (error) {
     console.error('Claude API error:', error);
-    res.status(500).json({ error: 'Analysis failed', details: error.message });
+    res.status(500).json({ error: error.message });
   }
-};
+}
