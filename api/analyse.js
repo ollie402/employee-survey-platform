@@ -17,7 +17,7 @@ export default async function handler(req, res) {
       messages: [
         {
           role: 'user',
-          content: `You are analysing employee feedback responses. Analyse the following responses and return a JSON object only (no other text) with this structure:
+          content: `You are analysing employee feedback responses. Analyse the following responses and return a JSON object only — no markdown, no code fences, no explanation, just the raw JSON object:
 {
   "overall_sentiment": "positive" | "neutral" | "negative",
   "sentiment_score": 0.0-1.0,
@@ -33,7 +33,8 @@ ${responseText}`
     });
 
     const raw = message.content[0].text;
-    const parsed = JSON.parse(raw);
+    const cleaned = raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+    const parsed = JSON.parse(cleaned);
     res.status(200).json(parsed);
 
   } catch (error) {
