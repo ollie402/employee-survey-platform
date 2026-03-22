@@ -5650,15 +5650,31 @@
                         <div id="chat-editor-tab-analytics" class="chat-editor-tab-content" style="display: none;">
                             <div style="max-width: 1200px;">
 
-                                <!-- TEST: Claude API verification button (temporary) -->
-                                <div id="claude-test-section" style="margin-bottom: 20px; padding: 16px; background: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px;">
-                                    <div style="display: flex; align-items: center; gap: 12px;">
-                                        <button onclick="testClaudeAnalysis()" style="padding: 10px 20px; background: #7c3aed; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
-                                            Test Claude API
-                                        </button>
-                                        <span style="color: #92400e; font-size: 14px;">Temporary test — calls /api/analyse with this chat's responses and logs result to console</span>
+                                <!-- Claude Analysis Results -->
+                                <div id="claude-analysis-results" style="display: none;">
+                                    <h3 style="margin: 0 0 16px 0; font-size: 18px; color: #1e293b;">Claude AI Analysis</h3>
+                                    <div style="display: flex; gap: 16px; margin-bottom: 20px;">
+                                        <div style="flex: 1; padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;">
+                                            <div style="font-size: 13px; color: #64748b; margin-bottom: 4px;">Overall Sentiment</div>
+                                            <div id="claude-sentiment" style="font-size: 24px; font-weight: 700; color: #1e293b;"></div>
+                                        </div>
+                                        <div style="flex: 1; padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;">
+                                            <div style="font-size: 13px; color: #64748b; margin-bottom: 4px;">Score</div>
+                                            <div id="claude-score" style="font-size: 24px; font-weight: 700; color: #1e293b;"></div>
+                                        </div>
+                                        <div style="flex: 1; padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;">
+                                            <div style="font-size: 13px; color: #64748b; margin-bottom: 4px;">Responses Analysed</div>
+                                            <div id="claude-response-count" style="font-size: 24px; font-weight: 700; color: #1e293b;"></div>
+                                        </div>
                                     </div>
-                                    <pre id="claude-test-output" style="margin-top: 12px; padding: 12px; background: #1e1e1e; color: #d4d4d4; border-radius: 6px; font-size: 13px; overflow-x: auto; display: none; white-space: pre-wrap;"></pre>
+                                    <div style="padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 20px;">
+                                        <div style="font-size: 13px; color: #64748b; margin-bottom: 8px;">Summary</div>
+                                        <p id="claude-summary" style="margin: 0; font-size: 15px; color: #1e293b; line-height: 1.6;"></p>
+                                    </div>
+                                    <div style="padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;">
+                                        <div style="font-size: 13px; color: #64748b; margin-bottom: 8px;">Key Themes</div>
+                                        <ul id="claude-themes" style="margin: 0; padding-left: 20px; font-size: 15px; color: #1e293b; line-height: 1.8;"></ul>
+                                    </div>
                                 </div>
 
                                 <!-- Loading State -->
@@ -15606,46 +15622,6 @@ async function analyseWithClaude(responses) {
     }
 }
 
-/**
- * TEST: Temporary function to verify Claude API connection
- * Fetches current chat's responses and sends them to /api/analyse
- */
-async function testClaudeAnalysis() {
-    const outputEl = document.getElementById('claude-test-output');
-    outputEl.style.display = 'block';
-    outputEl.textContent = 'Loading responses from database...';
-
-    try {
-        if (!window.currentEditingChatId) {
-            outputEl.textContent = 'Error: No chat selected. Open a Listen chat first.';
-            return;
-        }
-
-        const { data: responses, error } = await window.supabaseClient
-            .from('chat_responses')
-            .select('id, response_text')
-            .eq('chat_id', window.currentEditingChatId);
-
-        if (error) throw error;
-
-        if (!responses || responses.length === 0) {
-            outputEl.textContent = 'No responses found for this chat.';
-            return;
-        }
-
-        outputEl.textContent = `Found ${responses.length} response(s). Sending to Claude API...`;
-
-        const result = await analyseWithClaude(responses);
-
-        console.log('Claude API test result:', result);
-        outputEl.textContent = JSON.stringify(result, null, 2);
-
-    } catch (err) {
-        console.error('Claude API test failed:', err);
-        outputEl.textContent = 'ERROR: ' + err.message;
-        outputEl.style.color = '#ef4444';
-    }
-}
 
 /**
  * Save analysis results to Supabase
@@ -15803,7 +15779,21 @@ async function analyzeAllUnanalyzedResponses() {
         hideAnalysisProgressModal();
 
         console.log('Claude analysis result:', result);
-        alert(`Analysis complete!\n\nSentiment: ${result.overall_sentiment}\nScore: ${result.sentiment_score}\nThemes: ${result.key_themes.join(', ')}\n\nSummary: ${result.summary}`);
+
+        // Display results in the Analytics tab
+        document.getElementById('claude-sentiment').textContent = result.overall_sentiment.charAt(0).toUpperCase() + result.overall_sentiment.slice(1);
+        document.getElementById('claude-score').textContent = result.sentiment_score;
+        document.getElementById('claude-response-count').textContent = result.response_count;
+        document.getElementById('claude-summary').textContent = result.summary;
+        const themesEl = document.getElementById('claude-themes');
+        themesEl.innerHTML = (result.key_themes || []).map(t => `<li>${t}</li>`).join('');
+
+        // Show the results, hide the empty state
+        document.getElementById('claude-analysis-results').style.display = 'block';
+        document.getElementById('analytics-empty').style.display = 'none';
+
+        // Switch to the Analytics tab
+        showChatEditorTab('analytics');
 
     } catch (error) {
         console.error('Error in Claude analysis:', error);
