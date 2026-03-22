@@ -13769,6 +13769,9 @@ async function loadChatIntoEditor(chatId) {
         window.currentEditingChatId = chatId;
         window.currentEditingChat = chat;
 
+        // Clear any previous Claude analysis results when switching chats
+        claudeAnalysisResult = null;
+
         // Populate form fields
         const chatEditorName = document.getElementById('chat-editor-name');
         const chatSetupName = document.getElementById('chat-setup-name');
@@ -13910,6 +13913,9 @@ let sentimentPieChart = null;
 let topicsBarChart = null;
 let sentimentTimeChart = null;
 
+// Store Claude analysis result so the Analytics tab can show it
+let claudeAnalysisResult = null;
+
 /**
  * Load analytics for the current chat
  */
@@ -13917,11 +13923,22 @@ async function loadChatAnalytics(chatId) {
     const loadingEl = document.getElementById('analytics-loading');
     const emptyEl = document.getElementById('analytics-empty');
     const contentEl = document.getElementById('analytics-content');
+    const claudeResultsEl = document.getElementById('claude-analysis-results');
+
+    // If we have Claude analysis results, show them and skip DB-based analytics
+    if (claudeAnalysisResult) {
+        if (loadingEl) loadingEl.style.display = 'none';
+        if (emptyEl) emptyEl.style.display = 'none';
+        if (contentEl) contentEl.style.display = 'none';
+        if (claudeResultsEl) claudeResultsEl.style.display = 'block';
+        return;
+    }
 
     // Show loading
     if (loadingEl) loadingEl.style.display = 'block';
     if (emptyEl) emptyEl.style.display = 'none';
     if (contentEl) contentEl.style.display = 'none';
+    if (claudeResultsEl) claudeResultsEl.style.display = 'none';
 
     try {
         // Fetch responses with analysis
@@ -15780,7 +15797,10 @@ async function analyzeAllUnanalyzedResponses() {
 
         console.log('Claude analysis result:', result);
 
-        // Display results in the Analytics tab
+        // Store the result so the Analytics tab can display it
+        claudeAnalysisResult = result;
+
+        // Populate the Analytics tab display
         document.getElementById('claude-sentiment').textContent = result.overall_sentiment.charAt(0).toUpperCase() + result.overall_sentiment.slice(1);
         document.getElementById('claude-score').textContent = result.sentiment_score;
         document.getElementById('claude-response-count').textContent = result.response_count;
@@ -15788,11 +15808,7 @@ async function analyzeAllUnanalyzedResponses() {
         const themesEl = document.getElementById('claude-themes');
         themesEl.innerHTML = (result.key_themes || []).map(t => `<li>${t}</li>`).join('');
 
-        // Show the results, hide the empty state
-        document.getElementById('claude-analysis-results').style.display = 'block';
-        document.getElementById('analytics-empty').style.display = 'none';
-
-        // Switch to the Analytics tab
+        // Switch to the Analytics tab (loadChatAnalytics will show claude results)
         showChatEditorTab('analytics');
 
     } catch (error) {
