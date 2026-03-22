@@ -4260,6 +4260,38 @@
         .rw-field textarea { resize: vertical; min-height: 110px; line-height: 1.6; }
         .rw-field .rw-hint { font-size: 11.5px; color: var(--rw-text-soft); margin-top: 5px; }
 
+        /* Engage Topics tag input */
+        .rw-tags-input-wrap {
+          display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+          padding: 8px 10px; min-height: 44px;
+          border: 1.5px solid var(--rw-border); border-radius: 8px;
+          background: #fafbfc; cursor: text;
+          transition: all 0.15s;
+        }
+        .rw-tags-input-wrap:focus-within {
+          border-color: var(--rw-accent2); background: #fff;
+          box-shadow: 0 0 0 3px rgba(108,99,255,0.08);
+        }
+        .rw-tag {
+          display: inline-flex; align-items: center; gap: 4px;
+          background: #eef2ff; color: #4338ca; border-radius: 5px;
+          padding: 3px 8px; font-size: 12.5px; font-weight: 500;
+          line-height: 1.4; white-space: nowrap;
+        }
+        .rw-tag-remove {
+          background: none; border: none; cursor: pointer;
+          color: #6366f1; font-size: 14px; line-height: 1;
+          padding: 0 0 0 2px; display: flex; align-items: center;
+        }
+        .rw-tag-remove:hover { color: #dc2626; }
+        .rw-tags-text-input {
+          flex: 1; min-width: 120px; border: none; outline: none;
+          background: transparent; font-family: inherit;
+          font-size: 13.5px; color: var(--rw-text);
+          padding: 2px 0;
+        }
+        .rw-tags-text-input::placeholder { color: #94a3b8; }
+
         .rw-save-section {
           padding: 16px 22px;
           border-top: 1px solid #e8edf5;
@@ -4508,6 +4540,118 @@
           font-style: italic;
         }
         .rw-tab-wrapper.rw-tab-disabled-wrapper .rw-tab-hint { display: block; }
+
+        /* ========== ENGAGE SECTION — TEAL THEME OVERRIDES ========== */
+
+        /* Identity banner */
+        .engage-identity-banner {
+          display: flex; align-items: center; gap: 14px;
+          background: #E1F5EE; border: 0.5px solid #5DCAA5;
+          border-radius: 10px; padding: 14px 18px; margin-bottom: 24px;
+        }
+        .engage-identity-banner-icon {
+          width: 40px; height: 40px; border-radius: 10px;
+          background: #0F6E56; display: flex; align-items: center;
+          justify-content: center; flex-shrink: 0;
+        }
+        .engage-identity-banner-icon svg { width: 20px; height: 20px; color: #fff; }
+        .engage-identity-banner-title {
+          font-size: 14px; font-weight: 700; color: #085041; margin-bottom: 2px;
+        }
+        .engage-identity-banner-subtitle {
+          font-size: 12px; color: #0F6E56; line-height: 1.4;
+        }
+
+        /* Active tab underline — teal */
+        #engage-chat-editor-section .engage-chat-editor-tab.active {
+          color: #0F6E56 !important;
+          border-bottom-color: #0F6E56 !important;
+        }
+
+        /* Card header icon — teal for Chat Configuration (purple → teal) */
+        #engage-chat-editor-section .rw-card-header-icon.purple {
+          background: #E1F5EE !important; color: #0F6E56 !important;
+        }
+
+        /* Topic tags — teal */
+        #engage-chat-editor-section .rw-tag {
+          background: #E1F5EE; color: #085041;
+        }
+        #engage-chat-editor-section .rw-tag-remove {
+          color: #0F6E56;
+        }
+        #engage-chat-editor-section .rw-tag-remove:hover { color: #dc2626; }
+
+        /* Tags input focus ring — teal */
+        #engage-chat-editor-section .rw-tags-input-wrap:focus-within {
+          border-color: #0F6E56;
+          box-shadow: 0 0 0 3px rgba(15,110,86,0.08);
+        }
+
+        /* Getting Started progress bar — teal */
+        #engage-chat-editor-section .rw-progress-bar-fill {
+          background: #1D9E75 !important;
+        }
+
+        /* Getting Started progress fraction text — teal */
+        #engage-chat-editor-section .rw-progress-fraction {
+          color: #0F6E56 !important;
+        }
+
+        /* Notification row — green-tinted */
+        #engage-chat-editor-section .rw-notif-row {
+          background: #EAF3DE; border-color: #C0DD97; color: #3B6D11;
+        }
+        #engage-chat-editor-section .rw-notif-left span { color: #3B6D11; }
+        #engage-chat-editor-section .rw-notif-left svg { color: #3B6D11; }
+
+        /* Notification "Instant" badge — teal */
+        #engage-chat-editor-section .rw-notif-pill {
+          background: #1D9E75;
+        }
+
+        /* Create Chat button — teal border & text */
+        #engage-chat-editor-section .rw-btn-create {
+          color: #0F6E56; border-color: #0F6E56;
+        }
+        #engage-chat-editor-section .rw-btn-create:hover {
+          background: rgba(15,110,86,0.06);
+        }
+
+        /* Save button — teal solid */
+        #engage-save-chat-btn.rw-btn-save {
+          background: #1D9E75 !important;
+          box-shadow: 0 4px 14px rgba(29,158,117,0.35) !important;
+        }
+        #engage-save-chat-btn.rw-btn-save:hover {
+          box-shadow: 0 6px 18px rgba(29,158,117,0.4) !important;
+        }
+
+        /* Copy Link button — teal */
+        #engageCopyLinkBtn.rw-btn-copy {
+          background: #1D9E75 !important;
+        }
+
+        /* Participants subtab active — teal (JS handles inline styles) */
+
+        /* Analyze All button — teal in Engage */
+        #engage-chat-editor-section .ai-analyze-all-btn {
+          background: linear-gradient(135deg, #1D9E75 0%, #0F6E56 100%) !important;
+        }
+        #engage-chat-editor-section .ai-analyze-all-btn:hover {
+          box-shadow: 0 4px 12px rgba(29,158,117,0.3);
+        }
+
+        /* Import/export button — teal in Engage */
+        #engage-chat-editor-section .btn-export-responses {
+          background: #1D9E75 !important; border-color: #1D9E75 !important;
+        }
+
+        /* Engage save participants button */
+        #engage-save-participants-btn {
+          background: #1D9E75 !important;
+        }
+
     </style>
 </head>
 <body>
@@ -5506,6 +5650,33 @@
                         <div id="chat-editor-tab-analytics" class="chat-editor-tab-content" style="display: none;">
                             <div style="max-width: 1200px;">
 
+                                <!-- Claude Analysis Results -->
+                                <div id="claude-analysis-results" style="display: none;">
+                                    <h3 style="margin: 0 0 16px 0; font-size: 18px; color: #1e293b;">Claude AI Analysis</h3>
+                                    <div style="display: flex; gap: 16px; margin-bottom: 20px;">
+                                        <div style="flex: 1; padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;">
+                                            <div style="font-size: 13px; color: #64748b; margin-bottom: 4px;">Overall Sentiment</div>
+                                            <div id="claude-sentiment" style="font-size: 24px; font-weight: 700; color: #1e293b;"></div>
+                                        </div>
+                                        <div style="flex: 1; padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;">
+                                            <div style="font-size: 13px; color: #64748b; margin-bottom: 4px;">Score</div>
+                                            <div id="claude-score" style="font-size: 24px; font-weight: 700; color: #1e293b;"></div>
+                                        </div>
+                                        <div style="flex: 1; padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;">
+                                            <div style="font-size: 13px; color: #64748b; margin-bottom: 4px;">Responses Analysed</div>
+                                            <div id="claude-response-count" style="font-size: 24px; font-weight: 700; color: #1e293b;"></div>
+                                        </div>
+                                    </div>
+                                    <div style="padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 20px;">
+                                        <div style="font-size: 13px; color: #64748b; margin-bottom: 8px;">Summary</div>
+                                        <p id="claude-summary" style="margin: 0; font-size: 15px; color: #1e293b; line-height: 1.6;"></p>
+                                    </div>
+                                    <div style="padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;">
+                                        <div style="font-size: 13px; color: #64748b; margin-bottom: 8px;">Key Themes</div>
+                                        <ul id="claude-themes" style="margin: 0; padding-left: 20px; font-size: 15px; color: #1e293b; line-height: 1.8;"></ul>
+                                    </div>
+                                </div>
+
                                 <!-- Loading State -->
                                 <div id="analytics-loading" class="analytics-loading" style="display: none;">
                                     <div class="analytics-loading-spinner"></div>
@@ -5583,6 +5754,472 @@
                                         </div>
                                     </div>
 
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- ============================================ -->
+                <!-- ENGAGE SECTION (Duplicate of Listen)        -->
+                <!-- ============================================ -->
+
+                <!-- Engage Landing (My Chats Tile View) -->
+                <div id="engage-section" class="hidden">
+                    <div class="chats-container">
+                        <main class="chat-dashboard-main">
+                            <h1 class="chat-dashboard-section-title">My chats</h1>
+                            <div class="chats-grid-container">
+                                <div class="chats-grid" id="engage-chats-grid">
+                                    <!-- New Chat Card -->
+                                    <div class="new-chat-card" onclick="openEngageChatEditor()">
+                                        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                        <span>Blank</span>
+                                    </div>
+
+                                    <!-- Stacked overflow (only shown when needed) -->
+                                    <div class="chat-stack" id="engageChatStack" style="display: none;">
+                                        <div class="stack-card stack-3"></div>
+                                        <div class="stack-card stack-2"></div>
+                                        <div class="stack-card stack-1"></div>
+                                        <div class="stack-top">
+                                            <span class="stack-count">+5 more</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Expanded overflow section (hidden by default) -->
+                                <div class="chats-overflow-expanded" id="engageChatsOverflowExpanded" style="display: none;">
+                                    <div class="overflow-header">
+                                        <span>All chats</span>
+                                        <button class="btn-show-less" id="engageShowLessBtn">Show less</button>
+                                    </div>
+                                    <div class="overflow-grid" id="engageOverflowGrid">
+                                    </div>
+                                </div>
+                            </div>
+                        </main>
+                    </div>
+                </div>
+
+                <!-- Engage Chat Editor Section -->
+                <div id="engage-chat-editor-section" class="hidden">
+                    <!-- Top Header Bar -->
+                    <div style="display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; border-bottom: 1px solid #e2e8f0; background: white;">
+                        <div style="display: flex; align-items: center; gap: 16px;">
+                            <button onclick="showSection('engage')" style="background: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 4px; color: #64748b; font-size: 14px;">
+                                ← Back
+                            </button>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <input type="text" id="engage-chat-editor-name" placeholder="Untitled Chat" style="border: none; font-size: 18px; font-weight: 600; outline: none; width: 250px;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab Navigation -->
+                    <div style="display: flex; gap: 0; border-bottom: 1px solid #e2e8f0; background: white;">
+                        <button class="engage-chat-editor-tab active" onclick="showEngageChatEditorTab('setup')" data-tab="setup" style="padding: 16px 24px; border: none; background: none; cursor: pointer; font-size: 14px; color: #0F6E56; border-bottom: 2px solid #0F6E56; font-weight: 500;">Setup</button>
+                        <span class="rw-tab-wrapper" id="engage-participants-tab-wrapper"><button class="engage-chat-editor-tab" onclick="showEngageChatEditorTab('participants')" data-tab="participants" style="padding: 16px 24px; border: none; background: none; cursor: pointer; font-size: 14px; color: #64748b; border-bottom: 2px solid transparent;">Participants</button><span class="rw-tab-hint">Not needed for Open Access</span></span>
+                        <button class="engage-chat-editor-tab" onclick="showEngageChatEditorTab('responses')" data-tab="responses" style="padding: 16px 24px; border: none; background: none; cursor: pointer; font-size: 14px; color: #64748b; border-bottom: 2px solid transparent;">Responses</button>
+                        <button class="engage-chat-editor-tab" onclick="showEngageChatEditorTab('analytics')" data-tab="analytics" style="padding: 16px 24px; border: none; background: none; cursor: pointer; font-size: 14px; color: #64748b; border-bottom: 2px solid transparent;">Analytics</button>
+                    </div>
+
+                    <!-- Tab Content Area -->
+                    <div style="padding: 32px; background: #f8fafc; min-height: calc(100vh - 140px);">
+
+                        <!-- Setup Tab -->
+                        <div id="engage-chat-editor-tab-setup" class="engage-chat-editor-tab-content">
+                            <!-- Engage identity banner -->
+                            <div class="engage-identity-banner">
+                              <div class="engage-identity-banner-icon">
+                                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                              </div>
+                              <div>
+                                <div class="engage-identity-banner-title">Engage — AI-guided topic conversations</div>
+                                <div class="engage-identity-banner-subtitle">Define topics below and the AI will use them to guide participants through the chat</div>
+                              </div>
+                            </div>
+                            <div class="rw-setup-grid">
+                              <div class="rw-left-col">
+                                <div class="rw-card">
+                                  <div class="rw-card-header">
+                                    <div class="rw-card-header-icon purple">
+                                      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                                    </div>
+                                    <div>
+                                      <div class="rw-card-title">Chat Configuration</div>
+                                      <div class="rw-card-subtitle">Set up how your chat appears to participants</div>
+                                    </div>
+                                  </div>
+                                  <div class="rw-card-body">
+                                    <div class="rw-field">
+                                      <label>
+                                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+                                        Chat Name
+                                      </label>
+                                      <input type="text" id="engage-chat-setup-name" placeholder="e.g., General Feedback, Customer Insights">
+                                    </div>
+                                    <div class="rw-field">
+                                      <label>
+                                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"/></svg>
+                                        Welcome Message
+                                      </label>
+                                      <textarea id="engage-chat-setup-welcome" rows="4" placeholder="Hi! Thanks for taking the time to share your feedback with us.">Hi! Thanks for taking the time to share your feedback with us. Please feel free to tell us about your experience or any suggestions you might have.</textarea>
+                                      <div class="rw-hint">This message will appear when participants first open the chat.</div>
+                                    </div>
+                                    <div class="rw-field">
+                                      <label>
+                                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+                                        Topics to Cover
+                                      </label>
+                                      <div class="rw-tags-input-wrap" id="engage-topics-wrap" onclick="document.getElementById('engage-topics-input').focus()">
+                                        <input type="text" class="rw-tags-text-input" id="engage-topics-input"
+                                               placeholder="Work-life balance, Management support, Career development"
+                                               onkeydown="handleEngageTopicKeydown(event)">
+                                      </div>
+                                      <div class="rw-hint">Specify the topics you'd like to explore. The AI will use these to guide participants during the chat.</div>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div class="rw-card">
+                                  <div class="rw-card-header">
+                                    <div class="rw-card-header-icon pink">
+                                      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                                    </div>
+                                    <div>
+                                      <div class="rw-card-title">Access & Notifications</div>
+                                      <div class="rw-card-subtitle">Control who can respond and how you're alerted</div>
+                                    </div>
+                                  </div>
+                                  <div class="rw-card-body">
+                                    <div class="rw-field">
+                                      <label>
+                                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064"/></svg>
+                                        Access Type
+                                      </label>
+                                      <select id="engage-chat-access-type">
+                                          <option value="open">Open Access - Anyone with the link can respond</option>
+                                          <option value="closed">Closed Access - Only invited participants via unique links</option>
+                                          <option value="combined">Combined Access - Public link AND invited participants</option>
+                                      </select>
+                                    </div>
+                                    <div class="rw-field">
+                                      <label>
+                                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                                        Submission Notifications
+                                      </label>
+                                      <select id="engage-chat-notification-frequency">
+                                          <option value="">Use my default setting</option>
+                                          <option value="instant">Every submission (instant)</option>
+                                          <option value="daily">Daily digest</option>
+                                          <option value="weekly">Weekly digest</option>
+                                          <option value="never">Never</option>
+                                      </select>
+                                      <div class="rw-hint">Override your global notification setting for this specific chat.</div>
+                                    </div>
+                                    <div class="rw-notif-row">
+                                      <div class="rw-notif-left">
+                                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                        <span>Notifications active — using your default setting</span>
+                                      </div>
+                                      <div class="rw-notif-pill">Instant</div>
+                                    </div>
+                                  </div>
+                                  <div class="rw-save-section">
+                                    <button id="engage-create-chat-btn" class="rw-btn-create" onclick="createEngageChat(this)">
+                                      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                      Create Chat
+                                    </button>
+                                    <button onclick="saveEngageAll(this)" id="engage-save-chat-btn" class="rw-btn-save" style="flex:1; padding:11px 20px; background:#1D9E75 !important; color:#fff !important; border:none; border-radius:9px; font-size:13.5px; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; box-shadow:0 4px 14px rgba(29,158,117,0.35); width:100%;">
+                                      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                      Save Changes
+                                    </button>
+                                  </div>
+                                </div>
+
+                              </div>
+
+                              <div class="rw-right-col">
+
+                                <!-- Your Chat Link Card (always visible) -->
+                                <div class="rw-card" id="engage-chat-success-panel">
+                                  <div class="rw-card-header">
+                                    <div class="rw-card-header-icon green">
+                                      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+                                    </div>
+                                    <div>
+                                      <div class="rw-card-title">Your Chat Link</div>
+                                      <div class="rw-card-subtitle" id="engage-link-card-subtitle">Share this with your participants — <em>create a chat first</em></div>
+                                    </div>
+                                  </div>
+                                  <div class="rw-card-body">
+                                    <div class="rw-link-panel rw-link-panel-disabled" id="engage-link-panel">
+                                      <div class="rw-link-panel-label">Participant URL</div>
+                                      <div class="rw-link-display">
+                                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+                                        <input type="text" id="engageGeneratedChatLink" readonly placeholder="https://rworldfeedback.co.uk/chat/...">
+                                      </div>
+                                      <div class="rw-link-actions">
+                                        <button onclick="copyEngageGeneratedLink()" id="engageCopyLinkBtn" class="rw-btn-copy" style="flex:1; padding:9px; background:#1D9E75 !important; color:#fff !important; border:none; border-radius:7px; font-size:12.5px; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;">
+                                          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:14px;height:14px;flex-shrink:0;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+                                          Copy Link
+                                        </button>
+                                        <button class="rw-btn-qr" title="QR Code (coming soon)" style="width:38px;height:38px;flex-shrink:0;padding:0;">
+                                          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
+                                        </button>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div class="rw-card" id="engage-getting-started-box">
+                                  <div class="rw-checklist-header">
+                                    <div class="rw-checklist-title-row">
+                                      <div class="rw-checklist-title">Getting Started</div>
+                                      <span id="engage-gs-progress" class="rw-progress-fraction">0/6 complete</span>
+                                    </div>
+                                    <div class="rw-progress-bar-bg">
+                                      <div class="rw-progress-bar-fill" id="engage-gs-progress-bar" style="width: 0%;"></div>
+                                    </div>
+                                  </div>
+                                  <div class="rw-checklist-items">
+                                    <ol id="engage-gs-steps-list" style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 12px;">
+                                    </ol>
+                                  </div>
+                                </div>
+
+                              </div>
+
+                            </div>
+                        </div>
+
+                        <!-- Participants Tab -->
+                        <div id="engage-chat-editor-tab-participants" class="engage-chat-editor-tab-content" style="display: none;">
+                            <div>
+                                <div style="display: flex; gap: 0; margin-bottom: 24px; border-bottom: 1px solid #e2e8f0;">
+                                    <button id="engage-participants-subtab-1" onclick="switchEngageParticipantsPage(1)" style="padding: 10px 20px; border: none; background: none; cursor: pointer; font-size: 13px; font-weight: 600; color: #0F6E56; border-bottom: 2px solid #0F6E56;">Manage Participants</button>
+                                    <button id="engage-participants-subtab-2" onclick="switchEngageParticipantsPage(2)" style="padding: 10px 20px; border: none; background: none; cursor: pointer; font-size: 13px; font-weight: 500; color: #94a3b8; border-bottom: 2px solid transparent;">Manage Invites</button>
+                                </div>
+
+                                <div id="engage-participants-page-1" style="background: white; border-radius: 12px; padding: 32px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); margin-bottom: 24px;">
+                                    <h3 style="margin: 0 0 24px 0; color: #1e293b;">Manage Participants</h3>
+                                    <div style="display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap;">
+                                        <input type="text" id="engage-participant-first-name" placeholder="First Name" style="flex: 1; min-width: 120px; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px;">
+                                        <input type="text" id="engage-participant-surname" placeholder="Surname" style="flex: 1; min-width: 120px; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px;">
+                                        <input type="email" id="engage-participant-email-new" placeholder="Email" style="flex: 2; min-width: 200px; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px;">
+                                        <button onclick="addNewEngageParticipant()" style="padding: 10px 20px; background: #1D9E75; color: white; border: none; border-radius: 8px; font-weight: 500; cursor: pointer;">Add</button>
+                                    </div>
+                                    <button onclick="openEngageExcelPasteModal()" style="margin-bottom: 24px; padding: 10px 16px; background: #f8fafc; color: #1e293b; border: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer; font-size: 14px;">
+                                        Paste from Excel
+                                    </button>
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 12px;">
+                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                            <input type="checkbox" id="engage-select-all-participants" onchange="toggleSelectAllEngageParticipants()">
+                                            <span style="font-size: 14px; color: #64748b;">Select All</span>
+                                        </label>
+                                        <div style="display: flex; gap: 12px; align-items: center;">
+                                            <select id="engage-invite-type-select" style="padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px;">
+                                                <option value="first">First Invite</option>
+                                                <option value="reminder">Reminder</option>
+                                            </select>
+                                            <button onclick="sendEngageInvitesToSelected()" style="padding: 10px 16px; background: #d6366c; color: white; border: none; border-radius: 8px; font-weight: 500; cursor: pointer;">
+                                                Send to Selected
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div style="border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
+                                        <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                                            <thead>
+                                                <tr style="background: #f8fafc;">
+                                                    <th style="padding: 12px; text-align: left; font-weight: 600; color: #64748b; width: 40px;"></th>
+                                                    <th style="padding: 12px; text-align: left; font-weight: 600; color: #64748b;">First Name</th>
+                                                    <th style="padding: 12px; text-align: left; font-weight: 600; color: #64748b;">Surname</th>
+                                                    <th style="padding: 12px; text-align: left; font-weight: 600; color: #64748b;">Email</th>
+                                                    <th style="padding: 12px; text-align: left; font-weight: 600; color: #64748b;">Status</th>
+                                                    <th style="padding: 12px; text-align: center; font-weight: 600; color: #64748b; width: 100px;">Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="engage-participants-table-body">
+                                                <tr id="engage-no-participants-row">
+                                                    <td colspan="6" style="padding: 32px; text-align: center; color: #64748b;">
+                                                        No participants added yet. Add participants above or paste from Excel.
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div id="engage-participants-pagination" style="display: flex; justify-content: center; gap: 8px; margin-top: 16px;"></div>
+                                    <div style="display: flex; justify-content: flex-end; margin-top: 24px;">
+                                        <button onclick="saveEngageAll(this)" id="engage-save-participants-btn" style="padding: 12px 24px; background: #10b981; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 500; font-size: 14px;">Save</button>
+                                    </div>
+                                </div>
+
+                                <div id="engage-participants-page-2" style="display: none; background: white; border-radius: 12px; padding: 32px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);">
+                                    <h3 style="margin: 0 0 24px 0; color: #1e293b;">Manage Invites &amp; Reminders</h3>
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                                        <div>
+                                            <div style="margin-bottom: 20px;">
+                                                <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #1e293b;">Email Invite Text</label>
+                                                <div class="email-subject-row" id="engage-invite-subject-row">
+                                                    <span class="email-subject-label">Subject:</span>
+                                                    <input type="text" id="engage-email-invite-subject" class="email-subject-input"
+                                                           value="You've been invited to share your feedback" placeholder="Email subject line">
+                                                </div>
+                                                <div id="engage-email-invite-editor" style="min-height: 180px; background: #fff; border: 1px solid #e2e8f0; border-radius: 0 0 8px 8px;"></div>
+                                                <p style="margin-top: 6px; font-size: 12px; color: #64748b;">Use {first_name}, {surname}, {email}, {link} as placeholders.</p>
+                                            </div>
+                                            <div>
+                                                <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #1e293b;">Email Reminder Text</label>
+                                                <div class="email-subject-row" id="engage-reminder-subject-row">
+                                                    <span class="email-subject-label">Subject:</span>
+                                                    <input type="text" id="engage-email-reminder-subject" class="email-subject-input"
+                                                           value="A reminder to share your feedback" placeholder="Email subject line">
+                                                </div>
+                                                <div id="engage-email-reminder-editor" style="min-height: 180px; background: #fff; border: 1px solid #e2e8f0; border-radius: 0 0 8px 8px;"></div>
+                                                <p style="margin-top: 6px; font-size: 12px; color: #64748b;">Use {first_name}, {surname}, {email}, {link} as placeholders.</p>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div style="margin-bottom: 20px;">
+                                                <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #1e293b;">Schedule Invites</label>
+                                                <input type="datetime-local" id="engage-schedule-invites-datetime" style="width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+                                                <p style="margin-top: 6px; font-size: 12px; color: #64748b;">Leave empty to send manually.</p>
+                                            </div>
+                                            <div>
+                                                <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #1e293b;">Schedule Reminders</label>
+                                                <input type="datetime-local" id="engage-schedule-reminders-datetime" style="width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+                                                <p style="margin-top: 6px; font-size: 12px; color: #64748b;">Leave empty to send manually.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div style="margin-top: 24px; text-align: right;">
+                                        <button onclick="saveEngageAll(this)" style="padding: 12px 24px; background: #10b981; color: white; border: none; border-radius: 8px; font-weight: 500; cursor: pointer; font-size: 14px;">
+                                            Save
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Responses Tab -->
+                        <div id="engage-chat-editor-tab-responses" class="engage-chat-editor-tab-content" style="display: none;">
+                            <div class="responses-tab-content">
+                                <div class="responses-empty-state" id="engageResponsesEmptyState">
+                                    <div class="empty-state-icon">📭</div>
+                                    <h3>No responses yet</h3>
+                                    <p>Responses will appear here once people start using your chat.</p>
+                                </div>
+                                <div class="responses-table-container" id="engageResponsesTableContainer">
+                                    <div class="responses-table-header">
+                                        <h3>Responses (<span id="engageResponseCount">0</span>)</h3>
+                                        <div style="display: flex; gap: 12px; align-items: center;">
+                                            <button onclick="analyzeAllUnanalyzedEngageResponses()" class="ai-analyze-all-btn">
+                                                🔍 Analyze All with AI
+                                            </button>
+                                            <button onclick="showImportEngageResponsesModal()" class="btn-export-responses" style="background: #1D9E75; color: white; border-color: #1D9E75;">
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                                    <polyline points="17 8 12 3 7 8"></polyline>
+                                                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                                                </svg>
+                                                Import CSV
+                                            </button>
+                                            <button class="btn-export-responses" id="engageExportResponsesBtn">
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                                    <polyline points="7 10 12 15 17 10"></polyline>
+                                                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                                                </svg>
+                                                Export CSV
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <table class="responses-table">
+                                        <thead>
+                                            <tr>
+                                                <th class="col-response">Response</th>
+                                                <th class="col-sentiment" style="width: 120px;">Sentiment</th>
+                                                <th class="col-topics" style="width: 180px;">Topics</th>
+                                                <th class="col-participant" id="engageParticipantColumn">Participant</th>
+                                                <th class="col-date">Date Submitted</th>
+                                                <th class="col-status">Status</th>
+                                                <th class="col-actions">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="engageResponsesTableBody">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Analytics Tab -->
+                        <div id="engage-chat-editor-tab-analytics" class="engage-chat-editor-tab-content" style="display: none;">
+                            <div style="max-width: 1200px;">
+                                <div id="engage-analytics-loading" class="analytics-loading" style="display: none;">
+                                    <div class="analytics-loading-spinner"></div>
+                                    <div>Loading analytics...</div>
+                                </div>
+                                <div id="engage-analytics-empty" class="analytics-empty" style="display: none;">
+                                    <div class="analytics-empty-icon">📊</div>
+                                    <div class="analytics-empty-title">No Analytics Available Yet</div>
+                                    <div>Analyze some responses first to see insights here.</div>
+                                    <button onclick="showEngageChatEditorTab('responses')" style="margin-top: 16px; padding: 10px 20px; background: #1D9E75; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                                        Go to Responses Tab
+                                    </button>
+                                </div>
+                                <div id="engage-analytics-content" style="display: none;">
+                                    <div class="analytics-cards">
+                                        <div class="analytics-card">
+                                            <div class="analytics-card-label">Total Responses</div>
+                                            <div class="analytics-card-value" id="engage-analytics-total-responses">0</div>
+                                            <div class="analytics-card-subtitle" id="engage-analytics-analyzed-count">0 analyzed</div>
+                                        </div>
+                                        <div class="analytics-card positive">
+                                            <div class="analytics-card-label">Positive</div>
+                                            <div class="analytics-card-value" id="engage-analytics-positive-pct">0%</div>
+                                            <div class="analytics-card-subtitle" id="engage-analytics-positive-count">0 responses</div>
+                                        </div>
+                                        <div class="analytics-card negative">
+                                            <div class="analytics-card-label">Negative</div>
+                                            <div class="analytics-card-value" id="engage-analytics-negative-pct">0%</div>
+                                            <div class="analytics-card-subtitle" id="engage-analytics-negative-count">0 responses</div>
+                                        </div>
+                                        <div class="analytics-card neutral">
+                                            <div class="analytics-card-label">Neutral</div>
+                                            <div class="analytics-card-value" id="engage-analytics-neutral-pct">0%</div>
+                                            <div class="analytics-card-subtitle" id="engage-analytics-neutral-count">0 responses</div>
+                                        </div>
+                                        <div class="analytics-card">
+                                            <div class="analytics-card-label">Top Topic</div>
+                                            <div class="analytics-card-value" id="engage-analytics-top-topic" style="font-size: 24px;">-</div>
+                                            <div class="analytics-card-subtitle" id="engage-analytics-top-topic-count">0 mentions</div>
+                                        </div>
+                                    </div>
+                                    <div class="analytics-charts">
+                                        <div class="analytics-chart-card">
+                                            <div class="analytics-chart-title">Sentiment Breakdown</div>
+                                            <div class="analytics-chart-container">
+                                                <canvas id="engageSentimentPieChart"></canvas>
+                                            </div>
+                                        </div>
+                                        <div class="analytics-chart-card">
+                                            <div class="analytics-chart-title">Top Topics</div>
+                                            <div class="analytics-chart-container">
+                                                <canvas id="engageTopicsBarChart"></canvas>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="analytics-charts">
+                                        <div class="analytics-chart-card full-width">
+                                            <div class="analytics-chart-title">Sentiment Over Time</div>
+                                            <div class="analytics-chart-container">
+                                                <canvas id="engageSentimentTimeChart"></canvas>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -11248,6 +11885,18 @@ function showSection(sectionName) {
             }
         }, 100);
     }
+
+    // Load engage chats when showing engage section
+    if (sectionName === 'engage' && typeof renderEngageChatCards === 'function') {
+        setTimeout(() => {
+            try {
+                console.log('💬 Loading engage chats...');
+                renderEngageChatCards();
+            } catch (error) {
+                console.error('Error loading engage chats:', error);
+            }
+        }, 100);
+    }
 }
 
 // Helper function to update navigation highlighting
@@ -14862,93 +15511,117 @@ document.addEventListener('DOMContentLoaded', initSaveChatButton);
 // AI ANALYSIS CONFIGURATION & FUNCTIONS
 // ============================================================================
 
-const AI_SERVER_URL = 'http://localhost:8080';  // Change for production
+// OLD: localhost:8080 Flask/Railway AI server — disabled, replaced by Claude API via /api/analyse
+// const AI_SERVER_URL = 'http://localhost:8080';
 
 /**
  * Check if AI server is available
+ * OLD: Called localhost:8080/health — now disabled
  */
-async function checkAIServerHealth() {
-    try {
-        const response = await fetch(`${AI_SERVER_URL}/health`, {
-            method: 'GET'
-        });
-        const data = await response.json();
-        return data.status === 'healthy';
-    } catch (error) {
-        console.log('AI server not available:', error.message);
-        return false;
-    }
-}
+// async function checkAIServerHealth() {
+//     try {
+//         const response = await fetch(`${AI_SERVER_URL}/health`, {
+//             method: 'GET'
+//         });
+//         const data = await response.json();
+//         return data.status === 'healthy';
+//     } catch (error) {
+//         console.log('AI server not available:', error.message);
+//         return false;
+//     }
+// }
 
 /**
  * Analyze a single response
+ * OLD: Called localhost:8080/analyze — now disabled
  */
-async function analyzeResponse(responseId, responseText) {
-    try {
-        const response = await fetch(`${AI_SERVER_URL}/analyze`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                text: responseText,
-                response_id: responseId
-            })
-        });
-
-        if (!response.ok) {
-            throw new Error(`AI server error: ${response.status}`);
-        }
-
-        const result = await response.json();
-
-        if (!result.success) {
-            throw new Error(result.error || 'Analysis failed');
-        }
-
-        return result.data;
-
-    } catch (error) {
-        console.error('Error analyzing response:', error);
-        throw error;
-    }
-}
+// async function analyzeResponse(responseId, responseText) {
+//     try {
+//         const response = await fetch(`${AI_SERVER_URL}/analyze`, {
+//             method: 'POST',
+//             headers: {
+//                 'Content-Type': 'application/json'
+//             },
+//             body: JSON.stringify({
+//                 text: responseText,
+//                 response_id: responseId
+//             })
+//         });
+//         if (!response.ok) {
+//             throw new Error(`AI server error: ${response.status}`);
+//         }
+//         const result = await response.json();
+//         if (!result.success) {
+//             throw new Error(result.error || 'Analysis failed');
+//         }
+//         return result.data;
+//     } catch (error) {
+//         console.error('Error analyzing response:', error);
+//         throw error;
+//     }
+// }
 
 /**
  * Analyze multiple responses at once
+ * OLD: Called localhost:8080/analyze-batch — now disabled
  */
-async function analyzeResponsesBatch(responses) {
+// async function analyzeResponsesBatch(responses) {
+//     try {
+//         const response = await fetch(`${AI_SERVER_URL}/analyze-batch`, {
+//             method: 'POST',
+//             headers: {
+//                 'Content-Type': 'application/json'
+//             },
+//             body: JSON.stringify({
+//                 responses: responses.map(r => ({
+//                     id: r.id,
+//                     text: r.response_text
+//                 }))
+//             })
+//         });
+//         if (!response.ok) {
+//             throw new Error(`AI server error: ${response.status}`);
+//         }
+//         const result = await response.json();
+//         if (!result.success) {
+//             throw new Error(result.error || 'Batch analysis failed');
+//         }
+//         return result.results;
+//     } catch (error) {
+//         console.error('Error in batch analysis:', error);
+//         throw error;
+//     }
+// }
+
+/**
+ * NEW: Analyse responses using Claude API via /api/analyse
+ */
+async function analyseWithClaude(responses) {
     try {
-        const response = await fetch(`${AI_SERVER_URL}/analyze-batch`, {
+        const response = await fetch('/api/analyse', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
                 responses: responses.map(r => ({
-                    id: r.id,
-                    text: r.response_text
+                    message: r.response_text || r.text || r.message || ''
                 }))
             })
         });
 
         if (!response.ok) {
-            throw new Error(`AI server error: ${response.status}`);
+            const err = await response.json();
+            throw new Error(err.error || `API error: ${response.status}`);
         }
 
-        const result = await response.json();
-
-        if (!result.success) {
-            throw new Error(result.error || 'Batch analysis failed');
-        }
-
-        return result.results;
-
+        return await response.json();
     } catch (error) {
-        console.error('Error in batch analysis:', error);
+        console.error('Error calling Claude API:', error);
         throw error;
     }
 }
+
 
 /**
  * Save analysis results to Supabase
@@ -14986,46 +15659,94 @@ async function saveAnalysisToDatabase(analysisData) {
 
 /**
  * Analyze a single response and save to database
+ * OLD: Used localhost:8080 analyzeResponse() — now disabled
+ */
+// async function analyzeAndSaveSingle(responseId, responseText, buttonElement) {
+//     if (buttonElement) {
+//         buttonElement.disabled = true;
+//         buttonElement.innerHTML = '⏳ Analyzing...';
+//     }
+//     try {
+//         const analysis = await analyzeResponse(responseId, responseText);
+//         await saveAnalysisToDatabase(analysis);
+//         updateResponseRowWithAnalysis(responseId, analysis);
+//         if (buttonElement) {
+//             buttonElement.innerHTML = '✅ Done';
+//             buttonElement.style.background = '#10b981';
+//         }
+//         return analysis;
+//     } catch (error) {
+//         if (buttonElement) {
+//             buttonElement.disabled = false;
+//             buttonElement.innerHTML = '🔍 Retry';
+//             buttonElement.style.background = '#ef4444';
+//         }
+//         alert('Analysis failed: ' + error.message);
+//         throw error;
+//     }
+// }
+
+/**
+ * Stub: single response analysis — will be re-implemented with Claude later
  */
 async function analyzeAndSaveSingle(responseId, responseText, buttonElement) {
-    // Show loading state
-    if (buttonElement) {
-        buttonElement.disabled = true;
-        buttonElement.innerHTML = '⏳ Analyzing...';
-    }
-
-    try {
-        // Get AI analysis
-        const analysis = await analyzeResponse(responseId, responseText);
-
-        // Save to database
-        await saveAnalysisToDatabase(analysis);
-
-        // Update the row UI
-        updateResponseRowWithAnalysis(responseId, analysis);
-
-        // Show success
-        if (buttonElement) {
-            buttonElement.innerHTML = '✅ Done';
-            buttonElement.style.background = '#10b981';
-        }
-
-        return analysis;
-
-    } catch (error) {
-        // Show error
-        if (buttonElement) {
-            buttonElement.disabled = false;
-            buttonElement.innerHTML = '🔍 Retry';
-            buttonElement.style.background = '#ef4444';
-        }
-        alert('Analysis failed: ' + error.message);
-        throw error;
-    }
+    alert('Single response analysis is being migrated to Claude AI. Use "Analyze All with AI" for now.');
 }
 
 /**
  * Analyze all unanalyzed responses for current chat
+ * OLD: Used localhost:8080 Flask server — now disabled
+ */
+// async function analyzeAllUnanalyzedResponses() {
+//     if (!window.currentEditingChatId) {
+//         alert('No chat selected');
+//         return;
+//     }
+//     try {
+//         const isHealthy = await checkAIServerHealth();
+//         if (!isHealthy) {
+//             alert('AI server is not available. Make sure it is running on localhost:8080');
+//             return;
+//         }
+//         const { data: allResponses, error: fetchError } = await window.supabaseClient
+//             .from('chat_responses')
+//             .select('id, response_text')
+//             .eq('chat_id', window.currentEditingChatId);
+//         if (fetchError) throw fetchError;
+//         const { data: existingAnalyses } = await window.supabaseClient
+//             .from('chat_response_analysis')
+//             .select('response_id')
+//             .in('response_id', allResponses.map(r => r.id));
+//         const analyzedIds = new Set((existingAnalyses || []).map(a => a.response_id));
+//         const unanalyzedResponses = allResponses.filter(r => !analyzedIds.has(r.id));
+//         if (unanalyzedResponses.length === 0) {
+//             alert('All responses have already been analyzed!');
+//             return;
+//         }
+//         const confirmMsg = `Analyze ${unanalyzedResponses.length} response(s)? This may take a moment.`;
+//         if (!confirm(confirmMsg)) return;
+//         showAnalysisProgressModal(unanalyzedResponses.length);
+//         const results = await analyzeResponsesBatch(unanalyzedResponses);
+//         let completed = 0;
+//         for (const result of results) {
+//             if (result.analysis) {
+//                 await saveAnalysisToDatabase(result.analysis);
+//             }
+//             completed++;
+//             updateAnalysisProgress(completed, unanalyzedResponses.length);
+//         }
+//         hideAnalysisProgressModal();
+//         loadChatResponses(window.currentEditingChatId);
+//         alert(`Successfully analyzed ${completed} response(s)!`);
+//     } catch (error) {
+//         console.error('Error in bulk analysis:', error);
+//         hideAnalysisProgressModal();
+//         alert('Bulk analysis failed: ' + error.message);
+//     }
+// }
+
+/**
+ * NEW: Analyze all responses for current chat using Claude API
  */
 async function analyzeAllUnanalyzedResponses() {
     if (!window.currentEditingChatId) {
@@ -15034,14 +15755,6 @@ async function analyzeAllUnanalyzedResponses() {
     }
 
     try {
-        // Check if AI server is available
-        const isHealthy = await checkAIServerHealth();
-        if (!isHealthy) {
-            alert('AI server is not available. Make sure it is running on localhost:8080');
-            return;
-        }
-
-        // Get responses that don't have analysis yet
         const { data: allResponses, error: fetchError } = await window.supabaseClient
             .from('chat_responses')
             .select('id, response_text')
@@ -15049,51 +15762,43 @@ async function analyzeAllUnanalyzedResponses() {
 
         if (fetchError) throw fetchError;
 
-        // Get existing analyses
-        const { data: existingAnalyses } = await window.supabaseClient
-            .from('chat_response_analysis')
-            .select('response_id')
-            .in('response_id', allResponses.map(r => r.id));
-
-        const analyzedIds = new Set((existingAnalyses || []).map(a => a.response_id));
-        const unanalyzedResponses = allResponses.filter(r => !analyzedIds.has(r.id));
-
-        if (unanalyzedResponses.length === 0) {
-            alert('All responses have already been analyzed!');
+        if (!allResponses || allResponses.length === 0) {
+            alert('No responses to analyse.');
             return;
         }
 
-        const confirmMsg = `Analyze ${unanalyzedResponses.length} response(s)? This may take a moment.`;
+        const confirmMsg = `Analyse ${allResponses.length} response(s) with Claude AI? This may take a moment.`;
         if (!confirm(confirmMsg)) return;
 
-        // Show progress modal
-        showAnalysisProgressModal(unanalyzedResponses.length);
+        showAnalysisProgressModal(allResponses.length);
+        updateAnalysisProgress(0, allResponses.length, 'Sending to Claude API...');
 
-        // Analyze in batches
-        const results = await analyzeResponsesBatch(unanalyzedResponses);
+        const result = await analyseWithClaude(allResponses);
 
-        // Save each result
-        let completed = 0;
-        for (const result of results) {
-            if (result.analysis) {
-                await saveAnalysisToDatabase(result.analysis);
-            }
-            completed++;
-            updateAnalysisProgress(completed, unanalyzedResponses.length);
-        }
-
-        // Close progress modal
+        updateAnalysisProgress(allResponses.length, allResponses.length, 'Done!');
         hideAnalysisProgressModal();
 
-        // Reload responses to show analysis
-        loadChatResponses(window.currentEditingChatId);
+        console.log('Claude analysis result:', result);
 
-        alert(`Successfully analyzed ${completed} response(s)!`);
+        // Display results in the Analytics tab
+        document.getElementById('claude-sentiment').textContent = result.overall_sentiment.charAt(0).toUpperCase() + result.overall_sentiment.slice(1);
+        document.getElementById('claude-score').textContent = result.sentiment_score;
+        document.getElementById('claude-response-count').textContent = result.response_count;
+        document.getElementById('claude-summary').textContent = result.summary;
+        const themesEl = document.getElementById('claude-themes');
+        themesEl.innerHTML = (result.key_themes || []).map(t => `<li>${t}</li>`).join('');
+
+        // Show the results, hide the empty state
+        document.getElementById('claude-analysis-results').style.display = 'block';
+        document.getElementById('analytics-empty').style.display = 'none';
+
+        // Switch to the Analytics tab
+        showChatEditorTab('analytics');
 
     } catch (error) {
-        console.error('Error in bulk analysis:', error);
+        console.error('Error in Claude analysis:', error);
         hideAnalysisProgressModal();
-        alert('Bulk analysis failed: ' + error.message);
+        alert('Analysis failed: ' + error.message);
     }
 }
 
@@ -19311,6 +20016,1135 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+// ============================================================
+// ENGAGE SECTION — Complete duplicate of Listen
+// All functions prefixed with engage / Engage, table: engage_chats
+// ============================================================
+
+// --- Engage global state ---
+let engageParticipantsData = [];
+let engageCurrentParticipantPage = 1;
+let engageCurrentChatId = null;
+window.engageOverflowChats = [];
+let engageSentimentPieChart = null;
+let engageTopicsBarChart = null;
+let engageSentimentTimeChart = null;
+
+// --- Engage Quill editors (initialised on DOMContentLoaded) ---
+let engageInviteQuill = null;
+let engageReminderQuill = null;
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialise Quill editors for Engage email templates
+    if (typeof Quill !== 'undefined') {
+        const inviteEl = document.getElementById('engage-email-invite-editor');
+        if (inviteEl) {
+            engageInviteQuill = new Quill('#engage-email-invite-editor', {
+                theme: 'snow',
+                modules: { toolbar: [['bold', 'italic', 'underline'], ['link'], [{ list: 'ordered' }, { list: 'bullet' }]] }
+            });
+        }
+        const reminderEl = document.getElementById('engage-email-reminder-editor');
+        if (reminderEl) {
+            engageReminderQuill = new Quill('#engage-email-reminder-editor', {
+                theme: 'snow',
+                modules: { toolbar: [['bold', 'italic', 'underline'], ['link'], [{ list: 'ordered' }, { list: 'bullet' }]] }
+            });
+        }
+    }
+
+    // Engage stack expand/collapse
+    const engageStack = document.getElementById('engageChatStack');
+    const engageShowLessBtn = document.getElementById('engageShowLessBtn');
+    if (engageStack) engageStack.addEventListener('click', expandEngageChatStack);
+    if (engageShowLessBtn) engageShowLessBtn.addEventListener('click', collapseEngageChatStack);
+
+    // Engage access type change handler
+    var engageSel = document.getElementById('engage-chat-access-type');
+    if (engageSel) engageSel.addEventListener('change', updateEngageTabAndLinkState);
+    updateEngageTabAndLinkState();
+});
+
+function getEngageInviteEditorHTML() { return engageInviteQuill ? engageInviteQuill.root.innerHTML : ''; }
+function getEngageReminderEditorHTML() { return engageReminderQuill ? engageReminderQuill.root.innerHTML : ''; }
+function setEngageInviteEditorHTML(html) { if (engageInviteQuill) engageInviteQuill.root.innerHTML = html; }
+function setEngageReminderEditorHTML(html) { if (engageReminderQuill) engageReminderQuill.root.innerHTML = html; }
+
+// --- Engage link panel / tab state ---
+function updateEngageLinkPanelForAccessType() { updateEngageTabAndLinkState(); }
+function updateEngageTabAndLinkState() {
+    var sel = document.getElementById('engage-chat-access-type');
+    var linkPanel = document.getElementById('engage-link-panel');
+    var partTab = document.querySelector('.engage-chat-editor-tab[data-tab="participants"]');
+    var partWrapper = document.getElementById('engage-participants-tab-wrapper');
+    if (!sel) return;
+    var v = sel.value;
+
+    // Link panel: disabled if no chat exists yet OR if access type is closed
+    var chatExists = !!(engageCurrentChatId || window.engageCurrentEditingChatId);
+    if (linkPanel) {
+        if (!chatExists || v === 'closed') {
+            linkPanel.classList.add('rw-link-panel-disabled');
+        } else {
+            linkPanel.classList.remove('rw-link-panel-disabled');
+        }
+    }
+
+    // Participants tab: disabled for open, enabled for closed/combined
+    if (partTab) {
+        if (v === 'open') {
+            partTab.classList.add('rw-tab-disabled');
+            if (partWrapper) partWrapper.classList.add('rw-tab-disabled-wrapper');
+        } else {
+            partTab.classList.remove('rw-tab-disabled');
+            if (partWrapper) partWrapper.classList.remove('rw-tab-disabled-wrapper');
+        }
+    }
+}
+
+// --- Engage Topics tag input ---
+let engageTopicsData = [];
+
+function handleEngageTopicKeydown(e) {
+    if (e.key === 'Enter' || e.key === ',') {
+        e.preventDefault();
+        var input = e.target;
+        var val = input.value.replace(/,/g, '').trim();
+        if (val && !engageTopicsData.includes(val)) {
+            engageTopicsData.push(val);
+            renderEngageTopicTags();
+        }
+        input.value = '';
+    } else if (e.key === 'Backspace' && !e.target.value && engageTopicsData.length > 0) {
+        engageTopicsData.pop();
+        renderEngageTopicTags();
+    }
+}
+
+function removeEngageTopic(index) {
+    engageTopicsData.splice(index, 1);
+    renderEngageTopicTags();
+}
+
+function renderEngageTopicTags() {
+    var wrap = document.getElementById('engage-topics-wrap');
+    var input = document.getElementById('engage-topics-input');
+    if (!wrap || !input) return;
+    // Remove existing tags
+    wrap.querySelectorAll('.rw-tag').forEach(function(t) { t.remove(); });
+    // Insert tags before the input
+    engageTopicsData.forEach(function(topic, i) {
+        var tag = document.createElement('span');
+        tag.className = 'rw-tag';
+        tag.innerHTML = escapeHtmlText(topic) + '<button type="button" class="rw-tag-remove" onclick="removeEngageTopic(' + i + ')">&times;</button>';
+        wrap.insertBefore(tag, input);
+    });
+    // Update placeholder
+    input.placeholder = engageTopicsData.length > 0 ? '' : 'Work-life balance, Management support, Career development';
+}
+
+function getEngageTopicsJSON() {
+    return engageTopicsData.length > 0 ? JSON.stringify(engageTopicsData) : null;
+}
+
+function setEngageTopicsFromData(data) {
+    if (!data) { engageTopicsData = []; }
+    else if (typeof data === 'string') {
+        try { engageTopicsData = JSON.parse(data); } catch (e) { engageTopicsData = data.split(',').map(function(s) { return s.trim(); }).filter(Boolean); }
+    } else if (Array.isArray(data)) {
+        engageTopicsData = data.slice();
+    } else { engageTopicsData = []; }
+    renderEngageTopicTags();
+}
+
+// Reset the Engage link panel to its initial "create a chat first" disabled state
+function engageResetLinkPanel() {
+    var linkPanel = document.getElementById('engage-link-panel');
+    var subtitle = document.getElementById('engage-link-card-subtitle');
+    if (linkPanel) linkPanel.classList.add('rw-link-panel-disabled');
+    if (subtitle) subtitle.innerHTML = 'Share this with your participants — <em>create a chat first</em>';
+}
+
+// Activate the Engage link panel after a chat is created or loaded
+function engageActivateLinkPanel() {
+    var linkPanel = document.getElementById('engage-link-panel');
+    var subtitle = document.getElementById('engage-link-card-subtitle');
+    if (subtitle) subtitle.textContent = 'Share this with your participants';
+    // Let the access-type logic decide whether to keep it disabled (e.g. closed access)
+    updateEngageTabAndLinkState();
+}
+
+// --- Load engage chats from database ---
+async function loadEngageChats() {
+    try {
+        const { data: { user } } = await window.supabaseClient.auth.getUser();
+        if (!user) { console.log('Not authenticated'); return []; }
+        const { data: chats, error } = await window.supabaseClient
+            .from('engage_chats')
+            .select('*')
+            .order('created_at', { ascending: false });
+        if (error) throw error;
+        return chats || [];
+    } catch (error) {
+        console.error('Error loading engage chats:', error);
+        return [];
+    }
+}
+
+// --- Create engage chat card HTML ---
+function createEngageChatCardHTML(chat) {
+    return `
+        <div class="chat-card" data-engage-chat-id="${chat.id}" data-chat-slug="${chat.slug}" onclick="openEngageChatEditor('${chat.id}')">
+            <div class="chat-card-header"></div>
+            <button class="chat-card-menu-btn" onclick="event.stopPropagation(); toggleEngageChatCardMenu(this)" aria-label="More options">&#8942;</button>
+            <div class="chat-card-dropdown">
+                <button class="chat-card-dropdown-item" onclick="event.stopPropagation(); closeEngageChatCardMenus(); copyEngageChatLink('${chat.slug}')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                    </svg>
+                    Copy link
+                </button>
+                <button class="chat-card-dropdown-item" onclick="event.stopPropagation(); closeEngageChatCardMenus(); openEngageChatEditor('${chat.id}')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                    </svg>
+                    Edit
+                </button>
+                <button class="chat-card-dropdown-item" onclick="event.stopPropagation(); closeEngageChatCardMenus(); deleteEngageChat('${chat.id}')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 6h18"></path>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path>
+                        <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    </svg>
+                    Delete
+                </button>
+            </div>
+            <div class="chat-card-body">
+                <div class="chat-card-title">${chat.name}</div>
+                <div class="chat-card-meta">
+                    <span>Opened ${formatChatDate(chat.created_at)}</span>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// --- Engage card menu helpers ---
+function closeEngageChatCardMenus() {
+    document.querySelectorAll('#engage-chats-grid .chat-card-dropdown.open, #engageOverflowGrid .chat-card-dropdown.open').forEach(d => d.classList.remove('open'));
+}
+function toggleEngageChatCardMenu(btn) {
+    const dropdown = btn.nextElementSibling;
+    const isOpen = dropdown.classList.contains('open');
+    closeEngageChatCardMenus();
+    if (!isOpen) dropdown.classList.add('open');
+}
+
+// --- Render engage chat cards ---
+const ENGAGE_MAX_VISIBLE_TILES = 8;
+
+async function renderEngageChatCards() {
+    const chats = await loadEngageChats();
+    const chatsGrid = document.getElementById('engage-chats-grid');
+    const stack = document.getElementById('engageChatStack');
+    const overflowExpanded = document.getElementById('engageChatsOverflowExpanded');
+    const overflowGrid = document.getElementById('engageOverflowGrid');
+
+    if (!chatsGrid) { console.error('Engage chats grid not found'); return; }
+
+    const existingCards = chatsGrid.querySelectorAll('.chat-card');
+    existingCards.forEach(card => card.remove());
+
+    if (stack) stack.style.display = 'none';
+    if (overflowExpanded) overflowExpanded.style.display = 'none';
+    if (overflowGrid) overflowGrid.innerHTML = '';
+    window.engageOverflowChats = [];
+
+    let newChatCard = chatsGrid.querySelector('.new-chat-card');
+    if (!newChatCard) {
+        chatsGrid.insertAdjacentHTML('afterbegin', `
+            <div class="new-chat-card" onclick="openEngageChatEditor()">
+                <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                <span>Blank</span>
+            </div>
+        `);
+        newChatCard = chatsGrid.querySelector('.new-chat-card');
+    }
+
+    if (!chats || chats.length === 0) return;
+
+    const visibleChats = chats.slice(0, ENGAGE_MAX_VISIBLE_TILES);
+    const overflowChatsData = chats.slice(ENGAGE_MAX_VISIBLE_TILES);
+
+    visibleChats.forEach(chat => {
+        const cardHTML = createEngageChatCardHTML(chat);
+        if (stack) { stack.insertAdjacentHTML('beforebegin', cardHTML); }
+        else { chatsGrid.insertAdjacentHTML('beforeend', cardHTML); }
+    });
+
+    if (overflowChatsData.length > 0 && stack) {
+        stack.style.display = 'block';
+        const stackCount = stack.querySelector('.stack-count');
+        if (stackCount) stackCount.textContent = `+${overflowChatsData.length} more`;
+        window.engageOverflowChats = overflowChatsData;
+    }
+}
+
+function expandEngageChatStack() {
+    const stack = document.getElementById('engageChatStack');
+    const overflowExpanded = document.getElementById('engageChatsOverflowExpanded');
+    const overflowGrid = document.getElementById('engageOverflowGrid');
+    if (!stack || !overflowExpanded || !overflowGrid) return;
+    stack.style.display = 'none';
+    overflowExpanded.style.display = 'block';
+    if (window.engageOverflowChats && window.engageOverflowChats.length > 0) {
+        overflowGrid.innerHTML = window.engageOverflowChats.map(chat => createEngageChatCardHTML(chat)).join('');
+    }
+}
+
+function collapseEngageChatStack() {
+    const stack = document.getElementById('engageChatStack');
+    const overflowExpanded = document.getElementById('engageChatsOverflowExpanded');
+    if (!stack || !overflowExpanded) return;
+    overflowExpanded.style.display = 'none';
+    stack.style.display = 'block';
+}
+
+// --- Delete engage chat ---
+async function deleteEngageChat(chatId) {
+    if (!confirm('Are you sure you want to delete this chat? This cannot be undone.')) return;
+    try {
+        const { error } = await window.supabaseClient.from('engage_chats').delete().eq('id', chatId);
+        if (error) throw error;
+        const card = document.querySelector(`[data-engage-chat-id="${chatId}"]`);
+        if (card) card.remove();
+        console.log('Engage chat deleted successfully');
+    } catch (error) {
+        console.error('Error deleting engage chat:', error);
+        alert('Failed to delete chat: ' + error.message);
+    }
+}
+
+// --- Copy engage chat link ---
+function copyEngageChatLink(slug) {
+    const link = 'https://rworldfeedback.co.uk/chat/' + slug;
+    navigator.clipboard.writeText(link).then(() => {
+        const btn = document.querySelector(`[data-engage-chat-id] [data-chat-slug="${slug}"] .chat-card-dropdown-item, [data-chat-slug="${slug}"] .chat-card-dropdown-item`);
+        if (btn) {
+            const orig = btn.innerHTML;
+            btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Copied!';
+            setTimeout(() => { btn.innerHTML = orig; }, 2000);
+        }
+    }).catch(() => { alert('Failed to copy link'); });
+}
+
+// --- Open engage chat editor ---
+function openEngageChatEditor(chatId = null) {
+    engageCurrentChatId = null;
+    window.engageCurrentEditingChatId = null;
+    window.engageCurrentEditingChat = null;
+
+    const saveBtn = document.getElementById('engage-save-chat-btn');
+    if (saveBtn) { saveBtn.textContent = 'Save'; saveBtn.style.background = '#1D9E75'; saveBtn.disabled = false; }
+
+    if (!chatId) {
+        document.getElementById('engage-chat-editor-name').value = '';
+        document.getElementById('engage-chat-setup-name').value = '';
+        document.getElementById('engage-chat-setup-welcome').value = 'Hi! Thanks for taking the time to share your feedback with us. Please feel free to tell us about your experience or any suggestions you might have.';
+        const accessDropdown = document.getElementById('engage-chat-access-type');
+        if (accessDropdown) accessDropdown.value = 'open';
+        const notifDropdown = document.getElementById('engage-chat-notification-frequency');
+        if (notifDropdown) notifDropdown.value = '';
+        const generatedLinkInput = document.getElementById('engageGeneratedChatLink');
+        if (generatedLinkInput) generatedLinkInput.value = '';
+        engageParticipantsData = [];
+        // Reset link panel to disabled "create a chat first" state
+        engageResetLinkPanel();
+        setEngageTopicsFromData(null);
+        var createBtn = document.getElementById('engage-create-chat-btn');
+        if (createBtn) { createBtn.style.display = ''; createBtn.textContent = 'Create Chat'; }
+    } else {
+        loadEngageChatIntoEditor(chatId);
+    }
+
+    showSection('engage-chat-editor');
+    showEngageChatEditorTab('setup');
+
+    // Reset Getting Started checklist and re-evaluate
+    if (typeof engageGsReset === 'function') engageGsReset();
+}
+
+// --- Load existing engage chat into editor ---
+async function loadEngageChatIntoEditor(chatId) {
+    try {
+        const { data: chat, error } = await window.supabaseClient
+            .from('engage_chats').select('*').eq('id', chatId).single();
+        if (error) throw error;
+        if (!chat) { console.error('Engage chat not found'); return; }
+
+        window.engageCurrentEditingChatId = chatId;
+        window.engageCurrentEditingChat = chat;
+
+        const chatEditorName = document.getElementById('engage-chat-editor-name');
+        const chatSetupName = document.getElementById('engage-chat-setup-name');
+        const chatSetupWelcome = document.getElementById('engage-chat-setup-welcome');
+        if (chatEditorName) chatEditorName.value = chat.name || '';
+        if (chatSetupName) chatSetupName.value = chat.name || '';
+        if (chatSetupWelcome) chatSetupWelcome.value = chat.welcome_message || '';
+
+        const accessTypeDropdown = document.getElementById('engage-chat-access-type');
+        if (accessTypeDropdown) {
+            if (chat.access_type === 'invite_only' || chat.access_type === 'closed') { accessTypeDropdown.value = 'closed'; }
+            else if (chat.access_type === 'combined') { accessTypeDropdown.value = 'combined'; }
+            else { accessTypeDropdown.value = 'open'; }
+        }
+        updateEngageLinkPanelForAccessType();
+
+        var createBtn = document.getElementById('engage-create-chat-btn');
+        if (createBtn) createBtn.style.display = 'none';
+
+        const notifDropdown = document.getElementById('engage-chat-notification-frequency');
+        if (notifDropdown) notifDropdown.value = chat.notification_frequency || '';
+
+        const generatedChatLink = document.getElementById('engageGeneratedChatLink');
+
+        // Always populate the link
+        if (generatedChatLink) generatedChatLink.value = 'https://rworldfeedback.co.uk/chat/' + chat.slug;
+
+        // Activate the link panel (chat exists) and let access-type logic handle disabled state
+        engageActivateLinkPanel();
+
+        if (chat.access_type === 'invite_only' || chat.access_type === 'closed') {
+            await loadEngageExistingParticipants(chatId);
+        }
+
+        if (chat.email_invite_text) setEngageInviteEditorHTML(chat.email_invite_text);
+        if (chat.email_reminder_text) setEngageReminderEditorHTML(chat.email_reminder_text);
+
+        var invSubj = document.getElementById('engage-email-invite-subject');
+        if (invSubj) invSubj.value = chat.email_invite_subject || "You've been invited to share your feedback";
+        var remSubj = document.getElementById('engage-email-reminder-subject');
+        if (remSubj) remSubj.value = chat.email_reminder_subject || 'A reminder to share your feedback';
+
+        setEngageTopicsFromData(chat.engage_topics);
+
+        console.log('Loaded engage chat into editor:', chat.name);
+
+        // Re-evaluate Getting Started checklist now that fields are populated
+        if (typeof engageGsReset === 'function') engageGsReset();
+    } catch (error) {
+        console.error('Error loading engage chat:', error);
+        alert('Failed to load chat: ' + error.message);
+    }
+}
+
+// --- Show engage chat editor tab ---
+function showEngageChatEditorTab(tabName) {
+    if (tabName === 'participants') {
+        var partTab = document.querySelector('.engage-chat-editor-tab[data-tab="participants"]');
+        if (partTab && partTab.classList.contains('rw-tab-disabled')) tabName = 'setup';
+    }
+    document.querySelectorAll('.engage-chat-editor-tab-content').forEach(content => { content.style.display = 'none'; });
+    document.querySelectorAll('.engage-chat-editor-tab').forEach(tab => {
+        tab.style.color = '#64748b';
+        tab.style.borderBottomColor = 'transparent';
+    });
+    const tabContent = document.getElementById('engage-chat-editor-tab-' + tabName);
+    if (tabContent) tabContent.style.display = 'block';
+    const activeTab = document.querySelector('.engage-chat-editor-tab[data-tab="' + tabName + '"]');
+    if (activeTab) { activeTab.style.color = '#0F6E56'; activeTab.style.borderBottomColor = '#0F6E56'; }
+    if (tabName === 'responses' && window.engageCurrentEditingChatId) loadEngageChatResponses(window.engageCurrentEditingChatId);
+    if (tabName === 'analytics' && window.engageCurrentEditingChatId) loadEngageChatAnalytics(window.engageCurrentEditingChatId);
+
+    // Getting Started: tick "Go to Participants" when Participants tab is opened
+    if (tabName === 'participants' && typeof engageGsCompleteByKey === 'function') {
+        engageGsCompleteByKey('goParticipants');
+    }
+}
+
+// --- Create engage chat ---
+async function createEngageChat(btn) {
+    const chatName = document.getElementById('engage-chat-setup-name').value.trim();
+    const welcomeMessage = document.getElementById('engage-chat-setup-welcome').value.trim();
+    const accessType = document.getElementById('engage-chat-access-type').value;
+
+    if (!chatName) { alert('Please enter a chat name'); document.getElementById('engage-chat-setup-name').focus(); return; }
+
+    var existingId = engageCurrentChatId || window.engageCurrentEditingChatId;
+    if (existingId) { var saveBtn = document.getElementById('engage-save-chat-btn'); if (saveBtn) await saveEngageAll(saveBtn); return; }
+
+    if (btn) { btn.disabled = true; btn.innerHTML = '<span class="btn-spinner"></span> Creating...'; }
+    try {
+        await generateEngageChatLink();
+        if (typeof engageGsCompleteByKey === 'function') engageGsCompleteByKey('create');
+    } catch (error) { console.error('Error creating engage chat:', error); }
+    finally { if (btn) { btn.disabled = false; btn.innerHTML = 'Create Chat'; } }
+}
+
+function generateEngageChatLink() {
+    const chatName = document.getElementById('engage-chat-setup-name').value || 'Untitled Chat';
+    const accessType = getEngageSelectedAccessType();
+    if (accessType === 'invite_only') {
+        // For invite-only, just show the success panel as saved
+    } else {
+        showEngageSuccessPanelWithLink(chatName);
+    }
+}
+
+function getEngageSelectedAccessType() {
+    const dropdown = document.getElementById('engage-chat-access-type');
+    if (dropdown) {
+        if (dropdown.value === 'closed') return 'invite_only';
+        if (dropdown.value === 'combined') return 'combined';
+        return 'open';
+    }
+    return 'open';
+}
+
+function showEngageSuccessPanelWithLink(chatName) {
+    const generatedChatLink = document.getElementById('engageGeneratedChatLink');
+    const uniqueId = generateUniqueId();
+    const chatLink = 'https://rworldfeedback.co.uk/chat/' + uniqueId;
+    if (generatedChatLink) generatedChatLink.value = chatLink;
+    // Activate the link panel (removes disabled state, updates subtitle)
+    engageActivateLinkPanel();
+}
+
+// --- Save engage all ---
+async function saveEngageAll(btn) {
+    const chatName = document.getElementById('engage-chat-setup-name').value.trim();
+    const welcomeMessage = document.getElementById('engage-chat-setup-welcome').value.trim();
+    const accessType = document.getElementById('engage-chat-access-type').value;
+    const notifFreq = document.getElementById('engage-chat-notification-frequency').value || null;
+
+    if (!chatName) { alert('Please enter a chat name on the Setup tab first'); return; }
+
+    const originalHTML = btn.innerHTML;
+    btn.disabled = true;
+    btn.textContent = 'Saving...';
+
+    try {
+        const { data: { user } } = await window.supabaseClient.auth.getUser();
+        if (!user) { alert('Please log in to save'); btn.innerHTML = originalHTML; btn.disabled = false; return; }
+
+        let chatId = engageCurrentChatId || window.engageCurrentEditingChatId;
+
+        let userRecord = null;
+        try {
+            const { data: ud } = await window.supabaseClient.from('users').select('id, organization_id').eq('auth_id', user.id).single();
+            userRecord = ud;
+        } catch (e) { console.warn('Could not look up user record:', e); }
+
+        if (!chatId) {
+            let linkCode;
+            const generatedLinkInput = document.getElementById('engageGeneratedChatLink');
+            if (generatedLinkInput && generatedLinkInput.value) {
+                const linkParts = generatedLinkInput.value.split('/chat/');
+                if (linkParts.length > 1) linkCode = linkParts[1];
+            }
+            if (!linkCode) linkCode = generateUniqueId();
+
+            const chatData = {
+                name: chatName, welcome_message: welcomeMessage, access_type: accessType,
+                user_id: user.id,
+                created_by: userRecord ? userRecord.id : null,
+                organization_id: userRecord ? userRecord.organization_id : null,
+                slug: linkCode,
+                email_invite_text: getEngageInviteEditorHTML(),
+                email_reminder_text: getEngageReminderEditorHTML(),
+                email_invite_subject: document.getElementById('engage-email-invite-subject').value.trim() || "You've been invited to share your feedback",
+                email_reminder_subject: document.getElementById('engage-email-reminder-subject').value.trim() || 'A reminder to share your feedback',
+                notification_frequency: notifFreq,
+                engage_topics: getEngageTopicsJSON()
+            };
+
+            const { data: newChat, error } = await window.supabaseClient.from('engage_chats').insert(chatData).select().single();
+            if (error) throw error;
+
+            chatId = newChat.id;
+            engageCurrentChatId = newChat.id;
+            window.engageCurrentEditingChatId = newChat.id;
+            window.engageCurrentEditingChat = newChat;
+
+            // Populate the link and activate the panel
+            var genLink = document.getElementById('engageGeneratedChatLink');
+            if (genLink) genLink.value = 'https://rworldfeedback.co.uk/chat/' + newChat.slug;
+            engageActivateLinkPanel();
+
+            // Hide Create button now that chat exists
+            var createBtnEl = document.getElementById('engage-create-chat-btn');
+            if (createBtnEl) createBtnEl.style.display = 'none';
+        } else {
+            const updateData = {
+                name: chatName, welcome_message: welcomeMessage, access_type: accessType,
+                email_invite_text: getEngageInviteEditorHTML(),
+                email_reminder_text: getEngageReminderEditorHTML(),
+                email_invite_subject: document.getElementById('engage-email-invite-subject').value.trim() || "You've been invited to share your feedback",
+                email_reminder_subject: document.getElementById('engage-email-reminder-subject').value.trim() || 'A reminder to share your feedback',
+                notification_frequency: notifFreq,
+                engage_topics: getEngageTopicsJSON()
+            };
+            const { data: updatedChat, error } = await window.supabaseClient.from('engage_chats').update(updateData).eq('id', chatId).select().single();
+            if (error) throw error;
+            window.engageCurrentEditingChat = updatedChat;
+        }
+
+        // Save participants
+        if (engageParticipantsData && engageParticipantsData.length > 0) {
+            await window.supabaseClient.from('engage_chat_participants').delete().eq('chat_id', chatId);
+            const participantsToInsert = engageParticipantsData.map(p => ({
+                chat_id: chatId, first_name: p.first_name, surname: p.surname, email: p.email,
+                unique_token: p.unique_token || Math.random().toString(36).substring(2, 10)
+            }));
+            const { error: insertError } = await window.supabaseClient.from('engage_chat_participants').insert(participantsToInsert);
+            if (insertError) throw insertError;
+        }
+
+        if (typeof engageGsCompleteByKey === 'function') engageGsCompleteByKey('save');
+        btn.textContent = '✓ Saved!';
+        btn.style.background = '#158f65';
+        setTimeout(() => { btn.innerHTML = originalHTML; btn.style.background = '#1D9E75'; btn.disabled = false; }, 2000);
+    } catch (error) {
+        console.error('Error saving engage chat:', error);
+        alert('Error saving: ' + error.message);
+        btn.innerHTML = originalHTML; btn.style.background = '#1D9E75'; btn.disabled = false;
+    }
+}
+
+// --- Copy engage generated link ---
+function copyEngageGeneratedLink() {
+    const linkInput = document.getElementById('engageGeneratedChatLink');
+    if (!linkInput || !linkInput.value) return;
+    linkInput.select();
+    document.execCommand('copy');
+    // Show "Copied!" feedback on the button
+    var btn = document.getElementById('engageCopyLinkBtn');
+    if (btn) {
+        var origHTML = btn.innerHTML;
+        btn.innerHTML = '<svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:14px;height:14px;flex-shrink:0;"><polyline points="20 6 9 17 4 12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></polyline></svg> Copied!';
+        setTimeout(function() { btn.innerHTML = origHTML; }, 2000);
+    }
+    if (typeof engageGsCompleteByKey === 'function') engageGsCompleteByKey('copyLink');
+}
+
+// --- Engage participants functions ---
+function addNewEngageParticipant() {
+    const firstName = document.getElementById('engage-participant-first-name').value.trim();
+    const surname = document.getElementById('engage-participant-surname').value.trim();
+    const email = document.getElementById('engage-participant-email-new').value.trim();
+    if (!firstName || !surname || !email) { alert('Please fill in all fields (First Name, Surname, Email)'); return; }
+    if (!isValidEmailFormat(email)) { alert('Please enter a valid email address'); return; }
+    if (engageParticipantsData.some(p => p.email.toLowerCase() === email.toLowerCase())) { alert('A participant with this email already exists'); return; }
+    engageParticipantsData.push({ id: 'temp-' + Date.now(), first_name: firstName, surname: surname, email: email, invite_sent: false, reminder_sent: false, selected: false });
+    document.getElementById('engage-participant-first-name').value = '';
+    document.getElementById('engage-participant-surname').value = '';
+    document.getElementById('engage-participant-email-new').value = '';
+    renderEngageParticipantsTable();
+    if (typeof engageGsCompleteByKey === 'function') engageGsCompleteByKey('addParticipants');
+}
+
+function openEngageExcelPasteModal() {
+    const modal = document.getElementById('excel-paste-modal');
+    if (modal) { modal.style.display = 'flex'; document.getElementById('excel-paste-textarea').value = ''; document.getElementById('excel-paste-textarea').focus(); }
+}
+
+function importFromEngageExcel() {
+    const textarea = document.getElementById('excel-paste-textarea');
+    const data = textarea.value.trim();
+    if (!data) { alert('Please paste some data first'); return; }
+    const lines = data.split('\n');
+    let imported = 0, skipped = 0;
+    lines.forEach(line => {
+        const parts = line.split('\t');
+        if (parts.length >= 3) {
+            const firstName = parts[0].trim(), surname = parts[1].trim(), email = parts[2].trim();
+            if (firstName && surname && email && isValidEmailFormat(email)) {
+                if (!engageParticipantsData.some(p => p.email.toLowerCase() === email.toLowerCase())) {
+                    engageParticipantsData.push({ id: 'temp-' + Date.now() + '-' + imported, first_name: firstName, surname: surname, email: email, invite_sent: false, reminder_sent: false, selected: false });
+                    imported++;
+                } else { skipped++; }
+            } else { skipped++; }
+        } else { skipped++; }
+    });
+    closeExcelPasteModal();
+    renderEngageParticipantsTable();
+    alert(`Imported ${imported} participant(s). ${skipped > 0 ? skipped + ' row(s) skipped (invalid or duplicate).' : ''}`);
+}
+
+function renderEngageParticipantsTable() {
+    const tbody = document.getElementById('engage-participants-table-body');
+    if (!tbody) return;
+    if (engageParticipantsData.length === 0) {
+        tbody.innerHTML = `<tr id="engage-no-participants-row"><td colspan="6" style="padding: 32px; text-align: center; color: #64748b;">No participants added yet. Add participants above or paste from Excel.</td></tr>`;
+        document.getElementById('engage-participants-pagination').innerHTML = '';
+        return;
+    }
+    const totalPages = Math.ceil(engageParticipantsData.length / participantsPerPage);
+    const startIndex = (engageCurrentParticipantPage - 1) * participantsPerPage;
+    const endIndex = Math.min(startIndex + participantsPerPage, engageParticipantsData.length);
+    const pageParticipants = engageParticipantsData.slice(startIndex, endIndex);
+
+    tbody.innerHTML = pageParticipants.map((p, index) => {
+        const globalIndex = startIndex + index;
+        const statusBadge = p.invite_sent
+            ? (p.reminder_sent ? '<span style="background: #dbeafe; color: #1e40af; padding: 2px 8px; border-radius: 4px; font-size: 12px;">Reminder Sent</span>' : '<span style="background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 4px; font-size: 12px;">Invited</span>')
+            : '<span style="background: #f3f4f6; color: #6b7280; padding: 2px 8px; border-radius: 4px; font-size: 12px;">Not Invited</span>';
+        return `<tr style="border-top: 1px solid #e2e8f0;" id="engage-participant-row-${globalIndex}">
+                <td style="padding: 12px; text-align: center;"><input type="checkbox" ${p.selected ? 'checked' : ''} onchange="toggleEngageParticipantSelection(${globalIndex})"></td>
+                <td style="padding: 12px;">${escapeHtmlText(p.first_name)}</td>
+                <td style="padding: 12px;">${escapeHtmlText(p.surname)}</td>
+                <td style="padding: 12px;">${escapeHtmlText(p.email)}</td>
+                <td style="padding: 12px;">${statusBadge}</td>
+                <td style="padding: 12px; text-align: center;">
+                    <button onclick="editEngageParticipantRow(${globalIndex})" style="background: none; border: none; cursor: pointer; padding: 4px 8px;" title="Edit">✏️</button>
+                    <button onclick="removeEngageParticipantRow(${globalIndex})" style="background: none; border: none; cursor: pointer; padding: 4px 8px;" title="Remove">🗑️</button>
+                </td></tr>`;
+    }).join('');
+    renderEngageParticipantsPagination(totalPages);
+}
+
+function renderEngageParticipantsPagination(totalPages) {
+    const paginationDiv = document.getElementById('engage-participants-pagination');
+    if (!paginationDiv) return;
+    if (totalPages <= 1) { paginationDiv.innerHTML = ''; return; }
+    let html = '';
+    html += `<button onclick="goToEngageParticipantPage(${engageCurrentParticipantPage - 1})" ${engageCurrentParticipantPage === 1 ? 'disabled' : ''} style="padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 6px; background: white; cursor: ${engageCurrentParticipantPage === 1 ? 'not-allowed' : 'pointer'};">←</button>`;
+    for (let i = 1; i <= totalPages; i++) {
+        const isActive = i === engageCurrentParticipantPage;
+        html += `<button onclick="goToEngageParticipantPage(${i})" style="padding: 8px 12px; border: 1px solid ${isActive ? '#1D9E75' : '#e2e8f0'}; border-radius: 6px; background: ${isActive ? '#1D9E75' : 'white'}; color: ${isActive ? 'white' : '#1e293b'}; cursor: pointer;">${i}</button>`;
+    }
+    html += `<button onclick="goToEngageParticipantPage(${engageCurrentParticipantPage + 1})" ${engageCurrentParticipantPage === totalPages ? 'disabled' : ''} style="padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 6px; background: white; cursor: ${engageCurrentParticipantPage === totalPages ? 'not-allowed' : 'pointer'};">→</button>`;
+    paginationDiv.innerHTML = html;
+}
+
+function goToEngageParticipantPage(page) {
+    const totalPages = Math.ceil(engageParticipantsData.length / participantsPerPage);
+    if (page < 1 || page > totalPages) return;
+    engageCurrentParticipantPage = page;
+    renderEngageParticipantsTable();
+}
+
+function toggleEngageParticipantSelection(index) {
+    engageParticipantsData[index].selected = !engageParticipantsData[index].selected;
+    updateEngageSelectAllCheckbox();
+}
+
+function toggleSelectAllEngageParticipants() {
+    const selectAll = document.getElementById('engage-select-all-participants').checked;
+    engageParticipantsData.forEach(p => p.selected = selectAll);
+    renderEngageParticipantsTable();
+}
+
+function updateEngageSelectAllCheckbox() {
+    const cb = document.getElementById('engage-select-all-participants');
+    if (cb) cb.checked = engageParticipantsData.length > 0 && engageParticipantsData.every(p => p.selected);
+}
+
+function editEngageParticipantRow(index) {
+    const p = engageParticipantsData[index];
+    const newFirstName = prompt('First Name:', p.first_name); if (newFirstName === null) return;
+    const newSurname = prompt('Surname:', p.surname); if (newSurname === null) return;
+    const newEmail = prompt('Email:', p.email); if (newEmail === null) return;
+    if (!newFirstName.trim() || !newSurname.trim() || !newEmail.trim()) { alert('All fields are required'); return; }
+    if (!isValidEmailFormat(newEmail)) { alert('Please enter a valid email address'); return; }
+    engageParticipantsData[index] = { ...p, first_name: newFirstName.trim(), surname: newSurname.trim(), email: newEmail.trim() };
+    renderEngageParticipantsTable();
+}
+
+function removeEngageParticipantRow(index) {
+    if (confirm('Are you sure you want to remove this participant?')) {
+        engageParticipantsData.splice(index, 1);
+        const totalPages = Math.ceil(engageParticipantsData.length / participantsPerPage);
+        if (engageCurrentParticipantPage > totalPages && totalPages > 0) engageCurrentParticipantPage = totalPages;
+        renderEngageParticipantsTable();
+    }
+}
+
+function switchEngageParticipantsPage(page) {
+    document.getElementById('engage-participants-page-1').style.display = page === 1 ? 'block' : 'none';
+    document.getElementById('engage-participants-page-2').style.display = page === 2 ? 'block' : 'none';
+    const tab1 = document.getElementById('engage-participants-subtab-1');
+    const tab2 = document.getElementById('engage-participants-subtab-2');
+    tab1.style.color = page === 1 ? '#0F6E56' : '#94a3b8';
+    tab1.style.borderBottom = page === 1 ? '2px solid #0F6E56' : '2px solid transparent';
+    tab1.style.fontWeight = page === 1 ? '600' : '500';
+    tab2.style.color = page === 2 ? '#0F6E56' : '#94a3b8';
+    tab2.style.borderBottom = page === 2 ? '2px solid #0F6E56' : '2px solid transparent';
+    tab2.style.fontWeight = page === 2 ? '600' : '500';
+}
+
+async function loadEngageExistingParticipants(chatId) {
+    try {
+        const { data: participants, error } = await window.supabaseClient
+            .from('engage_chat_participants').select('*').eq('chat_id', chatId).order('created_at', { ascending: true });
+        if (error) throw error;
+        engageParticipantsData = (participants || []).map(p => ({
+            id: p.id, first_name: p.first_name, surname: p.surname, email: p.email,
+            unique_token: p.unique_token, invite_sent: p.invite_sent || false, reminder_sent: p.reminder_sent || false, selected: false
+        }));
+        renderEngageParticipantsTable();
+    } catch (error) { console.error('Error loading engage participants:', error); }
+}
+
+async function sendEngageInvitesToSelected() {
+    const selectedParticipants = engageParticipantsData.filter(p => p.selected);
+    if (selectedParticipants.length === 0) { alert('Please select at least one participant'); return; }
+    const inviteType = document.getElementById('engage-invite-type-select').value;
+    const isReminder = inviteType === 'reminder';
+    if (!window.engageCurrentEditingChatId) { alert('Please save the chat first before sending invites'); return; }
+    const confirmMsg = `Send ${isReminder ? 'reminder' : 'invite'} emails to ${selectedParticipants.length} participant(s)?`;
+    if (!confirm(confirmMsg)) return;
+    const chat = window.engageCurrentEditingChat;
+    if (!chat) { alert('Chat data not loaded'); return; }
+    const chatLink = `https://rworldfeedback.co.uk/chat/${chat.slug}`;
+    let sent = 0, failed = 0;
+    for (const participant of selectedParticipants) {
+        try {
+            const htmlBody = createInviteEmailHTML(participant.first_name, chat.name, chatLink);
+            const textBody = createInviteEmailText(participant.first_name, chat.name, chatLink);
+            const response = await fetch('/api/send-email', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    to: participant.email,
+                    subject: isReminder
+                        ? (document.getElementById('engage-email-reminder-subject')?.value?.trim() || 'A reminder to share your feedback')
+                        : (document.getElementById('engage-email-invite-subject')?.value?.trim() || "You've been invited to share your feedback"),
+                    htmlBody: htmlBody, textBody: textBody
+                })
+            });
+            const result = await response.json();
+            if (response.ok && result.success) {
+                if (isReminder) { participant.reminder_sent = true; } else { participant.invite_sent = true; }
+                participant.selected = false; sent++;
+            } else { failed++; }
+        } catch (error) { console.error('Error sending engage invite:', error); failed++; }
+    }
+    renderEngageParticipantsTable();
+    alert(`${sent} ${isReminder ? 'reminder(s)' : 'invite(s)'} sent successfully${failed > 0 ? `, ${failed} failed` : ''}`);
+}
+
+// --- Engage responses ---
+async function loadEngageChatResponses(chatId) {
+    if (!chatId) return;
+    try {
+        const { data: responses, error } = await window.supabaseClient
+            .from('engage_chat_responses')
+            .select(`*, chat_response_analysis ( sentiment_label, sentiment_score, primary_topic, topics )`)
+            .eq('chat_id', chatId)
+            .order('submitted_at', { ascending: false });
+        if (error) throw error;
+        displayEngageResponses(responses);
+    } catch (error) { console.error('Error loading engage responses:', error); }
+}
+
+function displayEngageResponses(responses) {
+    const tableContainer = document.getElementById('engageResponsesTableContainer');
+    const tableBody = document.getElementById('engageResponsesTableBody');
+    const responseCount = document.getElementById('engageResponseCount');
+    const emptyState = document.getElementById('engageResponsesEmptyState');
+
+    if (tableContainer) tableContainer.style.display = 'block';
+    if (emptyState) emptyState.style.display = 'none';
+    if (responseCount) responseCount.textContent = responses ? responses.length : 0;
+
+    const participantColumn = document.getElementById('engageParticipantColumn');
+    const chat = window.engageCurrentEditingChat;
+    const showParticipant = chat && chat.access_type === 'invite_only';
+    if (participantColumn) participantColumn.style.display = showParticipant ? '' : 'none';
+
+    if (!responses || responses.length === 0) {
+        if (tableBody) tableBody.innerHTML = `<tr class="empty-row"><td colspan="7" style="text-align: center; padding: 40px; color: #6b7280;"><div style="font-size: 2rem; margin-bottom: 8px;">📭</div><div>No responses yet. Responses will appear here once people start using your chat.</div></td></tr>`;
+        return;
+    }
+
+    if (tableBody) tableBody.innerHTML = responses.map(response => {
+        const analysis = response.chat_response_analysis?.[0] || response.chat_response_analysis;
+        const hasAnalysis = analysis && analysis.sentiment_label;
+        let sentimentContent = hasAnalysis ? getSentimentBadgeHTML(analysis.sentiment_label) : '<span style="color: #9ca3af; font-size: 12px;">Not analyzed</span>';
+        let topicsContent = '';
+        if (hasAnalysis && analysis.topics) {
+            const topics = Array.isArray(analysis.topics) ? analysis.topics : [];
+            topicsContent = topics.map(t => `<span class="ai-topic-tag">${escapeHtmlText(t)}</span>`).join(' ');
+        }
+        const participantCell = showParticipant ? `<td class="col-participant">${escapeHtmlText(response.participant_name || '')}</td>` : `<td class="col-participant" style="display:none;"></td>`;
+        const date = response.submitted_at ? new Date(response.submitted_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+        const statusBadge = response.is_read ? '<span style="background:#dcfce7;color:#166534;padding:2px 8px;border-radius:4px;font-size:12px;">Read</span>' : '<span style="background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:4px;font-size:12px;">New</span>';
+        return `<tr><td class="col-response">${escapeHtmlText(response.response_text || '')}</td><td class="col-sentiment">${sentimentContent}</td><td class="col-topics">${topicsContent}</td>${participantCell}<td class="col-date">${date}</td><td class="col-status">${statusBadge}</td><td class="col-actions"></td></tr>`;
+    }).join('');
+}
+
+function analyzeAllUnanalyzedEngageResponses() {
+    alert('AI analysis for Engage responses coming soon.');
+}
+function showImportEngageResponsesModal() {
+    alert('Import CSV for Engage responses coming soon.');
+}
+
+// --- Engage analytics ---
+async function loadEngageChatAnalytics(chatId) {
+    const loadingEl = document.getElementById('engage-analytics-loading');
+    const emptyEl = document.getElementById('engage-analytics-empty');
+    const contentEl = document.getElementById('engage-analytics-content');
+    if (loadingEl) loadingEl.style.display = 'block';
+    if (emptyEl) emptyEl.style.display = 'none';
+    if (contentEl) contentEl.style.display = 'none';
+
+    try {
+        const { data: responses, error } = await window.supabaseClient
+            .from('engage_chat_responses')
+            .select(`id, response_text, submitted_at, chat_response_analysis ( sentiment_label, sentiment_score, primary_topic, topics )`)
+            .eq('chat_id', chatId)
+            .order('submitted_at', { ascending: true });
+        if (error) throw error;
+        if (loadingEl) loadingEl.style.display = 'none';
+
+        const analyzedResponses = (responses || []).filter(r =>
+            r.chat_response_analysis && (Array.isArray(r.chat_response_analysis) ? r.chat_response_analysis.length > 0 : r.chat_response_analysis.sentiment_label)
+        );
+        if (analyzedResponses.length === 0) { if (emptyEl) emptyEl.style.display = 'block'; return; }
+        if (contentEl) contentEl.style.display = 'block';
+        displayEngageAnalytics(responses, analyzedResponses);
+    } catch (error) {
+        console.error('Error loading engage analytics:', error);
+        if (loadingEl) loadingEl.style.display = 'none';
+        if (emptyEl) { emptyEl.style.display = 'block'; }
+    }
+}
+
+function displayEngageAnalytics(allResponses, analyzedResponses) {
+    const analysisData = analyzedResponses.map(r => {
+        const analysis = Array.isArray(r.chat_response_analysis) ? r.chat_response_analysis[0] : r.chat_response_analysis;
+        return { ...analysis, submitted_at: r.submitted_at };
+    });
+
+    const total = allResponses.length;
+    const analyzed = analysisData.length;
+    const positive = analysisData.filter(a => a.sentiment_label === 'positive').length;
+    const negative = analysisData.filter(a => a.sentiment_label === 'negative').length;
+    const neutral = analysisData.filter(a => a.sentiment_label === 'neutral').length;
+
+    document.getElementById('engage-analytics-total-responses').textContent = total;
+    document.getElementById('engage-analytics-analyzed-count').textContent = `${analyzed} analyzed`;
+    document.getElementById('engage-analytics-positive-pct').textContent = analyzed > 0 ? Math.round(positive / analyzed * 100) + '%' : '0%';
+    document.getElementById('engage-analytics-positive-count').textContent = `${positive} responses`;
+    document.getElementById('engage-analytics-negative-pct').textContent = analyzed > 0 ? Math.round(negative / analyzed * 100) + '%' : '0%';
+    document.getElementById('engage-analytics-negative-count').textContent = `${negative} responses`;
+    document.getElementById('engage-analytics-neutral-pct').textContent = analyzed > 0 ? Math.round(neutral / analyzed * 100) + '%' : '0%';
+    document.getElementById('engage-analytics-neutral-count').textContent = `${neutral} responses`;
+
+    // Topics
+    const topicCounts = {};
+    analysisData.forEach(a => {
+        const topics = Array.isArray(a.topics) ? a.topics : (a.primary_topic ? [a.primary_topic] : []);
+        topics.forEach(t => { topicCounts[t] = (topicCounts[t] || 0) + 1; });
+    });
+    const sortedTopics = Object.entries(topicCounts).sort((a, b) => b[1] - a[1]);
+    document.getElementById('engage-analytics-top-topic').textContent = sortedTopics.length > 0 ? sortedTopics[0][0] : '-';
+    document.getElementById('engage-analytics-top-topic-count').textContent = sortedTopics.length > 0 ? `${sortedTopics[0][1]} mentions` : '0 mentions';
+
+    // Charts
+    if (typeof Chart !== 'undefined') {
+        // Sentiment pie chart
+        if (engageSentimentPieChart) engageSentimentPieChart.destroy();
+        const pieCtx = document.getElementById('engageSentimentPieChart');
+        if (pieCtx) {
+            engageSentimentPieChart = new Chart(pieCtx, {
+                type: 'doughnut',
+                data: { labels: ['Positive', 'Negative', 'Neutral'], datasets: [{ data: [positive, negative, neutral], backgroundColor: ['#22c55e', '#ef4444', '#94a3b8'] }] },
+                options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+            });
+        }
+        // Topics bar chart
+        if (engageTopicsBarChart) engageTopicsBarChart.destroy();
+        const barCtx = document.getElementById('engageTopicsBarChart');
+        if (barCtx) {
+            const topN = sortedTopics.slice(0, 8);
+            engageTopicsBarChart = new Chart(barCtx, {
+                type: 'bar',
+                data: { labels: topN.map(t => t[0]), datasets: [{ label: 'Mentions', data: topN.map(t => t[1]), backgroundColor: '#1D9E75' }] },
+                options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+            });
+        }
+        // Sentiment over time
+        if (engageSentimentTimeChart) engageSentimentTimeChart.destroy();
+        const timeCtx = document.getElementById('engageSentimentTimeChart');
+        if (timeCtx) {
+            const dateMap = {};
+            analysisData.forEach(a => {
+                const d = new Date(a.submitted_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                if (!dateMap[d]) dateMap[d] = { positive: 0, negative: 0, neutral: 0 };
+                dateMap[d][a.sentiment_label]++;
+            });
+            const dates = Object.keys(dateMap);
+            engageSentimentTimeChart = new Chart(timeCtx, {
+                type: 'line',
+                data: {
+                    labels: dates,
+                    datasets: [
+                        { label: 'Positive', data: dates.map(d => dateMap[d].positive), borderColor: '#22c55e', fill: false },
+                        { label: 'Negative', data: dates.map(d => dateMap[d].negative), borderColor: '#ef4444', fill: false },
+                        { label: 'Neutral', data: dates.map(d => dateMap[d].neutral), borderColor: '#94a3b8', fill: false }
+                    ]
+                },
+                options: { responsive: true, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+            });
+        }
+    }
+}
+
+// ============================================================
+// ENGAGE — Getting Started checklist logic
+// (Complete duplicate of Listen GS, scoped to engage- IDs)
+// ============================================================
+
+let engageGsStepState = [];
+let engageGsCurrentSteps = [];
+
+const engageGsStepDefs = {
+    name:         { label: '<strong>Name your chat</strong> — Enter a name in the Chat Name field', key: 'name' },
+    welcome:      { label: '<strong>Set your welcome message</strong> — Customise the message respondents see when they open the chat', key: 'welcome' },
+    access:       { label: '<strong>Choose access type</strong> — Select who can access your chat link', key: 'access' },
+    create:       { label: '<strong>Create your chat</strong> — Click the "Create Chat" button to generate your unique link', key: 'create' },
+    copyLink:     { label: '<strong>Copy your link</strong> — Use the Copy button to share your chat link with participants', key: 'copyLink' },
+    goParticipants: { label: '<strong>Go to Participants</strong> — Switch to the Participants tab to manage your audience', key: 'goParticipants' },
+    addParticipants: { label: '<strong>Add participants</strong> — Add participant names and emails', key: 'addParticipants' },
+    save:         { label: '<strong>Save your chat</strong> — Click "Save" to store your settings', key: 'save' }
+};
+
+const engageGsAccessSteps = {
+    open:     ['name', 'welcome', 'access', 'create', 'copyLink', 'save'],
+    closed:   ['name', 'welcome', 'access', 'create', 'goParticipants', 'addParticipants', 'save'],
+    combined: ['name', 'welcome', 'access', 'create', 'copyLink', 'goParticipants', 'addParticipants', 'save']
+};
+
+function engageGsRenderSteps(stepKeys) {
+    engageGsCurrentSteps = stepKeys;
+    engageGsStepState = new Array(stepKeys.length).fill(false);
+    const list = document.getElementById('engage-gs-steps-list');
+    if (!list) return;
+    list.innerHTML = stepKeys.map(function(key, i) {
+        var num = i + 1;
+        var def = engageGsStepDefs[key];
+        return '<li id="engage-gs-step-' + num + '" style="display:flex;gap:10px;align-items:flex-start;font-size:13px;color:#334155;line-height:1.5;transition:opacity 0.3s;">' +
+            '<span id="engage-gs-circle-' + num + '" style="flex-shrink:0;width:22px;height:22px;background:#E1F5EE;color:#0F6E56;border:2px solid #5DCAA5;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;transition:background 0.3s;">' + num + '</span>' +
+            '<span id="engage-gs-text-' + num + '">' + def.label + '</span></li>';
+    }).join('');
+    engageGsUpdateProgress();
+}
+
+function engageGsCompleteStep(step) {
+    if (step < 1 || step > engageGsCurrentSteps.length) return;
+    if (engageGsStepState[step - 1]) return;
+    engageGsStepState[step - 1] = true;
+    var circle = document.getElementById('engage-gs-circle-' + step);
+    var li = document.getElementById('engage-gs-step-' + step);
+    if (circle) { circle.style.background = '#1D9E75'; circle.style.border = 'none'; circle.style.color = '#fff'; circle.innerHTML = '✓'; circle.style.fontSize = '13px'; }
+    if (li) li.style.opacity = '0.6';
+    engageGsUpdateProgress();
+}
+
+function engageGsUncompleteStep(step) {
+    if (step < 1 || step > engageGsCurrentSteps.length) return;
+    if (!engageGsStepState[step - 1]) return;
+    engageGsStepState[step - 1] = false;
+    var circle = document.getElementById('engage-gs-circle-' + step);
+    var li = document.getElementById('engage-gs-step-' + step);
+    if (circle) { circle.style.background = '#E1F5EE'; circle.style.border = '2px solid #5DCAA5'; circle.style.color = '#0F6E56'; circle.innerHTML = step; circle.style.fontSize = '12px'; }
+    if (li) li.style.opacity = '1';
+    engageGsUpdateProgress();
+}
+
+function engageGsCompleteByKey(key) {
+    var idx = engageGsCurrentSteps.indexOf(key);
+    if (idx !== -1) engageGsCompleteStep(idx + 1);
+}
+
+function engageGsUncompleteByKey(key) {
+    var idx = engageGsCurrentSteps.indexOf(key);
+    if (idx !== -1) engageGsUncompleteStep(idx + 1);
+}
+
+function engageGsUpdateProgress() {
+    var total = engageGsCurrentSteps.length;
+    var done = engageGsStepState.filter(Boolean).length;
+    var label = document.getElementById('engage-gs-progress');
+    var bar = document.getElementById('engage-gs-progress-bar');
+    if (label) label.textContent = done + '/' + total + ' complete';
+    if (bar) bar.style.width = (total > 0 ? Math.round((done / total) * 100) : 0) + '%';
+}
+
+function engageGsRebuildForAccessType(accessType) {
+    var keys = engageGsAccessSteps[accessType] || engageGsAccessSteps.open;
+    engageGsRenderSteps(keys);
+    engageGsEvaluateState();
+}
+
+function engageGsEvaluateState() {
+    setTimeout(function() {
+        var chatName = document.getElementById('engage-chat-setup-name');
+        var welcome = document.getElementById('engage-chat-setup-welcome');
+        var successPanel = document.getElementById('engage-chat-success-panel');
+        var panelVisible = successPanel && successPanel.style.display !== 'none';
+        var isExisting = !!window.engageCurrentEditingChatId;
+
+        if (chatName && chatName.value.trim()) engageGsCompleteByKey('name');
+        if (welcome && welcome.value.trim()) engageGsCompleteByKey('welcome');
+        engageGsCompleteByKey('access');
+        if (panelVisible || isExisting) engageGsCompleteByKey('create');
+        if (isExisting) {
+            engageGsCompleteByKey('copyLink');
+            engageGsCompleteByKey('save');
+            engageGsCompleteByKey('goParticipants');
+        }
+        if (typeof engageParticipantsData !== 'undefined' && engageParticipantsData.length > 0) engageGsCompleteByKey('addParticipants');
+
+        engageGsUpdateProgress();
+    }, 100);
+}
+
+function engageGsReset() {
+    var accessType = (document.getElementById('engage-chat-access-type') || {}).value || 'open';
+    engageGsRebuildForAccessType(accessType);
+}
+
+// Initialize Engage Getting Started listeners
+(function initEngageGettingStarted() {
+    function setup() {
+        var chatNameInput = document.getElementById('engage-chat-setup-name');
+        var welcomeInput = document.getElementById('engage-chat-setup-welcome');
+        var accessSelect = document.getElementById('engage-chat-access-type');
+
+        if (!chatNameInput) { setTimeout(setup, 500); return; }
+
+        // Step 1: Chat name
+        chatNameInput.addEventListener('input', function() {
+            if (this.value.trim()) engageGsCompleteByKey('name');
+            else engageGsUncompleteByKey('name');
+        });
+
+        // Step 2: Welcome message
+        if (welcomeInput) {
+            welcomeInput.addEventListener('input', function() {
+                if (this.value.trim()) engageGsCompleteByKey('welcome');
+                else engageGsUncompleteByKey('welcome');
+            });
+        }
+
+        // Listen for access type changes — rebuild checklist
+        if (accessSelect) {
+            accessSelect.addEventListener('change', function() {
+                engageGsRebuildForAccessType(this.value);
+            });
+        }
+
+        // Initial render
+        engageGsRebuildForAccessType((accessSelect || {}).value || 'open');
+    }
+    setup();
+})();
 </script>
 
 </body>

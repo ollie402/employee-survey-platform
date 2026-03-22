@@ -743,6 +743,7 @@
         console.log('Supabase client is ready');
 
         try {
+            // Try listening_chats first
             const { data: chat, error } = await window.supabaseClient
                 .from('listening_chats')
                 .select('*')
@@ -750,16 +751,30 @@
                 .eq('is_active', true)
                 .single();
 
-            if (error || !chat) {
-                console.error('Chat not found or not active:', error);
-                return null;
+            if (!error && chat) {
+                window.currentChat = chat;
+                window.currentChatSource = 'listening_chats';
+                console.log('Chat loaded from listening_chats:', chat.name);
+                return chat;
             }
 
-            // Store chat data for later use
-            window.currentChat = chat;
-            console.log('Chat loaded from database:', chat.name);
+            // Fallback: try engage_chats
+            const { data: engageChat, error: engageError } = await window.supabaseClient
+                .from('engage_chats')
+                .select('*')
+                .eq('slug', slug)
+                .eq('is_active', true)
+                .single();
 
-            return chat;
+            if (!engageError && engageChat) {
+                window.currentChat = engageChat;
+                window.currentChatSource = 'engage_chats';
+                console.log('Chat loaded from engage_chats:', engageChat.name);
+                return engageChat;
+            }
+
+            console.error('Chat not found or not active in either table');
+            return null;
 
         } catch (error) {
             console.error('Error loading chat:', error);
@@ -809,10 +824,12 @@
         console.log('📝 Insert data:', insertData);
 
         try {
-            console.log('⏳ Attempting to insert into chat_responses...');
+            // Use engage_chat_responses table for engage chats, chat_responses for listening chats
+            const responsesTable = window.currentChatSource === 'engage_chats' ? 'engage_chat_responses' : 'chat_responses';
+            console.log(`⏳ Attempting to insert into ${responsesTable}...`);
 
             const { data, error } = await window.supabaseClient
-                .from('chat_responses')
+                .from(responsesTable)
                 .insert(insertData)
                 .select()
                 .single();
