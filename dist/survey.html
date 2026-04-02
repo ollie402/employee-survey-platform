@@ -1713,18 +1713,29 @@
             }
 
             try {
+                console.log('[Translation] Sending', textsToSend.length, 'texts to /api/translate, targetLang:', langCode);
+                console.log('[Translation] Texts:', textsToSend);
+
                 const response = await fetch('/api/translate', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ texts: textsToSend, targetLang: langCode })
                 });
 
-                if (!response.ok) throw new Error('Translation failed');
+                if (!response.ok) {
+                    const errBody = await response.text();
+                    console.error('[Translation] API error, status:', response.status, 'body:', errBody);
+                    throw new Error('Translation failed: ' + response.status);
+                }
 
                 const data = await response.json();
+                console.log('[Translation] Response received,', data.translated.length, 'translations');
+                console.log('[Translation] Translated:', data.translated);
+
                 applyTranslatedTexts(entries, data.translated);
+                console.log('[Translation] Applied to', entries.length, 'DOM elements');
             } catch (err) {
-                console.error('Translation error:', err);
+                console.error('[Translation] Error:', err);
             } finally {
                 isTranslating = false;
                 if (langSelect) langSelect.disabled = false;
