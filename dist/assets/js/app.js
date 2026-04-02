@@ -1284,9 +1284,9 @@ function showToast(message, type = 'info') {
 }
 
 // Profile and Settings Functions
-function showProfile() {
+async function showProfile() {
     const modal = document.getElementById('profile-settings-modal');
-    
+
     // Populate form with current user data
     if (currentUser) {
         document.getElementById('profile-name').value = currentUser.name || '';
@@ -1297,7 +1297,28 @@ function showProfile() {
         document.getElementById('profile-language').value = currentLanguage;
         document.getElementById('profile-bio').value = currentUser.bio || '';
     }
-    
+
+    // Load notification frequency from database
+    const notifDropdown = document.getElementById('profile-notification-frequency');
+    if (notifDropdown) {
+        notifDropdown.value = currentUser?.notificationFrequency || 'instant';
+        try {
+            const { data: { user } } = await window.supabaseClient.auth.getUser();
+            if (user) {
+                const { data: userData } = await window.supabaseClient
+                    .from('users')
+                    .select('notification_frequency')
+                    .eq('auth_id', user.id)
+                    .single();
+                if (userData && userData.notification_frequency) {
+                    notifDropdown.value = userData.notification_frequency;
+                }
+            }
+        } catch (err) {
+            console.error('Error loading notification preference:', err);
+        }
+    }
+
     modal.classList.remove('hidden');
 }
 
@@ -1344,10 +1365,10 @@ function closeModal(modalId) {
     modal.classList.add('hidden');
 }
 
-function handleProfileUpdate(event) {
+async function handleProfileUpdate(event) {
     event.preventDefault();
-    
-    const formData = new FormData(event.target);
+
+    const notificationFrequency = document.getElementById('profile-notification-frequency').value;
     const profileData = {
         name: document.getElementById('profile-name').value,
         email: document.getElementById('profile-email').value,
@@ -1355,20 +1376,34 @@ function handleProfileUpdate(event) {
         phone: document.getElementById('profile-phone').value,
         timezone: document.getElementById('profile-timezone').value,
         language: document.getElementById('profile-language').value,
-        bio: document.getElementById('profile-bio').value
+        bio: document.getElementById('profile-bio').value,
+        notificationFrequency: notificationFrequency
     };
-    
+
     // Update current user
     if (currentUser) {
         Object.assign(currentUser, profileData);
         document.getElementById('user-name').textContent = profileData.name;
-        
+
         // Change language if updated
         if (profileData.language !== currentLanguage) {
             changeLanguage(profileData.language);
         }
     }
-    
+
+    // Save notification preference to database
+    try {
+        const { data: { user } } = await window.supabaseClient.auth.getUser();
+        if (user) {
+            await window.supabaseClient
+                .from('users')
+                .update({ notification_frequency: notificationFrequency })
+                .eq('auth_id', user.id);
+        }
+    } catch (err) {
+        console.error('Error saving notification preference:', err);
+    }
+
     closeModal('profile-settings-modal');
     showToast('Profile updated successfully!', 'success');
 }
