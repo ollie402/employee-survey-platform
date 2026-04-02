@@ -855,16 +855,9 @@
                 </div>
             `;
 
-            // Show language switcher
+            // Show language switcher and apply default/session language
             showLanguageSwitcher();
-
-            // Auto-translate if default language or session language is not English
-            const langToUse = sessionStorage.getItem('survey-language') || currentSurvey.default_language || 'EN-GB';
-            if (langToUse !== 'EN-GB') {
-                currentLanguage = langToUse;
-                document.getElementById('lang-select').value = langToUse;
-                setTimeout(() => switchLanguage(langToUse), 100);
-            }
+            applyActiveTranslation();
         }
 
         // Start the survey
@@ -958,11 +951,8 @@
             // Initialize any calendar questions
             initAllCalendars();
 
-            // Re-translate if not English
-            if (currentLanguage && currentLanguage !== 'EN-GB') {
-                originalTexts = {}; // Reset originals for new page content
-                setTimeout(() => switchLanguage(currentLanguage), 100);
-            }
+            // Re-translate if active language is not English
+            applyActiveTranslation();
         }
 
         function renderQuestion(question, qIndex) {
@@ -1567,10 +1557,7 @@
             `;
 
             // Translate completion page if not English
-            if (currentLanguage && currentLanguage !== 'EN-GB') {
-                originalTexts = {};
-                setTimeout(() => switchLanguage(currentLanguage), 100);
-            }
+            applyActiveTranslation();
         }
 
         // Utility function to escape HTML
@@ -1584,94 +1571,140 @@
         // ===== LANGUAGE SWITCHER =====
         const RTL_LANGUAGES = ['AR', 'UR'];
         let currentLanguage = 'EN-GB';
-        let originalTexts = {}; // Store original English texts for re-translation
         let isTranslating = false;
+        // Stores the original English text for each translatable element so we
+        // always translate from English and can restore cleanly.
+        // Keyed by a stable selector string → { originalText, hasRequired }
+        let originalTextMap = new Map();
+
+        function isEnglish(code) {
+            return !code || code === 'EN-GB' || code === 'EN';
+        }
 
         function showLanguageSwitcher() {
             document.getElementById('lang-switcher-container').style.display = 'flex';
-            // Restore session choice
+            // Restore session choice first, then fall back to survey default
             const saved = sessionStorage.getItem('survey-language');
             if (saved) {
                 document.getElementById('lang-select').value = saved;
                 currentLanguage = saved;
-            }
-            // Set to survey default language if no session choice
-            if (!saved && currentSurvey && currentSurvey.default_language && currentSurvey.default_language !== 'EN-GB') {
+            } else if (currentSurvey && currentSurvey.default_language && !isEnglish(currentSurvey.default_language)) {
                 const defaultLang = currentSurvey.default_language;
                 document.getElementById('lang-select').value = defaultLang;
                 currentLanguage = defaultLang;
             }
         }
 
-        function showTranslationLoading() {
+        // Build a list of { element, originalText, hasRequired } from the
+        // current DOM. Always reads from originalTextMap when available so we
+        // never send already-translated text to the API.
+        function collectTranslatableEntries() {
+            const entries = [];
+
+            const selectors = [
+                '.survey-title',
+                '.landing-container h1',
+                '.survey-description',
+                '.landing-description',
+                '.page-title',
+                '.page-instructions',
+                '.question-text',
+                '.option-label',
+                '.rating-label',
+                '.start-btn',
+                '.btn-primary',
+                '.btn-secondary',
+                '.complete-container h2',
+                '.complete-container p'
+            ];
+
+            selectors.forEach(sel => {
+                document.querySelectorAll(sel).forEach((el, idx) => {
+                    const key = sel + '[' + idx + ']';
+                    const hasRequired = (sel === '.question-text') && !!el.querySelector('.required');
+
+                    // If we already stored an original for this key, use it
+                    if (originalTextMap.has(key)) {
+                        const stored = originalTextMap.get(key);
+                        entries.push({ el, key, originalText: stored.originalText, hasRequired: stored.hasRequired });
+                        return;
+                    }
+
+                    // Otherwise capture the current (English) text as original
+                    let text;
+                    if (sel === '.question-text') {
+                        const clone = el.cloneNode(true);
+                        const req = clone.querySelector('.required');
+                        if (req) req.remove();
+                        text = clone.textContent.trim();
+                    } else {
+                        text = el.textContent.trim();
+                    }
+
+                    if (!text) return;
+
+                    originalTextMap.set(key, { originalText: text, hasRequired });
+                    entries.push({ el, key, originalText: text, hasRequired });
+                });
+            });
+
+            return entries;
+        }
+
+        // Clear stored originals — called before a full DOM re-render so stale
+        // references don't persist.
+        function resetOriginalTexts() {
+            originalTextMap = new Map();
+        }
+
+        function applyTranslatedTexts(entries, translated) {
+            entries.forEach((entry, i) => {
+                if (i >= translated.length) return;
+                if (entry.el.classList.contains('question-text')) {
+                    entry.el.innerHTML = escapeHtml(translated[i]) + (entry.hasRequired ? '<span class="required">*</span>' : '');
+                } else {
+                    entry.el.textContent = translated[i];
+                }
+            });
+        }
+
+        function restoreEnglishTexts() {
+            const entries = collectTranslatableEntries();
+            entries.forEach(entry => {
+                if (entry.el.classList.contains('question-text')) {
+                    entry.el.innerHTML = escapeHtml(entry.originalText) + (entry.hasRequired ? '<span class="required">*</span>' : '');
+                } else {
+                    entry.el.textContent = entry.originalText;
+                }
+            });
+        }
+
+        async function translateCurrentPage(langCode) {
+            if (isTranslating) return;
+            if (isEnglish(langCode)) {
+                restoreEnglishTexts();
+                const container = document.getElementById('survey-container');
+                container.removeAttribute('dir');
+                return;
+            }
+
+            const entries = collectTranslatableEntries();
+            // Always send the original English texts so we translate from source
+            const textsToSend = entries.map(e => e.originalText);
+            if (textsToSend.length === 0) return;
+
+            isTranslating = true;
+
+            // Disable dropdown and show loading state
+            const langSelect = document.getElementById('lang-select');
+            if (langSelect) langSelect.disabled = true;
             const overlay = document.createElement('div');
             overlay.id = 'translation-overlay';
             overlay.className = 'translation-loading';
-            overlay.innerHTML = `
-                <div class="translation-loading-content">
-                    <div class="loading-spinner"></div>
-                    <span>Translating...</span>
-                </div>
-            `;
+            overlay.innerHTML = '<div class="translation-loading-content"><div class="loading-spinner"></div><span>Translating...</span></div>';
             document.body.appendChild(overlay);
-        }
 
-        function hideTranslationLoading() {
-            const overlay = document.getElementById('translation-overlay');
-            if (overlay) overlay.remove();
-        }
-
-        function collectTranslatableTexts() {
-            const texts = [];
-            const elements = [];
-
-            // Survey title
-            document.querySelectorAll('.survey-title, .landing-container h1').forEach(el => {
-                if (el.textContent.trim()) { texts.push(el.textContent.trim()); elements.push(el); }
-            });
-            // Survey description
-            document.querySelectorAll('.survey-description, .landing-description').forEach(el => {
-                if (el.textContent.trim()) { texts.push(el.textContent.trim()); elements.push(el); }
-            });
-            // Page titles and instructions
-            document.querySelectorAll('.page-title, .page-instructions').forEach(el => {
-                if (el.textContent.trim()) { texts.push(el.textContent.trim()); elements.push(el); }
-            });
-            // Question texts (just the text, not the required asterisk)
-            document.querySelectorAll('.question-text').forEach(el => {
-                // Get text content minus the required span
-                const clone = el.cloneNode(true);
-                const req = clone.querySelector('.required');
-                if (req) req.remove();
-                const text = clone.textContent.trim();
-                if (text) { texts.push(text); elements.push({ el: el, hasRequired: !!el.querySelector('.required') }); }
-            });
-            // Option labels
-            document.querySelectorAll('.option-label').forEach(el => {
-                if (el.textContent.trim()) { texts.push(el.textContent.trim()); elements.push(el); }
-            });
-            // Rating labels
-            document.querySelectorAll('.rating-label').forEach(el => {
-                if (el.textContent.trim()) { texts.push(el.textContent.trim()); elements.push(el); }
-            });
-            // Buttons (Start, Next, Back, Submit)
-            document.querySelectorAll('.start-btn, .btn-primary, .btn-secondary').forEach(el => {
-                if (el.textContent.trim() && !el.disabled) { texts.push(el.textContent.trim()); elements.push(el); }
-            });
-            // Complete page
-            document.querySelectorAll('.complete-container h2, .complete-container p').forEach(el => {
-                if (el.textContent.trim()) { texts.push(el.textContent.trim()); elements.push(el); }
-            });
-
-            return { texts, elements };
-        }
-
-        async function switchLanguage(langCode) {
-            if (isTranslating) return;
-            currentLanguage = langCode;
-            sessionStorage.setItem('survey-language', langCode);
-
-            // Set RTL direction
+            // Set RTL / LTR
             const container = document.getElementById('survey-container');
             if (RTL_LANGUAGES.includes(langCode)) {
                 container.setAttribute('dir', 'rtl');
@@ -1679,69 +1712,52 @@
                 container.removeAttribute('dir');
             }
 
-            // If switching back to English and we have originals, restore them
-            if (langCode === 'EN-GB') {
-                restoreOriginalTexts();
-                return;
-            }
-
-            const { texts, elements } = collectTranslatableTexts();
-            if (texts.length === 0) return;
-
-            // Store originals before first translation
-            if (Object.keys(originalTexts).length === 0) {
-                storeOriginalTexts(elements, texts);
-            }
-
-            isTranslating = true;
-            showTranslationLoading();
-
             try {
+                console.log('[Translation] Sending', textsToSend.length, 'texts to /api/translate, targetLang:', langCode);
+                console.log('[Translation] Texts:', textsToSend);
+
                 const response = await fetch('/api/translate', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ texts, targetLang: langCode })
+                    body: JSON.stringify({ texts: textsToSend, targetLang: langCode })
                 });
 
-                if (!response.ok) throw new Error('Translation failed');
+                if (!response.ok) {
+                    const errBody = await response.text();
+                    console.error('[Translation] API error, status:', response.status, 'body:', errBody);
+                    throw new Error('Translation failed: ' + response.status);
+                }
 
                 const data = await response.json();
-                applyTranslations(elements, data.translated);
+                console.log('[Translation] Response received,', data.translated.length, 'translations');
+                console.log('[Translation] Translated:', data.translated);
+
+                applyTranslatedTexts(entries, data.translated);
+                console.log('[Translation] Applied to', entries.length, 'DOM elements');
             } catch (err) {
-                console.error('Translation error:', err);
+                console.error('[Translation] Error:', err);
             } finally {
                 isTranslating = false;
-                hideTranslationLoading();
+                if (langSelect) langSelect.disabled = false;
+                const ol = document.getElementById('translation-overlay');
+                if (ol) ol.remove();
             }
         }
 
-        function storeOriginalTexts(elements, texts) {
-            elements.forEach((el, i) => {
-                const key = 'orig_' + i;
-                originalTexts[key] = { element: el, text: texts[i] };
-            });
+        // Called by the dropdown onchange
+        async function switchLanguage(langCode) {
+            currentLanguage = langCode;
+            sessionStorage.setItem('survey-language', langCode);
+            await translateCurrentPage(langCode);
         }
 
-        function applyTranslations(elements, translated) {
-            elements.forEach((item, i) => {
-                if (i >= translated.length) return;
-                if (item && item.el) {
-                    // Question text with possible required asterisk
-                    item.el.innerHTML = escapeHtml(translated[i]) + (item.hasRequired ? '<span class="required">*</span>' : '');
-                } else if (item && item.textContent !== undefined) {
-                    item.textContent = translated[i];
-                }
-            });
-        }
-
-        function restoreOriginalTexts() {
-            Object.values(originalTexts).forEach(({ element, text }) => {
-                if (element && element.el) {
-                    element.el.innerHTML = escapeHtml(text) + (element.hasRequired ? '<span class="required">*</span>' : '');
-                } else if (element && element.textContent !== undefined) {
-                    element.textContent = text;
-                }
-            });
+        // Called after any full DOM render (landing, survey page, completion) to
+        // apply translation if the active language is not English.
+        async function applyActiveTranslation() {
+            resetOriginalTexts();
+            if (!isEnglish(currentLanguage)) {
+                await translateCurrentPage(currentLanguage);
+            }
         }
 
         // ===== END LANGUAGE SWITCHER =====
