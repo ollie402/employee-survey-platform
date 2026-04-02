@@ -100,20 +100,14 @@ async function updateOrganization(id, updates) {
     try {
         console.log('Attempting to update organization:', id, 'with updates:', updates);
 
-        // Only include fields that exist in the database table
-        // Based on saveOrganization, the table has: id, name, slug, description, status, created_at
-        const allowedFields = ['name', 'slug', 'description', 'status'];
+        // Only include fields that exist in the organizations database table
+        const allowedFields = ['name', 'description', 'status', 'industry', 'size', 'website'];
         const safeUpdates = {};
 
         for (const key of allowedFields) {
-            if (updates[key] !== undefined && updates[key] !== null && updates[key] !== '') {
+            if (updates[key] !== undefined) {
                 safeUpdates[key] = updates[key];
             }
-        }
-
-        // If name is being updated, also update slug
-        if (safeUpdates.name) {
-            safeUpdates.slug = generateSlug(safeUpdates.name);
         }
 
         console.log('Safe updates (filtered to existing columns):', safeUpdates);
