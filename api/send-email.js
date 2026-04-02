@@ -26,7 +26,7 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Email service not configured' });
   }
 
-  try {
+  try {1
     // Send the email using SMTP2GO's API - FIXED: Removed api_key from body
     const response = await fetch('https://api.smtp2go.com/v3/email/send', {
       method: 'POST',
