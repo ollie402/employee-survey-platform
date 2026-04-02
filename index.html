@@ -7037,6 +7037,29 @@
                                     </button>
                                 </div>
                                 <div class="sb-settings-body">
+                                    <!-- Default Survey Language -->
+                                    <div class="sb-settings-section">
+                                        <h3 class="sb-settings-section-title">Default Survey Language</h3>
+                                        <p style="font-size:0.85rem;color:#666;margin-bottom:0.5rem;">This is the language your survey will display in by default for participants</p>
+                                        <select id="sb-default-language" class="sb-select" onchange="sbSetDefaultLanguage(this.value)" style="width:100%;padding:0.5rem;border:1px solid #d0d0d0;border-radius:6px;font-size:0.95rem;">
+                                            <option value="EN-GB">English</option>
+                                            <option value="CY">Welsh</option>
+                                            <option value="FR">French</option>
+                                            <option value="PL">Polish</option>
+                                            <option value="RO">Romanian</option>
+                                            <option value="UR">Urdu</option>
+                                            <option value="PA">Punjabi</option>
+                                            <option value="AR">Arabic</option>
+                                            <option value="ES">Spanish</option>
+                                            <option value="PT-PT">Portuguese</option>
+                                            <option value="IT">Italian</option>
+                                            <option value="DE">German</option>
+                                            <option value="TR">Turkish</option>
+                                            <option value="SO">Somali</option>
+                                            <option value="BN">Bengali</option>
+                                        </select>
+                                    </div>
+
                                     <!-- Theme Colors -->
                                     <div class="sb-settings-section">
                                         <h3 class="sb-settings-section-title">Theme Color</h3>
@@ -16377,11 +16400,91 @@ async function sbShowResponsesTab() {
     }
 }
 
+// Language name lookup
+const SB_LANGUAGE_NAMES = {
+    'EN-GB': 'English', 'CY': 'Welsh', 'FR': 'French', 'PL': 'Polish',
+    'RO': 'Romanian', 'UR': 'Urdu', 'PA': 'Punjabi', 'AR': 'Arabic',
+    'ES': 'Spanish', 'PT-PT': 'Portuguese', 'IT': 'Italian', 'DE': 'German',
+    'TR': 'Turkish', 'SO': 'Somali', 'BN': 'Bengali'
+};
+
 // Render the responses panel
-function sbRenderResponsesPanel(responses) {
+async function sbRenderResponsesPanel(responses) {
     sbCalculateSummaryStats(responses);
     sbRenderRawDataTable(responses);
     sbRenderAnalytics(responses);
+    await sbAutoTranslateResponses(responses);
+}
+
+// Auto-translate non-English text responses back to English
+async function sbAutoTranslateResponses(responses) {
+    const questions = sbGetAllQuestions();
+    const textQuestionTypes = ['text', 'short-text', 'long-text', 'textarea'];
+    const textQuestions = questions.filter(q => textQuestionTypes.includes(q.type));
+
+    if (textQuestions.length === 0) return;
+
+    // Find responses needing translation
+    const toTranslate = [];
+    responses.forEach((response, rIndex) => {
+        const lang = response.response_language;
+        if (!lang || lang === 'EN-GB') return;
+
+        const answers = response.responses || {};
+        textQuestions.forEach(q => {
+            const answer = answers[q.id];
+            if (answer && typeof answer === 'string' && answer.trim()) {
+                toTranslate.push({ rIndex, questionId: q.id, text: answer, lang });
+            }
+        });
+    });
+
+    if (toTranslate.length === 0) return;
+
+    // Show translating indicator
+    const panel = document.getElementById('sb-responses-panel');
+    const indicator = document.createElement('div');
+    indicator.id = 'sb-translating-indicator';
+    indicator.style.cssText = 'background:#f5f3ff;color:#7c3aed;padding:0.5rem 1rem;border-radius:8px;margin-bottom:0.75rem;font-size:0.85rem;display:flex;align-items:center;gap:0.5rem;';
+    indicator.innerHTML = '<div style="width:16px;height:16px;border:2px solid #e5e5e5;border-top-color:#7c3aed;border-radius:50%;animation:spin 1s linear infinite;"></div> Translating responses...';
+    panel.insertBefore(indicator, panel.firstChild);
+
+    try {
+        const texts = toTranslate.map(t => t.text);
+        const res = await fetch('/api/translate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ texts, targetLang: 'EN-GB' })
+        });
+
+        if (!res.ok) throw new Error('Translation API error');
+
+        const data = await res.json();
+
+        // Apply translations to the raw data table cells
+        const bodyEl = document.getElementById('sb-responses-body');
+        const rows = bodyEl.querySelectorAll('tr');
+        const qIndexMap = {};
+        questions.forEach((q, i) => { qIndexMap[q.id] = i; });
+
+        toTranslate.forEach((item, i) => {
+            if (i >= data.translated.length) return;
+            const row = rows[item.rIndex];
+            if (!row) return;
+            const colIndex = qIndexMap[item.questionId] + 1; // +1 for the Submitted column
+            const cell = row.children[colIndex];
+            if (!cell) return;
+
+            const langName = SB_LANGUAGE_NAMES[item.lang] || item.lang;
+            cell.innerHTML = `${data.translated[i]} <span style="display:inline-block;background:#f0e6ff;color:#7c3aed;font-size:0.7rem;padding:0.1rem 0.4rem;border-radius:999px;margin-left:0.35rem;">Translated from ${langName}</span>`;
+            cell.title = `Original (${langName}): ${item.text}`;
+        });
+    } catch (err) {
+        console.error('Failed to translate responses:', err);
+    } finally {
+        const ind = document.getElementById('sb-translating-indicator');
+        if (ind) ind.remove();
+    }
 }
 
 // Calculate and display summary stats
@@ -18182,7 +18285,17 @@ function sbCloseSettings() {
     document.getElementById('sb-settings-panel').classList.add('sb-hidden');
 }
 
+function sbSetDefaultLanguage(langCode) {
+    sbCurrentSurvey.defaultLanguage = langCode;
+}
+
 function sbRenderSettings() {
+    // Default language
+    const langSelect = document.getElementById('sb-default-language');
+    if (langSelect) {
+        langSelect.value = sbCurrentSurvey.defaultLanguage || 'EN-GB';
+    }
+
     // Theme colors
     const themeContainer = document.getElementById('sb-theme-colors');
     if (themeContainer) {
@@ -18331,6 +18444,7 @@ async function sbSyncSurveyToSupabase(survey) {
         end_date: survey.endDate || null,
         landing_page_content: survey.landingPageContent || 'Thank you for taking the time to complete this survey.',
         thank_you_content: survey.thankYouContent || 'Your response has been recorded. Thank you for your feedback!',
+        default_language: survey.defaultLanguage || 'EN-GB',
         data: survey, // Store full survey structure as JSON
         updated_at: new Date().toISOString()
     };

@@ -572,6 +572,113 @@
             }
         }
 
+        /* Language Switcher */
+        .lang-switcher-wrapper {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 0.75rem;
+        }
+
+        .lang-switcher {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 999px;
+            padding: 0.4rem 0.85rem;
+            font-size: 0.85rem;
+            color: #555;
+            cursor: pointer;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+            transition: border-color 0.2s;
+        }
+
+        .lang-switcher:hover {
+            border-color: #7c3aed;
+        }
+
+        .lang-switcher select {
+            appearance: none;
+            -webkit-appearance: none;
+            border: none;
+            background: transparent;
+            font-size: 0.85rem;
+            color: #333;
+            cursor: pointer;
+            padding-right: 0.5rem;
+            outline: none;
+        }
+
+        .lang-switcher-arrow {
+            font-size: 0.6rem;
+            color: #999;
+        }
+
+        /* Translation loading overlay */
+        .translation-loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255,255,255,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .translation-loading-content {
+            background: white;
+            padding: 1.5rem 2.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.95rem;
+            color: #555;
+        }
+
+        .translation-loading .loading-spinner {
+            width: 24px;
+            height: 24px;
+            margin: 0;
+        }
+
+        /* RTL support */
+        [dir="rtl"] .options-list,
+        [dir="rtl"] .question-text,
+        [dir="rtl"] .survey-title,
+        [dir="rtl"] .survey-description,
+        [dir="rtl"] .page-title,
+        [dir="rtl"] .page-instructions,
+        [dir="rtl"] .landing-description,
+        [dir="rtl"] .landing-container h1,
+        [dir="rtl"] .complete-container h2,
+        [dir="rtl"] .complete-container p {
+            text-align: right;
+        }
+
+        [dir="rtl"] .option-item {
+            flex-direction: row-reverse;
+        }
+
+        [dir="rtl"] .survey-navigation {
+            flex-direction: row-reverse;
+        }
+
+        [dir="rtl"] .btn-primary {
+            margin-left: 0;
+            margin-right: auto;
+        }
+
+        [dir="rtl"] .lang-switcher-wrapper {
+            justify-content: flex-start;
+        }
+
         /* Validation Error */
         .question-card.error .question-text {
             color: #dc2626;
@@ -597,6 +704,29 @@
 </head>
 <body>
     <div id="survey-container">
+        <div id="lang-switcher-container" class="lang-switcher-wrapper" style="display:none;">
+            <label class="lang-switcher">
+                <span>🌐</span>
+                <select id="lang-select" onchange="switchLanguage(this.value)">
+                    <option value="EN-GB">English</option>
+                    <option value="CY">Welsh</option>
+                    <option value="FR">French</option>
+                    <option value="PL">Polish</option>
+                    <option value="RO">Romanian</option>
+                    <option value="UR">Urdu</option>
+                    <option value="PA">Punjabi</option>
+                    <option value="AR">Arabic</option>
+                    <option value="ES">Spanish</option>
+                    <option value="PT-PT">Portuguese</option>
+                    <option value="IT">Italian</option>
+                    <option value="DE">German</option>
+                    <option value="TR">Turkish</option>
+                    <option value="SO">Somali</option>
+                    <option value="BN">Bengali</option>
+                </select>
+                <span class="lang-switcher-arrow">▾</span>
+            </label>
+        </div>
         <div id="survey-loading">
             <div class="loading-spinner"></div>
             <p>Loading survey...</p>
@@ -724,6 +854,17 @@
                     <button class="start-btn" onclick="startSurvey()">Start Survey</button>
                 </div>
             `;
+
+            // Show language switcher
+            showLanguageSwitcher();
+
+            // Auto-translate if default language or session language is not English
+            const langToUse = sessionStorage.getItem('survey-language') || currentSurvey.default_language || 'EN-GB';
+            if (langToUse !== 'EN-GB') {
+                currentLanguage = langToUse;
+                document.getElementById('lang-select').value = langToUse;
+                setTimeout(() => switchLanguage(langToUse), 100);
+            }
         }
 
         // Start the survey
@@ -816,6 +957,12 @@
 
             // Initialize any calendar questions
             initAllCalendars();
+
+            // Re-translate if not English
+            if (currentLanguage && currentLanguage !== 'EN-GB') {
+                originalTexts = {}; // Reset originals for new page content
+                setTimeout(() => switchLanguage(currentLanguage), 100);
+            }
         }
 
         function renderQuestion(question, qIndex) {
@@ -1364,6 +1511,7 @@
                         survey_id: currentSurvey.id,
                         respondent_id: respondentId,
                         responses: responses,
+                        response_language: currentLanguage || 'EN-GB',
                         completed_at: new Date().toISOString()
                     });
 
@@ -1417,6 +1565,12 @@
                     <p>${escapeHtml(thankYouContent)}</p>
                 </div>
             `;
+
+            // Translate completion page if not English
+            if (currentLanguage && currentLanguage !== 'EN-GB') {
+                originalTexts = {};
+                setTimeout(() => switchLanguage(currentLanguage), 100);
+            }
         }
 
         // Utility function to escape HTML
@@ -1426,6 +1580,171 @@
             div.textContent = text;
             return div.innerHTML;
         }
+
+        // ===== LANGUAGE SWITCHER =====
+        const RTL_LANGUAGES = ['AR', 'UR'];
+        let currentLanguage = 'EN-GB';
+        let originalTexts = {}; // Store original English texts for re-translation
+        let isTranslating = false;
+
+        function showLanguageSwitcher() {
+            document.getElementById('lang-switcher-container').style.display = 'flex';
+            // Restore session choice
+            const saved = sessionStorage.getItem('survey-language');
+            if (saved) {
+                document.getElementById('lang-select').value = saved;
+                currentLanguage = saved;
+            }
+            // Set to survey default language if no session choice
+            if (!saved && currentSurvey && currentSurvey.default_language && currentSurvey.default_language !== 'EN-GB') {
+                const defaultLang = currentSurvey.default_language;
+                document.getElementById('lang-select').value = defaultLang;
+                currentLanguage = defaultLang;
+            }
+        }
+
+        function showTranslationLoading() {
+            const overlay = document.createElement('div');
+            overlay.id = 'translation-overlay';
+            overlay.className = 'translation-loading';
+            overlay.innerHTML = `
+                <div class="translation-loading-content">
+                    <div class="loading-spinner"></div>
+                    <span>Translating...</span>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+        }
+
+        function hideTranslationLoading() {
+            const overlay = document.getElementById('translation-overlay');
+            if (overlay) overlay.remove();
+        }
+
+        function collectTranslatableTexts() {
+            const texts = [];
+            const elements = [];
+
+            // Survey title
+            document.querySelectorAll('.survey-title, .landing-container h1').forEach(el => {
+                if (el.textContent.trim()) { texts.push(el.textContent.trim()); elements.push(el); }
+            });
+            // Survey description
+            document.querySelectorAll('.survey-description, .landing-description').forEach(el => {
+                if (el.textContent.trim()) { texts.push(el.textContent.trim()); elements.push(el); }
+            });
+            // Page titles and instructions
+            document.querySelectorAll('.page-title, .page-instructions').forEach(el => {
+                if (el.textContent.trim()) { texts.push(el.textContent.trim()); elements.push(el); }
+            });
+            // Question texts (just the text, not the required asterisk)
+            document.querySelectorAll('.question-text').forEach(el => {
+                // Get text content minus the required span
+                const clone = el.cloneNode(true);
+                const req = clone.querySelector('.required');
+                if (req) req.remove();
+                const text = clone.textContent.trim();
+                if (text) { texts.push(text); elements.push({ el: el, hasRequired: !!el.querySelector('.required') }); }
+            });
+            // Option labels
+            document.querySelectorAll('.option-label').forEach(el => {
+                if (el.textContent.trim()) { texts.push(el.textContent.trim()); elements.push(el); }
+            });
+            // Rating labels
+            document.querySelectorAll('.rating-label').forEach(el => {
+                if (el.textContent.trim()) { texts.push(el.textContent.trim()); elements.push(el); }
+            });
+            // Buttons (Start, Next, Back, Submit)
+            document.querySelectorAll('.start-btn, .btn-primary, .btn-secondary').forEach(el => {
+                if (el.textContent.trim() && !el.disabled) { texts.push(el.textContent.trim()); elements.push(el); }
+            });
+            // Complete page
+            document.querySelectorAll('.complete-container h2, .complete-container p').forEach(el => {
+                if (el.textContent.trim()) { texts.push(el.textContent.trim()); elements.push(el); }
+            });
+
+            return { texts, elements };
+        }
+
+        async function switchLanguage(langCode) {
+            if (isTranslating) return;
+            currentLanguage = langCode;
+            sessionStorage.setItem('survey-language', langCode);
+
+            // Set RTL direction
+            const container = document.getElementById('survey-container');
+            if (RTL_LANGUAGES.includes(langCode)) {
+                container.setAttribute('dir', 'rtl');
+            } else {
+                container.removeAttribute('dir');
+            }
+
+            // If switching back to English and we have originals, restore them
+            if (langCode === 'EN-GB') {
+                restoreOriginalTexts();
+                return;
+            }
+
+            const { texts, elements } = collectTranslatableTexts();
+            if (texts.length === 0) return;
+
+            // Store originals before first translation
+            if (Object.keys(originalTexts).length === 0) {
+                storeOriginalTexts(elements, texts);
+            }
+
+            isTranslating = true;
+            showTranslationLoading();
+
+            try {
+                const response = await fetch('/api/translate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ texts, targetLang: langCode })
+                });
+
+                if (!response.ok) throw new Error('Translation failed');
+
+                const data = await response.json();
+                applyTranslations(elements, data.translated);
+            } catch (err) {
+                console.error('Translation error:', err);
+            } finally {
+                isTranslating = false;
+                hideTranslationLoading();
+            }
+        }
+
+        function storeOriginalTexts(elements, texts) {
+            elements.forEach((el, i) => {
+                const key = 'orig_' + i;
+                originalTexts[key] = { element: el, text: texts[i] };
+            });
+        }
+
+        function applyTranslations(elements, translated) {
+            elements.forEach((item, i) => {
+                if (i >= translated.length) return;
+                if (item && item.el) {
+                    // Question text with possible required asterisk
+                    item.el.innerHTML = escapeHtml(translated[i]) + (item.hasRequired ? '<span class="required">*</span>' : '');
+                } else if (item && item.textContent !== undefined) {
+                    item.textContent = translated[i];
+                }
+            });
+        }
+
+        function restoreOriginalTexts() {
+            Object.values(originalTexts).forEach(({ element, text }) => {
+                if (element && element.el) {
+                    element.el.innerHTML = escapeHtml(text) + (element.hasRequired ? '<span class="required">*</span>' : '');
+                } else if (element && element.textContent !== undefined) {
+                    element.textContent = text;
+                }
+            });
+        }
+
+        // ===== END LANGUAGE SWITCHER =====
 
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', loadSurvey);
