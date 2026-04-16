@@ -1279,69 +1279,6 @@ function generateAnotherLink() {
             showToast(`Table sorted by ${header.textContent}`, 'info');
         }
 
-        // View details functions with working modals
-        function showStatDetails(type, value) {
-            const modal = document.createElement('div');
-            modal.className = 'modal';
-            modal.innerHTML = `
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h3>${type.charAt(0).toUpperCase() + type.slice(1)} Details</h3>
-                        <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
-                    </div>
-                    <div>
-                        <h4>Current Value: ${value}</h4>
-                        <div class="dashboard-grid" style="margin: 1.5rem 0;">
-                            <div class="stat-card">
-                                <div class="stat-value">+15%</div>
-                                <div class="stat-label">Growth vs Last Month</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-value">23</div>
-                                <div class="stat-label">New This Week</div>
-                            </div>
-                        </div>
-                        <div class="chart-placeholder">
-                            📊 ${type} trend chart over the last 6 months
-                        </div>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(modal);
-        }
-
-        function showActivityDetails(org, activity) {
-            const modal = document.createElement('div');
-            modal.className = 'modal';
-            modal.innerHTML = `
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h3>Activity Details</h3>
-                        <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
-                    </div>
-                    <div>
-                        <div class="form-group">
-                            <label class="form-label">Organization</label>
-                            <input type="text" class="form-input" value="${org}" readonly>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Activity</label>
-                            <textarea class="form-input" readonly rows="3">${activity}</textarea>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Timestamp</label>
-                            <input type="text" class="form-input" value="${new Date().toLocaleString()}" readonly>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Impact Level</label>
-                            <span class="tag tag-active">Normal</span>
-                        </div>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(modal);
-        }
-
         function showOrganizationDetails(orgName) {
             const modal = document.createElement('div');
             modal.className = 'modal';
@@ -1906,63 +1843,6 @@ function generateAnotherLink() {
             });
         }
 
-        function handleViewAll() {
-            const modal = document.createElement('div');
-            modal.className = 'modal';
-            modal.innerHTML = `
-                <div class="modal-content" style="max-width: 900px;">
-                    <div class="modal-header">
-                        <h3>All Recent Activity</h3>
-                        <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
-                    </div>
-                    <div>
-                        <div class="filters">
-                            <div class="filter-group">
-                                <label class="filter-label">Filter by Type</label>
-                                <select class="form-select">
-                                    <option>All Activities</option>
-                                    <option>Survey Activities</option>
-                                    <option>User Activities</option>
-                                    <option>System Activities</option>
-                                </select>
-                            </div>
-                            <div class="filter-group">
-                                <label class="filter-label">Date Range</label>
-                                <select class="form-select">
-                                    <option>Last 7 days</option>
-                                    <option>Last 30 days</option>
-                                    <option>Last 90 days</option>
-                                </select>
-                            </div>
-                        </div>
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Time</th>
-                                    <th>Organization</th>
-                                    <th>Activity</th>
-                                    <th>User</th>
-                                    <th>Type</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr><td>2 hours ago</td><td>TechCorp Ltd</td><td>New survey created: "Q4 Feedback"</td><td>Sarah Johnson</td><td><span class="tag tag-active">Survey</span></td></tr>
-                                <tr><td>4 hours ago</td><td>Global Industries</td><td>Chat feedback submitted</td><td>Anonymous</td><td><span class="tag tag-processing">Feedback</span></td></tr>
-                                <tr><td>1 day ago</td><td>StartupX</td><td>Survey completed: 127 responses</td><td>Mike Chen</td><td><span class="tag tag-success">Survey</span></td></tr>
-                                <tr><td>1 day ago</td><td>TechCorp Ltd</td><td>User login</td><td>Sarah Johnson</td><td><span class="tag tag-pending">System</span></td></tr>
-                                <tr><td>2 days ago</td><td>Global Industries</td><td>Data export completed</td><td>Lisa Wang</td><td><span class="tag tag-active">Export</span></td></tr>
-                            </tbody>
-                        </table>
-                        <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1rem;">
-                            <button class="btn btn-secondary" onclick="handleExportData('activity')">Export All</button>
-                            <button class="btn btn-primary" onclick="this.closest('.modal').remove()">Close</button>
-                        </div>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(modal);
-        }
-
         function createNewChat() {
             const modal = document.createElement('div');
             modal.className = 'modal';
@@ -2123,7 +2003,7 @@ Would you recommend us?"></textarea>
 
         // Initialize the application
         document.addEventListener('DOMContentLoaded', function() {
-            showSection('dashboard');
+            showSection('home');
             initializeBrandingListeners();
             
             const demoAccounts = document.querySelectorAll('.demo-account');
