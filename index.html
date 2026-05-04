@@ -1439,9 +1439,9 @@
 
         /* Survey Builder Root Variables */
         .survey-builder-container {
-            --sb-primary: #673ab7;
-            --sb-primary-light: #ede7f6;
-            --sb-background: #f0ebf8;
+            --sb-primary: #5f6368;
+            --sb-primary-light: #f1f3f4;
+            --sb-background: #f1f3f4;
             --sb-surface: #ffffff;
             --sb-text: #202124;
             --sb-text-secondary: #5f6368;
@@ -6860,7 +6860,9 @@
                                 <div class="sb-builder-tabs">
                                     <button class="sb-builder-tab active" data-tab="questions" onclick="sbShowQuestionsTab()">Questions</button>
                                     <button class="sb-builder-tab" data-tab="responses" onclick="sbShowResponsesTab()">Responses</button>
+                                    <!-- Hidden: Settings tab (accessible via cog icon in top right)
                                     <button class="sb-builder-tab" onclick="sbOpenSettings()">Settings</button>
+                                    -->
                                 </div>
                             </header>
 
@@ -13753,7 +13755,7 @@ function sbCreateDefaultSurvey() {
         public_code: sbGenerateShortCode(), // Short code for shareable URLs
         name: 'Untitled Survey',
         description: '',
-        themeColor: 'purple',
+        themeColor: 'grey',
         ratingScale: {
             points: 5,
             labels: ['Strongly Disagree', 'Disagree', 'Neutral', 'Agree', 'Strongly Agree'],
