@@ -128,10 +128,6 @@
             <nav>
                 <div class="nav-section" id="master-admin-section">
                     <div class="nav-title" data-translate="master-admin">Master Admin</div>
-                    <div class="nav-item active" onclick="showSection('dashboard')">
-                        <div class="nav-icon">📊</div>
-                        <span data-translate="dashboard">Dashboard</span>
-                    </div>
                     <div class="nav-item" onclick="showSection('organizations')">
                         <div class="nav-icon">🏢</div>
                         <span data-translate="organizations">Organizations</span>
@@ -331,90 +327,6 @@
             </header>
 
             <div class="content-area" id="content-area">
-                <!-- Dashboard Section -->
-                <div id="dashboard-section" class="fade-in">
-                    <div class="dashboard-grid">
-                        <div class="stat-card" onclick="showStatDetails('organizations', '47')">
-                            <div class="stat-value">47</div>
-                            <div class="stat-label" data-translate="active-organizations">Active Organizations</div>
-                        </div>
-                        <div class="stat-card" onclick="showStatDetails('users', '1,247')">
-                            <div class="stat-value">1,247</div>
-                            <div class="stat-label" data-translate="total-users">Total Users</div>
-                        </div>
-                        <div class="stat-card" onclick="showStatDetails('surveys', '89')">
-                            <div class="stat-value">89</div>
-                            <div class="stat-label" data-translate="active-surveys">Active Surveys</div>
-                        </div>
-                        <div class="stat-card" onclick="showStatDetails('responses', '15,632')">
-                            <div class="stat-value">15,632</div>
-                            <div class="stat-label" data-translate="total-responses">Total Responses</div>
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <div class="card-header">
-                            <h2 class="card-title" data-translate="recent-activity">Recent Activity</h2>
-                            <button class="btn btn-secondary" onclick="handleViewAll()" data-translate="view-all">View All</button>
-                        </div>
-                        <table class="table" id="activity-table">
-                            <thead>
-                                <tr>
-                                    <th onclick="sortTable(this, 0)" data-translate="organization">Organization</th>
-                                    <th onclick="sortTable(this, 1)" data-translate="activity">Activity</th>
-                                    <th onclick="sortTable(this, 2)" data-translate="user">User</th>
-                                    <th onclick="sortTable(this, 3)" data-translate="time">Time</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr onclick="showActivityDetails('TechCorp Ltd', 'New survey created')">
-                                    <td>TechCorp Ltd</td>
-                                    <td>New survey created: "Q4 Feedback"</td>
-                                    <td>Sarah Johnson</td>
-                                    <td>2 hours ago</td>
-                                </tr>
-                                <tr onclick="showActivityDetails('Global Industries', 'Chat feedback submitted')">
-                                    <td>Global Industries</td>
-                                    <td>Chat feedback submitted</td>
-                                    <td>Anonymous</td>
-                                    <td>4 hours ago</td>
-                                </tr>
-                                <tr onclick="showActivityDetails('StartupX', 'Survey completed')">
-                                    <td>StartupX</td>
-                                    <td>Survey completed: 127 responses</td>
-                                    <td>Mike Chen</td>
-                                    <td>1 day ago</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <!-- Quick Actions Card -->
-                    <div class="card">
-                        <div class="card-header">
-                            <h2 class="card-title">Quick Actions</h2>
-                        </div>
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-                            <button class="btn btn-primary" onclick="showCreateOrganizationModal()" style="padding: 1rem;">
-                                <div>🏢</div>
-                                <div data-translate="add-organization">Add Organization</div>
-                            </button>
-                            <button class="btn btn-success" onclick="createNewChat()" style="padding: 1rem;">
-                                <div>💬</div>
-                                <div data-translate="create-new-chat">Create Chat</div>
-                            </button>
-                            <button class="btn btn-secondary" onclick="showSection('survey-builder')" style="padding: 1rem;">
-                                <div>📝</div>
-                                <div>Build Survey</div>
-                            </button>
-                            <button class="btn btn-warning" onclick="generateNewReport()" style="padding: 1rem;">
-                                <div>📊</div>
-                                <div>Generate Report</div>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Organizations Section -->
                 <div id="organizations-section" class="hidden">
                     <div class="card">
