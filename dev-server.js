@@ -1,4 +1,4 @@
-// Development server with email API support
+// Local Express development server that serves static files, loads environment variables, handles email sending via SMTP2GO, and proxies chat/AI API endpoints for local testing.
 import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
