@@ -951,6 +951,9 @@
             // Initialize any calendar questions
             initAllCalendars();
 
+            // Initialize any Engage (AI conversation) questions
+            initEngageQuestions();
+
             // Re-translate if active language is not English
             applyActiveTranslation();
         }
@@ -992,6 +995,9 @@
                     break;
                 case 'calendar':
                     html += renderCalendar(question, questionId);
+                    break;
+                case 'engage':
+                    html += renderEngageChat(question, questionId);
                     break;
                 default:
                     html += renderTextInput(question, questionId);
@@ -1351,6 +1357,11 @@
             Object.keys(responses).forEach(questionId => {
                 const value = responses[questionId];
 
+                // Engage transcripts are arrays of {role, content} objects — restored by initEngageQuestions()
+                if (Array.isArray(value) && value.length && typeof value[0] === 'object') {
+                    return;
+                }
+
                 if (Array.isArray(value)) {
                     // Checkboxes
                     value.forEach(v => {
@@ -1371,6 +1382,139 @@
                     }
                 }
             });
+        }
+
+        // ---- Engage (AI conversation) question runtime ----
+        const engageState = {};
+
+        function renderEngageChat(question, questionId) {
+            return `
+                <div class="engage-chat" id="engage-chat-${questionId}" data-qid="${questionId}" style="border:1px solid #fbcfe8;background:#fff;border-radius:12px;overflow:hidden;">
+                    <div class="engage-messages" id="engage-messages-${questionId}" style="max-height:340px;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;background:#fafafa;"></div>
+                    <div class="engage-status" id="engage-status-${questionId}" style="padding:0 16px;font-size:12px;color:#94a3b8;min-height:18px;"></div>
+                    <div class="engage-input-row" id="engage-input-row-${questionId}" style="display:flex;gap:8px;padding:12px 16px;border-top:1px solid #f1f5f9;">
+                        <input type="text" class="engage-input" id="engage-text-${questionId}" placeholder="Type your reply…" autocomplete="off"
+                               style="flex:1;border:1px solid #e2e8f0;border-radius:8px;padding:10px 12px;font-size:14px;"
+                               onkeydown="if(event.key==='Enter'){event.preventDefault();engageSend('${questionId}');}">
+                        <button type="button" class="engage-send-btn" onclick="engageSend('${questionId}')" style="background:#ec4899;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:14px;font-weight:500;cursor:pointer;">Send</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function findQuestionById(qid) {
+            let surveyData;
+            try { surveyData = typeof currentSurvey.data === 'string' ? JSON.parse(currentSurvey.data) : currentSurvey.data; } catch (e) { return null; }
+            const pages = surveyData.pages || [surveyData];
+            for (const p of pages) {
+                for (const q of (p.questions || [])) { if (q.id === qid) return q; }
+            }
+            return null;
+        }
+
+        function engageRenderMessage(qid, role, content) {
+            const box = document.getElementById('engage-messages-' + qid);
+            if (!box) return;
+            const isBot = role === 'assistant';
+            const wrap = document.createElement('div');
+            wrap.style.cssText = 'display:flex;' + (isBot ? 'justify-content:flex-start;' : 'justify-content:flex-end;');
+            wrap.innerHTML = '<div style="max-width:80%;padding:9px 13px;border-radius:' + (isBot ? '2px 12px 12px 12px' : '12px 2px 12px 12px') + ';font-size:14px;line-height:1.45;' + (isBot ? 'background:#fff;border:1px solid #f1d6e3;color:#334155;' : 'background:#ec4899;color:#fff;') + '">' + escapeHtml(content) + '</div>';
+            box.appendChild(wrap);
+            box.scrollTop = box.scrollHeight;
+        }
+
+        function engageSetStatus(qid, type, msg) {
+            const el = document.getElementById('engage-status-' + qid);
+            const inputRow = document.getElementById('engage-input-row-' + qid);
+            if (!el) return;
+            if (type === 'typing') {
+                el.innerHTML = '<span style="color:#be185d;">AI is typing…</span>';
+            } else if (type === 'complete') {
+                el.innerHTML = '<span style="color:#15803d;">✓ Conversation complete — thank you!</span>';
+                if (inputRow) inputRow.style.display = 'none';
+            } else if (type === 'error') {
+                el.innerHTML = '<span style="color:#b91c1c;">Couldn\'t reach the AI: ' + escapeHtml(msg || '') + '. <a href="#" onclick="event.preventDefault();engageRetry(\'' + qid + '\')" style="color:#be185d;">Retry</a></span>';
+            } else {
+                el.innerHTML = '';
+            }
+        }
+
+        function initEngageQuestions() {
+            document.querySelectorAll('.engage-chat').forEach(el => {
+                const qid = el.dataset.qid;
+                const question = findQuestionById(qid);
+                if (!question) return;
+                engageState[qid] = engageState[qid] || {};
+                const existing = responses[qid];
+                if (Array.isArray(existing) && existing.length) {
+                    // Restore an in-progress / completed conversation
+                    existing.forEach(m => engageRenderMessage(qid, m.role, m.content));
+                    if (engageState[qid].complete) engageSetStatus(qid, 'complete');
+                } else if (question.engageIntro) {
+                    // Show the configured opening message
+                    responses[qid] = [{ role: 'assistant', content: question.engageIntro }];
+                    engageRenderMessage(qid, 'assistant', question.engageIntro);
+                } else {
+                    // Let the AI open the conversation
+                    responses[qid] = [];
+                    engageGetAiReply(qid);
+                }
+            });
+        }
+
+        async function engageSend(qid) {
+            const input = document.getElementById('engage-text-' + qid);
+            if (!input) return;
+            const text = input.value.trim();
+            const st = engageState[qid] || (engageState[qid] = {});
+            if (!text || st.busy || st.complete) return;
+            input.value = '';
+            if (!Array.isArray(responses[qid])) responses[qid] = [];
+            responses[qid].push({ role: 'user', content: text });
+            engageRenderMessage(qid, 'user', text);
+            const card = document.querySelector(`[data-question-id="${qid}"]`);
+            if (card) card.classList.remove('error');
+            await engageGetAiReply(qid);
+        }
+
+        async function engageGetAiReply(qid) {
+            const question = findQuestionById(qid);
+            if (!question) return;
+            const st = engageState[qid] || (engageState[qid] = {});
+            st.busy = true; st.error = false;
+            engageSetStatus(qid, 'typing');
+            try {
+                const res = await fetch('/api/engage-chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        topics: question.engageTopics || [],
+                        goal: question.engageGoal || '',
+                        intro: question.engageIntro || '',
+                        maxExchanges: question.engageMaxExchanges || 5,
+                        history: responses[qid] || []
+                    })
+                });
+                if (!res.ok) throw new Error('AI error (' + res.status + ')');
+                const data = await res.json();
+                if (data.error) throw new Error(data.error);
+                if (!Array.isArray(responses[qid])) responses[qid] = [];
+                responses[qid].push({ role: 'assistant', content: data.message });
+                engageRenderMessage(qid, 'assistant', data.message);
+                if (data.complete) st.complete = true;
+                engageSetStatus(qid, st.complete ? 'complete' : '');
+            } catch (e) {
+                st.error = true;
+                engageSetStatus(qid, 'error', e.message);
+            } finally {
+                st.busy = false;
+            }
+        }
+
+        function engageRetry(qid) {
+            const st = engageState[qid];
+            if (st && st.busy) return;
+            engageGetAiReply(qid);
         }
 
         // Navigation
@@ -1425,7 +1569,12 @@
                     const response = responses[questionId];
                     const card = document.querySelector(`[data-question-id="${questionId}"]`);
 
-                    if (!response || (Array.isArray(response) && response.length === 0) || response === '') {
+                    // Engage questions count as answered once the participant has replied at least once
+                    const unanswered = question.type === 'engage'
+                        ? !(Array.isArray(response) && response.some(m => m && m.role === 'user'))
+                        : (!response || (Array.isArray(response) && response.length === 0) || response === '');
+
+                    if (unanswered) {
                         if (card) {
                             card.classList.add('error');
                             if (!firstErrorCard) firstErrorCard = card;
