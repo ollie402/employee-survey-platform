@@ -47,7 +47,7 @@ ${question}`;
     const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
     const message = await client.messages.create({
-      model: 'claude-opus-4-6',
+      model: 'claude-opus-4-8',
       max_tokens: 512,
       messages: [{ role: 'user', content: prompt }]
     });

@@ -6860,6 +6860,7 @@
                                 <div class="sb-builder-tabs">
                                     <button class="sb-builder-tab active" data-tab="questions" onclick="sbShowQuestionsTab()">Questions</button>
                                     <button class="sb-builder-tab" data-tab="responses" onclick="sbShowResponsesTab()">Responses</button>
+                                    <button class="sb-builder-tab" data-tab="analytics" onclick="sbShowAnalyticsTab()">Analytics</button>
                                     <!-- Hidden: Settings tab (accessible via cog icon in top right)
                                     <button class="sb-builder-tab" onclick="sbOpenSettings()">Settings</button>
                                     -->
@@ -6926,6 +6927,60 @@
                                 <!-- Analytics View -->
                                 <div id="sb-analytics-view" class="sb-hidden">
                                     <div id="sb-analytics-container"></div>
+                                </div>
+                            </div>
+
+                            <!-- Analytics Panel (top-level tab) -->
+                            <div id="sb-analytics-panel" class="sb-hidden">
+                                <style>
+                                    #sb-analytics-panel { padding: 28px 32px; background:#f8fafc; min-height: calc(100vh - 200px); }
+                                    .sba-dashboard { max-width: 1080px; margin: 0 auto; display:flex; flex-direction:column; gap:28px; }
+                                    .sba-section-title { font-size:12px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:#94a3b8; margin:0 0 12px; }
+                                    .sba-card { background:#fff; border:1px solid #eef0f4; border-radius:14px; padding:22px 24px; box-shadow:0 1px 3px rgba(15,23,42,.06); }
+                                    .sba-muted { color:#94a3b8; font-size:13px; margin:0; }
+                                    .sba-empty { text-align:center; padding:64px 24px; color:#64748b; }
+                                    .sba-empty-icon { font-size:44px; margin-bottom:12px; }
+                                    .sba-empty h3 { margin:0 0 6px; color:#1e293b; font-size:18px; }
+                                    .sba-empty p { margin:0; font-size:14px; }
+                                    .sba-timeline { display:flex; align-items:flex-end; gap:10px; height:160px; padding-top:18px; overflow-x:auto; }
+                                    .sba-tl-bar { flex:1; min-width:34px; display:flex; flex-direction:column; align-items:center; height:100%; justify-content:flex-end; }
+                                    .sba-tl-fill { width:100%; max-width:46px; background:linear-gradient(180deg,#ec4899,#f472b6); border-radius:6px 6px 0 0; transition:height .3s ease; }
+                                    .sba-tl-count { font-size:12px; font-weight:600; color:#475569; margin-bottom:4px; }
+                                    .sba-tl-label { font-size:11px; color:#94a3b8; margin-top:8px; white-space:nowrap; }
+                                    .sba-bar-row { display:flex; align-items:center; gap:12px; margin:8px 0; }
+                                    .sba-bar-label { width:34%; font-size:13px; color:#334155; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+                                    .sba-bar-track { flex:1; height:10px; background:#f1f5f9; border-radius:999px; overflow:hidden; }
+                                    .sba-bar-fill { height:100%; background:linear-gradient(90deg,#ec4899,#f472b6); border-radius:999px; transition:width .3s ease; }
+                                    .sba-bar-val { width:92px; text-align:right; font-size:12px; color:#64748b; font-variant-numeric:tabular-nums; }
+                                    .sba-mean { display:flex; align-items:baseline; gap:8px; margin-bottom:14px; }
+                                    .sba-mean-num { font-size:32px; font-weight:700; color:#0f172a; }
+                                    .sba-mean-lbl { font-size:12px; color:#94a3b8; text-transform:uppercase; letter-spacing:.05em; }
+                                    .sba-q-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(340px,1fr)); gap:18px; }
+                                    .sba-q-head { display:flex; align-items:center; gap:10px; margin-bottom:14px; }
+                                    .sba-q-num { background:#fce7f3; color:#be185d; font-size:11px; font-weight:700; padding:3px 8px; border-radius:6px; }
+                                    .sba-q-title { flex:1; font-size:14px; font-weight:600; color:#1e293b; }
+                                    .sba-q-count { font-size:12px; color:#94a3b8; }
+                                    .sba-samples { display:flex; flex-direction:column; gap:8px; }
+                                    .sba-sample { background:#f8fafc; border-left:3px solid #f472b6; padding:8px 12px; border-radius:6px; font-size:13px; color:#475569; font-style:italic; }
+                                    .sba-ai-head { font-size:15px; font-weight:600; color:#1e293b; margin-bottom:12px; display:flex; align-items:center; gap:8px; }
+                                    .sba-ai-sub { font-size:12px; color:#94a3b8; font-weight:400; }
+                                    .sba-ai-btn { background:#ec4899; color:#fff; border:none; padding:10px 18px; border-radius:8px; font-size:14px; font-weight:500; cursor:pointer; transition:background .2s; }
+                                    .sba-ai-btn:hover { background:#db2777; }
+                                    .sba-ai-btn-sm { margin-top:12px; padding:7px 14px; font-size:13px; background:#fff; color:#be185d; border:1px solid #fbcfe8; }
+                                    .sba-ai-btn-sm:hover { background:#fdf2f8; }
+                                    .sba-sentiment { display:inline-block; padding:4px 12px; border-radius:999px; font-size:12px; font-weight:600; text-transform:capitalize; }
+                                    .sba-sent-positive { background:#dcfce7; color:#15803d; }
+                                    .sba-sent-neutral { background:#f1f5f9; color:#475569; }
+                                    .sba-sent-negative { background:#fee2e2; color:#b91c1c; }
+                                    .sba-ai-summary { margin:12px 0; font-size:14px; line-height:1.6; color:#334155; }
+                                    .sba-chips { display:flex; flex-wrap:wrap; gap:8px; }
+                                    .sba-chip { background:#f3e8ff; color:#7c3aed; font-size:12px; padding:4px 10px; border-radius:999px; }
+                                    .sba-loading { display:flex; align-items:center; gap:10px; color:#64748b; font-size:14px; padding:24px; }
+                                    .sba-spinner { width:18px; height:18px; border:2px solid #e2e8f0; border-top-color:#ec4899; border-radius:50%; animation:spin 1s linear infinite; }
+                                    .sba-error { color:#b91c1c; font-size:13px; }
+                                </style>
+                                <div class="sba-dashboard" id="sba-dashboard">
+                                    <!-- populated by sbRenderAnalyticsDashboard() -->
                                 </div>
                             </div>
 
@@ -16255,6 +16310,7 @@ function sbOpenBuilder() {
 
     // Ensure responses panel is hidden and questions tab is active
     document.getElementById('sb-responses-panel').classList.add('sb-hidden');
+    document.getElementById('sb-analytics-panel').classList.add('sb-hidden');
     document.querySelector('.sb-builder-content').style.display = 'flex';
     document.getElementById('sb-floating-actions').classList.remove('sb-hidden');
     document.querySelector('.sb-save-bar').style.display = 'flex';
@@ -16291,6 +16347,7 @@ function sbShowQuestionsTab() {
     document.getElementById('sb-floating-actions').classList.remove('sb-hidden');
     document.querySelector('.sb-save-bar').style.display = 'flex';
     document.getElementById('sb-responses-panel').classList.add('sb-hidden');
+    document.getElementById('sb-analytics-panel').classList.add('sb-hidden');
 }
 
 // Show Responses Tab
@@ -16311,6 +16368,7 @@ async function sbShowResponsesTab() {
     document.getElementById('sb-floating-actions').classList.add('sb-hidden');
     document.querySelector('.sb-save-bar').style.display = 'none';
     document.getElementById('sb-responses-panel').classList.remove('sb-hidden');
+    document.getElementById('sb-analytics-panel').classList.add('sb-hidden');
 
     // Fetch and display responses
     try {
@@ -16332,6 +16390,240 @@ async function sbShowResponsesTab() {
         console.error('Failed to fetch responses:', err);
         sbCurrentResponses = [];
         sbRenderResponsesPanel([]);
+    }
+}
+
+// Show Analytics Tab (top-level dashboard)
+async function sbShowAnalyticsTab() {
+    if (!sbCurrentSurvey || !sbCurrentSurvey.id) {
+        alert('Please save your survey first to view analytics.');
+        return;
+    }
+
+    // Update tab active states
+    document.querySelectorAll('.sb-builder-tab').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    document.querySelector('.sb-builder-tab[data-tab="analytics"]').classList.add('active');
+
+    // Hide questions content and responses panel, show analytics panel
+    document.querySelector('.sb-builder-content').style.display = 'none';
+    document.getElementById('sb-floating-actions').classList.add('sb-hidden');
+    document.querySelector('.sb-save-bar').style.display = 'none';
+    document.getElementById('sb-responses-panel').classList.add('sb-hidden');
+    document.getElementById('sb-analytics-panel').classList.remove('sb-hidden');
+
+    // Loading state
+    const dash = document.getElementById('sba-dashboard');
+    if (dash) dash.innerHTML = '<div class="sba-loading"><div class="sba-spinner"></div> Loading analytics…</div>';
+
+    // Fetch responses for this survey
+    try {
+        const { data: responses, error } = await window.supabaseClient
+            .from('survey_responses')
+            .select('*')
+            .eq('survey_id', sbCurrentSurvey.id)
+            .order('completed_at', { ascending: false });
+
+        if (error) {
+            console.error('Analytics fetch error:', error);
+            sbCurrentResponses = [];
+        } else {
+            sbCurrentResponses = responses || [];
+        }
+    } catch (err) {
+        console.error('Analytics fetch failed:', err);
+        sbCurrentResponses = [];
+    }
+
+    sbRenderAnalyticsDashboard(sbCurrentResponses);
+}
+
+// Escape HTML in user-generated response text
+function sbaEsc(s) {
+    return String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+}
+
+// A single horizontal bar row (label · bar · count/percent)
+function sbaBarRow(label, count, total, max) {
+    const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+    const w = max > 0 ? Math.round((count / max) * 100) : 0;
+    const lbl = sbaEsc(String(label));
+    return `<div class="sba-bar-row">
+        <div class="sba-bar-label" title="${lbl}">${lbl}</div>
+        <div class="sba-bar-track"><div class="sba-bar-fill" style="width:${Math.max(w, 2)}%"></div></div>
+        <div class="sba-bar-val">${count} · ${pct}%</div>
+    </div>`;
+}
+
+// Build the full analytics dashboard
+function sbRenderAnalyticsDashboard(responses) {
+    const dash = document.getElementById('sba-dashboard');
+    if (!dash) return;
+
+    if (!responses || responses.length === 0) {
+        dash.innerHTML = `
+            <div class="sba-empty">
+                <div class="sba-empty-icon">📊</div>
+                <h3>No responses yet</h3>
+                <p>Analytics will appear here once people start completing this survey.</p>
+            </div>`;
+        return;
+    }
+
+    dash.innerHTML = `
+        <div>
+            <div class="sba-section-title">Responses over time</div>
+            <div class="sba-card">${sbRenderResponsesTimeline(responses)}</div>
+        </div>
+        <div>
+            <div class="sba-section-title">AI summary</div>
+            ${sbRenderAiSummarySection(responses)}
+        </div>
+        <div>
+            <div class="sba-section-title">Question breakdown</div>
+            <div class="sba-q-grid">${sbRenderQuestionBreakdowns(responses)}</div>
+        </div>`;
+}
+
+// Section 1: responses-over-time bar chart (grouped by day)
+function sbRenderResponsesTimeline(responses) {
+    const counts = {};
+    responses.forEach(r => {
+        const ts = r.completed_at || r.created_at;
+        if (!ts) return;
+        const key = new Date(ts).toISOString().slice(0, 10);
+        counts[key] = (counts[key] || 0) + 1;
+    });
+
+    const dates = Object.keys(counts).sort();
+    if (dates.length === 0) return '<p class="sba-muted">No dated responses yet.</p>';
+
+    const max = Math.max(...dates.map(d => counts[d]));
+    const bars = dates.slice(-30).map(d => {
+        const c = counts[d];
+        const h = Math.round((c / max) * 100);
+        const label = new Date(d).toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+        return `<div class="sba-tl-bar" title="${label}: ${c}">
+            <div class="sba-tl-count">${c}</div>
+            <div class="sba-tl-fill" style="height:${Math.max(h, 4)}%"></div>
+            <div class="sba-tl-label">${label}</div>
+        </div>`;
+    }).join('');
+
+    return `<div class="sba-timeline">${bars}</div>`;
+}
+
+// Section 3: per-question breakdown cards
+function sbRenderQuestionBreakdowns(responses) {
+    const questions = sbGetAllQuestions();
+    if (questions.length === 0) return '<p class="sba-muted">This survey has no questions yet.</p>';
+
+    return questions.map((q, i) => {
+        const answers = responses
+            .map(r => r.responses?.[q.id])
+            .filter(a => a !== undefined && a !== null && a !== '');
+        const title = q.text || q.title || `Question ${i + 1}`;
+        let body = '';
+
+        if (answers.length === 0) {
+            body = '<p class="sba-muted">No answers yet.</p>';
+        } else if (q.type === 'rating') {
+            const nums = answers.map(a => parseFloat(a)).filter(a => !isNaN(a));
+            const mean = nums.length ? (nums.reduce((a, b) => a + b, 0) / nums.length).toFixed(2) : 'N/A';
+            const dist = {};
+            nums.forEach(a => dist[a] = (dist[a] || 0) + 1);
+            const keys = Object.keys(dist).sort((a, b) => parseFloat(a) - parseFloat(b));
+            const max = Math.max(1, ...keys.map(k => dist[k]));
+            body = `<div class="sba-mean"><span class="sba-mean-num">${mean}</span><span class="sba-mean-lbl">mean average</span></div>`
+                + keys.map(k => sbaBarRow(k, dist[k], nums.length, max)).join('');
+        } else if (q.type === 'single' || q.type === 'multi') {
+            const dist = {};
+            answers.forEach(a => { (Array.isArray(a) ? a : [a]).forEach(o => dist[o] = (dist[o] || 0) + 1); });
+            const opts = (q.options && q.options.length) ? q.options : Object.keys(dist);
+            const max = Math.max(1, ...opts.map(o => dist[o] || 0));
+            body = opts.map(o => sbaBarRow(o, dist[o] || 0, answers.length, max)).join('');
+        } else {
+            body = `<div class="sba-samples">`
+                + answers.slice(0, 5).map(a => `<div class="sba-sample">“${sbaEsc(typeof a === 'string' ? a : JSON.stringify(a))}”</div>`).join('')
+                + (answers.length > 5 ? `<div class="sba-muted">+ ${answers.length - 5} more</div>` : '')
+                + `</div>`;
+        }
+
+        return `<div class="sba-card">
+            <div class="sba-q-head">
+                <span class="sba-q-num">Q${i + 1}</span>
+                <span class="sba-q-title">${sbaEsc(title)}</span>
+                <span class="sba-q-count">${answers.length}</span>
+            </div>
+            <div>${body}</div>
+        </div>`;
+    }).join('');
+}
+
+// Section 2: AI summary of free-text answers (button-triggered)
+function sbRenderAiSummarySection(responses) {
+    const textCount = sbCollectTextAnswers(responses).length;
+    if (textCount === 0) {
+        return `<div class="sba-card"><div class="sba-ai-head">✨ AI summary</div><p class="sba-muted">No free-text answers to summarise yet.</p></div>`;
+    }
+    return `<div class="sba-card">
+        <div class="sba-ai-head">✨ AI summary <span class="sba-ai-sub">${textCount} text answer${textCount !== 1 ? 's' : ''}</span></div>
+        <div id="sba-ai-body">
+            <p class="sba-muted" style="margin-bottom:14px;">Summarise the free-text answers into overall sentiment, a short summary, and key themes.</p>
+            <button class="sba-ai-btn" onclick="sbGenerateAiSummary()">Generate AI summary</button>
+        </div>
+    </div>`;
+}
+
+// Collect all non-empty free-text answers as [{message}]
+function sbCollectTextAnswers(responses) {
+    const textTypes = ['text', 'short-text', 'long-text', 'textarea'];
+    const textQs = sbGetAllQuestions().filter(q => textTypes.includes(q.type));
+    const out = [];
+    responses.forEach(r => textQs.forEach(q => {
+        const a = r.responses?.[q.id];
+        if (a && typeof a === 'string' && a.trim()) out.push({ message: a.trim() });
+    }));
+    return out;
+}
+
+// Call /api/analyse and render the result
+async function sbGenerateAiSummary() {
+    const body = document.getElementById('sba-ai-body');
+    if (!body) return;
+
+    const messages = sbCollectTextAnswers(sbCurrentResponses);
+    if (messages.length === 0) {
+        body.innerHTML = '<p class="sba-muted">No free-text answers to summarise.</p>';
+        return;
+    }
+
+    body.innerHTML = '<div class="sba-loading"><div class="sba-spinner"></div> Analysing responses…</div>';
+
+    try {
+        const res = await fetch('/api/analyse', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ responses: messages })
+        });
+        if (!res.ok) throw new Error('AI service error (' + res.status + ')');
+        const d = await res.json();
+
+        const sentiment = (d.overall_sentiment || 'neutral').toLowerCase();
+        const sentClass = ['positive', 'negative'].includes(sentiment) ? sentiment : 'neutral';
+        const themes = (d.key_themes || []).map(t => `<span class="sba-chip">${sbaEsc(t)}</span>`).join('');
+
+        body.innerHTML = `
+            <div class="sba-ai-result">
+                <span class="sba-sentiment sba-sent-${sentClass}">${sbaEsc(sentiment)}</span>
+                <p class="sba-ai-summary">${sbaEsc(d.summary || '')}</p>
+                ${themes ? `<div class="sba-chips">${themes}</div>` : ''}
+            </div>
+            <button class="sba-ai-btn sba-ai-btn-sm" onclick="sbGenerateAiSummary()">Regenerate</button>`;
+    } catch (e) {
+        body.innerHTML = `<p class="sba-error">Couldn't generate summary: ${sbaEsc(e.message)}</p>
+            <button class="sba-ai-btn sba-ai-btn-sm" onclick="sbGenerateAiSummary()">Try again</button>`;
     }
 }
 
