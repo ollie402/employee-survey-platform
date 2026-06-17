@@ -6301,6 +6301,24 @@
                         <!-- Analytics Tab -->
                         <div id="engage-chat-editor-tab-analytics" class="engage-chat-editor-tab-content" style="display: none;">
                             <div style="max-width: 1200px;">
+
+                                <!-- Structured scaffold (always visible, even before analysis) -->
+                                <div class="engage-analytics-scaffold" style="margin-bottom: 24px;">
+                                    <div class="sba-filterbar" id="engage-filterbar"></div>
+                                    <div style="margin-top: 20px;">
+                                        <div class="sba-section-title">Changes over time</div>
+                                        <div class="sba-card" id="engage-trend"><p class="sba-muted">Loading…</p></div>
+                                    </div>
+                                    <div style="margin-top: 20px;">
+                                        <div class="sba-section-title">AI summary</div>
+                                        <div class="sba-card" id="engage-ai-summary"></div>
+                                    </div>
+                                    <div style="margin-top: 20px;">
+                                        <div class="sba-section-title">Ask the AI about these responses</div>
+                                        <div class="sba-card" id="engage-ask"></div>
+                                    </div>
+                                </div>
+
                                 <div id="engage-analytics-loading" class="analytics-loading" style="display: none;">
                                     <div class="analytics-loading-spinner"></div>
                                     <div>Loading analytics...</div>
@@ -21496,7 +21514,7 @@ function showEngageChatEditorTab(tabName) {
     const activeTab = document.querySelector('.engage-chat-editor-tab[data-tab="' + tabName + '"]');
     if (activeTab) { activeTab.style.color = '#0F6E56'; activeTab.style.borderBottomColor = '#0F6E56'; }
     if (tabName === 'responses' && window.engageCurrentEditingChatId) loadEngageChatResponses(window.engageCurrentEditingChatId);
-    if (tabName === 'analytics' && window.engageCurrentEditingChatId) loadEngageChatAnalytics(window.engageCurrentEditingChatId);
+    if (tabName === 'analytics' && window.engageCurrentEditingChatId) { loadEngageChatAnalytics(window.engageCurrentEditingChatId); engageLoadScaffold(window.engageCurrentEditingChatId); }
 
     // Getting Started: tick "Go to Participants" when Participants tab is opened
     if (tabName === 'participants' && typeof engageGsCompleteByKey === 'function') {
@@ -21923,6 +21941,179 @@ function showImportEngageResponsesModal() {
 }
 
 // --- Engage analytics ---
+// ---- Engage analytics scaffold: date filter + trend + AI summary + Ask-AI ----
+let engageAnalyticsRange = { preset: 'all', from: null, to: null };
+let engageAnalyticsResponses = [];
+
+async function engageLoadScaffold(chatId) {
+    const fb = document.getElementById('engage-filterbar');
+    if (fb) fb.innerHTML = engageRenderDateFilter();
+    try {
+        const { data, error } = await window.supabaseClient
+            .from('engage_chat_responses')
+            .select('submitted_at, response_text')
+            .eq('chat_id', chatId);
+        engageAnalyticsResponses = error ? [] : (data || []);
+    } catch (e) {
+        engageAnalyticsResponses = [];
+    }
+    engageRenderTrend();
+    engageRenderSummaryBox();
+    engageRenderAskBox();
+}
+
+function engageGetFilteredResponses() {
+    const r = engageAnalyticsRange;
+    let fromTs = null, toTs = null;
+    if (r.preset === '7' || r.preset === '30' || r.preset === '90') {
+        fromTs = Date.now() - parseInt(r.preset) * 86400000;
+    } else if (r.preset === 'custom') {
+        if (r.from) fromTs = new Date(r.from + 'T00:00:00').getTime();
+        if (r.to) toTs = new Date(r.to + 'T23:59:59').getTime();
+    }
+    return (engageAnalyticsResponses || []).filter(x => {
+        const ts = x.submitted_at;
+        if (!ts) return false;
+        const t = new Date(ts).getTime();
+        if (isNaN(t)) return false;
+        if (fromTs !== null && t < fromTs) return false;
+        if (toTs !== null && t > toTs) return false;
+        return true;
+    });
+}
+
+function engageRenderDateFilter() {
+    const r = engageAnalyticsRange;
+    const presets = [['all', 'All time'], ['7', 'Last 7 days'], ['30', 'Last 30 days'], ['90', 'Last 90 days']];
+    const btns = presets.map(([v, l]) =>
+        `<button class="sba-range-btn ${r.preset === v ? 'active' : ''}" onclick="engageSetRange('${v}')">${l}</button>`).join('');
+    return `<div>
+        <div class="sba-range-btns">
+            ${btns}
+            <button class="sba-range-btn ${r.preset === 'custom' ? 'active' : ''}" onclick="engageSetRange('custom')">Custom</button>
+        </div>
+        <div class="sba-custom-range" style="margin-top:10px;${r.preset === 'custom' ? '' : 'display:none;'}">
+            <input type="date" class="sba-date-input" value="${r.from || ''}" onchange="engageSetCustom('from', this.value)">
+            <span class="sba-muted">to</span>
+            <input type="date" class="sba-date-input" value="${r.to || ''}" onchange="engageSetCustom('to', this.value)">
+        </div>
+    </div>`;
+}
+
+function engageSetRange(p) {
+    engageAnalyticsRange.preset = p;
+    const fb = document.getElementById('engage-filterbar');
+    if (fb) fb.innerHTML = engageRenderDateFilter();
+    engageRenderTrend();
+    engageRenderSummaryBox();
+    engageRenderAskBox();
+}
+
+function engageSetCustom(which, val) {
+    engageAnalyticsRange.preset = 'custom';
+    engageAnalyticsRange[which] = val || null;
+    const fb = document.getElementById('engage-filterbar');
+    if (fb) fb.innerHTML = engageRenderDateFilter();
+    engageRenderTrend();
+    engageRenderSummaryBox();
+    engageRenderAskBox();
+}
+
+function engageRenderTrend() {
+    const el = document.getElementById('engage-trend');
+    if (!el) return;
+    const counts = {};
+    engageGetFilteredResponses().forEach(x => {
+        const d = new Date(x.submitted_at);
+        if (isNaN(d.getTime())) return;
+        const k = d.toISOString().slice(0, 10);
+        counts[k] = (counts[k] || 0) + 1;
+    });
+    const dates = Object.keys(counts).sort();
+    if (!dates.length) {
+        el.innerHTML = '<p class="sba-muted">No responses in this period yet.</p>';
+        return;
+    }
+    const max = Math.max(...dates.map(d => counts[d]));
+    el.innerHTML = '<div class="sba-timeline">' + dates.slice(-30).map(d => {
+        const c = counts[d];
+        const h = Math.round((c / max) * 100);
+        const label = new Date(d).toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+        return `<div class="sba-tl-bar" title="${label}: ${c}"><div class="sba-tl-count">${c}</div><div class="sba-tl-fill" style="height:${Math.max(h, 4)}%"></div><div class="sba-tl-label">${label}</div></div>`;
+    }).join('') + '</div>';
+}
+
+function engageRenderSummaryBox() {
+    const el = document.getElementById('engage-ai-summary');
+    if (!el) return;
+    const textCount = engageGetFilteredResponses().filter(r => r.response_text && r.response_text.trim()).length;
+    if (!textCount) { el.innerHTML = '<p class="sba-muted">No responses to summarise in this period yet.</p>'; return; }
+    el.innerHTML = `<div id="engage-summary-body">
+        <p class="sba-muted" style="margin-bottom:14px;">Summarise these ${textCount} response${textCount !== 1 ? 's' : ''} into sentiment, a short summary and key themes.</p>
+        <button class="sba-ai-btn" onclick="engageGenerateSummary()">Generate AI summary</button>
+    </div>`;
+}
+
+async function engageGenerateSummary() {
+    const body = document.getElementById('engage-summary-body');
+    if (!body) return;
+    const msgs = engageGetFilteredResponses().map(r => r.response_text).filter(t => t && t.trim()).map(t => ({ message: t.trim() }));
+    if (!msgs.length) { body.innerHTML = '<p class="sba-muted">No responses to summarise.</p>'; return; }
+    body.innerHTML = '<div class="sba-loading"><div class="sba-spinner"></div> Analysing…</div>';
+    try {
+        const res = await fetch('/api/analyse', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ responses: msgs }) });
+        if (!res.ok) throw new Error('AI service error (' + res.status + ')');
+        const d = await res.json();
+        const sentiment = (d.overall_sentiment || 'neutral').toLowerCase();
+        const sentClass = ['positive', 'negative'].includes(sentiment) ? sentiment : 'neutral';
+        const themes = (d.key_themes || []).map(t => `<span class="sba-chip">${sbaEsc(t)}</span>`).join('');
+        body.innerHTML = `<div>
+            <span class="sba-sentiment sba-sent-${sentClass}">${sbaEsc(sentiment)}</span>
+            <p class="sba-ai-summary">${sbaEsc(d.summary || '')}</p>
+            ${themes ? `<div class="sba-chips">${themes}</div>` : ''}
+        </div><button class="sba-ai-btn sba-ai-btn-sm" onclick="engageGenerateSummary()">Regenerate</button>`;
+    } catch (e) {
+        body.innerHTML = `<p class="sba-error">Couldn't generate summary: ${sbaEsc(e.message)}</p><button class="sba-ai-btn sba-ai-btn-sm" onclick="engageGenerateSummary()">Try again</button>`;
+    }
+}
+
+function engageRenderAskBox() {
+    const el = document.getElementById('engage-ask');
+    if (!el) return;
+    const chips = ['What are the most common themes?', 'Any urgent issues?', 'What would people change?'];
+    el.innerHTML = `<div class="sba-ask-row">
+        <input type="text" id="engage-ask-input" class="sba-ask-input" placeholder="Ask a question about these responses…" onkeydown="if(event.key==='Enter'){event.preventDefault();engageAskAI();}">
+        <button class="sba-ai-btn" onclick="engageAskAI()">Ask</button>
+    </div>
+    <div class="sba-chips" style="margin-top:10px;">${chips.map(c => `<span class="sba-chip sba-ask-chip" onclick="engageAskChip(this)">${c}</span>`).join('')}</div>
+    <div id="engage-ask-answer"></div>`;
+}
+
+function engageAskChip(elc) {
+    const inp = document.getElementById('engage-ask-input');
+    if (inp) { inp.value = elc.textContent; engageAskAI(); }
+}
+
+async function engageAskAI() {
+    const inp = document.getElementById('engage-ask-input');
+    const ansEl = document.getElementById('engage-ask-answer');
+    if (!inp || !ansEl) return;
+    const question = inp.value.trim();
+    if (!question) return;
+    const filtered = engageGetFilteredResponses();
+    const samples = filtered.map(r => r.response_text).filter(t => t && t.trim()).slice(0, 25);
+    ansEl.innerHTML = '<div class="sba-loading"><div class="sba-spinner"></div> Thinking…</div>';
+    try {
+        const res = await fetch('/api/ask-data', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ question, samples, response_count: filtered.length }) });
+        if (!res.ok) throw new Error('AI service error (' + res.status + ')');
+        const d = await res.json();
+        if (d.error) throw new Error(d.error);
+        ansEl.innerHTML = `<div class="sba-ask-result">${sbaEsc(d.answer || '').replace(/\n/g, '<br>')}</div>`;
+    } catch (e) {
+        ansEl.innerHTML = `<p class="sba-error">Couldn't get an answer: ${sbaEsc(e.message)}</p>`;
+    }
+}
+
 async function loadEngageChatAnalytics(chatId) {
     const loadingEl = document.getElementById('engage-analytics-loading');
     const emptyEl = document.getElementById('engage-analytics-empty');
