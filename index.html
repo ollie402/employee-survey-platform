@@ -6982,6 +6982,24 @@
                                     .sba-export-btn { display:inline-flex; align-items:center; gap:7px; background:#fff; color:#334155; border:1px solid #e2e8f0; padding:8px 14px; border-radius:8px; font-size:13px; font-weight:500; cursor:pointer; transition:border-color .15s, color .15s, background .15s; }
                                     .sba-export-btn:hover { border-color:#ec4899; color:#be185d; background:#fdf2f8; }
                                     .sba-export-btn svg { width:15px; height:15px; }
+                                    .sba-filterbar { display:flex; flex-wrap:wrap; align-items:center; gap:12px; justify-content:space-between; }
+                                    .sba-range-btns { display:flex; flex-wrap:wrap; gap:6px; }
+                                    .sba-range-btn { background:#fff; border:1px solid #e2e8f0; color:#475569; padding:6px 12px; border-radius:999px; font-size:13px; cursor:pointer; transition:border-color .15s, color .15s, background .15s; }
+                                    .sba-range-btn:hover { border-color:#ec4899; color:#be185d; }
+                                    .sba-range-btn.active { background:#ec4899; border-color:#ec4899; color:#fff; }
+                                    .sba-custom-range { display:flex; align-items:center; gap:8px; }
+                                    .sba-date-input { border:1px solid #e2e8f0; border-radius:8px; padding:6px 10px; font-size:13px; }
+                                    .sba-empty-banner { background:#fff7ed; border:1px solid #fed7aa; color:#9a3412; padding:12px 16px; border-radius:10px; font-size:14px; }
+                                    .sba-ask-row { display:flex; gap:8px; }
+                                    .sba-ask-input { flex:1; border:1px solid #e2e8f0; border-radius:8px; padding:10px 12px; font-size:14px; }
+                                    .sba-ask-chip { cursor:pointer; }
+                                    .sba-ask-chip:hover { background:#fbcfe8; }
+                                    .sba-ask-result { margin-top:12px; font-size:14px; line-height:1.6; color:#334155; background:#f8fafc; border-radius:8px; padding:12px 14px; }
+                                    .sba-pager { display:flex; align-items:center; justify-content:center; gap:14px; margin-top:18px; }
+                                    .sba-pager-btn { background:#fff; border:1px solid #e2e8f0; color:#475569; padding:7px 14px; border-radius:8px; font-size:13px; cursor:pointer; }
+                                    .sba-pager-btn:hover:not([disabled]) { border-color:#ec4899; color:#be185d; }
+                                    .sba-pager-btn[disabled] { opacity:.4; cursor:default; }
+                                    .sba-pager-info { font-size:13px; color:#64748b; }
                                 </style>
                                 <div class="sba-dashboard" id="sba-dashboard">
                                     <!-- populated by sbRenderAnalyticsDashboard() -->
@@ -16349,6 +16367,9 @@ function sbGoToDashboard() {
 
 // Store current responses for export
 let sbCurrentResponses = [];
+let sbAnalyticsRange = { preset: 'all', from: null, to: null };
+let sbAnalyticsPage = 1;
+const SB_ANALYTICS_PAGE_SIZE = 6;
 
 // Show Questions Tab (default view)
 function sbShowQuestionsTab() {
@@ -16452,7 +16473,10 @@ async function sbShowAnalyticsTab() {
         sbCurrentResponses = [];
     }
 
-    sbRenderAnalyticsDashboard(sbCurrentResponses);
+    // Reset filter + pagination for a fresh view
+    sbAnalyticsRange = { preset: 'all', from: null, to: null };
+    sbAnalyticsPage = 1;
+    sbRenderAnalyticsDashboard();
 }
 
 // Escape HTML in user-generated response text
@@ -16472,30 +16496,32 @@ function sbaBarRow(label, count, total, max) {
     </div>`;
 }
 
-// Build the full analytics dashboard
-function sbRenderAnalyticsDashboard(responses) {
+// Build the full analytics dashboard. The structure (date filter, trend,
+// summary, Ask-AI, breakdown) is ALWAYS shown — sections fill in with data.
+function sbRenderAnalyticsDashboard() {
     const dash = document.getElementById('sba-dashboard');
     if (!dash) return;
 
-    if (!responses || responses.length === 0) {
-        dash.innerHTML = `
-            <div class="sba-empty">
-                <div class="sba-empty-icon">📊</div>
-                <h3>No responses yet</h3>
-                <p>Analytics will appear here once people start completing this survey.</p>
-            </div>`;
-        return;
-    }
+    const responses = sbGetFilteredResponses();
+    const totalAll = (sbCurrentResponses || []).length;
 
     const dlIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>';
 
+    const emptyBanner = totalAll === 0
+        ? `<div class="sba-empty-banner">📊 No responses yet — analytics will populate here as people complete this survey.</div>`
+        : '';
+
     dash.innerHTML = `
-        <div class="sba-toolbar">
-            <button class="sba-export-btn" onclick="sbExportAnalyticsWord()" title="Export analytics as a Word document">${dlIcon} Export Word</button>
-            <button class="sba-export-btn" onclick="sbExportAnalyticsCSV()" title="Export analytics as CSV">${dlIcon} Export CSV</button>
+        <div class="sba-filterbar">
+            ${sbRenderDateFilter()}
+            <div class="sba-toolbar" style="margin-bottom:0;">
+                <button class="sba-export-btn" onclick="sbExportAnalyticsWord()" title="Export analytics as a Word document">${dlIcon} Export Word</button>
+                <button class="sba-export-btn" onclick="sbExportAnalyticsCSV()" title="Export analytics as CSV">${dlIcon} Export CSV</button>
+            </div>
         </div>
+        ${emptyBanner}
         <div>
-            <div class="sba-section-title">Responses over time</div>
+            <div class="sba-section-title">Changes over time</div>
             <div class="sba-card">${sbRenderResponsesTimeline(responses)}</div>
         </div>
         <div>
@@ -16503,9 +16529,143 @@ function sbRenderAnalyticsDashboard(responses) {
             ${sbRenderAiSummarySection(responses)}
         </div>
         <div>
+            <div class="sba-section-title">Ask the AI about these responses</div>
+            ${sbRenderAskAiSection(responses)}
+        </div>
+        <div>
             <div class="sba-section-title">Question breakdown</div>
-            <div class="sba-q-grid">${sbRenderQuestionBreakdowns(responses)}</div>
+            <div id="sba-breakdown">${sbRenderQuestionBreakdownPaged(responses)}</div>
         </div>`;
+}
+
+// ---- Date-range filter ----
+function sbGetFilteredResponses() {
+    const all = sbCurrentResponses || [];
+    const r = sbAnalyticsRange;
+    let fromTs = null, toTs = null;
+    if (r.preset === '7' || r.preset === '30' || r.preset === '90') {
+        fromTs = Date.now() - parseInt(r.preset) * 86400000;
+    } else if (r.preset === 'custom') {
+        if (r.from) fromTs = new Date(r.from + 'T00:00:00').getTime();
+        if (r.to) toTs = new Date(r.to + 'T23:59:59').getTime();
+    }
+    if (fromTs === null && toTs === null) return all;
+    return all.filter(resp => {
+        const ts = resp.completed_at || resp.created_at;
+        if (!ts) return false;
+        const t = new Date(ts).getTime();
+        if (isNaN(t)) return false;
+        if (fromTs !== null && t < fromTs) return false;
+        if (toTs !== null && t > toTs) return false;
+        return true;
+    });
+}
+
+function sbRenderDateFilter() {
+    const r = sbAnalyticsRange;
+    const presets = [['all', 'All time'], ['7', 'Last 7 days'], ['30', 'Last 30 days'], ['90', 'Last 90 days']];
+    const btns = presets.map(([val, label]) =>
+        `<button class="sba-range-btn ${r.preset === val ? 'active' : ''}" onclick="sbSetAnalyticsRange('${val}')">${label}</button>`).join('');
+    return `<div>
+        <div class="sba-range-btns">
+            ${btns}
+            <button class="sba-range-btn ${r.preset === 'custom' ? 'active' : ''}" onclick="sbSetAnalyticsRange('custom')">Custom</button>
+        </div>
+        <div class="sba-custom-range" style="margin-top:10px;${r.preset === 'custom' ? '' : 'display:none;'}">
+            <input type="date" class="sba-date-input" value="${r.from || ''}" onchange="sbSetAnalyticsCustom('from', this.value)">
+            <span class="sba-muted">to</span>
+            <input type="date" class="sba-date-input" value="${r.to || ''}" onchange="sbSetAnalyticsCustom('to', this.value)">
+        </div>
+    </div>`;
+}
+
+function sbSetAnalyticsRange(preset) {
+    sbAnalyticsRange.preset = preset;
+    sbAnalyticsPage = 1;
+    sbRenderAnalyticsDashboard();
+}
+
+function sbSetAnalyticsCustom(which, value) {
+    sbAnalyticsRange.preset = 'custom';
+    sbAnalyticsRange[which] = value || null;
+    sbAnalyticsPage = 1;
+    sbRenderAnalyticsDashboard();
+}
+
+// ---- Ask the AI about the data (reuses /api/ask-data) ----
+function sbRenderAskAiSection(responses) {
+    const hasText = sbCollectTextAnswers(responses).length > 0;
+    const chips = ['What are the most common themes?', 'Any urgent issues?', 'What would people change?'];
+    return `<div class="sba-card">
+        <div class="sba-ask-row">
+            <input type="text" id="sba-ask-input" class="sba-ask-input" placeholder="Ask a question about these responses…"
+                   onkeydown="if(event.key==='Enter'){event.preventDefault();sbAnalyticsAskAI();}">
+            <button class="sba-ai-btn" onclick="sbAnalyticsAskAI()">Ask</button>
+        </div>
+        <div class="sba-chips" style="margin-top:10px;">
+            ${chips.map(c => `<span class="sba-chip sba-ask-chip" onclick="sbAnalyticsAskChip(this)">${c}</span>`).join('')}
+        </div>
+        ${!hasText ? '<p class="sba-muted" style="margin-top:10px;">Works best once there are free-text answers to analyse.</p>' : ''}
+        <div id="sba-ask-answer"></div>
+    </div>`;
+}
+
+function sbAnalyticsAskChip(el) {
+    const inp = document.getElementById('sba-ask-input');
+    if (inp) { inp.value = el.textContent; sbAnalyticsAskAI(); }
+}
+
+async function sbAnalyticsAskAI() {
+    const inp = document.getElementById('sba-ask-input');
+    const ansEl = document.getElementById('sba-ask-answer');
+    if (!inp || !ansEl) return;
+    const question = inp.value.trim();
+    if (!question) return;
+    const responses = sbGetFilteredResponses();
+    const samples = sbCollectTextAnswers(responses).map(o => o.message).slice(0, 25);
+    ansEl.innerHTML = '<div class="sba-loading"><div class="sba-spinner"></div> Thinking…</div>';
+    try {
+        const res = await fetch('/api/ask-data', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ question, samples, response_count: responses.length })
+        });
+        if (!res.ok) throw new Error('AI service error (' + res.status + ')');
+        const d = await res.json();
+        if (d.error) throw new Error(d.error);
+        ansEl.innerHTML = `<div class="sba-ask-result">${sbaEsc(d.answer || '').replace(/\n/g, '<br>')}</div>`;
+    } catch (e) {
+        ansEl.innerHTML = `<p class="sba-error">Couldn't get an answer: ${sbaEsc(e.message)}</p>`;
+    }
+}
+
+// ---- Question breakdown (paginated) ----
+function sbRenderQuestionBreakdownPaged(responses) {
+    const questions = sbGetAllQuestions();
+    if (questions.length === 0) return '<p class="sba-muted">This survey has no questions yet.</p>';
+    const pageSize = SB_ANALYTICS_PAGE_SIZE;
+    const totalPages = Math.max(1, Math.ceil(questions.length / pageSize));
+    if (sbAnalyticsPage > totalPages) sbAnalyticsPage = totalPages;
+    if (sbAnalyticsPage < 1) sbAnalyticsPage = 1;
+    const start = (sbAnalyticsPage - 1) * pageSize;
+    const pageQs = questions.slice(start, start + pageSize);
+    const cards = pageQs.map((q, idx) => sbRenderOneQuestionCard(q, start + idx, responses)).join('');
+    return `<div class="sba-q-grid">${cards}</div>${sbRenderAnalyticsPager(totalPages)}`;
+}
+
+function sbRenderAnalyticsPager(totalPages) {
+    if (totalPages <= 1) return '';
+    return `<div class="sba-pager">
+        <button class="sba-pager-btn" ${sbAnalyticsPage <= 1 ? 'disabled' : ''} onclick="sbAnalyticsSetPage(${sbAnalyticsPage - 1})">‹ Prev</button>
+        <span class="sba-pager-info">Page ${sbAnalyticsPage} of ${totalPages}</span>
+        <button class="sba-pager-btn" ${sbAnalyticsPage >= totalPages ? 'disabled' : ''} onclick="sbAnalyticsSetPage(${sbAnalyticsPage + 1})">Next ›</button>
+    </div>`;
+}
+
+function sbAnalyticsSetPage(p) {
+    sbAnalyticsPage = p;
+    const el = document.getElementById('sba-breakdown');
+    if (el) el.innerHTML = sbRenderQuestionBreakdownPaged(sbGetFilteredResponses());
 }
 
 // Section 1: responses-over-time bar chart (grouped by day)
@@ -16539,11 +16699,7 @@ function sbRenderResponsesTimeline(responses) {
 }
 
 // Section 3: per-question breakdown cards
-function sbRenderQuestionBreakdowns(responses) {
-    const questions = sbGetAllQuestions();
-    if (questions.length === 0) return '<p class="sba-muted">This survey has no questions yet.</p>';
-
-    return questions.map((q, i) => {
+function sbRenderOneQuestionCard(q, i, responses) {
         const answers = responses
             .map(r => r.responses?.[q.id])
             .filter(a => a !== undefined && a !== null && a !== '');
@@ -16591,7 +16747,6 @@ function sbRenderQuestionBreakdowns(responses) {
             </div>
             <div>${body}</div>
         </div>`;
-    }).join('');
 }
 
 // Section 2: AI summary of free-text answers (button-triggered)
@@ -16626,7 +16781,7 @@ async function sbGenerateAiSummary() {
     const body = document.getElementById('sba-ai-body');
     if (!body) return;
 
-    const messages = sbCollectTextAnswers(sbCurrentResponses);
+    const messages = sbCollectTextAnswers(sbGetFilteredResponses());
     if (messages.length === 0) {
         body.innerHTML = '<p class="sba-muted">No free-text answers to summarise.</p>';
         return;
@@ -16746,8 +16901,9 @@ function sbaDownloadFile(filename, content, mime) {
 
 // Export analytics as CSV
 function sbExportAnalyticsCSV() {
-    if (!sbCurrentResponses || sbCurrentResponses.length === 0) { alert('No analytics to export yet.'); return; }
-    const data = sbComputeAnalyticsData(sbCurrentResponses);
+    const exportResponses = sbGetFilteredResponses();
+    if (!exportResponses || exportResponses.length === 0) { alert('No analytics to export yet.'); return; }
+    const data = sbComputeAnalyticsData(exportResponses);
     const esc = v => {
         const s = String(v == null ? '' : v);
         return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
@@ -16788,8 +16944,9 @@ function sbExportAnalyticsCSV() {
 
 // Export analytics as a Word document (HTML-as-.doc, opens natively in Word)
 function sbExportAnalyticsWord() {
-    if (!sbCurrentResponses || sbCurrentResponses.length === 0) { alert('No analytics to export yet.'); return; }
-    const data = sbComputeAnalyticsData(sbCurrentResponses);
+    const exportResponses = sbGetFilteredResponses();
+    if (!exportResponses || exportResponses.length === 0) { alert('No analytics to export yet.'); return; }
+    const data = sbComputeAnalyticsData(exportResponses);
     const esc = sbaEsc;
     let b = '';
     b += `<h1>${esc(sbaSurveyName())} — Analytics</h1>`;
