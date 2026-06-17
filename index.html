@@ -18457,10 +18457,37 @@ async function sbShowAutocomplete(inputElement, pageIndex, questionIndex) {
     `;
     overlay.classList.add('active');
 
-    // Search question bank
-    const results = await sbSearchQuestionBank(searchText);
+    // Token to guard against stale async renders (input changed / different question)
+    const token = String(Date.now()) + ':' + Math.random();
+    overlay.dataset.token = token;
 
-    // Build results HTML
+    // Search the question bank (fast, local)
+    const bankResults = await sbSearchQuestionBank(searchText);
+    if (overlay.dataset.token !== token) return; // input changed while searching
+    sbRenderBankOverlay(overlay, searchText, bankResults);
+
+    // AI-predicted suggestions (async; appended when ready). Degrades gracefully
+    // if the AI is unavailable (e.g. no API credits) — the bank still works.
+    if (searchText.trim().length >= 3) {
+        sbFetchAiSuggestions(searchText).then(aiSuggestions => {
+            if (overlay.dataset.token !== token) return; // input changed since request
+            if (!overlay.classList.contains('active')) return;
+            if (!aiSuggestions || !aiSuggestions.length) return;
+            const existing = new Set(bankResults.map(r => (r.question_text || '').toLowerCase()));
+            const aiItems = aiSuggestions
+                .filter(s => s && !existing.has(s.toLowerCase()))
+                .map(s => ({ question_text: s, question_type: 'text', options: [], use_count: 0, isAi: true }));
+            if (!aiItems.length) return;
+            sbRenderBankOverlay(overlay, searchText, bankResults.concat(aiItems));
+        }).catch(() => {});
+    }
+}
+
+/**
+ * Render the question-bank overlay from a results array.
+ * Items with isAi:true are shown as "AI suggestion" predictions.
+ */
+function sbRenderBankOverlay(overlay, searchText, results) {
     let listHTML = '';
 
     if (results.length === 0) {
@@ -18476,6 +18503,21 @@ async function sbShowAutocomplete(inputElement, pageIndex, questionIndex) {
     } else {
         results.forEach((q, index) => {
             const highlightedText = sbHighlightMatch(q.question_text, searchText);
+
+            if (q.isAi) {
+                listHTML += `
+                    <div class="sb-question-bank-item sb-question-bank-item--ai"
+                         data-index="${index}"
+                         onmousedown="sbSelectFromBank(${index}); event.preventDefault();">
+                        <div class="sb-question-bank-item-text">${highlightedText}</div>
+                        <div class="sb-question-bank-item-meta">
+                            <span class="sb-question-bank-item-type" style="background:#fce7f3;color:#be185d;">✨ AI suggestion</span>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
             const typeClass = q.question_type.replace(/\s+/g, '-').toLowerCase();
             const typeDisplay = q.question_type.replace(/-/g, ' ');
 
@@ -18502,7 +18544,8 @@ async function sbShowAutocomplete(inputElement, pageIndex, questionIndex) {
         });
     }
 
-    // Update overlay content
+    const aiCount = results.filter(r => r.isAi).length;
+
     overlay.innerHTML = `
         <div class="sb-question-bank-header">
             <div class="sb-question-bank-header-title">
@@ -18523,12 +18566,37 @@ async function sbShowAutocomplete(inputElement, pageIndex, questionIndex) {
         <div class="sb-question-bank-list">
             ${listHTML}
         </div>
-        ${results.length > 0 ? `<div class="sb-question-bank-count">${results.length} suggestion${results.length !== 1 ? 's' : ''}</div>` : ''}
+        ${results.length > 0 ? `<div class="sb-question-bank-count">${results.length} suggestion${results.length !== 1 ? 's' : ''}${aiCount ? ` · ${aiCount} from AI` : ''}</div>` : ''}
     `;
 
     // Store results for keyboard navigation / selection
     overlay.dataset.results = JSON.stringify(results);
     sbAutocompleteSelectedIndex = -1;
+}
+
+/**
+ * Fetch AI-predicted question suggestions for the current partial input.
+ * Returns [] on any failure so the bank autocomplete keeps working.
+ */
+async function sbFetchAiSuggestions(searchText) {
+    try {
+        let previousQuestions = [];
+        try {
+            const bank = await sbFetchQuestionBank();
+            previousQuestions = (bank || []).map(q => q.question_text).filter(Boolean).slice(0, 40);
+        } catch (e) { /* no bank context available */ }
+
+        const res = await fetch('/api/suggest-questions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ input: searchText, previousQuestions })
+        });
+        if (!res.ok) return [];
+        const data = await res.json();
+        return Array.isArray(data.suggestions) ? data.suggestions : [];
+    } catch (e) {
+        return [];
+    }
 }
 
 /**
@@ -18583,6 +18651,16 @@ function sbSelectFromBank(resultIndex) {
     }
 
     const question = sbCurrentSurvey.pages[pageIndex].questions[questionIndex];
+
+    // AI suggestions fill only the title (like a search-bar completion);
+    // leave the question type and options as the user set them.
+    if (selected.isAi) {
+        question.text = selected.question_text;
+        sbHideQuestionBankOverlay();
+        sbRenderBuilder();
+        sbShowToast('Question added from AI suggestion');
+        return;
+    }
 
     // Update question text
     question.text = selected.question_text;
