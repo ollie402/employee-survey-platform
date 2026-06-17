@@ -14169,9 +14169,9 @@ function showChatEditorTab(tabName) {
     }
 
     // Load analytics when Analytics tab is clicked
-    if (tabName === 'analytics' && window.currentEditingChatId) {
-        loadChatAnalytics(window.currentEditingChatId);
-        listenLoadScaffold(window.currentEditingChatId);
+    if (tabName === 'analytics') {
+        listenLoadScaffold(window.currentEditingChatId || null);
+        if (window.currentEditingChatId) loadChatAnalytics(window.currentEditingChatId);
     }
 
     // Getting Started: tick "Go to Participants" when Participants tab is opened
@@ -14197,14 +14197,17 @@ let listenAnalyticsResponses = [];
 async function listenLoadScaffold(chatId) {
     const fb = document.getElementById('listen-filterbar');
     if (fb) fb.innerHTML = listenRenderDateFilter();
-    try {
-        const { data, error } = await window.supabaseClient
-            .from('chat_responses')
-            .select('submitted_at')
-            .eq('chat_id', chatId);
-        listenAnalyticsResponses = error ? [] : (data || []);
-    } catch (e) {
-        listenAnalyticsResponses = [];
+    listenAnalyticsResponses = [];
+    if (chatId) {
+        try {
+            const { data, error } = await window.supabaseClient
+                .from('chat_responses')
+                .select('submitted_at')
+                .eq('chat_id', chatId);
+            listenAnalyticsResponses = error ? [] : (data || []);
+        } catch (e) {
+            listenAnalyticsResponses = [];
+        }
     }
     listenRenderTrend();
 }
@@ -21514,7 +21517,7 @@ function showEngageChatEditorTab(tabName) {
     const activeTab = document.querySelector('.engage-chat-editor-tab[data-tab="' + tabName + '"]');
     if (activeTab) { activeTab.style.color = '#0F6E56'; activeTab.style.borderBottomColor = '#0F6E56'; }
     if (tabName === 'responses' && window.engageCurrentEditingChatId) loadEngageChatResponses(window.engageCurrentEditingChatId);
-    if (tabName === 'analytics' && window.engageCurrentEditingChatId) { loadEngageChatAnalytics(window.engageCurrentEditingChatId); engageLoadScaffold(window.engageCurrentEditingChatId); }
+    if (tabName === 'analytics') { engageLoadScaffold(window.engageCurrentEditingChatId || null); if (window.engageCurrentEditingChatId) loadEngageChatAnalytics(window.engageCurrentEditingChatId); }
 
     // Getting Started: tick "Go to Participants" when Participants tab is opened
     if (tabName === 'participants' && typeof engageGsCompleteByKey === 'function') {
@@ -21948,14 +21951,17 @@ let engageAnalyticsResponses = [];
 async function engageLoadScaffold(chatId) {
     const fb = document.getElementById('engage-filterbar');
     if (fb) fb.innerHTML = engageRenderDateFilter();
-    try {
-        const { data, error } = await window.supabaseClient
-            .from('engage_chat_responses')
-            .select('submitted_at, response_text')
-            .eq('chat_id', chatId);
-        engageAnalyticsResponses = error ? [] : (data || []);
-    } catch (e) {
-        engageAnalyticsResponses = [];
+    engageAnalyticsResponses = [];
+    if (chatId) {
+        try {
+            const { data, error } = await window.supabaseClient
+                .from('engage_chat_responses')
+                .select('submitted_at, response_text')
+                .eq('chat_id', chatId);
+            engageAnalyticsResponses = error ? [] : (data || []);
+        } catch (e) {
+            engageAnalyticsResponses = [];
+        }
     }
     engageRenderTrend();
     engageRenderSummaryBox();
