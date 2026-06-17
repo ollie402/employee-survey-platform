@@ -208,6 +208,16 @@ app.all('/api/engage-chat', async (req, res) => {
   }
 });
 
+app.all('/api/translate', async (req, res) => {
+  try {
+    const module = await import('./api/translate.js');
+    await module.default(req, res);
+  } catch (error) {
+    console.error('Error in /api/translate:', error);
+    res.status(500).json({ error: 'Internal server error', message: error.message });
+  }
+});
+
 console.log('📡 API endpoints registered: /api/chat-session, /api/chat-response, /api/generate-ai-report');
 
 // Serve index.html for root
