@@ -6978,6 +6978,10 @@
                                     .sba-loading { display:flex; align-items:center; gap:10px; color:#64748b; font-size:14px; padding:24px; }
                                     .sba-spinner { width:18px; height:18px; border:2px solid #e2e8f0; border-top-color:#ec4899; border-radius:50%; animation:spin 1s linear infinite; }
                                     .sba-error { color:#b91c1c; font-size:13px; }
+                                    .sba-toolbar { display:flex; justify-content:flex-end; gap:10px; margin-bottom:-10px; }
+                                    .sba-export-btn { display:inline-flex; align-items:center; gap:7px; background:#fff; color:#334155; border:1px solid #e2e8f0; padding:8px 14px; border-radius:8px; font-size:13px; font-weight:500; cursor:pointer; transition:border-color .15s, color .15s, background .15s; }
+                                    .sba-export-btn:hover { border-color:#ec4899; color:#be185d; background:#fdf2f8; }
+                                    .sba-export-btn svg { width:15px; height:15px; }
                                 </style>
                                 <div class="sba-dashboard" id="sba-dashboard">
                                     <!-- populated by sbRenderAnalyticsDashboard() -->
@@ -16471,7 +16475,13 @@ function sbRenderAnalyticsDashboard(responses) {
         return;
     }
 
+    const dlIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>';
+
     dash.innerHTML = `
+        <div class="sba-toolbar">
+            <button class="sba-export-btn" onclick="sbExportAnalyticsWord()" title="Export analytics as a Word document">${dlIcon} Export Word</button>
+            <button class="sba-export-btn" onclick="sbExportAnalyticsCSV()" title="Export analytics as CSV">${dlIcon} Export CSV</button>
+        </div>
         <div>
             <div class="sba-section-title">Responses over time</div>
             <div class="sba-card">${sbRenderResponsesTimeline(responses)}</div>
@@ -16492,7 +16502,9 @@ function sbRenderResponsesTimeline(responses) {
     responses.forEach(r => {
         const ts = r.completed_at || r.created_at;
         if (!ts) return;
-        const key = new Date(ts).toISOString().slice(0, 10);
+        const d = new Date(ts);
+        if (isNaN(d.getTime())) return; // skip unparseable timestamps
+        const key = d.toISOString().slice(0, 10);
         counts[key] = (counts[key] || 0) + 1;
     });
 
@@ -16625,6 +16637,171 @@ async function sbGenerateAiSummary() {
         body.innerHTML = `<p class="sba-error">Couldn't generate summary: ${sbaEsc(e.message)}</p>
             <button class="sba-ai-btn sba-ai-btn-sm" onclick="sbGenerateAiSummary()">Try again</button>`;
     }
+}
+
+// ---- Analytics export (Word + CSV) ----
+
+// Compute a flat data structure both exporters share
+function sbComputeAnalyticsData(responses) {
+    const questions = sbGetAllQuestions();
+
+    const counts = {};
+    responses.forEach(r => {
+        const ts = r.completed_at || r.created_at;
+        if (!ts) return;
+        const d = new Date(ts);
+        if (isNaN(d.getTime())) return;
+        const key = d.toISOString().slice(0, 10);
+        counts[key] = (counts[key] || 0) + 1;
+    });
+    const timeline = Object.keys(counts).sort().map(date => ({ date, count: counts[date] }));
+
+    const q = questions.map((question, i) => {
+        const answers = responses
+            .map(r => r.responses?.[question.id])
+            .filter(a => a !== undefined && a !== null && a !== '');
+        const out = {
+            num: i + 1,
+            title: question.text || question.title || `Question ${i + 1}`,
+            type: question.type || 'text',
+            responseCount: answers.length
+        };
+        if (question.type === 'rating') {
+            const nums = answers.map(a => parseFloat(a)).filter(a => !isNaN(a));
+            out.mean = nums.length ? (nums.reduce((a, b) => a + b, 0) / nums.length).toFixed(2) : 'N/A';
+            const dist = {};
+            nums.forEach(a => dist[a] = (dist[a] || 0) + 1);
+            out.distribution = Object.keys(dist).sort((a, b) => parseFloat(a) - parseFloat(b))
+                .map(k => ({ label: k, count: dist[k], pct: nums.length ? Math.round(dist[k] / nums.length * 100) : 0 }));
+        } else if (question.type === 'single' || question.type === 'multi') {
+            const dist = {};
+            answers.forEach(a => { (Array.isArray(a) ? a : [a]).forEach(o => dist[o] = (dist[o] || 0) + 1); });
+            const opts = (question.options && question.options.length) ? question.options : Object.keys(dist);
+            out.distribution = opts.map(o => ({ label: o, count: dist[o] || 0, pct: answers.length ? Math.round((dist[o] || 0) / answers.length * 100) : 0 }));
+        } else {
+            out.samples = answers.map(a => typeof a === 'string' ? a : JSON.stringify(a));
+        }
+        return out;
+    });
+
+    return { total: responses.length, timeline, questions: q };
+}
+
+// Read the AI summary from the page if one has been generated
+function sbGetAiSummaryForExport() {
+    const result = document.querySelector('#sba-ai-body .sba-ai-result');
+    if (!result) return null;
+    return {
+        sentiment: result.querySelector('.sba-sentiment')?.textContent?.trim() || '',
+        summary: result.querySelector('.sba-ai-summary')?.textContent?.trim() || '',
+        themes: [...result.querySelectorAll('.sba-chip')].map(c => c.textContent.trim())
+    };
+}
+
+function sbaSurveyName() {
+    return (sbCurrentSurvey && (sbCurrentSurvey.title || sbCurrentSurvey.name)) || 'Survey';
+}
+
+function sbaFileName(ext) {
+    const base = sbaSurveyName().replace(/[^a-z0-9]+/gi, '-').replace(/^-+|-+$/g, '').toLowerCase() || 'survey';
+    return base + '-analytics.' + ext;
+}
+
+function sbaDownloadFile(filename, content, mime) {
+    const blob = new Blob([content], { type: mime });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+// Export analytics as CSV
+function sbExportAnalyticsCSV() {
+    if (!sbCurrentResponses || sbCurrentResponses.length === 0) { alert('No analytics to export yet.'); return; }
+    const data = sbComputeAnalyticsData(sbCurrentResponses);
+    const esc = v => {
+        const s = String(v == null ? '' : v);
+        return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+    };
+    const lines = [];
+    lines.push(esc(sbaSurveyName() + ' — Analytics'));
+    lines.push('Total responses,' + data.total);
+    lines.push('');
+    lines.push('Responses over time');
+    lines.push('Date,Responses');
+    data.timeline.forEach(t => lines.push(esc(t.date) + ',' + t.count));
+    lines.push('');
+    lines.push('Question breakdown');
+    data.questions.forEach(q => {
+        lines.push('');
+        lines.push(esc('Q' + q.num + ': ' + q.title) + ' (' + q.type + ')');
+        lines.push('Responses,' + q.responseCount);
+        if (q.mean !== undefined) lines.push('Mean,' + q.mean);
+        if (q.distribution) {
+            lines.push('Option,Count,Percent');
+            q.distribution.forEach(d => lines.push(esc(d.label) + ',' + d.count + ',' + d.pct + '%'));
+        }
+        if (q.samples) {
+            lines.push('Responses');
+            q.samples.forEach(s => lines.push(esc(s)));
+        }
+    });
+    const ai = sbGetAiSummaryForExport();
+    if (ai) {
+        lines.push('');
+        lines.push('AI summary');
+        lines.push('Sentiment,' + esc(ai.sentiment));
+        lines.push('Summary,' + esc(ai.summary));
+        if (ai.themes.length) lines.push('Key themes,' + esc(ai.themes.join('; ')));
+    }
+    sbaDownloadFile(sbaFileName('csv'), '﻿' + lines.join('\r\n'), 'text/csv;charset=utf-8');
+}
+
+// Export analytics as a Word document (HTML-as-.doc, opens natively in Word)
+function sbExportAnalyticsWord() {
+    if (!sbCurrentResponses || sbCurrentResponses.length === 0) { alert('No analytics to export yet.'); return; }
+    const data = sbComputeAnalyticsData(sbCurrentResponses);
+    const esc = sbaEsc;
+    let b = '';
+    b += `<h1>${esc(sbaSurveyName())} — Analytics</h1>`;
+    b += `<p><strong>Total responses:</strong> ${data.total}</p>`;
+
+    b += `<h2>Responses over time</h2>`;
+    b += `<table border="1" cellspacing="0" cellpadding="6"><tr><th align="left">Date</th><th align="left">Responses</th></tr>`;
+    data.timeline.forEach(t => { b += `<tr><td>${esc(t.date)}</td><td>${t.count}</td></tr>`; });
+    b += `</table>`;
+
+    b += `<h2>Question breakdown</h2>`;
+    data.questions.forEach(q => {
+        b += `<h3>Q${q.num}: ${esc(q.title)}</h3>`;
+        b += `<p><em>${esc(q.type)} — ${q.responseCount} responses</em></p>`;
+        if (q.mean !== undefined) b += `<p><strong>Mean average:</strong> ${esc(q.mean)}</p>`;
+        if (q.distribution) {
+            b += `<table border="1" cellspacing="0" cellpadding="6"><tr><th align="left">Option</th><th align="left">Count</th><th align="left">Percent</th></tr>`;
+            q.distribution.forEach(d => { b += `<tr><td>${esc(d.label)}</td><td>${d.count}</td><td>${d.pct}%</td></tr>`; });
+            b += `</table>`;
+        }
+        if (q.samples) {
+            b += `<ul>`;
+            q.samples.forEach(s => { b += `<li>${esc(s)}</li>`; });
+            b += `</ul>`;
+        }
+    });
+
+    const ai = sbGetAiSummaryForExport();
+    if (ai) {
+        b += `<h2>AI summary</h2>`;
+        b += `<p><strong>Sentiment:</strong> ${esc(ai.sentiment)}</p>`;
+        b += `<p>${esc(ai.summary)}</p>`;
+        if (ai.themes.length) b += `<p><strong>Key themes:</strong> ${esc(ai.themes.join(', '))}</p>`;
+    }
+
+    const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>${esc(sbaSurveyName())} Analytics</title></head><body style="font-family:Calibri,Arial,sans-serif;">${b}</body></html>`;
+    sbaDownloadFile(sbaFileName('doc'), '﻿' + html, 'application/msword');
 }
 
 // Language name lookup
