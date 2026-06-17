@@ -5723,6 +5723,15 @@
                         <div id="chat-editor-tab-analytics" class="chat-editor-tab-content" style="display: none;">
                             <div style="max-width: 1200px;">
 
+                                <!-- Structured scaffold (always visible, even before analysis) -->
+                                <div class="listen-analytics-scaffold" style="margin-bottom: 24px;">
+                                    <div class="sba-filterbar" id="listen-filterbar"></div>
+                                    <div style="margin-top: 20px;">
+                                        <div class="sba-section-title">Changes over time</div>
+                                        <div class="sba-card" id="listen-trend"><p class="sba-muted">Loading…</p></div>
+                                    </div>
+                                </div>
+
                                 <!-- Loading State -->
                                 <div id="analytics-loading" class="analytics-loading" style="display: none;">
                                     <div class="analytics-loading-spinner"></div>
@@ -14144,6 +14153,7 @@ function showChatEditorTab(tabName) {
     // Load analytics when Analytics tab is clicked
     if (tabName === 'analytics' && window.currentEditingChatId) {
         loadChatAnalytics(window.currentEditingChatId);
+        listenLoadScaffold(window.currentEditingChatId);
     }
 
     // Getting Started: tick "Go to Participants" when Participants tab is opened
@@ -14160,6 +14170,103 @@ function showChatEditorTab(tabName) {
 let claudeAnalysisResult = null;
 // Timestamp of last analysis
 let claudeAnalysisTimestamp = null;
+
+// ---- Listen analytics scaffold: date filter + changes-over-time trend ----
+// (always visible, built from raw chat_responses timestamps — no AI needed)
+let listenAnalyticsRange = { preset: 'all', from: null, to: null };
+let listenAnalyticsResponses = [];
+
+async function listenLoadScaffold(chatId) {
+    const fb = document.getElementById('listen-filterbar');
+    if (fb) fb.innerHTML = listenRenderDateFilter();
+    try {
+        const { data, error } = await window.supabaseClient
+            .from('chat_responses')
+            .select('submitted_at')
+            .eq('chat_id', chatId);
+        listenAnalyticsResponses = error ? [] : (data || []);
+    } catch (e) {
+        listenAnalyticsResponses = [];
+    }
+    listenRenderTrend();
+}
+
+function listenGetFilteredTimestamps() {
+    const r = listenAnalyticsRange;
+    let fromTs = null, toTs = null;
+    if (r.preset === '7' || r.preset === '30' || r.preset === '90') {
+        fromTs = Date.now() - parseInt(r.preset) * 86400000;
+    } else if (r.preset === 'custom') {
+        if (r.from) fromTs = new Date(r.from + 'T00:00:00').getTime();
+        if (r.to) toTs = new Date(r.to + 'T23:59:59').getTime();
+    }
+    return (listenAnalyticsResponses || []).filter(x => {
+        const ts = x.submitted_at;
+        if (!ts) return false;
+        const t = new Date(ts).getTime();
+        if (isNaN(t)) return false;
+        if (fromTs !== null && t < fromTs) return false;
+        if (toTs !== null && t > toTs) return false;
+        return true;
+    });
+}
+
+function listenRenderDateFilter() {
+    const r = listenAnalyticsRange;
+    const presets = [['all', 'All time'], ['7', 'Last 7 days'], ['30', 'Last 30 days'], ['90', 'Last 90 days']];
+    const btns = presets.map(([v, l]) =>
+        `<button class="sba-range-btn ${r.preset === v ? 'active' : ''}" onclick="listenSetRange('${v}')">${l}</button>`).join('');
+    return `<div>
+        <div class="sba-range-btns">
+            ${btns}
+            <button class="sba-range-btn ${r.preset === 'custom' ? 'active' : ''}" onclick="listenSetRange('custom')">Custom</button>
+        </div>
+        <div class="sba-custom-range" style="margin-top:10px;${r.preset === 'custom' ? '' : 'display:none;'}">
+            <input type="date" class="sba-date-input" value="${r.from || ''}" onchange="listenSetCustom('from', this.value)">
+            <span class="sba-muted">to</span>
+            <input type="date" class="sba-date-input" value="${r.to || ''}" onchange="listenSetCustom('to', this.value)">
+        </div>
+    </div>`;
+}
+
+function listenSetRange(p) {
+    listenAnalyticsRange.preset = p;
+    const fb = document.getElementById('listen-filterbar');
+    if (fb) fb.innerHTML = listenRenderDateFilter();
+    listenRenderTrend();
+}
+
+function listenSetCustom(which, val) {
+    listenAnalyticsRange.preset = 'custom';
+    listenAnalyticsRange[which] = val || null;
+    const fb = document.getElementById('listen-filterbar');
+    if (fb) fb.innerHTML = listenRenderDateFilter();
+    listenRenderTrend();
+}
+
+function listenRenderTrend() {
+    const el = document.getElementById('listen-trend');
+    if (!el) return;
+    const counts = {};
+    listenGetFilteredTimestamps().forEach(x => {
+        const d = new Date(x.submitted_at);
+        if (isNaN(d.getTime())) return;
+        const k = d.toISOString().slice(0, 10);
+        counts[k] = (counts[k] || 0) + 1;
+    });
+    const dates = Object.keys(counts).sort();
+    if (!dates.length) {
+        el.innerHTML = '<p class="sba-muted">No responses in this period yet.</p>';
+        return;
+    }
+    const max = Math.max(...dates.map(d => counts[d]));
+    el.innerHTML = '<div class="sba-timeline">' + dates.slice(-30).map(d => {
+        const c = counts[d];
+        const h = Math.round((c / max) * 100);
+        const label = new Date(d).toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+        return `<div class="sba-tl-bar" title="${label}: ${c}"><div class="sba-tl-count">${c}</div><div class="sba-tl-fill" style="height:${Math.max(h, 4)}%"></div><div class="sba-tl-label">${label}</div></div>`;
+    }).join('') + '</div>';
+}
 
 /**
  * Load analytics for the current chat (NotebookLM redesign)
