@@ -12,7 +12,7 @@ export default async function handler(req, res) {
     const responseText = responses.map((r, i) => `Response ${i + 1}: ${r.message}`).join('\n');
 
     const message = await client.messages.create({
-      model: 'claude-opus-4-6',
+      model: 'claude-opus-4-8',
       max_tokens: 1024,
       messages: [
         {

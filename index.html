@@ -4713,6 +4713,125 @@
           background: #E1F5EE !important; color: #0F6E56 !important;
         }
 
+        /* Hide decorative icons in Listen/Engage chat Setup (card-header squares,
+           field-label icons, notif tick, link-display icon). Button icons
+           (.rw-btn-*) are intentionally NOT matched and remain. */
+        .rw-card-header-icon,
+        .rw-field label svg,
+        .rw-notif-left svg,
+        .rw-link-display svg {
+          display: none !important;
+        }
+
+        /* "Inflatable" Setup cards (Listen): the card holding the next
+           incomplete step is expanded; the others collapse to their header.
+           Hovering a collapsed card re-inflates it; it deflates on mouse-leave.
+           Everything except the header collapses (body + the Create/Save row). */
+        #chat-editor-tab-setup .rw-inflatable > :not(.rw-card-header) {
+          overflow: hidden;
+          max-height: 800px;
+          opacity: 1;
+          transform: translateY(0);
+          transition: max-height 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+                      opacity 0.45s ease,
+                      transform 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+                      padding 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+                      margin 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        #chat-editor-tab-setup .rw-inflatable.rw-collapsed > :not(.rw-card-header) {
+          max-height: 0;
+          opacity: 0;
+          transform: translateY(-10px);
+          padding-top: 0;
+          padding-bottom: 0;
+          margin-top: 0;
+          margin-bottom: 0;
+        }
+
+        /* Collapse/expand chevron in each Setup card header (manual toggle) */
+        #chat-editor-tab-setup .rw-collapse-toggle {
+          margin-left: auto;
+          background: none;
+          border: none;
+          padding: 4px;
+          cursor: pointer;
+          color: #94a3b8;
+          display: flex;
+          align-items: center;
+          flex-shrink: 0;
+          transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), color 0.15s;
+        }
+        #chat-editor-tab-setup .rw-collapse-toggle:hover { color: #475569; }
+        #chat-editor-tab-setup .rw-collapse-toggle svg { width: 18px; height: 18px; }
+        #chat-editor-tab-setup .rw-inflatable.rw-collapsed .rw-collapse-toggle { transform: rotate(-90deg); }
+
+        /* Hover "info" tooltip in each Setup card header.
+           Cards are overflow:hidden (for rounded corners/collapse); the body clips
+           itself during collapse, so the card can be overflow:visible to let the
+           tooltip escape — header/body have no background, so corners stay rounded. */
+        #chat-editor-tab-setup .rw-inflatable { overflow: visible; }
+        #chat-editor-tab-setup .rw-info {
+          position: relative;
+          display: inline-flex;
+          align-items: center;
+          margin-left: 6px;
+          color: #94a3b8;
+          cursor: help;
+          vertical-align: middle;
+        }
+        #chat-editor-tab-setup .rw-info:hover { color: #6366f1; }
+        #chat-editor-tab-setup .rw-info svg { width: 15px; height: 15px; }
+        #chat-editor-tab-setup .rw-info .rw-tip {
+          position: absolute;
+          top: calc(100% + 8px);
+          left: 0;
+          width: 250px;
+          background: #1e293b;
+          color: #fff;
+          padding: 10px 12px;
+          border-radius: 8px;
+          font-size: 12px;
+          line-height: 1.45;
+          font-weight: 400;
+          opacity: 0;
+          visibility: hidden;
+          transform: translateY(-4px);
+          transition: opacity 0.18s ease, transform 0.18s ease;
+          z-index: 60;
+          box-shadow: 0 8px 24px rgba(15,23,42,0.22);
+          pointer-events: none;
+          text-align: left;
+          white-space: normal;
+        }
+        #chat-editor-tab-setup .rw-info:hover .rw-tip,
+        #chat-editor-tab-setup .rw-info:focus .rw-tip {
+          opacity: 1;
+          visibility: visible;
+          transform: translateY(0);
+        }
+
+        /* Access + Notifications split into two full-width, side-by-side boxes */
+        #chat-editor-tab-setup .rw-split-row {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 14px;
+          align-items: start;
+        }
+        /* Standalone Create/Save row — drop the divider line and right-align the buttons */
+        #chat-editor-tab-setup #lc-actions-card .rw-save-section { border-top: none; justify-content: flex-end; }
+        /* Stop the Save button stretching full-width (.rw-btn-save sets width:100%/flex:1),
+           which was squashing the Create Chat button to a sliver */
+        #chat-editor-tab-setup #lc-actions-card .rw-btn-save { width: auto; flex: 0 0 auto; }
+        /* No white card behind the action buttons — just the buttons, bottom-right */
+        #chat-editor-tab-setup #lc-actions-card {
+          background: transparent;
+          border: none;
+          box-shadow: none;
+        }
+
+        /* Show Getting Started above the "Your Chat Link" card in the right column (Listen) */
+        #chat-editor-tab-setup .rw-right-col #getting-started-box { order: -1; }
+
         /* Topic tags — teal */
         #engage-chat-editor-section .rw-tag {
           background: #E1F5EE; color: #085041;
@@ -5296,7 +5415,7 @@
                                 <h2 style="font-size: 24px; font-weight: 700; color: #1e293b; margin: 0 0 12px 0;">Explore</h2>
                                 <div style="width: 50px; height: 3px; background: #1e2a3b; margin-bottom: 20px;"></div>
                                 <p style="color: #64748b; font-size: 15px; line-height: 1.6; flex-grow: 1;">Discover trends and insights across your organisation. Dive deep into your data to uncover patterns that help you make informed decisions.</p>
-                                <button onclick="showSection('explore')" style="background: #d6366c; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 15px; font-weight: 500; cursor: pointer; margin-top: 20px;">Start Exploring</button>
+                                <button onclick="showSection('survey-builder')" style="background: #d6366c; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 15px; font-weight: 500; cursor: pointer; margin-top: 20px;">Start Exploring</button>
                             </div>
 
                         </div>
@@ -5377,15 +5496,18 @@
                               <div class="rw-left-col">
 
                                 <!-- Card 1: Chat Configuration -->
-                                <div class="rw-card">
+                                <div class="rw-card rw-inflatable" id="lc-config-card">
                                   <div class="rw-card-header">
                                     <div class="rw-card-header-icon purple">
                                       <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
                                     </div>
                                     <div>
-                                      <div class="rw-card-title">Chat Configuration</div>
+                                      <div class="rw-card-title">Chat Configuration <span class="rw-info" tabindex="0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg><span class="rw-tip">Chat Name is for your own reference and is also shown to participants. The Welcome Message is the first thing people see when they open the chat — use it to greet them and set the tone.</span></span></div>
                                       <div class="rw-card-subtitle">Set up how your chat appears to participants</div>
                                     </div>
+                                    <button class="rw-collapse-toggle" type="button" onclick="rwToggleCard(this)" aria-label="Collapse section">
+                                      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                    </button>
                                   </div>
                                   <div class="rw-card-body">
                                     <div class="rw-field">
@@ -5400,63 +5522,94 @@
                                         <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"/></svg>
                                         Welcome Message
                                       </label>
-                                      <textarea id="chat-setup-welcome" rows="4" placeholder="Hi! Thanks for taking the time to share your feedback with us.">Hi! Thanks for taking the time to share your feedback with us. Please feel free to tell us about your experience or any suggestions you might have.</textarea>
+                                      <textarea id="chat-setup-welcome" rows="4" placeholder="Hi! Thanks for taking the time to share your feedback with us. Please feel free to tell us about your experience or any suggestions you might have."></textarea>
                                       <div class="rw-hint">This message will appear when participants first open the chat.</div>
                                     </div>
                                   </div>
                                 </div>
 
-                                <!-- Card 2: Access & Notifications -->
-                                <div class="rw-card">
-                                  <div class="rw-card-header">
-                                    <div class="rw-card-header-icon pink">
-                                      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-                                    </div>
-                                    <div>
-                                      <div class="rw-card-title">Access & Notifications</div>
-                                      <div class="rw-card-subtitle">Control who can respond and how you're alerted</div>
-                                    </div>
-                                  </div>
-                                  <div class="rw-card-body">
-                                    <div class="rw-field">
-                                      <label>
-                                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064"/></svg>
-                                        Access Type
-                                      </label>
-                                      <select id="chat-access-type">
-                                          <option value="open">Open Access - Anyone with the link can respond</option>
-                                          <option value="closed">Closed Access - Only invited participants via unique links</option>
-                                          <option value="combined">Combined Access - Public link AND invited participants</option>
-                                      </select>
-                                    </div>
-                                    <div class="rw-field">
-                                      <label>
-                                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
-                                        Submission Notifications
-                                      </label>
-                                      <select id="chat-notification-frequency">
-                                          <option value="">Use my default setting</option>
-                                          <option value="instant">Every submission (instant)</option>
-                                          <option value="daily">Daily digest</option>
-                                          <option value="weekly">Weekly digest</option>
-                                          <option value="never">Never</option>
-                                      </select>
-                                      <div class="rw-hint">Override your global notification setting for this specific chat.</div>
-                                    </div>
-                                    <div class="rw-notif-row">
-                                      <div class="rw-notif-left">
-                                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                                        <span>Notifications active — using your default setting</span>
+                                <!-- Access + Notifications: split into two full-width side-by-side boxes -->
+                                <div class="rw-split-row">
+
+                                  <!-- Access (left) -->
+                                  <div class="rw-card rw-inflatable" id="lc-access-card">
+                                    <div class="rw-card-header">
+                                      <div class="rw-card-header-icon pink">
+                                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
                                       </div>
-                                      <div class="rw-notif-pill">Instant</div>
+                                      <div>
+                                        <div class="rw-card-title">Access <span class="rw-info" tabindex="0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg><span class="rw-tip">Decides who can respond. Open = anyone with the link. Closed = only people you invite, each via their own private link. Combined = a public link plus private invites for specific people.</span></span></div>
+                                        <div class="rw-card-subtitle">Control who can respond</div>
+                                      </div>
+                                      <button class="rw-collapse-toggle" type="button" onclick="rwToggleCard(this)" aria-label="Collapse section">
+                                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                      </button>
+                                    </div>
+                                    <div class="rw-card-body">
+                                      <div class="rw-field">
+                                        <label>
+                                          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064"/></svg>
+                                          Access Type
+                                        </label>
+                                        <select id="chat-access-type">
+                                            <option value="" disabled selected>Select access type…</option>
+                                            <option value="open">Open Access — Anyone with the link can respond, no invite or sign-in needed</option>
+                                            <option value="closed">Closed Access — Invite-only: each person gets their own private link (no public link)</option>
+                                            <option value="combined">Combined Access — A public link anyone can use, plus private invites for specific people</option>
+                                        </select>
+                                      </div>
                                     </div>
                                   </div>
+
+                                  <!-- Notifications (right) -->
+                                  <div class="rw-card rw-inflatable" id="lc-notifs-card">
+                                    <div class="rw-card-header">
+                                      <div class="rw-card-header-icon pink">
+                                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                                      </div>
+                                      <div>
+                                        <div class="rw-card-title">Notifications <span class="rw-info" tabindex="0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg><span class="rw-tip">How you're alerted to new responses: every submission as it arrives, a daily or weekly digest, or never. "Use my default setting" follows your account-wide notification preference.</span></span></div>
+                                        <div class="rw-card-subtitle">How you're alerted to responses</div>
+                                      </div>
+                                      <button class="rw-collapse-toggle" type="button" onclick="rwToggleCard(this)" aria-label="Collapse section">
+                                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                      </button>
+                                    </div>
+                                    <div class="rw-card-body">
+                                      <div class="rw-field">
+                                        <label>
+                                          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                                          Submission Notifications
+                                        </label>
+                                        <select id="chat-notification-frequency">
+                                            <option value="">Use my default setting</option>
+                                            <option value="instant">Every submission (instant)</option>
+                                            <option value="daily">Daily digest</option>
+                                            <option value="weekly">Weekly digest</option>
+                                            <option value="never">Never</option>
+                                        </select>
+                                        <div class="rw-hint">Override your global notification setting for this specific chat.</div>
+                                      </div>
+                                      <div class="rw-notif-row">
+                                        <div class="rw-notif-left">
+                                          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                          <span>Notifications active — using your default setting</span>
+                                        </div>
+                                        <div class="rw-notif-pill">Instant</div>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                </div>
+
+                                <!-- Create / Save (full width, below the split) -->
+                                <div class="rw-card" id="lc-actions-card">
                                   <div class="rw-save-section">
                                     <button id="create-chat-btn" class="rw-btn-create" onclick="createChat(this)">
                                       <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                                       Create Chat
                                     </button>
-                                    <button onclick="saveListeningAll(this)" id="save-chat-btn" class="rw-btn-save" style="flex:1; padding:11px 20px; background:linear-gradient(135deg,#6c63ff,#8b5cf6) !important; color:#fff !important; border:none; border-radius:9px; font-size:13.5px; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; box-shadow:0 4px 14px rgba(108,99,255,0.35); width:100%;">
+                                    <button onclick="saveListeningAll(this)" id="save-chat-btn" class="rw-btn-save" style="flex:0 0 auto; padding:11px 22px; background:linear-gradient(135deg,#6c63ff,#8b5cf6) !important; color:#fff !important; border:none; border-radius:9px; font-size:13.5px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:8px; box-shadow:0 2px 8px rgba(108,99,255,0.25);">
                                       <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                                       Save Changes
                                     </button>
@@ -5722,6 +5875,15 @@
                         <!-- Analytics Tab -->
                         <div id="chat-editor-tab-analytics" class="chat-editor-tab-content" style="display: none;">
                             <div style="max-width: 1200px;">
+
+                                <!-- Structured scaffold (always visible, even before analysis) -->
+                                <div class="listen-analytics-scaffold" style="margin-bottom: 24px;">
+                                    <div class="sba-filterbar" id="listen-filterbar"></div>
+                                    <div style="margin-top: 20px;">
+                                        <div class="sba-section-title">Changes over time</div>
+                                        <div class="sba-card" id="listen-trend"><p class="sba-muted">Loading…</p></div>
+                                    </div>
+                                </div>
 
                                 <!-- Loading State -->
                                 <div id="analytics-loading" class="analytics-loading" style="display: none;">
@@ -6292,6 +6454,24 @@
                         <!-- Analytics Tab -->
                         <div id="engage-chat-editor-tab-analytics" class="engage-chat-editor-tab-content" style="display: none;">
                             <div style="max-width: 1200px;">
+
+                                <!-- Structured scaffold (always visible, even before analysis) -->
+                                <div class="engage-analytics-scaffold" style="margin-bottom: 24px;">
+                                    <div class="sba-filterbar" id="engage-filterbar"></div>
+                                    <div style="margin-top: 20px;">
+                                        <div class="sba-section-title">Changes over time</div>
+                                        <div class="sba-card" id="engage-trend"><p class="sba-muted">Loading…</p></div>
+                                    </div>
+                                    <div style="margin-top: 20px;">
+                                        <div class="sba-section-title">AI summary</div>
+                                        <div class="sba-card" id="engage-ai-summary"></div>
+                                    </div>
+                                    <div style="margin-top: 20px;">
+                                        <div class="sba-section-title">Ask the AI about these responses</div>
+                                        <div class="sba-card" id="engage-ask"></div>
+                                    </div>
+                                </div>
+
                                 <div id="engage-analytics-loading" class="analytics-loading" style="display: none;">
                                     <div class="analytics-loading-spinner"></div>
                                     <div>Loading analytics...</div>
@@ -6860,6 +7040,7 @@
                                 <div class="sb-builder-tabs">
                                     <button class="sb-builder-tab active" data-tab="questions" onclick="sbShowQuestionsTab()">Questions</button>
                                     <button class="sb-builder-tab" data-tab="responses" onclick="sbShowResponsesTab()">Responses</button>
+                                    <button class="sb-builder-tab" data-tab="analytics" onclick="sbShowAnalyticsTab()">Analytics</button>
                                     <!-- Hidden: Settings tab (accessible via cog icon in top right)
                                     <button class="sb-builder-tab" onclick="sbOpenSettings()">Settings</button>
                                     -->
@@ -6911,6 +7092,10 @@
                                         <svg class="sb-icon-sm" viewBox="0 0 24 24" style="margin-right: 6px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                                         Export CSV
                                     </button>
+                                    <button class="sb-export-btn" onclick="sbOpenImportModal()" style="margin-left:8px;">
+                                        <svg class="sb-icon-sm" viewBox="0 0 24 24" style="margin-right: 6px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                                        Import Responses
+                                    </button>
                                 </div>
 
                                 <!-- Raw Data View -->
@@ -6926,6 +7111,82 @@
                                 <!-- Analytics View -->
                                 <div id="sb-analytics-view" class="sb-hidden">
                                     <div id="sb-analytics-container"></div>
+                                </div>
+                            </div>
+
+                            <!-- Analytics Panel (top-level tab) -->
+                            <div id="sb-analytics-panel" class="sb-hidden">
+                                <style>
+                                    #sb-analytics-panel { padding: 28px 32px; background:#f8fafc; min-height: calc(100vh - 200px); }
+                                    .sba-dashboard { max-width: 1080px; margin: 0 auto; display:flex; flex-direction:column; gap:28px; }
+                                    .sba-section-title { font-size:12px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:#94a3b8; margin:0 0 12px; }
+                                    .sba-card { background:#fff; border:1px solid #eef0f4; border-radius:14px; padding:22px 24px; box-shadow:0 1px 3px rgba(15,23,42,.06); }
+                                    .sba-muted { color:#94a3b8; font-size:13px; margin:0; }
+                                    .sba-empty { text-align:center; padding:64px 24px; color:#64748b; }
+                                    .sba-empty-icon { font-size:44px; margin-bottom:12px; }
+                                    .sba-empty h3 { margin:0 0 6px; color:#1e293b; font-size:18px; }
+                                    .sba-empty p { margin:0; font-size:14px; }
+                                    .sba-timeline { display:flex; align-items:flex-end; gap:10px; height:160px; padding-top:18px; overflow-x:auto; }
+                                    .sba-tl-bar { flex:1; min-width:34px; display:flex; flex-direction:column; align-items:center; height:100%; justify-content:flex-end; }
+                                    .sba-tl-fill { width:100%; max-width:46px; background:linear-gradient(180deg,#ec4899,#f472b6); border-radius:6px 6px 0 0; transition:height .3s ease; }
+                                    .sba-tl-count { font-size:12px; font-weight:600; color:#475569; margin-bottom:4px; }
+                                    .sba-tl-label { font-size:11px; color:#94a3b8; margin-top:8px; white-space:nowrap; }
+                                    .sba-bar-row { display:flex; align-items:center; gap:12px; margin:8px 0; }
+                                    .sba-bar-label { width:34%; font-size:13px; color:#334155; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+                                    .sba-bar-track { flex:1; height:10px; background:#f1f5f9; border-radius:999px; overflow:hidden; }
+                                    .sba-bar-fill { height:100%; background:linear-gradient(90deg,#ec4899,#f472b6); border-radius:999px; transition:width .3s ease; }
+                                    .sba-bar-val { width:92px; text-align:right; font-size:12px; color:#64748b; font-variant-numeric:tabular-nums; }
+                                    .sba-mean { display:flex; align-items:baseline; gap:8px; margin-bottom:14px; }
+                                    .sba-mean-num { font-size:32px; font-weight:700; color:#0f172a; }
+                                    .sba-mean-lbl { font-size:12px; color:#94a3b8; text-transform:uppercase; letter-spacing:.05em; }
+                                    .sba-q-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(340px,1fr)); gap:18px; }
+                                    .sba-q-head { display:flex; align-items:center; gap:10px; margin-bottom:14px; }
+                                    .sba-q-num { background:#fce7f3; color:#be185d; font-size:11px; font-weight:700; padding:3px 8px; border-radius:6px; }
+                                    .sba-q-title { flex:1; font-size:14px; font-weight:600; color:#1e293b; }
+                                    .sba-q-count { font-size:12px; color:#94a3b8; }
+                                    .sba-samples { display:flex; flex-direction:column; gap:8px; }
+                                    .sba-sample { background:#f8fafc; border-left:3px solid #f472b6; padding:8px 12px; border-radius:6px; font-size:13px; color:#475569; font-style:italic; }
+                                    .sba-ai-head { font-size:15px; font-weight:600; color:#1e293b; margin-bottom:12px; display:flex; align-items:center; gap:8px; }
+                                    .sba-ai-sub { font-size:12px; color:#94a3b8; font-weight:400; }
+                                    .sba-ai-btn { background:#ec4899; color:#fff; border:none; padding:10px 18px; border-radius:8px; font-size:14px; font-weight:500; cursor:pointer; transition:background .2s; }
+                                    .sba-ai-btn:hover { background:#db2777; }
+                                    .sba-ai-btn-sm { margin-top:12px; padding:7px 14px; font-size:13px; background:#fff; color:#be185d; border:1px solid #fbcfe8; }
+                                    .sba-ai-btn-sm:hover { background:#fdf2f8; }
+                                    .sba-sentiment { display:inline-block; padding:4px 12px; border-radius:999px; font-size:12px; font-weight:600; text-transform:capitalize; }
+                                    .sba-sent-positive { background:#dcfce7; color:#15803d; }
+                                    .sba-sent-neutral { background:#f1f5f9; color:#475569; }
+                                    .sba-sent-negative { background:#fee2e2; color:#b91c1c; }
+                                    .sba-ai-summary { margin:12px 0; font-size:14px; line-height:1.6; color:#334155; }
+                                    .sba-chips { display:flex; flex-wrap:wrap; gap:8px; }
+                                    .sba-chip { background:#f3e8ff; color:#7c3aed; font-size:12px; padding:4px 10px; border-radius:999px; }
+                                    .sba-loading { display:flex; align-items:center; gap:10px; color:#64748b; font-size:14px; padding:24px; }
+                                    .sba-spinner { width:18px; height:18px; border:2px solid #e2e8f0; border-top-color:#ec4899; border-radius:50%; animation:spin 1s linear infinite; }
+                                    .sba-error { color:#b91c1c; font-size:13px; }
+                                    .sba-toolbar { display:flex; justify-content:flex-end; gap:10px; margin-bottom:-10px; }
+                                    .sba-export-btn { display:inline-flex; align-items:center; gap:7px; background:#fff; color:#334155; border:1px solid #e2e8f0; padding:8px 14px; border-radius:8px; font-size:13px; font-weight:500; cursor:pointer; transition:border-color .15s, color .15s, background .15s; }
+                                    .sba-export-btn:hover { border-color:#ec4899; color:#be185d; background:#fdf2f8; }
+                                    .sba-export-btn svg { width:15px; height:15px; }
+                                    .sba-filterbar { display:flex; flex-wrap:wrap; align-items:center; gap:12px; justify-content:space-between; }
+                                    .sba-range-btns { display:flex; flex-wrap:wrap; gap:6px; }
+                                    .sba-range-btn { background:#fff; border:1px solid #e2e8f0; color:#475569; padding:6px 12px; border-radius:999px; font-size:13px; cursor:pointer; transition:border-color .15s, color .15s, background .15s; }
+                                    .sba-range-btn:hover { border-color:#ec4899; color:#be185d; }
+                                    .sba-range-btn.active { background:#ec4899; border-color:#ec4899; color:#fff; }
+                                    .sba-custom-range { display:flex; align-items:center; gap:8px; }
+                                    .sba-date-input { border:1px solid #e2e8f0; border-radius:8px; padding:6px 10px; font-size:13px; }
+                                    .sba-empty-banner { background:#fff7ed; border:1px solid #fed7aa; color:#9a3412; padding:12px 16px; border-radius:10px; font-size:14px; }
+                                    .sba-ask-row { display:flex; gap:8px; }
+                                    .sba-ask-input { flex:1; border:1px solid #e2e8f0; border-radius:8px; padding:10px 12px; font-size:14px; }
+                                    .sba-ask-chip { cursor:pointer; }
+                                    .sba-ask-chip:hover { background:#fbcfe8; }
+                                    .sba-ask-result { margin-top:12px; font-size:14px; line-height:1.6; color:#334155; background:#f8fafc; border-radius:8px; padding:12px 14px; }
+                                    .sba-pager { display:flex; align-items:center; justify-content:center; gap:14px; margin-top:18px; }
+                                    .sba-pager-btn { background:#fff; border:1px solid #e2e8f0; color:#475569; padding:7px 14px; border-radius:8px; font-size:13px; cursor:pointer; }
+                                    .sba-pager-btn:hover:not([disabled]) { border-color:#ec4899; color:#be185d; }
+                                    .sba-pager-btn[disabled] { opacity:.4; cursor:default; }
+                                    .sba-pager-info { font-size:13px; color:#64748b; }
+                                </style>
+                                <div class="sba-dashboard" id="sba-dashboard">
+                                    <!-- populated by sbRenderAnalyticsDashboard() -->
                                 </div>
                             </div>
 
@@ -6948,6 +7209,9 @@
                                 </button>
                                 <button class="sb-floating-action" onclick="sbAddQuestion('calendar')" title="Calendar">
                                     <svg class="sb-icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                                </button>
+                                <button class="sb-floating-action" onclick="sbAddQuestion('engage')" title="AI Conversation (Engage)">
+                                    <svg class="sb-icon" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
                                 </button>
                             </div>
 
@@ -7027,6 +7291,14 @@
                                     <div class="sb-settings-section">
                                         <h3 class="sb-settings-section-title">Landing Page Message</h3>
                                         <textarea id="sb-landing-content" class="sb-landing-textarea"></textarea>
+                                    </div>
+
+                                    <!-- Survey Logo -->
+                                    <div class="sb-settings-section">
+                                        <h3 class="sb-settings-section-title">Survey Logo</h3>
+                                        <p style="font-size:0.85rem;color:#666;margin-bottom:0.5rem;">Shown to participants at the top of the survey. PNG or JPG, up to 2MB.</p>
+                                        <input type="file" id="sb-survey-logo-input" accept="image/*" style="display:none;" onchange="sbHandleLogoUpload(event)">
+                                        <div id="sb-survey-logo-preview"></div>
                                     </div>
 
                                     <!-- Thank You -->
@@ -7461,6 +7733,8 @@
 <script src="assets/js/database.js"></script>
 <!-- Chart.js for interactive charts -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- SheetJS for parsing imported Excel (.xlsx) response files -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="assets/js/analytics-dashboard.js"></script>
 <script src="assets/js/auth-wizard.js"></script>
 <script src="assets/js/app.js?v=20250908-2125"></script>
@@ -13721,7 +13995,8 @@ const sbQuestionTypeLabels = {
     single: 'Multiple Choice',
     multi: 'Checkboxes',
     text: 'Paragraph',
-    calendar: 'Calendar'
+    calendar: 'Calendar',
+    engage: 'AI Conversation'
 };
 
 let sbSurveys = JSON.parse(localStorage.getItem('sbSurveys') || '[]');
@@ -13765,6 +14040,7 @@ function sbCreateDefaultSurvey() {
         endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
         landingPageContent: 'Thank you for taking the time to complete this survey. Your feedback is valuable to us.',
         thankYouContent: 'Your response has been recorded. Thank you for your feedback!',
+        surveyLogo: '',
         pages: [{ id: sbGenerateShortCode(), title: 'Page 1', instructions: '', questions: [], logic: [] }],
         createdAt: new Date().toISOString()
     };
@@ -13784,6 +14060,14 @@ function sbCreateDefaultQuestion(type) {
     if (type === 'rating') {
         question.ratingScale = 5;
         question.ratingLabels = sbGetDefaultRatingLabels(5);
+    }
+
+    // Initialize Engage (AI conversation) settings
+    if (type === 'engage') {
+        question.engageTopics = [];
+        question.engageGoal = '';
+        question.engageIntro = '';
+        question.engageMaxExchanges = 5;
     }
 
     return question;
@@ -13879,10 +14163,10 @@ function openChatEditor(chatId = null) {
         // New chat - reset form
         document.getElementById('chat-editor-name').value = '';
         document.getElementById('chat-setup-name').value = '';
-        document.getElementById('chat-setup-welcome').value = 'Hi! Thanks for taking the time to share your feedback with us. Please feel free to tell us about your experience or any suggestions you might have.';
-        // Reset dropdown to default
+        document.getElementById('chat-setup-welcome').value = '';
+        // Reset dropdown to unselected — user must actively choose an access type
         const accessDropdown = document.getElementById('chat-access-type');
-        if (accessDropdown) accessDropdown.value = 'open';
+        if (accessDropdown) accessDropdown.value = '';
         // Reset notification dropdown to default
         const notifDropdown = document.getElementById('chat-notification-frequency');
         if (notifDropdown) notifDropdown.value = '';
@@ -14053,8 +14337,9 @@ function showChatEditorTab(tabName) {
     }
 
     // Load analytics when Analytics tab is clicked
-    if (tabName === 'analytics' && window.currentEditingChatId) {
-        loadChatAnalytics(window.currentEditingChatId);
+    if (tabName === 'analytics') {
+        listenLoadScaffold(window.currentEditingChatId || null);
+        if (window.currentEditingChatId) loadChatAnalytics(window.currentEditingChatId);
     }
 
     // Getting Started: tick "Go to Participants" when Participants tab is opened
@@ -14071,6 +14356,106 @@ function showChatEditorTab(tabName) {
 let claudeAnalysisResult = null;
 // Timestamp of last analysis
 let claudeAnalysisTimestamp = null;
+
+// ---- Listen analytics scaffold: date filter + changes-over-time trend ----
+// (always visible, built from raw chat_responses timestamps — no AI needed)
+let listenAnalyticsRange = { preset: 'all', from: null, to: null };
+let listenAnalyticsResponses = [];
+
+async function listenLoadScaffold(chatId) {
+    const fb = document.getElementById('listen-filterbar');
+    if (fb) fb.innerHTML = listenRenderDateFilter();
+    listenAnalyticsResponses = [];
+    if (chatId) {
+        try {
+            const { data, error } = await window.supabaseClient
+                .from('chat_responses')
+                .select('submitted_at')
+                .eq('chat_id', chatId);
+            listenAnalyticsResponses = error ? [] : (data || []);
+        } catch (e) {
+            listenAnalyticsResponses = [];
+        }
+    }
+    listenRenderTrend();
+}
+
+function listenGetFilteredTimestamps() {
+    const r = listenAnalyticsRange;
+    let fromTs = null, toTs = null;
+    if (r.preset === '7' || r.preset === '30' || r.preset === '90') {
+        fromTs = Date.now() - parseInt(r.preset) * 86400000;
+    } else if (r.preset === 'custom') {
+        if (r.from) fromTs = new Date(r.from + 'T00:00:00').getTime();
+        if (r.to) toTs = new Date(r.to + 'T23:59:59').getTime();
+    }
+    return (listenAnalyticsResponses || []).filter(x => {
+        const ts = x.submitted_at;
+        if (!ts) return false;
+        const t = new Date(ts).getTime();
+        if (isNaN(t)) return false;
+        if (fromTs !== null && t < fromTs) return false;
+        if (toTs !== null && t > toTs) return false;
+        return true;
+    });
+}
+
+function listenRenderDateFilter() {
+    const r = listenAnalyticsRange;
+    const presets = [['all', 'All time'], ['7', 'Last 7 days'], ['30', 'Last 30 days'], ['90', 'Last 90 days']];
+    const btns = presets.map(([v, l]) =>
+        `<button class="sba-range-btn ${r.preset === v ? 'active' : ''}" onclick="listenSetRange('${v}')">${l}</button>`).join('');
+    return `<div>
+        <div class="sba-range-btns">
+            ${btns}
+            <button class="sba-range-btn ${r.preset === 'custom' ? 'active' : ''}" onclick="listenSetRange('custom')">Custom</button>
+        </div>
+        <div class="sba-custom-range" style="margin-top:10px;${r.preset === 'custom' ? '' : 'display:none;'}">
+            <input type="date" class="sba-date-input" value="${r.from || ''}" onchange="listenSetCustom('from', this.value)">
+            <span class="sba-muted">to</span>
+            <input type="date" class="sba-date-input" value="${r.to || ''}" onchange="listenSetCustom('to', this.value)">
+        </div>
+    </div>`;
+}
+
+function listenSetRange(p) {
+    listenAnalyticsRange.preset = p;
+    const fb = document.getElementById('listen-filterbar');
+    if (fb) fb.innerHTML = listenRenderDateFilter();
+    listenRenderTrend();
+}
+
+function listenSetCustom(which, val) {
+    listenAnalyticsRange.preset = 'custom';
+    listenAnalyticsRange[which] = val || null;
+    const fb = document.getElementById('listen-filterbar');
+    if (fb) fb.innerHTML = listenRenderDateFilter();
+    listenRenderTrend();
+}
+
+function listenRenderTrend() {
+    const el = document.getElementById('listen-trend');
+    if (!el) return;
+    const counts = {};
+    listenGetFilteredTimestamps().forEach(x => {
+        const d = new Date(x.submitted_at);
+        if (isNaN(d.getTime())) return;
+        const k = d.toISOString().slice(0, 10);
+        counts[k] = (counts[k] || 0) + 1;
+    });
+    const dates = Object.keys(counts).sort();
+    if (!dates.length) {
+        el.innerHTML = '<p class="sba-muted">No responses in this period yet.</p>';
+        return;
+    }
+    const max = Math.max(...dates.map(d => counts[d]));
+    el.innerHTML = '<div class="sba-timeline">' + dates.slice(-30).map(d => {
+        const c = counts[d];
+        const h = Math.round((c / max) * 100);
+        const label = new Date(d).toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+        return `<div class="sba-tl-bar" title="${label}: ${c}"><div class="sba-tl-count">${c}</div><div class="sba-tl-fill" style="height:${Math.max(h, 4)}%"></div><div class="sba-tl-label">${label}</div></div>`;
+    }).join('') + '</div>';
+}
 
 /**
  * Load analytics for the current chat (NotebookLM redesign)
@@ -16255,6 +16640,7 @@ function sbOpenBuilder() {
 
     // Ensure responses panel is hidden and questions tab is active
     document.getElementById('sb-responses-panel').classList.add('sb-hidden');
+    document.getElementById('sb-analytics-panel').classList.add('sb-hidden');
     document.querySelector('.sb-builder-content').style.display = 'flex';
     document.getElementById('sb-floating-actions').classList.remove('sb-hidden');
     document.querySelector('.sb-save-bar').style.display = 'flex';
@@ -16277,6 +16663,9 @@ function sbGoToDashboard() {
 
 // Store current responses for export
 let sbCurrentResponses = [];
+let sbAnalyticsRange = { preset: 'all', from: null, to: null };
+let sbAnalyticsPage = 1;
+const SB_ANALYTICS_PAGE_SIZE = 6;
 
 // Show Questions Tab (default view)
 function sbShowQuestionsTab() {
@@ -16291,6 +16680,7 @@ function sbShowQuestionsTab() {
     document.getElementById('sb-floating-actions').classList.remove('sb-hidden');
     document.querySelector('.sb-save-bar').style.display = 'flex';
     document.getElementById('sb-responses-panel').classList.add('sb-hidden');
+    document.getElementById('sb-analytics-panel').classList.add('sb-hidden');
 }
 
 // Show Responses Tab
@@ -16311,6 +16701,7 @@ async function sbShowResponsesTab() {
     document.getElementById('sb-floating-actions').classList.add('sb-hidden');
     document.querySelector('.sb-save-bar').style.display = 'none';
     document.getElementById('sb-responses-panel').classList.remove('sb-hidden');
+    document.getElementById('sb-analytics-panel').classList.add('sb-hidden');
 
     // Fetch and display responses
     try {
@@ -16333,6 +16724,562 @@ async function sbShowResponsesTab() {
         sbCurrentResponses = [];
         sbRenderResponsesPanel([]);
     }
+}
+
+// Show Analytics Tab (top-level dashboard)
+async function sbShowAnalyticsTab() {
+    if (!sbCurrentSurvey || !sbCurrentSurvey.id) {
+        alert('Please save your survey first to view analytics.');
+        return;
+    }
+
+    // Update tab active states
+    document.querySelectorAll('.sb-builder-tab').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    document.querySelector('.sb-builder-tab[data-tab="analytics"]').classList.add('active');
+
+    // Hide questions content and responses panel, show analytics panel
+    document.querySelector('.sb-builder-content').style.display = 'none';
+    document.getElementById('sb-floating-actions').classList.add('sb-hidden');
+    document.querySelector('.sb-save-bar').style.display = 'none';
+    document.getElementById('sb-responses-panel').classList.add('sb-hidden');
+    document.getElementById('sb-analytics-panel').classList.remove('sb-hidden');
+
+    // Loading state
+    const dash = document.getElementById('sba-dashboard');
+    if (dash) dash.innerHTML = '<div class="sba-loading"><div class="sba-spinner"></div> Loading analytics…</div>';
+
+    // Fetch responses for this survey
+    try {
+        const { data: responses, error } = await window.supabaseClient
+            .from('survey_responses')
+            .select('*')
+            .eq('survey_id', sbCurrentSurvey.id)
+            .order('completed_at', { ascending: false });
+
+        if (error) {
+            console.error('Analytics fetch error:', error);
+            sbCurrentResponses = [];
+        } else {
+            sbCurrentResponses = responses || [];
+        }
+    } catch (err) {
+        console.error('Analytics fetch failed:', err);
+        sbCurrentResponses = [];
+    }
+
+    // Reset filter + pagination for a fresh view
+    sbAnalyticsRange = { preset: 'all', from: null, to: null };
+    sbAnalyticsPage = 1;
+    sbRenderAnalyticsDashboard();
+}
+
+// Escape HTML in user-generated response text
+function sbaEsc(s) {
+    return String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+}
+
+// A single horizontal bar row (label · bar · count/percent)
+function sbaBarRow(label, count, total, max) {
+    const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+    const w = max > 0 ? Math.round((count / max) * 100) : 0;
+    const lbl = sbaEsc(String(label));
+    return `<div class="sba-bar-row">
+        <div class="sba-bar-label" title="${lbl}">${lbl}</div>
+        <div class="sba-bar-track"><div class="sba-bar-fill" style="width:${Math.max(w, 2)}%"></div></div>
+        <div class="sba-bar-val">${count} · ${pct}%</div>
+    </div>`;
+}
+
+// Build the full analytics dashboard. The structure (date filter, trend,
+// summary, Ask-AI, breakdown) is ALWAYS shown — sections fill in with data.
+function sbRenderAnalyticsDashboard() {
+    const dash = document.getElementById('sba-dashboard');
+    if (!dash) return;
+
+    const responses = sbGetFilteredResponses();
+    const totalAll = (sbCurrentResponses || []).length;
+
+    const dlIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>';
+
+    const emptyBanner = totalAll === 0
+        ? `<div class="sba-empty-banner">📊 No responses yet — analytics will populate here as people complete this survey.</div>`
+        : '';
+
+    dash.innerHTML = `
+        <div class="sba-filterbar">
+            ${sbRenderDateFilter()}
+            <div class="sba-toolbar" style="margin-bottom:0;">
+                <button class="sba-export-btn" onclick="sbExportAnalyticsWord()" title="Export analytics as a Word document">${dlIcon} Export Word</button>
+                <button class="sba-export-btn" onclick="sbExportAnalyticsCSV()" title="Export analytics as CSV">${dlIcon} Export CSV</button>
+            </div>
+        </div>
+        ${emptyBanner}
+        <div>
+            <div class="sba-section-title">Changes over time</div>
+            <div class="sba-card">${sbRenderResponsesTimeline(responses)}</div>
+        </div>
+        <div>
+            <div class="sba-section-title">AI summary</div>
+            ${sbRenderAiSummarySection(responses)}
+        </div>
+        <div>
+            <div class="sba-section-title">Ask the AI about these responses</div>
+            ${sbRenderAskAiSection(responses)}
+        </div>
+        <div>
+            <div class="sba-section-title">Question breakdown</div>
+            <div id="sba-breakdown">${sbRenderQuestionBreakdownPaged(responses)}</div>
+        </div>`;
+}
+
+// ---- Date-range filter ----
+function sbGetFilteredResponses() {
+    const all = sbCurrentResponses || [];
+    const r = sbAnalyticsRange;
+    let fromTs = null, toTs = null;
+    if (r.preset === '7' || r.preset === '30' || r.preset === '90') {
+        fromTs = Date.now() - parseInt(r.preset) * 86400000;
+    } else if (r.preset === 'custom') {
+        if (r.from) fromTs = new Date(r.from + 'T00:00:00').getTime();
+        if (r.to) toTs = new Date(r.to + 'T23:59:59').getTime();
+    }
+    if (fromTs === null && toTs === null) return all;
+    return all.filter(resp => {
+        const ts = resp.completed_at || resp.created_at;
+        if (!ts) return false;
+        const t = new Date(ts).getTime();
+        if (isNaN(t)) return false;
+        if (fromTs !== null && t < fromTs) return false;
+        if (toTs !== null && t > toTs) return false;
+        return true;
+    });
+}
+
+function sbRenderDateFilter() {
+    const r = sbAnalyticsRange;
+    const presets = [['all', 'All time'], ['7', 'Last 7 days'], ['30', 'Last 30 days'], ['90', 'Last 90 days']];
+    const btns = presets.map(([val, label]) =>
+        `<button class="sba-range-btn ${r.preset === val ? 'active' : ''}" onclick="sbSetAnalyticsRange('${val}')">${label}</button>`).join('');
+    return `<div>
+        <div class="sba-range-btns">
+            ${btns}
+            <button class="sba-range-btn ${r.preset === 'custom' ? 'active' : ''}" onclick="sbSetAnalyticsRange('custom')">Custom</button>
+        </div>
+        <div class="sba-custom-range" style="margin-top:10px;${r.preset === 'custom' ? '' : 'display:none;'}">
+            <input type="date" class="sba-date-input" value="${r.from || ''}" onchange="sbSetAnalyticsCustom('from', this.value)">
+            <span class="sba-muted">to</span>
+            <input type="date" class="sba-date-input" value="${r.to || ''}" onchange="sbSetAnalyticsCustom('to', this.value)">
+        </div>
+    </div>`;
+}
+
+function sbSetAnalyticsRange(preset) {
+    sbAnalyticsRange.preset = preset;
+    sbAnalyticsPage = 1;
+    sbRenderAnalyticsDashboard();
+}
+
+function sbSetAnalyticsCustom(which, value) {
+    sbAnalyticsRange.preset = 'custom';
+    sbAnalyticsRange[which] = value || null;
+    sbAnalyticsPage = 1;
+    sbRenderAnalyticsDashboard();
+}
+
+// ---- Ask the AI about the data (reuses /api/ask-data) ----
+function sbRenderAskAiSection(responses) {
+    const hasText = sbCollectTextAnswers(responses).length > 0;
+    const chips = ['What are the most common themes?', 'Any urgent issues?', 'What would people change?'];
+    return `<div class="sba-card">
+        <div class="sba-ask-row">
+            <input type="text" id="sba-ask-input" class="sba-ask-input" placeholder="Ask a question about these responses…"
+                   onkeydown="if(event.key==='Enter'){event.preventDefault();sbAnalyticsAskAI();}">
+            <button class="sba-ai-btn" onclick="sbAnalyticsAskAI()">Ask</button>
+        </div>
+        <div class="sba-chips" style="margin-top:10px;">
+            ${chips.map(c => `<span class="sba-chip sba-ask-chip" onclick="sbAnalyticsAskChip(this)">${c}</span>`).join('')}
+        </div>
+        ${!hasText ? '<p class="sba-muted" style="margin-top:10px;">Works best once there are free-text answers to analyse.</p>' : ''}
+        <div id="sba-ask-answer"></div>
+    </div>`;
+}
+
+function sbAnalyticsAskChip(el) {
+    const inp = document.getElementById('sba-ask-input');
+    if (inp) { inp.value = el.textContent; sbAnalyticsAskAI(); }
+}
+
+async function sbAnalyticsAskAI() {
+    const inp = document.getElementById('sba-ask-input');
+    const ansEl = document.getElementById('sba-ask-answer');
+    if (!inp || !ansEl) return;
+    const question = inp.value.trim();
+    if (!question) return;
+    const responses = sbGetFilteredResponses();
+    const samples = sbCollectTextAnswers(responses).map(o => o.message).slice(0, 25);
+    ansEl.innerHTML = '<div class="sba-loading"><div class="sba-spinner"></div> Thinking…</div>';
+    try {
+        const res = await fetch('/api/ask-data', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ question, samples, response_count: responses.length })
+        });
+        if (!res.ok) throw new Error('AI service error (' + res.status + ')');
+        const d = await res.json();
+        if (d.error) throw new Error(d.error);
+        ansEl.innerHTML = `<div class="sba-ask-result">${sbaEsc(d.answer || '').replace(/\n/g, '<br>')}</div>`;
+    } catch (e) {
+        ansEl.innerHTML = `<p class="sba-error">Couldn't get an answer: ${sbaEsc(e.message)}</p>`;
+    }
+}
+
+// ---- Question breakdown (paginated) ----
+function sbRenderQuestionBreakdownPaged(responses) {
+    const questions = sbGetAllQuestions();
+    if (questions.length === 0) return '<p class="sba-muted">This survey has no questions yet.</p>';
+    const pageSize = SB_ANALYTICS_PAGE_SIZE;
+    const totalPages = Math.max(1, Math.ceil(questions.length / pageSize));
+    if (sbAnalyticsPage > totalPages) sbAnalyticsPage = totalPages;
+    if (sbAnalyticsPage < 1) sbAnalyticsPage = 1;
+    const start = (sbAnalyticsPage - 1) * pageSize;
+    const pageQs = questions.slice(start, start + pageSize);
+    const cards = pageQs.map((q, idx) => sbRenderOneQuestionCard(q, start + idx, responses)).join('');
+    return `<div class="sba-q-grid">${cards}</div>${sbRenderAnalyticsPager(totalPages)}`;
+}
+
+function sbRenderAnalyticsPager(totalPages) {
+    if (totalPages <= 1) return '';
+    return `<div class="sba-pager">
+        <button class="sba-pager-btn" ${sbAnalyticsPage <= 1 ? 'disabled' : ''} onclick="sbAnalyticsSetPage(${sbAnalyticsPage - 1})">‹ Prev</button>
+        <span class="sba-pager-info">Page ${sbAnalyticsPage} of ${totalPages}</span>
+        <button class="sba-pager-btn" ${sbAnalyticsPage >= totalPages ? 'disabled' : ''} onclick="sbAnalyticsSetPage(${sbAnalyticsPage + 1})">Next ›</button>
+    </div>`;
+}
+
+function sbAnalyticsSetPage(p) {
+    sbAnalyticsPage = p;
+    const el = document.getElementById('sba-breakdown');
+    if (el) el.innerHTML = sbRenderQuestionBreakdownPaged(sbGetFilteredResponses());
+}
+
+// Section 1: responses-over-time bar chart (grouped by day)
+function sbRenderResponsesTimeline(responses) {
+    const counts = {};
+    responses.forEach(r => {
+        const ts = r.completed_at || r.created_at;
+        if (!ts) return;
+        const d = new Date(ts);
+        if (isNaN(d.getTime())) return; // skip unparseable timestamps
+        const key = d.toISOString().slice(0, 10);
+        counts[key] = (counts[key] || 0) + 1;
+    });
+
+    const dates = Object.keys(counts).sort();
+    if (dates.length === 0) return '<p class="sba-muted">No dated responses yet.</p>';
+
+    const max = Math.max(...dates.map(d => counts[d]));
+    const bars = dates.slice(-30).map(d => {
+        const c = counts[d];
+        const h = Math.round((c / max) * 100);
+        const label = new Date(d).toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+        return `<div class="sba-tl-bar" title="${label}: ${c}">
+            <div class="sba-tl-count">${c}</div>
+            <div class="sba-tl-fill" style="height:${Math.max(h, 4)}%"></div>
+            <div class="sba-tl-label">${label}</div>
+        </div>`;
+    }).join('');
+
+    return `<div class="sba-timeline">${bars}</div>`;
+}
+
+// Section 3: per-question breakdown cards
+function sbRenderOneQuestionCard(q, i, responses) {
+        const answers = responses
+            .map(r => r.responses?.[q.id])
+            .filter(a => a !== undefined && a !== null && a !== '');
+        const title = q.text || q.title || `Question ${i + 1}`;
+        let body = '';
+
+        if (answers.length === 0) {
+            body = '<p class="sba-muted">No answers yet.</p>';
+        } else if (q.type === 'rating') {
+            const nums = answers.map(a => parseFloat(a)).filter(a => !isNaN(a));
+            const mean = nums.length ? (nums.reduce((a, b) => a + b, 0) / nums.length).toFixed(2) : 'N/A';
+            const dist = {};
+            nums.forEach(a => dist[a] = (dist[a] || 0) + 1);
+            const keys = Object.keys(dist).sort((a, b) => parseFloat(a) - parseFloat(b));
+            const max = Math.max(1, ...keys.map(k => dist[k]));
+            body = `<div class="sba-mean"><span class="sba-mean-num">${mean}</span><span class="sba-mean-lbl">mean average</span></div>`
+                + keys.map(k => sbaBarRow(k, dist[k], nums.length, max)).join('');
+        } else if (q.type === 'single' || q.type === 'multi') {
+            const dist = {};
+            answers.forEach(a => { (Array.isArray(a) ? a : [a]).forEach(o => dist[o] = (dist[o] || 0) + 1); });
+            const opts = (q.options && q.options.length) ? q.options : Object.keys(dist);
+            const max = Math.max(1, ...opts.map(o => dist[o] || 0));
+            body = opts.map(o => sbaBarRow(o, dist[o] || 0, answers.length, max)).join('');
+        } else if (q.type === 'engage') {
+            const firstUserMsgs = answers
+                .map(a => Array.isArray(a) ? (a.find(m => m && m.role === 'user') || {}).content : null)
+                .filter(Boolean);
+            body = `<p class="sba-muted" style="margin-bottom:8px;">${answers.length} conversation${answers.length !== 1 ? 's' : ''}</p>`
+                + `<div class="sba-samples">`
+                + firstUserMsgs.slice(0, 5).map(s => `<div class="sba-sample">“${sbaEsc(s)}”</div>`).join('')
+                + (firstUserMsgs.length > 5 ? `<div class="sba-muted">+ ${firstUserMsgs.length - 5} more</div>` : '')
+                + `</div>`;
+        } else {
+            body = `<div class="sba-samples">`
+                + answers.slice(0, 5).map(a => `<div class="sba-sample">“${sbaEsc(typeof a === 'string' ? a : JSON.stringify(a))}”</div>`).join('')
+                + (answers.length > 5 ? `<div class="sba-muted">+ ${answers.length - 5} more</div>` : '')
+                + `</div>`;
+        }
+
+        return `<div class="sba-card">
+            <div class="sba-q-head">
+                <span class="sba-q-num">Q${i + 1}</span>
+                <span class="sba-q-title">${sbaEsc(title)}</span>
+                <span class="sba-q-count">${answers.length}</span>
+            </div>
+            <div>${body}</div>
+        </div>`;
+}
+
+// Section 2: AI summary of free-text answers (button-triggered)
+function sbRenderAiSummarySection(responses) {
+    const textCount = sbCollectTextAnswers(responses).length;
+    if (textCount === 0) {
+        return `<div class="sba-card"><div class="sba-ai-head">✨ AI summary</div><p class="sba-muted">No free-text answers to summarise yet.</p></div>`;
+    }
+    return `<div class="sba-card">
+        <div class="sba-ai-head">✨ AI summary <span class="sba-ai-sub">${textCount} text answer${textCount !== 1 ? 's' : ''}</span></div>
+        <div id="sba-ai-body">
+            <p class="sba-muted" style="margin-bottom:14px;">Summarise the free-text answers into overall sentiment, a short summary, and key themes.</p>
+            <button class="sba-ai-btn" onclick="sbGenerateAiSummary()">Generate AI summary</button>
+        </div>
+    </div>`;
+}
+
+// Collect all non-empty free-text answers as [{message}]
+function sbCollectTextAnswers(responses) {
+    const textTypes = ['text', 'short-text', 'long-text', 'textarea'];
+    const textQs = sbGetAllQuestions().filter(q => textTypes.includes(q.type));
+    const out = [];
+    responses.forEach(r => textQs.forEach(q => {
+        const a = r.responses?.[q.id];
+        if (a && typeof a === 'string' && a.trim()) out.push({ message: a.trim() });
+    }));
+    return out;
+}
+
+// Call /api/analyse and render the result
+async function sbGenerateAiSummary() {
+    const body = document.getElementById('sba-ai-body');
+    if (!body) return;
+
+    const messages = sbCollectTextAnswers(sbGetFilteredResponses());
+    if (messages.length === 0) {
+        body.innerHTML = '<p class="sba-muted">No free-text answers to summarise.</p>';
+        return;
+    }
+
+    body.innerHTML = '<div class="sba-loading"><div class="sba-spinner"></div> Analysing responses…</div>';
+
+    try {
+        const res = await fetch('/api/analyse', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ responses: messages })
+        });
+        if (!res.ok) throw new Error('AI service error (' + res.status + ')');
+        const d = await res.json();
+
+        const sentiment = (d.overall_sentiment || 'neutral').toLowerCase();
+        const sentClass = ['positive', 'negative'].includes(sentiment) ? sentiment : 'neutral';
+        const themes = (d.key_themes || []).map(t => `<span class="sba-chip">${sbaEsc(t)}</span>`).join('');
+
+        body.innerHTML = `
+            <div class="sba-ai-result">
+                <span class="sba-sentiment sba-sent-${sentClass}">${sbaEsc(sentiment)}</span>
+                <p class="sba-ai-summary">${sbaEsc(d.summary || '')}</p>
+                ${themes ? `<div class="sba-chips">${themes}</div>` : ''}
+            </div>
+            <button class="sba-ai-btn sba-ai-btn-sm" onclick="sbGenerateAiSummary()">Regenerate</button>`;
+    } catch (e) {
+        body.innerHTML = `<p class="sba-error">Couldn't generate summary: ${sbaEsc(e.message)}</p>
+            <button class="sba-ai-btn sba-ai-btn-sm" onclick="sbGenerateAiSummary()">Try again</button>`;
+    }
+}
+
+// ---- Analytics export (Word + CSV) ----
+
+// Compute a flat data structure both exporters share
+function sbComputeAnalyticsData(responses) {
+    const questions = sbGetAllQuestions();
+
+    const counts = {};
+    responses.forEach(r => {
+        const ts = r.completed_at || r.created_at;
+        if (!ts) return;
+        const d = new Date(ts);
+        if (isNaN(d.getTime())) return;
+        const key = d.toISOString().slice(0, 10);
+        counts[key] = (counts[key] || 0) + 1;
+    });
+    const timeline = Object.keys(counts).sort().map(date => ({ date, count: counts[date] }));
+
+    const q = questions.map((question, i) => {
+        const answers = responses
+            .map(r => r.responses?.[question.id])
+            .filter(a => a !== undefined && a !== null && a !== '');
+        const out = {
+            num: i + 1,
+            title: question.text || question.title || `Question ${i + 1}`,
+            type: question.type || 'text',
+            responseCount: answers.length
+        };
+        if (question.type === 'rating') {
+            const nums = answers.map(a => parseFloat(a)).filter(a => !isNaN(a));
+            out.mean = nums.length ? (nums.reduce((a, b) => a + b, 0) / nums.length).toFixed(2) : 'N/A';
+            const dist = {};
+            nums.forEach(a => dist[a] = (dist[a] || 0) + 1);
+            out.distribution = Object.keys(dist).sort((a, b) => parseFloat(a) - parseFloat(b))
+                .map(k => ({ label: k, count: dist[k], pct: nums.length ? Math.round(dist[k] / nums.length * 100) : 0 }));
+        } else if (question.type === 'single' || question.type === 'multi') {
+            const dist = {};
+            answers.forEach(a => { (Array.isArray(a) ? a : [a]).forEach(o => dist[o] = (dist[o] || 0) + 1); });
+            const opts = (question.options && question.options.length) ? question.options : Object.keys(dist);
+            out.distribution = opts.map(o => ({ label: o, count: dist[o] || 0, pct: answers.length ? Math.round((dist[o] || 0) / answers.length * 100) : 0 }));
+        } else if (question.type === 'engage') {
+            out.samples = answers
+                .map(a => Array.isArray(a) ? (a.find(m => m && m.role === 'user') || {}).content : null)
+                .filter(Boolean);
+        } else {
+            out.samples = answers.map(a => typeof a === 'string' ? a : JSON.stringify(a));
+        }
+        return out;
+    });
+
+    return { total: responses.length, timeline, questions: q };
+}
+
+// Read the AI summary from the page if one has been generated
+function sbGetAiSummaryForExport() {
+    const result = document.querySelector('#sba-ai-body .sba-ai-result');
+    if (!result) return null;
+    return {
+        sentiment: result.querySelector('.sba-sentiment')?.textContent?.trim() || '',
+        summary: result.querySelector('.sba-ai-summary')?.textContent?.trim() || '',
+        themes: [...result.querySelectorAll('.sba-chip')].map(c => c.textContent.trim())
+    };
+}
+
+function sbaSurveyName() {
+    return (sbCurrentSurvey && (sbCurrentSurvey.title || sbCurrentSurvey.name)) || 'Survey';
+}
+
+function sbaFileName(ext) {
+    const base = sbaSurveyName().replace(/[^a-z0-9]+/gi, '-').replace(/^-+|-+$/g, '').toLowerCase() || 'survey';
+    return base + '-analytics.' + ext;
+}
+
+function sbaDownloadFile(filename, content, mime) {
+    const blob = new Blob([content], { type: mime });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+// Export analytics as CSV
+function sbExportAnalyticsCSV() {
+    const exportResponses = sbGetFilteredResponses();
+    if (!exportResponses || exportResponses.length === 0) { alert('No analytics to export yet.'); return; }
+    const data = sbComputeAnalyticsData(exportResponses);
+    const esc = v => {
+        const s = String(v == null ? '' : v);
+        return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+    };
+    const lines = [];
+    lines.push(esc(sbaSurveyName() + ' — Analytics'));
+    lines.push('Total responses,' + data.total);
+    lines.push('');
+    lines.push('Responses over time');
+    lines.push('Date,Responses');
+    data.timeline.forEach(t => lines.push(esc(t.date) + ',' + t.count));
+    lines.push('');
+    lines.push('Question breakdown');
+    data.questions.forEach(q => {
+        lines.push('');
+        lines.push(esc('Q' + q.num + ': ' + q.title) + ' (' + q.type + ')');
+        lines.push('Responses,' + q.responseCount);
+        if (q.mean !== undefined) lines.push('Mean,' + q.mean);
+        if (q.distribution) {
+            lines.push('Option,Count,Percent');
+            q.distribution.forEach(d => lines.push(esc(d.label) + ',' + d.count + ',' + d.pct + '%'));
+        }
+        if (q.samples) {
+            lines.push('Responses');
+            q.samples.forEach(s => lines.push(esc(s)));
+        }
+    });
+    const ai = sbGetAiSummaryForExport();
+    if (ai) {
+        lines.push('');
+        lines.push('AI summary');
+        lines.push('Sentiment,' + esc(ai.sentiment));
+        lines.push('Summary,' + esc(ai.summary));
+        if (ai.themes.length) lines.push('Key themes,' + esc(ai.themes.join('; ')));
+    }
+    sbaDownloadFile(sbaFileName('csv'), '﻿' + lines.join('\r\n'), 'text/csv;charset=utf-8');
+}
+
+// Export analytics as a Word document (HTML-as-.doc, opens natively in Word)
+function sbExportAnalyticsWord() {
+    const exportResponses = sbGetFilteredResponses();
+    if (!exportResponses || exportResponses.length === 0) { alert('No analytics to export yet.'); return; }
+    const data = sbComputeAnalyticsData(exportResponses);
+    const esc = sbaEsc;
+    let b = '';
+    b += `<h1>${esc(sbaSurveyName())} — Analytics</h1>`;
+    b += `<p><strong>Total responses:</strong> ${data.total}</p>`;
+
+    b += `<h2>Responses over time</h2>`;
+    b += `<table border="1" cellspacing="0" cellpadding="6"><tr><th align="left">Date</th><th align="left">Responses</th></tr>`;
+    data.timeline.forEach(t => { b += `<tr><td>${esc(t.date)}</td><td>${t.count}</td></tr>`; });
+    b += `</table>`;
+
+    b += `<h2>Question breakdown</h2>`;
+    data.questions.forEach(q => {
+        b += `<h3>Q${q.num}: ${esc(q.title)}</h3>`;
+        b += `<p><em>${esc(q.type)} — ${q.responseCount} responses</em></p>`;
+        if (q.mean !== undefined) b += `<p><strong>Mean average:</strong> ${esc(q.mean)}</p>`;
+        if (q.distribution) {
+            b += `<table border="1" cellspacing="0" cellpadding="6"><tr><th align="left">Option</th><th align="left">Count</th><th align="left">Percent</th></tr>`;
+            q.distribution.forEach(d => { b += `<tr><td>${esc(d.label)}</td><td>${d.count}</td><td>${d.pct}%</td></tr>`; });
+            b += `</table>`;
+        }
+        if (q.samples) {
+            b += `<ul>`;
+            q.samples.forEach(s => { b += `<li>${esc(s)}</li>`; });
+            b += `</ul>`;
+        }
+    });
+
+    const ai = sbGetAiSummaryForExport();
+    if (ai) {
+        b += `<h2>AI summary</h2>`;
+        b += `<p><strong>Sentiment:</strong> ${esc(ai.sentiment)}</p>`;
+        b += `<p>${esc(ai.summary)}</p>`;
+        if (ai.themes.length) b += `<p><strong>Key themes:</strong> ${esc(ai.themes.join(', '))}</p>`;
+    }
+
+    const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>${esc(sbaSurveyName())} Analytics</title></head><body style="font-family:Calibri,Arial,sans-serif;">${b}</body></html>`;
+    sbaDownloadFile(sbaFileName('doc'), '﻿' + html, 'application/msword');
 }
 
 // Language name lookup
@@ -17018,6 +17965,23 @@ function sbRenderQuestionCard(question, qIndex) {
         </div>
     ` : '';
 
+    const engageHtml = question.type === 'engage' ? `
+        <div class="sb-engage-config" style="margin-top:16px;padding:16px;background:#fdf2f8;border:1px solid #fbcfe8;border-radius:10px;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;color:#be185d;font-size:13px;font-weight:600;">
+                <svg style="width:16px;height:16px;flex-shrink:0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+                The AI will chat with the participant to cover the topics below.
+            </div>
+            <label style="display:block;font-size:12px;color:#64748b;margin-bottom:4px;">Topics to cover (comma separated)</label>
+            <input type="text" class="sb-input" value="${sbaEsc((question.engageTopics || []).join(', '))}" placeholder="Work-life balance, Management support, Career development" oninput="sbUpdateEngageTopics(${qIndex}, this.value)" style="width:100%;margin-bottom:12px;">
+            <label style="display:block;font-size:12px;color:#64748b;margin-bottom:4px;">Goal (optional)</label>
+            <input type="text" class="sb-input" value="${sbaEsc(question.engageGoal || '')}" placeholder="Understand how supported people feel by their manager" oninput="sbUpdateEngageField(${qIndex}, 'engageGoal', this.value)" style="width:100%;margin-bottom:12px;">
+            <label style="display:block;font-size:12px;color:#64748b;margin-bottom:4px;">Opening message (optional — leave blank to let the AI greet)</label>
+            <input type="text" class="sb-input" value="${sbaEsc(question.engageIntro || '')}" placeholder="Hi! I'd love to hear about your experience…" oninput="sbUpdateEngageField(${qIndex}, 'engageIntro', this.value)" style="width:100%;margin-bottom:12px;">
+            <label style="display:block;font-size:12px;color:#64748b;margin-bottom:4px;">Max participant replies before wrapping up</label>
+            <input type="number" min="1" max="15" class="sb-input" value="${question.engageMaxExchanges || 5}" onchange="sbUpdateEngageField(${qIndex}, 'engageMaxExchanges', Math.max(1, Math.min(15, parseInt(this.value) || 5)))" style="width:120px;">
+        </div>
+    ` : '';
+
     return `
         <div class="sb-card sb-question-card"
              id="sb-question-${qIndex}"
@@ -17058,6 +18022,7 @@ function sbRenderQuestionCard(question, qIndex) {
                 ${ratingHtml}
                 ${textHtml}
                 ${calendarHtml}
+                ${engageHtml}
             </div>
             <div class="sb-question-footer">
                 <button class="sb-btn-icon" onclick="sbDuplicateQuestion(${qIndex})" title="Duplicate">
@@ -17102,7 +18067,8 @@ function sbGetQuestionTypeIcon(type) {
         single: '<svg class="sb-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle></svg>',
         multi: '<svg class="sb-icon" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>',
         text: '<svg class="sb-icon" viewBox="0 0 24 24"><line x1="17" y1="10" x2="3" y2="10"></line><line x1="21" y1="6" x2="3" y2="6"></line><line x1="21" y1="14" x2="3" y2="14"></line><line x1="17" y1="18" x2="3" y2="18"></line></svg>',
-        calendar: '<svg class="sb-icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>'
+        calendar: '<svg class="sb-icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>',
+        engage: '<svg class="sb-icon" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>'
     };
     return icons[type] || icons.single;
 }
@@ -17241,6 +18207,16 @@ function sbRemoveOption(qIndex, optIndex) {
 
 function sbToggleRequired(qIndex, checked) {
     sbCurrentSurvey.pages[sbCurrentPageIndex].questions[qIndex].required = checked;
+}
+
+// Engage (AI conversation) question config handlers
+function sbUpdateEngageTopics(qIndex, value) {
+    const topics = value.split(',').map(t => t.trim()).filter(Boolean);
+    sbCurrentSurvey.pages[sbCurrentPageIndex].questions[qIndex].engageTopics = topics;
+}
+
+function sbUpdateEngageField(qIndex, field, value) {
+    sbCurrentSurvey.pages[sbCurrentPageIndex].questions[qIndex][field] = value;
 }
 
 function sbDuplicateQuestion(qIndex) {
@@ -17934,10 +18910,37 @@ async function sbShowAutocomplete(inputElement, pageIndex, questionIndex) {
     `;
     overlay.classList.add('active');
 
-    // Search question bank
-    const results = await sbSearchQuestionBank(searchText);
+    // Token to guard against stale async renders (input changed / different question)
+    const token = String(Date.now()) + ':' + Math.random();
+    overlay.dataset.token = token;
 
-    // Build results HTML
+    // Search the question bank (fast, local)
+    const bankResults = await sbSearchQuestionBank(searchText);
+    if (overlay.dataset.token !== token) return; // input changed while searching
+    sbRenderBankOverlay(overlay, searchText, bankResults);
+
+    // AI-predicted suggestions (async; appended when ready). Degrades gracefully
+    // if the AI is unavailable (e.g. no API credits) — the bank still works.
+    if (searchText.trim().length >= 3) {
+        sbFetchAiSuggestions(searchText).then(aiSuggestions => {
+            if (overlay.dataset.token !== token) return; // input changed since request
+            if (!overlay.classList.contains('active')) return;
+            if (!aiSuggestions || !aiSuggestions.length) return;
+            const existing = new Set(bankResults.map(r => (r.question_text || '').toLowerCase()));
+            const aiItems = aiSuggestions
+                .filter(s => s && !existing.has(s.toLowerCase()))
+                .map(s => ({ question_text: s, question_type: 'text', options: [], use_count: 0, isAi: true }));
+            if (!aiItems.length) return;
+            sbRenderBankOverlay(overlay, searchText, bankResults.concat(aiItems));
+        }).catch(() => {});
+    }
+}
+
+/**
+ * Render the question-bank overlay from a results array.
+ * Items with isAi:true are shown as "AI suggestion" predictions.
+ */
+function sbRenderBankOverlay(overlay, searchText, results) {
     let listHTML = '';
 
     if (results.length === 0) {
@@ -17953,6 +18956,21 @@ async function sbShowAutocomplete(inputElement, pageIndex, questionIndex) {
     } else {
         results.forEach((q, index) => {
             const highlightedText = sbHighlightMatch(q.question_text, searchText);
+
+            if (q.isAi) {
+                listHTML += `
+                    <div class="sb-question-bank-item sb-question-bank-item--ai"
+                         data-index="${index}"
+                         onmousedown="sbSelectFromBank(${index}); event.preventDefault();">
+                        <div class="sb-question-bank-item-text">${highlightedText}</div>
+                        <div class="sb-question-bank-item-meta">
+                            <span class="sb-question-bank-item-type" style="background:#fce7f3;color:#be185d;">✨ AI suggestion</span>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
             const typeClass = q.question_type.replace(/\s+/g, '-').toLowerCase();
             const typeDisplay = q.question_type.replace(/-/g, ' ');
 
@@ -17979,7 +18997,8 @@ async function sbShowAutocomplete(inputElement, pageIndex, questionIndex) {
         });
     }
 
-    // Update overlay content
+    const aiCount = results.filter(r => r.isAi).length;
+
     overlay.innerHTML = `
         <div class="sb-question-bank-header">
             <div class="sb-question-bank-header-title">
@@ -18000,12 +19019,37 @@ async function sbShowAutocomplete(inputElement, pageIndex, questionIndex) {
         <div class="sb-question-bank-list">
             ${listHTML}
         </div>
-        ${results.length > 0 ? `<div class="sb-question-bank-count">${results.length} suggestion${results.length !== 1 ? 's' : ''}</div>` : ''}
+        ${results.length > 0 ? `<div class="sb-question-bank-count">${results.length} suggestion${results.length !== 1 ? 's' : ''}${aiCount ? ` · ${aiCount} from AI` : ''}</div>` : ''}
     `;
 
     // Store results for keyboard navigation / selection
     overlay.dataset.results = JSON.stringify(results);
     sbAutocompleteSelectedIndex = -1;
+}
+
+/**
+ * Fetch AI-predicted question suggestions for the current partial input.
+ * Returns [] on any failure so the bank autocomplete keeps working.
+ */
+async function sbFetchAiSuggestions(searchText) {
+    try {
+        let previousQuestions = [];
+        try {
+            const bank = await sbFetchQuestionBank();
+            previousQuestions = (bank || []).map(q => q.question_text).filter(Boolean).slice(0, 40);
+        } catch (e) { /* no bank context available */ }
+
+        const res = await fetch('/api/suggest-questions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ input: searchText, previousQuestions })
+        });
+        if (!res.ok) return [];
+        const data = await res.json();
+        return Array.isArray(data.suggestions) ? data.suggestions : [];
+    } catch (e) {
+        return [];
+    }
 }
 
 /**
@@ -18060,6 +19104,16 @@ function sbSelectFromBank(resultIndex) {
     }
 
     const question = sbCurrentSurvey.pages[pageIndex].questions[questionIndex];
+
+    // AI suggestions fill only the title (like a search-bar completion);
+    // leave the question type and options as the user set them.
+    if (selected.isAi) {
+        question.text = selected.question_text;
+        sbHideQuestionBankOverlay();
+        sbRenderBuilder();
+        sbShowToast('Question added from AI suggestion');
+        return;
+    }
 
     // Update question text
     question.text = selected.question_text;
@@ -18274,6 +19328,59 @@ function sbRenderSettings() {
     const thankyouContent = document.getElementById('sb-thankyou-content');
     if (landingContent) landingContent.value = sbCurrentSurvey.landingPageContent;
     if (thankyouContent) thankyouContent.value = sbCurrentSurvey.thankYouContent;
+
+    // Survey logo
+    sbRenderLogoPreview();
+}
+
+// Render the survey-logo preview / upload prompt in Settings
+function sbRenderLogoPreview() {
+    const el = document.getElementById('sb-survey-logo-preview');
+    if (!el) return;
+    const logo = sbCurrentSurvey && sbCurrentSurvey.surveyLogo;
+    if (logo) {
+        el.innerHTML = `
+            <div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;">
+                <img src="${logo}" alt="Survey logo" style="max-height:64px;max-width:160px;object-fit:contain;border:1px solid #e2e2e2;border-radius:6px;padding:4px;background:#fff;">
+                <button type="button" onclick="document.getElementById('sb-survey-logo-input').click()" style="padding:6px 12px;border:1px solid #d0d0d0;border-radius:6px;background:#fff;cursor:pointer;font-size:0.85rem;">Replace</button>
+                <button type="button" onclick="sbRemoveSurveyLogo()" style="padding:6px 12px;border:1px solid #d0d0d0;border-radius:6px;background:#fff;cursor:pointer;font-size:0.85rem;color:#c0392b;">Remove</button>
+            </div>`;
+    } else {
+        el.innerHTML = `
+            <div onclick="document.getElementById('sb-survey-logo-input').click()" style="cursor:pointer;text-align:center;padding:1.25rem;border:2px dashed #d0d0d0;border-radius:8px;">
+                <div style="font-size:2rem;margin-bottom:0.4rem;">📎</div>
+                <div><strong>Click to upload logo</strong></div>
+                <div style="color:#888;font-size:0.8rem;margin-top:0.25rem;">PNG, JPG up to 2MB</div>
+            </div>`;
+    }
+}
+
+// Handle a survey-logo file selection (base64, stored on the survey object)
+function sbHandleLogoUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) {
+        showToast('File size must be less than 2MB', 'error');
+        event.target.value = '';
+        return;
+    }
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        if (sbCurrentSurvey) {
+            sbCurrentSurvey.surveyLogo = e.target.result;
+            sbRenderLogoPreview();
+            showToast('✅ Logo added — remember to Save', 'success');
+        }
+    };
+    reader.readAsDataURL(file);
+    event.target.value = '';
+}
+
+function sbRemoveSurveyLogo() {
+    if (sbCurrentSurvey) {
+        sbCurrentSurvey.surveyLogo = '';
+        sbRenderLogoPreview();
+    }
 }
 
 function sbSetThemeColor(name) {
@@ -18637,6 +19744,22 @@ function sbRenderPreviewQuestion(question, qIndex, theme) {
         inputHtml = `
             <textarea class="sb-preview-textarea" rows="4" placeholder="Your answer"
                       oninput="sbSetPreviewResponse('${question.id}', this.value)">${response || ''}</textarea>
+        `;
+    } else if (question.type === 'engage') {
+        const topics = question.engageTopics || [];
+        const intro = question.engageIntro || "Hi! I'd love to ask you a few questions — let's chat.";
+        inputHtml = `
+            <div class="sb-preview-engage" style="border:1px solid #fbcfe8;background:#fdf2f8;border-radius:10px;padding:14px;">
+                <div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:10px;">
+                    <div style="width:28px;height:28px;border-radius:50%;background:#ec4899;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;">✦</div>
+                    <div style="background:#fff;border:1px solid #f3d4e3;border-radius:0 10px 10px 10px;padding:8px 12px;font-size:14px;color:#334155;">${sbaEsc(intro)}</div>
+                </div>
+                <div style="display:flex;gap:8px;opacity:.6;">
+                    <input type="text" disabled placeholder="Participant replies here…" style="flex:1;border:1px solid #e2e8f0;border-radius:8px;padding:8px 12px;font-size:13px;background:#fff;">
+                    <button disabled style="background:#ec4899;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:13px;">Send</button>
+                </div>
+                <p style="margin:10px 0 0;font-size:11px;color:#be185d;">AI conversation${topics.length ? ' covering: ' + sbaEsc(topics.join(', ')) : ''} — interactive in the live survey.</p>
+            </div>
         `;
     }
 
@@ -19773,6 +20896,12 @@ function gsUpdateProgress() {
     if (bar) bar.style.width = (total > 0 ? Math.round((done / total) * 100) : 0) + '%';
 }
 
+// Manual collapse/expand: the chevron in each Setup card's header toggles it.
+function rwToggleCard(btn) {
+    var card = btn.closest('.rw-card');
+    if (card) card.classList.toggle('rw-collapsed');
+}
+
 function gsRebuildForAccessType(accessType) {
     var keys = gsAccessSteps[accessType] || gsAccessSteps.open;
     gsRenderSteps(keys);
@@ -19789,7 +20918,8 @@ function gsEvaluateState() {
 
         if (chatName && chatName.value.trim()) gsCompleteByKey('name');
         if (welcome && welcome.value.trim()) gsCompleteByKey('welcome');
-        gsCompleteByKey('access');
+        var accessSel = document.getElementById('chat-access-type');
+        if (accessSel && accessSel.value) gsCompleteByKey('access');
         if (panelVisible || isExisting) gsCompleteByKey('create');
         if (isExisting) {
             gsCompleteByKey('copyLink');
@@ -20615,7 +21745,7 @@ function showEngageChatEditorTab(tabName) {
     const activeTab = document.querySelector('.engage-chat-editor-tab[data-tab="' + tabName + '"]');
     if (activeTab) { activeTab.style.color = '#0F6E56'; activeTab.style.borderBottomColor = '#0F6E56'; }
     if (tabName === 'responses' && window.engageCurrentEditingChatId) loadEngageChatResponses(window.engageCurrentEditingChatId);
-    if (tabName === 'analytics' && window.engageCurrentEditingChatId) loadEngageChatAnalytics(window.engageCurrentEditingChatId);
+    if (tabName === 'analytics') { engageLoadScaffold(window.engageCurrentEditingChatId || null); if (window.engageCurrentEditingChatId) loadEngageChatAnalytics(window.engageCurrentEditingChatId); }
 
     // Getting Started: tick "Go to Participants" when Participants tab is opened
     if (tabName === 'participants' && typeof engageGsCompleteByKey === 'function') {
@@ -21042,6 +22172,182 @@ function showImportEngageResponsesModal() {
 }
 
 // --- Engage analytics ---
+// ---- Engage analytics scaffold: date filter + trend + AI summary + Ask-AI ----
+let engageAnalyticsRange = { preset: 'all', from: null, to: null };
+let engageAnalyticsResponses = [];
+
+async function engageLoadScaffold(chatId) {
+    const fb = document.getElementById('engage-filterbar');
+    if (fb) fb.innerHTML = engageRenderDateFilter();
+    engageAnalyticsResponses = [];
+    if (chatId) {
+        try {
+            const { data, error } = await window.supabaseClient
+                .from('engage_chat_responses')
+                .select('submitted_at, response_text')
+                .eq('chat_id', chatId);
+            engageAnalyticsResponses = error ? [] : (data || []);
+        } catch (e) {
+            engageAnalyticsResponses = [];
+        }
+    }
+    engageRenderTrend();
+    engageRenderSummaryBox();
+    engageRenderAskBox();
+}
+
+function engageGetFilteredResponses() {
+    const r = engageAnalyticsRange;
+    let fromTs = null, toTs = null;
+    if (r.preset === '7' || r.preset === '30' || r.preset === '90') {
+        fromTs = Date.now() - parseInt(r.preset) * 86400000;
+    } else if (r.preset === 'custom') {
+        if (r.from) fromTs = new Date(r.from + 'T00:00:00').getTime();
+        if (r.to) toTs = new Date(r.to + 'T23:59:59').getTime();
+    }
+    return (engageAnalyticsResponses || []).filter(x => {
+        const ts = x.submitted_at;
+        if (!ts) return false;
+        const t = new Date(ts).getTime();
+        if (isNaN(t)) return false;
+        if (fromTs !== null && t < fromTs) return false;
+        if (toTs !== null && t > toTs) return false;
+        return true;
+    });
+}
+
+function engageRenderDateFilter() {
+    const r = engageAnalyticsRange;
+    const presets = [['all', 'All time'], ['7', 'Last 7 days'], ['30', 'Last 30 days'], ['90', 'Last 90 days']];
+    const btns = presets.map(([v, l]) =>
+        `<button class="sba-range-btn ${r.preset === v ? 'active' : ''}" onclick="engageSetRange('${v}')">${l}</button>`).join('');
+    return `<div>
+        <div class="sba-range-btns">
+            ${btns}
+            <button class="sba-range-btn ${r.preset === 'custom' ? 'active' : ''}" onclick="engageSetRange('custom')">Custom</button>
+        </div>
+        <div class="sba-custom-range" style="margin-top:10px;${r.preset === 'custom' ? '' : 'display:none;'}">
+            <input type="date" class="sba-date-input" value="${r.from || ''}" onchange="engageSetCustom('from', this.value)">
+            <span class="sba-muted">to</span>
+            <input type="date" class="sba-date-input" value="${r.to || ''}" onchange="engageSetCustom('to', this.value)">
+        </div>
+    </div>`;
+}
+
+function engageSetRange(p) {
+    engageAnalyticsRange.preset = p;
+    const fb = document.getElementById('engage-filterbar');
+    if (fb) fb.innerHTML = engageRenderDateFilter();
+    engageRenderTrend();
+    engageRenderSummaryBox();
+    engageRenderAskBox();
+}
+
+function engageSetCustom(which, val) {
+    engageAnalyticsRange.preset = 'custom';
+    engageAnalyticsRange[which] = val || null;
+    const fb = document.getElementById('engage-filterbar');
+    if (fb) fb.innerHTML = engageRenderDateFilter();
+    engageRenderTrend();
+    engageRenderSummaryBox();
+    engageRenderAskBox();
+}
+
+function engageRenderTrend() {
+    const el = document.getElementById('engage-trend');
+    if (!el) return;
+    const counts = {};
+    engageGetFilteredResponses().forEach(x => {
+        const d = new Date(x.submitted_at);
+        if (isNaN(d.getTime())) return;
+        const k = d.toISOString().slice(0, 10);
+        counts[k] = (counts[k] || 0) + 1;
+    });
+    const dates = Object.keys(counts).sort();
+    if (!dates.length) {
+        el.innerHTML = '<p class="sba-muted">No responses in this period yet.</p>';
+        return;
+    }
+    const max = Math.max(...dates.map(d => counts[d]));
+    el.innerHTML = '<div class="sba-timeline">' + dates.slice(-30).map(d => {
+        const c = counts[d];
+        const h = Math.round((c / max) * 100);
+        const label = new Date(d).toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+        return `<div class="sba-tl-bar" title="${label}: ${c}"><div class="sba-tl-count">${c}</div><div class="sba-tl-fill" style="height:${Math.max(h, 4)}%"></div><div class="sba-tl-label">${label}</div></div>`;
+    }).join('') + '</div>';
+}
+
+function engageRenderSummaryBox() {
+    const el = document.getElementById('engage-ai-summary');
+    if (!el) return;
+    const textCount = engageGetFilteredResponses().filter(r => r.response_text && r.response_text.trim()).length;
+    if (!textCount) { el.innerHTML = '<p class="sba-muted">No responses to summarise in this period yet.</p>'; return; }
+    el.innerHTML = `<div id="engage-summary-body">
+        <p class="sba-muted" style="margin-bottom:14px;">Summarise these ${textCount} response${textCount !== 1 ? 's' : ''} into sentiment, a short summary and key themes.</p>
+        <button class="sba-ai-btn" onclick="engageGenerateSummary()">Generate AI summary</button>
+    </div>`;
+}
+
+async function engageGenerateSummary() {
+    const body = document.getElementById('engage-summary-body');
+    if (!body) return;
+    const msgs = engageGetFilteredResponses().map(r => r.response_text).filter(t => t && t.trim()).map(t => ({ message: t.trim() }));
+    if (!msgs.length) { body.innerHTML = '<p class="sba-muted">No responses to summarise.</p>'; return; }
+    body.innerHTML = '<div class="sba-loading"><div class="sba-spinner"></div> Analysing…</div>';
+    try {
+        const res = await fetch('/api/analyse', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ responses: msgs }) });
+        if (!res.ok) throw new Error('AI service error (' + res.status + ')');
+        const d = await res.json();
+        const sentiment = (d.overall_sentiment || 'neutral').toLowerCase();
+        const sentClass = ['positive', 'negative'].includes(sentiment) ? sentiment : 'neutral';
+        const themes = (d.key_themes || []).map(t => `<span class="sba-chip">${sbaEsc(t)}</span>`).join('');
+        body.innerHTML = `<div>
+            <span class="sba-sentiment sba-sent-${sentClass}">${sbaEsc(sentiment)}</span>
+            <p class="sba-ai-summary">${sbaEsc(d.summary || '')}</p>
+            ${themes ? `<div class="sba-chips">${themes}</div>` : ''}
+        </div><button class="sba-ai-btn sba-ai-btn-sm" onclick="engageGenerateSummary()">Regenerate</button>`;
+    } catch (e) {
+        body.innerHTML = `<p class="sba-error">Couldn't generate summary: ${sbaEsc(e.message)}</p><button class="sba-ai-btn sba-ai-btn-sm" onclick="engageGenerateSummary()">Try again</button>`;
+    }
+}
+
+function engageRenderAskBox() {
+    const el = document.getElementById('engage-ask');
+    if (!el) return;
+    const chips = ['What are the most common themes?', 'Any urgent issues?', 'What would people change?'];
+    el.innerHTML = `<div class="sba-ask-row">
+        <input type="text" id="engage-ask-input" class="sba-ask-input" placeholder="Ask a question about these responses…" onkeydown="if(event.key==='Enter'){event.preventDefault();engageAskAI();}">
+        <button class="sba-ai-btn" onclick="engageAskAI()">Ask</button>
+    </div>
+    <div class="sba-chips" style="margin-top:10px;">${chips.map(c => `<span class="sba-chip sba-ask-chip" onclick="engageAskChip(this)">${c}</span>`).join('')}</div>
+    <div id="engage-ask-answer"></div>`;
+}
+
+function engageAskChip(elc) {
+    const inp = document.getElementById('engage-ask-input');
+    if (inp) { inp.value = elc.textContent; engageAskAI(); }
+}
+
+async function engageAskAI() {
+    const inp = document.getElementById('engage-ask-input');
+    const ansEl = document.getElementById('engage-ask-answer');
+    if (!inp || !ansEl) return;
+    const question = inp.value.trim();
+    if (!question) return;
+    const filtered = engageGetFilteredResponses();
+    const samples = filtered.map(r => r.response_text).filter(t => t && t.trim()).slice(0, 25);
+    ansEl.innerHTML = '<div class="sba-loading"><div class="sba-spinner"></div> Thinking…</div>';
+    try {
+        const res = await fetch('/api/ask-data', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ question, samples, response_count: filtered.length }) });
+        if (!res.ok) throw new Error('AI service error (' + res.status + ')');
+        const d = await res.json();
+        if (d.error) throw new Error(d.error);
+        ansEl.innerHTML = `<div class="sba-ask-result">${sbaEsc(d.answer || '').replace(/\n/g, '<br>')}</div>`;
+    } catch (e) {
+        ansEl.innerHTML = `<p class="sba-error">Couldn't get an answer: ${sbaEsc(e.message)}</p>`;
+    }
+}
+
 async function loadEngageChatAnalytics(chatId) {
     const loadingEl = document.getElementById('engage-analytics-loading');
     const emptyEl = document.getElementById('engage-analytics-empty');
@@ -21302,6 +22608,277 @@ function engageGsReset() {
         engageGsRebuildForAccessType((accessSelect || {}).value || 'open');
     }
     setup();
+})();
+</script>
+
+<!-- ===== Import Responses (Explore / survey builder) ===== -->
+<style>
+  .sb-import-overlay { position:fixed; inset:0; background:rgba(15,23,42,0.5); z-index:99999; display:flex; align-items:center; justify-content:center; padding:20px; }
+  .sb-import-dialog { background:#fff; border-radius:14px; width:760px; max-width:100%; max-height:88vh; display:flex; flex-direction:column; box-shadow:0 24px 60px rgba(0,0,0,0.3); font-family:inherit; }
+  .sb-import-header { display:flex; align-items:center; justify-content:space-between; padding:18px 22px; border-bottom:1px solid #e2e8f0; }
+  .sb-import-header h2 { font-size:1.05rem; margin:0; color:#1e293b; }
+  .sb-import-close { background:none; border:none; font-size:1.7rem; line-height:1; cursor:pointer; color:#94a3b8; }
+  .sb-import-body { padding:20px 22px; overflow:auto; }
+  .sb-import-drop { border:2px dashed #cbd5e1; border-radius:10px; padding:34px 20px; text-align:center; cursor:pointer; transition:border-color .15s, background .15s; }
+  .sb-import-drop.dragover, .sb-import-drop:hover { border-color:#6366f1; background:#f5f3ff; }
+  .sb-import-note { font-size:0.85rem; color:#475569; margin:0 0 12px; }
+  .sb-import-map-row { display:flex; align-items:center; gap:10px; padding:7px 0; border-bottom:1px solid #f1f5f9; }
+  .sb-import-map-row .sb-import-q { flex:1; font-size:0.86rem; color:#1e293b; }
+  .sb-import-map-row .sb-import-q small { color:#94a3b8; display:block; font-size:0.72rem; text-transform:capitalize; }
+  .sb-import-map-row select { flex:1; min-width:0; padding:7px 9px; border:1px solid #cbd5e1; border-radius:7px; font-size:0.83rem; background:#fff; }
+  .sb-import-preview-wrap { overflow:auto; max-height:240px; border:1px solid #e2e8f0; border-radius:8px; }
+  #sb-import-preview { border-collapse:collapse; width:100%; font-size:0.78rem; }
+  #sb-import-preview th, #sb-import-preview td { border:1px solid #eef2f7; padding:5px 8px; text-align:left; white-space:nowrap; max-width:200px; overflow:hidden; text-overflow:ellipsis; }
+  #sb-import-preview th { background:#f8fafc; position:sticky; top:0; }
+  .sb-import-footer { display:flex; justify-content:flex-end; gap:10px; padding:14px 22px; border-top:1px solid #e2e8f0; }
+  .sb-import-btn-secondary { padding:9px 16px; border:1px solid #cbd5e1; background:#fff; border-radius:8px; cursor:pointer; font-size:0.85rem; }
+  .sb-import-btn-primary { padding:9px 18px; border:none; background:linear-gradient(135deg,#6c63ff,#8b5cf6); color:#fff; border-radius:8px; cursor:pointer; font-size:0.85rem; font-weight:600; }
+  .sb-import-btn-primary:disabled { opacity:0.6; cursor:default; }
+</style>
+<div id="sb-import-modal" class="sb-import-overlay" style="display:none;">
+  <div class="sb-import-dialog">
+    <div class="sb-import-header">
+      <h2>Import Responses</h2>
+      <button class="sb-import-close" onclick="sbCloseImportModal()" aria-label="Close">&times;</button>
+    </div>
+    <div class="sb-import-body">
+      <div id="sb-import-stage-file">
+        <input type="file" id="sb-import-file" accept=".csv,.tsv,.txt,.json,.xlsx,.xls" style="display:none;" onchange="sbImportHandleFile(this)">
+        <div class="sb-import-drop" id="sb-import-drop" onclick="document.getElementById('sb-import-file').click()">
+          <div style="font-size:2.4rem;margin-bottom:0.5rem;">📥</div>
+          <div><strong>Click to choose a file</strong> or drag &amp; drop</div>
+          <div style="color:#94a3b8;font-size:0.8rem;margin-top:0.4rem;">CSV, TSV, JSON or Excel (.xlsx) — any column layout. You'll confirm the mapping next.</div>
+        </div>
+      </div>
+      <div id="sb-import-stage-map" style="display:none;">
+        <p class="sb-import-note">We matched your file's columns to this survey's questions. Check each one (fix any that are wrong), then import.</p>
+        <div id="sb-import-mapping"></div>
+        <h4 style="margin:16px 0 6px;font-size:0.9rem;color:#1e293b;">Preview <span id="sb-import-rowcount" style="color:#94a3b8;font-weight:400;"></span></h4>
+        <div class="sb-import-preview-wrap"><table id="sb-import-preview"></table></div>
+      </div>
+      <div id="sb-import-stage-result" style="display:none;"></div>
+    </div>
+    <div class="sb-import-footer">
+      <button class="sb-import-btn-secondary" onclick="sbCloseImportModal()">Cancel</button>
+      <button class="sb-import-btn-primary" id="sb-import-run-btn" onclick="sbImportRun()" style="display:none;">Import responses</button>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  window.sbImport = { headers: [], rows: [], mapping: {}, dateCol: '' };
+
+  function escHtml(s){ return String(s==null?'':s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+  function escAttr(s){ return escHtml(s).replace(/'/g,'&#39;'); }
+
+  window.sbOpenImportModal = function(){
+    if (typeof sbCurrentSurvey === 'undefined' || !sbCurrentSurvey || !sbCurrentSurvey.id){
+      alert('Please save your survey first, then import responses.');
+      return;
+    }
+    window.sbImport = { headers: [], rows: [], mapping: {}, dateCol: '' };
+    document.getElementById('sb-import-stage-file').style.display = '';
+    document.getElementById('sb-import-stage-map').style.display = 'none';
+    document.getElementById('sb-import-stage-result').style.display = 'none';
+    document.getElementById('sb-import-run-btn').style.display = 'none';
+    document.getElementById('sb-import-file').value = '';
+    document.getElementById('sb-import-modal').style.display = 'flex';
+  };
+  window.sbCloseImportModal = function(){ document.getElementById('sb-import-modal').style.display = 'none'; };
+
+  // ---------- parsing ----------
+  function detectDelimiter(line){
+    const counts = { ',':(line.match(/,/g)||[]).length, '\t':(line.match(/\t/g)||[]).length, ';':(line.match(/;/g)||[]).length };
+    let best = ',', max = -1;
+    for (const d in counts){ if (counts[d] > max){ max = counts[d]; best = d; } }
+    return max > 0 ? best : ',';
+  }
+  function parseDelimited(text, delim){
+    text = text.replace(/^﻿/, '');
+    const rows=[]; let row=[]; let field=''; let i=0; let inQ=false;
+    while (i < text.length){
+      const c = text[i];
+      if (inQ){
+        if (c === '"'){ if (text[i+1] === '"'){ field+='"'; i+=2; continue; } inQ=false; i++; continue; }
+        field += c; i++; continue;
+      }
+      if (c === '"'){ inQ=true; i++; continue; }
+      if (c === delim){ row.push(field); field=''; i++; continue; }
+      if (c === '\r'){ i++; continue; }
+      if (c === '\n'){ row.push(field); rows.push(row); row=[]; field=''; i++; continue; }
+      field += c; i++;
+    }
+    if (field.length || row.length){ row.push(field); rows.push(row); }
+    return rows.filter(r => r.some(c => String(c).trim() !== ''));
+  }
+  function matrixToObjects(matrix){
+    if (!matrix.length) return { headers:[], rows:[] };
+    const headers = matrix[0].map((h,i)=> String(h).trim() || ('Column ' + (i+1)));
+    const rows = matrix.slice(1).map(r => { const o={}; headers.forEach((h,i)=> o[h] = r[i] !== undefined ? r[i] : ''); return o; });
+    return { headers, rows };
+  }
+  function parseJsonImport(text){
+    const data = JSON.parse(text);
+    const arr = Array.isArray(data) ? data
+      : (data && Array.isArray(data.responses)) ? data.responses
+      : (data && Array.isArray(data.rows)) ? data.rows : null;
+    if (!arr) throw new Error('JSON must be an array of response objects.');
+    const headers = [];
+    arr.forEach(o => { if (o && typeof o === 'object') Object.keys(o).forEach(k => { if (!headers.includes(k)) headers.push(k); }); });
+    const rows = arr.map(o => { const r={}; headers.forEach(h => { let v = o ? o[h] : ''; if (v && typeof v === 'object') v = Array.isArray(v) ? v.join('; ') : JSON.stringify(v); r[h] = v==null ? '' : v; }); return r; });
+    return { headers, rows };
+  }
+
+  window.sbImportHandleFile = function(input){
+    const file = input.files && input.files[0];
+    if (!file) return;
+    const name = file.name.toLowerCase();
+    const isExcel = name.endsWith('.xlsx') || name.endsWith('.xls');
+    const reader = new FileReader();
+    reader.onload = function(e){
+      try {
+        let parsed;
+        if (isExcel){
+          if (typeof XLSX === 'undefined'){ alert('Excel support is still loading — please try again in a moment.'); return; }
+          const wb = XLSX.read(e.target.result, { type:'array' });
+          const ws = wb.Sheets[wb.SheetNames[0]];
+          parsed = matrixToObjects(XLSX.utils.sheet_to_json(ws, { header:1, defval:'', raw:false }));
+        } else if (name.endsWith('.json')){
+          parsed = parseJsonImport(e.target.result);
+        } else {
+          const text = e.target.result;
+          const firstLine = (text.split(/\r?\n/)[0]) || '';
+          const delim = name.endsWith('.tsv') ? '\t' : detectDelimiter(firstLine);
+          parsed = matrixToObjects(parseDelimited(text, delim));
+        }
+        if (!parsed.headers.length || !parsed.rows.length){ alert('Could not find any rows in that file. Please check it and try again.'); return; }
+        window.sbImport.headers = parsed.headers;
+        window.sbImport.rows = parsed.rows;
+        buildMapping();
+      } catch(err){
+        console.error('Import parse error', err);
+        alert('Sorry, that file could not be read: ' + err.message);
+      }
+    };
+    if (isExcel) reader.readAsArrayBuffer(file); else reader.readAsText(file);
+  };
+
+  // ---------- mapping ----------
+  function norm(s){ return String(s||'').toLowerCase().replace(/^q\d+\s*[:.\-]?\s*/,'').replace(/[^a-z0-9]+/g,' ').trim(); }
+  function guessColumn(question, qIndex, headers){
+    const qn = norm(question.text || question.title || ('question ' + (qIndex+1)));
+    let hit = qn && headers.find(h => norm(h) === qn); if (hit) return hit;
+    hit = headers.find(h => new RegExp('^\\s*q'+(qIndex+1)+'\\b','i').test(h)); if (hit) return hit;
+    if (qn) hit = headers.find(h => { const hn = norm(h); return hn && (hn.includes(qn) || qn.includes(hn)); });
+    return hit || '';
+  }
+  function guessDateColumn(headers){ return headers.find(h => /submit|date|time|completed|created/i.test(h)) || ''; }
+
+  function buildMapping(){
+    const questions = (typeof sbGetAllQuestions === 'function') ? sbGetAllQuestions() : [];
+    const headers = window.sbImport.headers;
+    const mapping = {}; const used = new Set();
+    questions.forEach((q,i)=>{ const g = guessColumn(q,i,headers); if (g && !used.has(g)){ mapping[q.id]=g; used.add(g);} else mapping[q.id]=''; });
+    window.sbImport.mapping = mapping;
+    window.sbImport.dateCol = guessDateColumn(headers);
+
+    const dateOpts = '<option value="">— use today’s date —</option>' + headers.map(h=>`<option value="${escAttr(h)}" ${h===window.sbImport.dateCol?'selected':''}>${escHtml(h)}</option>`).join('');
+    let html = `<div class="sb-import-map-row"><div class="sb-import-q"><strong>Submitted date</strong><small>optional — when each response was completed</small></div><select onchange="sbImport.dateCol=this.value;sbImportRenderPreview()">${dateOpts}</select></div>`;
+    html += questions.map((q,i)=>{
+      const title = escHtml(q.text || q.title || ('Question '+(i+1)));
+      const opts = '<option value="">— ignore —</option>' + headers.map(h=>`<option value="${escAttr(h)}" ${h===mapping[q.id]?'selected':''}>${escHtml(h)}</option>`).join('');
+      return `<div class="sb-import-map-row"><div class="sb-import-q">Q${i+1}: ${title}<small>${escHtml(q.type||'')}</small></div><select onchange="sbImport.mapping['${q.id}']=this.value;sbImportRenderPreview()">${opts}</select></div>`;
+    }).join('');
+    document.getElementById('sb-import-mapping').innerHTML = html;
+
+    document.getElementById('sb-import-stage-file').style.display = 'none';
+    document.getElementById('sb-import-stage-map').style.display = '';
+    document.getElementById('sb-import-run-btn').style.display = '';
+    sbImportRenderPreview();
+  }
+
+  // ---------- coercion ----------
+  function coerceValue(raw, q){
+    if (raw === undefined || raw === null) return undefined;
+    let v = raw; const type = q.type;
+    if (typeof v === 'string') v = v.trim();
+    if (v === '') return undefined;
+    if (type === 'rating'){ const n = parseFloat(String(v).replace(/[^0-9.\-]/g,'')); return isNaN(n) ? undefined : n; }
+    if (type === 'multi' || type === 'checkboxes' || type === 'calendar'){
+      if (Array.isArray(v)) return v;
+      return String(v).split(/[;,|]/).map(s=>s.trim()).filter(Boolean);
+    }
+    if (type === 'engage'){ return [{ role:'user', content:String(v) }]; }
+    return String(v);
+  }
+  function coerceDisplay(raw, q){ const c = coerceValue(raw,q); if (c===undefined) return ''; if (Array.isArray(c)) return c.map(x=> (x && x.content) ? x.content : x).join(', '); return String(c); }
+
+  window.sbImportRenderPreview = function(){
+    const questions = (typeof sbGetAllQuestions === 'function') ? sbGetAllQuestions() : [];
+    const rows = window.sbImport.rows;
+    document.getElementById('sb-import-rowcount').textContent = '(' + rows.length + ' row' + (rows.length===1?'':'s') + ')';
+    let html = '<thead><tr><th>Submitted</th>' + questions.map((q,i)=>'<th>Q'+(i+1)+'</th>').join('') + '</tr></thead><tbody>';
+    rows.slice(0,8).forEach(r=>{
+      const dateVal = window.sbImport.dateCol ? r[window.sbImport.dateCol] : '';
+      html += '<tr><td>'+escHtml(dateVal || '(today)')+'</td>';
+      questions.forEach(q=>{ const col = window.sbImport.mapping[q.id]; html += '<td>'+escHtml(coerceDisplay(col ? r[col] : '', q))+'</td>'; });
+      html += '</tr>';
+    });
+    html += '</tbody>';
+    document.getElementById('sb-import-preview').innerHTML = html;
+  };
+
+  // ---------- run ----------
+  window.sbImportRun = async function(){
+    const questions = (typeof sbGetAllQuestions === 'function') ? sbGetAllQuestions() : [];
+    const rows = window.sbImport.rows, mapping = window.sbImport.mapping, dateCol = window.sbImport.dateCol;
+    if (!Object.values(mapping).some(Boolean)){ alert('Please map at least one column to a question before importing.'); return; }
+    const records = [];
+    rows.forEach(r=>{
+      const responses = {};
+      questions.forEach(q=>{ const col = mapping[q.id]; if (!col) return; const c = coerceValue(r[col], q); if (c !== undefined) responses[q.id] = c; });
+      if (!Object.keys(responses).length) return;
+      let completed_at = new Date().toISOString();
+      if (dateCol && r[dateCol]){ const d = new Date(r[dateCol]); if (!isNaN(d.getTime())) completed_at = d.toISOString(); }
+      records.push({ survey_id: sbCurrentSurvey.id, respondent_id: sbGenerateId(), responses, response_language: (sbCurrentSurvey.defaultLanguage||'EN-GB'), completed_at });
+    });
+    if (!records.length){ alert('No rows had any mapped answers to import.'); return; }
+
+    const btn = document.getElementById('sb-import-run-btn');
+    btn.disabled = true; const orig = btn.textContent; btn.textContent = 'Importing…';
+    try {
+      if (!window.supabaseClient) throw new Error('Database connection not available.');
+      for (let i=0;i<records.length;i+=200){
+        const { error } = await window.supabaseClient.from('survey_responses').insert(records.slice(i,i+200));
+        if (error) throw error;
+      }
+      showResult(true, records.length);
+    } catch(err){
+      console.error('Import failed', err);
+      showResult(false, 0, err.message || String(err));
+    } finally {
+      btn.disabled = false; btn.textContent = orig;
+    }
+  };
+
+  function showResult(ok, count, msg){
+    document.getElementById('sb-import-stage-map').style.display = 'none';
+    document.getElementById('sb-import-run-btn').style.display = 'none';
+    const stage = document.getElementById('sb-import-stage-result');
+    stage.style.display = '';
+    stage.innerHTML = ok
+      ? '<div style="text-align:center;padding:24px;"><div style="font-size:2.6rem;">✅</div><h3 style="margin:8px 0 4px;">Imported '+count+' response'+(count===1?'':'s')+'</h3><p style="color:#64748b;margin:0;">They’re now in your Responses and Analytics.</p></div>'
+      : '<div style="text-align:center;padding:24px;"><div style="font-size:2.6rem;">⚠️</div><h3 style="margin:8px 0 4px;">Import failed</h3><p style="color:#64748b;margin:0;">'+escHtml(msg||'Unknown error')+'</p></div>';
+    if (ok) setTimeout(()=>{ sbCloseImportModal(); if (typeof sbShowResponsesTab==='function') sbShowResponsesTab(); }, 1300);
+  }
+
+  // ---------- drag & drop ----------
+  var drop = document.getElementById('sb-import-drop');
+  if (drop){
+    ['dragenter','dragover'].forEach(ev=> drop.addEventListener(ev, function(e){ e.preventDefault(); drop.classList.add('dragover'); }));
+    ['dragleave','drop'].forEach(ev=> drop.addEventListener(ev, function(e){ e.preventDefault(); drop.classList.remove('dragover'); }));
+    drop.addEventListener('drop', function(e){ const f = e.dataTransfer && e.dataTransfer.files; if (f && f[0]){ const inp = document.getElementById('sb-import-file'); inp.files = f; sbImportHandleFile(inp); } });
+  }
 })();
 </script>
 

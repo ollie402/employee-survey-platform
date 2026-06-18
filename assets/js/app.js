@@ -277,45 +277,54 @@ function toggleLanguageDropdown() {
     dropdown.classList.toggle('show');
 }
 
-function changeLanguage(lang) {
+function changeLanguage(lang, opts) {
+    opts = opts || {};
     const flagMap = {
         'en': '🇬🇧', 'es': '🇪🇸', 'fr': '🇫🇷', 'de': '🇩🇪',
         'it': '🇮🇹', 'pt': '🇵🇹', 'nl': '🇳🇱', 'zh': '🇨🇳',
         'ja': '🇯🇵', 'ko': '🇰🇷', 'ar': '🇸🇦', 'ru': '🇷🇺'
     };
-    
+
     const nameMap = {
         'en': 'English', 'es': 'Spanish', 'fr': 'French', 'de': 'German',
         'it': 'Italian', 'pt': 'Portuguese', 'nl': 'Dutch', 'zh': 'Chinese',
         'ja': 'Japanese', 'ko': 'Korean', 'ar': 'Arabic', 'ru': 'Russian'
     };
-    
+
     // Update dropdown display
-    document.getElementById('current-flag').textContent = flagMap[lang];
-    document.getElementById('current-language').textContent = nameMap[lang];
-    
+    const flagEl = document.getElementById('current-flag');
+    if (flagEl) flagEl.textContent = flagMap[lang] || '';
+    const nameEl = document.getElementById('current-language');
+    if (nameEl) nameEl.textContent = nameMap[lang] || '';
+
     document.querySelectorAll('.language-option').forEach(option => {
         option.classList.remove('selected');
     });
-    document.querySelector(`[data-lang="${lang}"]`).classList.add('selected');
-    
+    const selectedOption = document.querySelector(`[data-lang="${lang}"]`);
+    if (selectedOption) selectedOption.classList.add('selected');
+
     // Update current language
     currentLanguage = lang;
-    
-    // Apply translations
+
+    // Apply the curated (data-translate) translations first
     applyTranslations(lang);
-    
-    toggleLanguageDropdown();
-    
-    // Show toast in the selected language
-    const toastMessages = {
-        'en': `Language changed to ${nameMap[lang]}`,
-        'es': `Idioma cambiado a ${nameMap[lang]}`,
-        'fr': `Langue changée en ${nameMap[lang]}`,
-        'de': `Sprache geändert zu ${nameMap[lang]}`
-    };
-    
-    showToast(toastMessages[lang] || toastMessages['en'], 'success');
+
+    // Persist choice so it survives reloads
+    try { localStorage.setItem('rw_language', lang); } catch (e) {}
+
+    // Translate the entire interface dynamically
+    rwTranslateUI(lang);
+
+    if (!opts.silent) {
+        toggleLanguageDropdown();
+        const toastMessages = {
+            'en': `Language changed to ${nameMap[lang]}`,
+            'es': `Idioma cambiado a ${nameMap[lang]}`,
+            'fr': `Langue changée en ${nameMap[lang]}`,
+            'de': `Sprache geändert zu ${nameMap[lang]}`
+        };
+        showToast(toastMessages[lang] || toastMessages['en'], 'success');
+    }
 }
 
 function applyTranslations(lang) {
@@ -348,6 +357,164 @@ function applyTranslations(lang) {
         }
     });
 }
+
+// ============================================
+// Dynamic full-UI translation (MyMemory-backed)
+// Translates ALL on-screen text when a non-English language is
+// selected, and keeps translating as new content renders.
+// Caches per language in localStorage so each phrase is fetched
+// once ever. Add class "notranslate" to any element whose text
+// should be left untranslated (e.g. user data / brand names).
+// ============================================
+const RW_TX_SKIP_TAGS = new Set(['SCRIPT', 'STYLE', 'NOSCRIPT', 'TEXTAREA', 'INPUT', 'SELECT', 'OPTION', 'CODE', 'PRE', 'SVG', 'PATH']);
+let rwLangCache = {};        // { lang: { sourceText: translatedText } }
+let rwTxObserver = null;
+let rwTxDebounce = null;
+let rwPendingRoots = [];
+
+function rwTxLoadCache(lang) {
+    if (rwLangCache[lang]) return rwLangCache[lang];
+    try { rwLangCache[lang] = JSON.parse(localStorage.getItem('rw_tx_' + lang) || '{}'); }
+    catch (e) { rwLangCache[lang] = {}; }
+    return rwLangCache[lang];
+}
+
+function rwTxSaveCache(lang) {
+    try { localStorage.setItem('rw_tx_' + lang, JSON.stringify(rwLangCache[lang] || {})); } catch (e) {}
+}
+
+function rwTxSkipNode(node) {
+    let el = node.parentElement;
+    while (el) {
+        if (RW_TX_SKIP_TAGS.has(el.tagName)) return true;
+        if (el.isContentEditable) return true;
+        if (el.classList && el.classList.contains('notranslate')) return true;
+        if (el.id === 'language-dropdown' || el.id === 'language-btn') return true;
+        el = el.parentElement;
+    }
+    return false;
+}
+
+function rwCollectTextNodes(roots) {
+    const out = [];
+    roots.forEach(root => {
+        if (!root || root.nodeType !== 1) return;
+        const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+            acceptNode(node) {
+                const t = node.nodeValue;
+                if (!t || !t.trim()) return NodeFilter.FILTER_REJECT;
+                if (!/[A-Za-z]/.test(t)) return NodeFilter.FILTER_REJECT; // skip pure numbers/symbols
+                if (rwTxSkipNode(node)) return NodeFilter.FILTER_REJECT;
+                return NodeFilter.FILTER_ACCEPT;
+            }
+        });
+        let n;
+        while ((n = walker.nextNode())) out.push(n);
+    });
+    return out;
+}
+
+async function rwTranslateNodes(nodes, lang) {
+    if (!nodes.length) return;
+    const cache = rwTxLoadCache(lang);
+
+    // Store the original (English) text once per node
+    nodes.forEach(node => {
+        if (node.__rwOrig === undefined) node.__rwOrig = node.nodeValue;
+    });
+
+    // Unique sources not already cached
+    const needed = [];
+    const seen = new Set();
+    nodes.forEach(node => {
+        const src = node.__rwOrig.trim();
+        if (cache[src] === undefined && !seen.has(src)) { seen.add(src); needed.push(src); }
+    });
+
+    // Fetch missing translations in modest chunks
+    const CHUNK = 25;
+    for (let i = 0; i < needed.length; i += CHUNK) {
+        const batch = needed.slice(i, i + CHUNK);
+        try {
+            const res = await fetch('/api/translate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ texts: batch, targetLang: lang })
+            });
+            if (res.ok) {
+                const data = await res.json();
+                (data.translated || []).forEach((t, j) => { cache[batch[j]] = (t && t.trim()) ? t : batch[j]; });
+            } else {
+                batch.forEach(s => { cache[s] = s; });
+            }
+        } catch (e) {
+            batch.forEach(s => { cache[s] = s; });
+        }
+    }
+    if (needed.length) rwTxSaveCache(lang);
+
+    // Apply, preserving surrounding whitespace
+    nodes.forEach(node => {
+        const orig = node.__rwOrig;
+        const translated = cache[orig.trim()];
+        if (translated) {
+            const lead = (orig.match(/^\s*/) || [''])[0];
+            const trail = (orig.match(/\s*$/) || [''])[0];
+            const next = lead + translated + trail;
+            if (node.nodeValue !== next) node.nodeValue = next;
+        }
+    });
+}
+
+function rwRestoreEnglish() {
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null);
+    let n;
+    while ((n = walker.nextNode())) {
+        if (n.__rwOrig !== undefined && n.nodeValue !== n.__rwOrig) {
+            n.nodeValue = n.__rwOrig;
+        }
+    }
+}
+
+function rwTxStartObserver() {
+    if (rwTxObserver) return;
+    rwTxObserver = new MutationObserver(muts => {
+        if (currentLanguage === 'en') return;
+        for (const m of muts) {
+            m.addedNodes.forEach(node => {
+                if (node.nodeType === 1) rwPendingRoots.push(node);
+                else if (node.nodeType === 3 && node.parentElement) rwPendingRoots.push(node.parentElement);
+            });
+        }
+        if (!rwPendingRoots.length) return;
+        clearTimeout(rwTxDebounce);
+        rwTxDebounce = setTimeout(() => {
+            const roots = rwPendingRoots.splice(0);
+            rwTranslateNodes(rwCollectTextNodes(roots), currentLanguage);
+        }, 350);
+    });
+    // Only childList/subtree — our own text writes are characterData, so no loop
+    rwTxObserver.observe(document.body, { childList: true, subtree: true });
+}
+
+// Entry point: translate the whole UI to `lang`, or restore English
+function rwTranslateUI(lang) {
+    if (lang === 'en') {
+        rwRestoreEnglish();
+        return;
+    }
+    rwTxStartObserver();
+    rwTranslateNodes(rwCollectTextNodes([document.body]), lang);
+}
+
+// Restore the saved language on load (without toast / dropdown side-effects)
+document.addEventListener('DOMContentLoaded', () => {
+    let saved = 'en';
+    try { saved = localStorage.getItem('rw_language') || 'en'; } catch (e) {}
+    if (saved && saved !== 'en' && typeof changeLanguage === 'function') {
+        setTimeout(() => changeLanguage(saved, { silent: true }), 600);
+    }
+});
 
 // Application State Management
 let appState = {

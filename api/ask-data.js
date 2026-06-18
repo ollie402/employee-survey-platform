@@ -4,31 +4,37 @@ import { createClient } from '@supabase/supabase-js';
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { question, summary, key_themes, response_count, chat_id } = req.body;
+  const { question, summary, key_themes, response_count, chat_id, samples } = req.body;
 
   if (!question) return res.status(400).json({ error: 'No question provided' });
-  if (!chat_id) return res.status(400).json({ error: 'No chat_id provided' });
 
   try {
-    // Fetch responses from Supabase
-    const supabase = createClient(
-      process.env.SUPABASE_URL || 'https://wdwpqdzndlaldpuzuxyo.supabase.co',
-      process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_ANON_KEY
-    );
+    // Build sample responses for context. Prefer samples passed directly in
+    // the request (works for any data source — surveys, engage, etc.);
+    // otherwise fall back to fetching a Listen chat's responses by chat_id.
+    let sampleResponses = '';
+    if (Array.isArray(samples) && samples.length) {
+      sampleResponses = samples.filter(Boolean).map(String).slice(0, 30).join('\n');
+    } else if (chat_id) {
+      const supabase = createClient(
+        process.env.SUPABASE_URL || 'https://wdwpqdzndlaldpuzuxyo.supabase.co',
+        process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_ANON_KEY
+      );
 
-    const { data: responses, error: dbError } = await supabase
-      .from('chat_responses')
-      .select('response_text')
-      .eq('chat_id', chat_id)
-      .order('submitted_at', { ascending: true })
-      .limit(20);
+      const { data: responses, error: dbError } = await supabase
+        .from('chat_responses')
+        .select('response_text')
+        .eq('chat_id', chat_id)
+        .order('submitted_at', { ascending: true })
+        .limit(20);
 
-    if (dbError) throw new Error('Database error: ' + dbError.message);
+      if (dbError) throw new Error('Database error: ' + dbError.message);
 
-    const sampleResponses = (responses || [])
-      .map(r => r.response_text)
-      .filter(Boolean)
-      .join('\n');
+      sampleResponses = (responses || [])
+        .map(r => r.response_text)
+        .filter(Boolean)
+        .join('\n');
+    }
 
     const themesStr = (key_themes || []).join(', ');
 
@@ -47,7 +53,7 @@ ${question}`;
     const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
     const message = await client.messages.create({
-      model: 'claude-opus-4-6',
+      model: 'claude-opus-4-8',
       max_tokens: 512,
       messages: [{ role: 'user', content: prompt }]
     });

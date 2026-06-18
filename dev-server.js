@@ -198,6 +198,36 @@ app.all('/api/generate-ai-report', async (req, res) => {
   }
 });
 
+app.all('/api/engage-chat', async (req, res) => {
+  try {
+    const module = await import('./api/engage-chat.js');
+    await module.default(req, res);
+  } catch (error) {
+    console.error('Error in /api/engage-chat:', error);
+    res.status(500).json({ error: 'Internal server error', message: error.message });
+  }
+});
+
+app.all('/api/translate', async (req, res) => {
+  try {
+    const module = await import('./api/translate.js');
+    await module.default(req, res);
+  } catch (error) {
+    console.error('Error in /api/translate:', error);
+    res.status(500).json({ error: 'Internal server error', message: error.message });
+  }
+});
+
+app.all('/api/suggest-questions', async (req, res) => {
+  try {
+    const module = await import('./api/suggest-questions.js');
+    await module.default(req, res);
+  } catch (error) {
+    console.error('Error in /api/suggest-questions:', error);
+    res.status(500).json({ error: 'Internal server error', message: error.message });
+  }
+});
+
 console.log('📡 API endpoints registered: /api/chat-session, /api/chat-response, /api/generate-ai-report');
 
 // Serve index.html for root
