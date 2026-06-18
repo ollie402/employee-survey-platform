@@ -4713,6 +4713,16 @@
           background: #E1F5EE !important; color: #0F6E56 !important;
         }
 
+        /* Hide decorative icons in Listen/Engage chat Setup (card-header squares,
+           field-label icons, notif tick, link-display icon). Button icons
+           (.rw-btn-*) are intentionally NOT matched and remain. */
+        .rw-card-header-icon,
+        .rw-field label svg,
+        .rw-notif-left svg,
+        .rw-link-display svg {
+          display: none !important;
+        }
+
         /* Topic tags — teal */
         #engage-chat-editor-section .rw-tag {
           background: #E1F5EE; color: #085041;
@@ -5296,7 +5306,7 @@
                                 <h2 style="font-size: 24px; font-weight: 700; color: #1e293b; margin: 0 0 12px 0;">Explore</h2>
                                 <div style="width: 50px; height: 3px; background: #1e2a3b; margin-bottom: 20px;"></div>
                                 <p style="color: #64748b; font-size: 15px; line-height: 1.6; flex-grow: 1;">Discover trends and insights across your organisation. Dive deep into your data to uncover patterns that help you make informed decisions.</p>
-                                <button onclick="showSection('explore')" style="background: #d6366c; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 15px; font-weight: 500; cursor: pointer; margin-top: 20px;">Start Exploring</button>
+                                <button onclick="showSection('survey-builder')" style="background: #d6366c; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 15px; font-weight: 500; cursor: pointer; margin-top: 20px;">Start Exploring</button>
                             </div>
 
                         </div>
@@ -5400,7 +5410,7 @@
                                         <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"/></svg>
                                         Welcome Message
                                       </label>
-                                      <textarea id="chat-setup-welcome" rows="4" placeholder="Hi! Thanks for taking the time to share your feedback with us.">Hi! Thanks for taking the time to share your feedback with us. Please feel free to tell us about your experience or any suggestions you might have.</textarea>
+                                      <textarea id="chat-setup-welcome" rows="4" placeholder="Hi! Thanks for taking the time to share your feedback with us. Please feel free to tell us about your experience or any suggestions you might have."></textarea>
                                       <div class="rw-hint">This message will appear when participants first open the chat.</div>
                                     </div>
                                   </div>
@@ -5424,6 +5434,7 @@
                                         Access Type
                                       </label>
                                       <select id="chat-access-type">
+                                          <option value="" disabled selected>Select access type…</option>
                                           <option value="open">Open Access - Anyone with the link can respond</option>
                                           <option value="closed">Closed Access - Only invited participants via unique links</option>
                                           <option value="combined">Combined Access - Public link AND invited participants</option>
@@ -14004,10 +14015,10 @@ function openChatEditor(chatId = null) {
         // New chat - reset form
         document.getElementById('chat-editor-name').value = '';
         document.getElementById('chat-setup-name').value = '';
-        document.getElementById('chat-setup-welcome').value = 'Hi! Thanks for taking the time to share your feedback with us. Please feel free to tell us about your experience or any suggestions you might have.';
-        // Reset dropdown to default
+        document.getElementById('chat-setup-welcome').value = '';
+        // Reset dropdown to unselected — user must actively choose an access type
         const accessDropdown = document.getElementById('chat-access-type');
-        if (accessDropdown) accessDropdown.value = 'open';
+        if (accessDropdown) accessDropdown.value = '';
         // Reset notification dropdown to default
         const notifDropdown = document.getElementById('chat-notification-frequency');
         if (notifDropdown) notifDropdown.value = '';
@@ -20753,7 +20764,8 @@ function gsEvaluateState() {
 
         if (chatName && chatName.value.trim()) gsCompleteByKey('name');
         if (welcome && welcome.value.trim()) gsCompleteByKey('welcome');
-        gsCompleteByKey('access');
+        var accessSel = document.getElementById('chat-access-type');
+        if (accessSel && accessSel.value) gsCompleteByKey('access');
         if (panelVisible || isExisting) gsCompleteByKey('create');
         if (isExisting) {
             gsCompleteByKey('copyLink');
