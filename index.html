@@ -4765,6 +4765,51 @@
         #chat-editor-tab-setup .rw-collapse-toggle svg { width: 18px; height: 18px; }
         #chat-editor-tab-setup .rw-inflatable.rw-collapsed .rw-collapse-toggle { transform: rotate(-90deg); }
 
+        /* Hover "info" tooltip in each Setup card header.
+           Cards are overflow:hidden (for rounded corners/collapse); the body clips
+           itself during collapse, so the card can be overflow:visible to let the
+           tooltip escape — header/body have no background, so corners stay rounded. */
+        #chat-editor-tab-setup .rw-inflatable { overflow: visible; }
+        #chat-editor-tab-setup .rw-info {
+          position: relative;
+          display: inline-flex;
+          align-items: center;
+          margin-left: 6px;
+          color: #94a3b8;
+          cursor: help;
+          vertical-align: middle;
+        }
+        #chat-editor-tab-setup .rw-info:hover { color: #6366f1; }
+        #chat-editor-tab-setup .rw-info svg { width: 15px; height: 15px; }
+        #chat-editor-tab-setup .rw-info .rw-tip {
+          position: absolute;
+          top: calc(100% + 8px);
+          left: 0;
+          width: 250px;
+          background: #1e293b;
+          color: #fff;
+          padding: 10px 12px;
+          border-radius: 8px;
+          font-size: 12px;
+          line-height: 1.45;
+          font-weight: 400;
+          opacity: 0;
+          visibility: hidden;
+          transform: translateY(-4px);
+          transition: opacity 0.18s ease, transform 0.18s ease;
+          z-index: 60;
+          box-shadow: 0 8px 24px rgba(15,23,42,0.22);
+          pointer-events: none;
+          text-align: left;
+          white-space: normal;
+        }
+        #chat-editor-tab-setup .rw-info:hover .rw-tip,
+        #chat-editor-tab-setup .rw-info:focus .rw-tip {
+          opacity: 1;
+          visibility: visible;
+          transform: translateY(0);
+        }
+
         /* Access + Notifications split into two full-width, side-by-side boxes */
         #chat-editor-tab-setup .rw-split-row {
           display: grid;
@@ -5457,7 +5502,7 @@
                                       <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
                                     </div>
                                     <div>
-                                      <div class="rw-card-title">Chat Configuration</div>
+                                      <div class="rw-card-title">Chat Configuration <span class="rw-info" tabindex="0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg><span class="rw-tip">Chat Name is for your own reference and is also shown to participants. The Welcome Message is the first thing people see when they open the chat — use it to greet them and set the tone.</span></span></div>
                                       <div class="rw-card-subtitle">Set up how your chat appears to participants</div>
                                     </div>
                                     <button class="rw-collapse-toggle" type="button" onclick="rwToggleCard(this)" aria-label="Collapse section">
@@ -5493,7 +5538,7 @@
                                         <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
                                       </div>
                                       <div>
-                                        <div class="rw-card-title">Access</div>
+                                        <div class="rw-card-title">Access <span class="rw-info" tabindex="0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg><span class="rw-tip">Decides who can respond. Open = anyone with the link. Closed = only people you invite, each via their own private link. Combined = a public link plus private invites for specific people.</span></span></div>
                                         <div class="rw-card-subtitle">Control who can respond</div>
                                       </div>
                                       <button class="rw-collapse-toggle" type="button" onclick="rwToggleCard(this)" aria-label="Collapse section">
@@ -5508,9 +5553,9 @@
                                         </label>
                                         <select id="chat-access-type">
                                             <option value="" disabled selected>Select access type…</option>
-                                            <option value="open">Open Access - Anyone with the link can respond</option>
-                                            <option value="closed">Closed Access - Only invited participants via unique links</option>
-                                            <option value="combined">Combined Access - Public link AND invited participants</option>
+                                            <option value="open">Open Access — Anyone with the link can respond, no invite or sign-in needed</option>
+                                            <option value="closed">Closed Access — Invite-only: each person gets their own private link (no public link)</option>
+                                            <option value="combined">Combined Access — A public link anyone can use, plus private invites for specific people</option>
                                         </select>
                                       </div>
                                     </div>
@@ -5523,7 +5568,7 @@
                                         <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
                                       </div>
                                       <div>
-                                        <div class="rw-card-title">Notifications</div>
+                                        <div class="rw-card-title">Notifications <span class="rw-info" tabindex="0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg><span class="rw-tip">How you're alerted to new responses: every submission as it arrives, a daily or weekly digest, or never. "Use my default setting" follows your account-wide notification preference.</span></span></div>
                                         <div class="rw-card-subtitle">How you're alerted to responses</div>
                                       </div>
                                       <button class="rw-collapse-toggle" type="button" onclick="rwToggleCard(this)" aria-label="Collapse section">
@@ -7047,6 +7092,10 @@
                                         <svg class="sb-icon-sm" viewBox="0 0 24 24" style="margin-right: 6px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                                         Export CSV
                                     </button>
+                                    <button class="sb-export-btn" onclick="sbOpenImportModal()" style="margin-left:8px;">
+                                        <svg class="sb-icon-sm" viewBox="0 0 24 24" style="margin-right: 6px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                                        Import Responses
+                                    </button>
                                 </div>
 
                                 <!-- Raw Data View -->
@@ -7684,6 +7733,8 @@
 <script src="assets/js/database.js"></script>
 <!-- Chart.js for interactive charts -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- SheetJS for parsing imported Excel (.xlsx) response files -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="assets/js/analytics-dashboard.js"></script>
 <script src="assets/js/auth-wizard.js"></script>
 <script src="assets/js/app.js?v=20250908-2125"></script>
@@ -22557,6 +22608,277 @@ function engageGsReset() {
         engageGsRebuildForAccessType((accessSelect || {}).value || 'open');
     }
     setup();
+})();
+</script>
+
+<!-- ===== Import Responses (Explore / survey builder) ===== -->
+<style>
+  .sb-import-overlay { position:fixed; inset:0; background:rgba(15,23,42,0.5); z-index:99999; display:flex; align-items:center; justify-content:center; padding:20px; }
+  .sb-import-dialog { background:#fff; border-radius:14px; width:760px; max-width:100%; max-height:88vh; display:flex; flex-direction:column; box-shadow:0 24px 60px rgba(0,0,0,0.3); font-family:inherit; }
+  .sb-import-header { display:flex; align-items:center; justify-content:space-between; padding:18px 22px; border-bottom:1px solid #e2e8f0; }
+  .sb-import-header h2 { font-size:1.05rem; margin:0; color:#1e293b; }
+  .sb-import-close { background:none; border:none; font-size:1.7rem; line-height:1; cursor:pointer; color:#94a3b8; }
+  .sb-import-body { padding:20px 22px; overflow:auto; }
+  .sb-import-drop { border:2px dashed #cbd5e1; border-radius:10px; padding:34px 20px; text-align:center; cursor:pointer; transition:border-color .15s, background .15s; }
+  .sb-import-drop.dragover, .sb-import-drop:hover { border-color:#6366f1; background:#f5f3ff; }
+  .sb-import-note { font-size:0.85rem; color:#475569; margin:0 0 12px; }
+  .sb-import-map-row { display:flex; align-items:center; gap:10px; padding:7px 0; border-bottom:1px solid #f1f5f9; }
+  .sb-import-map-row .sb-import-q { flex:1; font-size:0.86rem; color:#1e293b; }
+  .sb-import-map-row .sb-import-q small { color:#94a3b8; display:block; font-size:0.72rem; text-transform:capitalize; }
+  .sb-import-map-row select { flex:1; min-width:0; padding:7px 9px; border:1px solid #cbd5e1; border-radius:7px; font-size:0.83rem; background:#fff; }
+  .sb-import-preview-wrap { overflow:auto; max-height:240px; border:1px solid #e2e8f0; border-radius:8px; }
+  #sb-import-preview { border-collapse:collapse; width:100%; font-size:0.78rem; }
+  #sb-import-preview th, #sb-import-preview td { border:1px solid #eef2f7; padding:5px 8px; text-align:left; white-space:nowrap; max-width:200px; overflow:hidden; text-overflow:ellipsis; }
+  #sb-import-preview th { background:#f8fafc; position:sticky; top:0; }
+  .sb-import-footer { display:flex; justify-content:flex-end; gap:10px; padding:14px 22px; border-top:1px solid #e2e8f0; }
+  .sb-import-btn-secondary { padding:9px 16px; border:1px solid #cbd5e1; background:#fff; border-radius:8px; cursor:pointer; font-size:0.85rem; }
+  .sb-import-btn-primary { padding:9px 18px; border:none; background:linear-gradient(135deg,#6c63ff,#8b5cf6); color:#fff; border-radius:8px; cursor:pointer; font-size:0.85rem; font-weight:600; }
+  .sb-import-btn-primary:disabled { opacity:0.6; cursor:default; }
+</style>
+<div id="sb-import-modal" class="sb-import-overlay" style="display:none;">
+  <div class="sb-import-dialog">
+    <div class="sb-import-header">
+      <h2>Import Responses</h2>
+      <button class="sb-import-close" onclick="sbCloseImportModal()" aria-label="Close">&times;</button>
+    </div>
+    <div class="sb-import-body">
+      <div id="sb-import-stage-file">
+        <input type="file" id="sb-import-file" accept=".csv,.tsv,.txt,.json,.xlsx,.xls" style="display:none;" onchange="sbImportHandleFile(this)">
+        <div class="sb-import-drop" id="sb-import-drop" onclick="document.getElementById('sb-import-file').click()">
+          <div style="font-size:2.4rem;margin-bottom:0.5rem;">📥</div>
+          <div><strong>Click to choose a file</strong> or drag &amp; drop</div>
+          <div style="color:#94a3b8;font-size:0.8rem;margin-top:0.4rem;">CSV, TSV, JSON or Excel (.xlsx) — any column layout. You'll confirm the mapping next.</div>
+        </div>
+      </div>
+      <div id="sb-import-stage-map" style="display:none;">
+        <p class="sb-import-note">We matched your file's columns to this survey's questions. Check each one (fix any that are wrong), then import.</p>
+        <div id="sb-import-mapping"></div>
+        <h4 style="margin:16px 0 6px;font-size:0.9rem;color:#1e293b;">Preview <span id="sb-import-rowcount" style="color:#94a3b8;font-weight:400;"></span></h4>
+        <div class="sb-import-preview-wrap"><table id="sb-import-preview"></table></div>
+      </div>
+      <div id="sb-import-stage-result" style="display:none;"></div>
+    </div>
+    <div class="sb-import-footer">
+      <button class="sb-import-btn-secondary" onclick="sbCloseImportModal()">Cancel</button>
+      <button class="sb-import-btn-primary" id="sb-import-run-btn" onclick="sbImportRun()" style="display:none;">Import responses</button>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  window.sbImport = { headers: [], rows: [], mapping: {}, dateCol: '' };
+
+  function escHtml(s){ return String(s==null?'':s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+  function escAttr(s){ return escHtml(s).replace(/'/g,'&#39;'); }
+
+  window.sbOpenImportModal = function(){
+    if (typeof sbCurrentSurvey === 'undefined' || !sbCurrentSurvey || !sbCurrentSurvey.id){
+      alert('Please save your survey first, then import responses.');
+      return;
+    }
+    window.sbImport = { headers: [], rows: [], mapping: {}, dateCol: '' };
+    document.getElementById('sb-import-stage-file').style.display = '';
+    document.getElementById('sb-import-stage-map').style.display = 'none';
+    document.getElementById('sb-import-stage-result').style.display = 'none';
+    document.getElementById('sb-import-run-btn').style.display = 'none';
+    document.getElementById('sb-import-file').value = '';
+    document.getElementById('sb-import-modal').style.display = 'flex';
+  };
+  window.sbCloseImportModal = function(){ document.getElementById('sb-import-modal').style.display = 'none'; };
+
+  // ---------- parsing ----------
+  function detectDelimiter(line){
+    const counts = { ',':(line.match(/,/g)||[]).length, '\t':(line.match(/\t/g)||[]).length, ';':(line.match(/;/g)||[]).length };
+    let best = ',', max = -1;
+    for (const d in counts){ if (counts[d] > max){ max = counts[d]; best = d; } }
+    return max > 0 ? best : ',';
+  }
+  function parseDelimited(text, delim){
+    text = text.replace(/^﻿/, '');
+    const rows=[]; let row=[]; let field=''; let i=0; let inQ=false;
+    while (i < text.length){
+      const c = text[i];
+      if (inQ){
+        if (c === '"'){ if (text[i+1] === '"'){ field+='"'; i+=2; continue; } inQ=false; i++; continue; }
+        field += c; i++; continue;
+      }
+      if (c === '"'){ inQ=true; i++; continue; }
+      if (c === delim){ row.push(field); field=''; i++; continue; }
+      if (c === '\r'){ i++; continue; }
+      if (c === '\n'){ row.push(field); rows.push(row); row=[]; field=''; i++; continue; }
+      field += c; i++;
+    }
+    if (field.length || row.length){ row.push(field); rows.push(row); }
+    return rows.filter(r => r.some(c => String(c).trim() !== ''));
+  }
+  function matrixToObjects(matrix){
+    if (!matrix.length) return { headers:[], rows:[] };
+    const headers = matrix[0].map((h,i)=> String(h).trim() || ('Column ' + (i+1)));
+    const rows = matrix.slice(1).map(r => { const o={}; headers.forEach((h,i)=> o[h] = r[i] !== undefined ? r[i] : ''); return o; });
+    return { headers, rows };
+  }
+  function parseJsonImport(text){
+    const data = JSON.parse(text);
+    const arr = Array.isArray(data) ? data
+      : (data && Array.isArray(data.responses)) ? data.responses
+      : (data && Array.isArray(data.rows)) ? data.rows : null;
+    if (!arr) throw new Error('JSON must be an array of response objects.');
+    const headers = [];
+    arr.forEach(o => { if (o && typeof o === 'object') Object.keys(o).forEach(k => { if (!headers.includes(k)) headers.push(k); }); });
+    const rows = arr.map(o => { const r={}; headers.forEach(h => { let v = o ? o[h] : ''; if (v && typeof v === 'object') v = Array.isArray(v) ? v.join('; ') : JSON.stringify(v); r[h] = v==null ? '' : v; }); return r; });
+    return { headers, rows };
+  }
+
+  window.sbImportHandleFile = function(input){
+    const file = input.files && input.files[0];
+    if (!file) return;
+    const name = file.name.toLowerCase();
+    const isExcel = name.endsWith('.xlsx') || name.endsWith('.xls');
+    const reader = new FileReader();
+    reader.onload = function(e){
+      try {
+        let parsed;
+        if (isExcel){
+          if (typeof XLSX === 'undefined'){ alert('Excel support is still loading — please try again in a moment.'); return; }
+          const wb = XLSX.read(e.target.result, { type:'array' });
+          const ws = wb.Sheets[wb.SheetNames[0]];
+          parsed = matrixToObjects(XLSX.utils.sheet_to_json(ws, { header:1, defval:'', raw:false }));
+        } else if (name.endsWith('.json')){
+          parsed = parseJsonImport(e.target.result);
+        } else {
+          const text = e.target.result;
+          const firstLine = (text.split(/\r?\n/)[0]) || '';
+          const delim = name.endsWith('.tsv') ? '\t' : detectDelimiter(firstLine);
+          parsed = matrixToObjects(parseDelimited(text, delim));
+        }
+        if (!parsed.headers.length || !parsed.rows.length){ alert('Could not find any rows in that file. Please check it and try again.'); return; }
+        window.sbImport.headers = parsed.headers;
+        window.sbImport.rows = parsed.rows;
+        buildMapping();
+      } catch(err){
+        console.error('Import parse error', err);
+        alert('Sorry, that file could not be read: ' + err.message);
+      }
+    };
+    if (isExcel) reader.readAsArrayBuffer(file); else reader.readAsText(file);
+  };
+
+  // ---------- mapping ----------
+  function norm(s){ return String(s||'').toLowerCase().replace(/^q\d+\s*[:.\-]?\s*/,'').replace(/[^a-z0-9]+/g,' ').trim(); }
+  function guessColumn(question, qIndex, headers){
+    const qn = norm(question.text || question.title || ('question ' + (qIndex+1)));
+    let hit = qn && headers.find(h => norm(h) === qn); if (hit) return hit;
+    hit = headers.find(h => new RegExp('^\\s*q'+(qIndex+1)+'\\b','i').test(h)); if (hit) return hit;
+    if (qn) hit = headers.find(h => { const hn = norm(h); return hn && (hn.includes(qn) || qn.includes(hn)); });
+    return hit || '';
+  }
+  function guessDateColumn(headers){ return headers.find(h => /submit|date|time|completed|created/i.test(h)) || ''; }
+
+  function buildMapping(){
+    const questions = (typeof sbGetAllQuestions === 'function') ? sbGetAllQuestions() : [];
+    const headers = window.sbImport.headers;
+    const mapping = {}; const used = new Set();
+    questions.forEach((q,i)=>{ const g = guessColumn(q,i,headers); if (g && !used.has(g)){ mapping[q.id]=g; used.add(g);} else mapping[q.id]=''; });
+    window.sbImport.mapping = mapping;
+    window.sbImport.dateCol = guessDateColumn(headers);
+
+    const dateOpts = '<option value="">— use today’s date —</option>' + headers.map(h=>`<option value="${escAttr(h)}" ${h===window.sbImport.dateCol?'selected':''}>${escHtml(h)}</option>`).join('');
+    let html = `<div class="sb-import-map-row"><div class="sb-import-q"><strong>Submitted date</strong><small>optional — when each response was completed</small></div><select onchange="sbImport.dateCol=this.value;sbImportRenderPreview()">${dateOpts}</select></div>`;
+    html += questions.map((q,i)=>{
+      const title = escHtml(q.text || q.title || ('Question '+(i+1)));
+      const opts = '<option value="">— ignore —</option>' + headers.map(h=>`<option value="${escAttr(h)}" ${h===mapping[q.id]?'selected':''}>${escHtml(h)}</option>`).join('');
+      return `<div class="sb-import-map-row"><div class="sb-import-q">Q${i+1}: ${title}<small>${escHtml(q.type||'')}</small></div><select onchange="sbImport.mapping['${q.id}']=this.value;sbImportRenderPreview()">${opts}</select></div>`;
+    }).join('');
+    document.getElementById('sb-import-mapping').innerHTML = html;
+
+    document.getElementById('sb-import-stage-file').style.display = 'none';
+    document.getElementById('sb-import-stage-map').style.display = '';
+    document.getElementById('sb-import-run-btn').style.display = '';
+    sbImportRenderPreview();
+  }
+
+  // ---------- coercion ----------
+  function coerceValue(raw, q){
+    if (raw === undefined || raw === null) return undefined;
+    let v = raw; const type = q.type;
+    if (typeof v === 'string') v = v.trim();
+    if (v === '') return undefined;
+    if (type === 'rating'){ const n = parseFloat(String(v).replace(/[^0-9.\-]/g,'')); return isNaN(n) ? undefined : n; }
+    if (type === 'multi' || type === 'checkboxes' || type === 'calendar'){
+      if (Array.isArray(v)) return v;
+      return String(v).split(/[;,|]/).map(s=>s.trim()).filter(Boolean);
+    }
+    if (type === 'engage'){ return [{ role:'user', content:String(v) }]; }
+    return String(v);
+  }
+  function coerceDisplay(raw, q){ const c = coerceValue(raw,q); if (c===undefined) return ''; if (Array.isArray(c)) return c.map(x=> (x && x.content) ? x.content : x).join(', '); return String(c); }
+
+  window.sbImportRenderPreview = function(){
+    const questions = (typeof sbGetAllQuestions === 'function') ? sbGetAllQuestions() : [];
+    const rows = window.sbImport.rows;
+    document.getElementById('sb-import-rowcount').textContent = '(' + rows.length + ' row' + (rows.length===1?'':'s') + ')';
+    let html = '<thead><tr><th>Submitted</th>' + questions.map((q,i)=>'<th>Q'+(i+1)+'</th>').join('') + '</tr></thead><tbody>';
+    rows.slice(0,8).forEach(r=>{
+      const dateVal = window.sbImport.dateCol ? r[window.sbImport.dateCol] : '';
+      html += '<tr><td>'+escHtml(dateVal || '(today)')+'</td>';
+      questions.forEach(q=>{ const col = window.sbImport.mapping[q.id]; html += '<td>'+escHtml(coerceDisplay(col ? r[col] : '', q))+'</td>'; });
+      html += '</tr>';
+    });
+    html += '</tbody>';
+    document.getElementById('sb-import-preview').innerHTML = html;
+  };
+
+  // ---------- run ----------
+  window.sbImportRun = async function(){
+    const questions = (typeof sbGetAllQuestions === 'function') ? sbGetAllQuestions() : [];
+    const rows = window.sbImport.rows, mapping = window.sbImport.mapping, dateCol = window.sbImport.dateCol;
+    if (!Object.values(mapping).some(Boolean)){ alert('Please map at least one column to a question before importing.'); return; }
+    const records = [];
+    rows.forEach(r=>{
+      const responses = {};
+      questions.forEach(q=>{ const col = mapping[q.id]; if (!col) return; const c = coerceValue(r[col], q); if (c !== undefined) responses[q.id] = c; });
+      if (!Object.keys(responses).length) return;
+      let completed_at = new Date().toISOString();
+      if (dateCol && r[dateCol]){ const d = new Date(r[dateCol]); if (!isNaN(d.getTime())) completed_at = d.toISOString(); }
+      records.push({ survey_id: sbCurrentSurvey.id, respondent_id: sbGenerateId(), responses, response_language: (sbCurrentSurvey.defaultLanguage||'EN-GB'), completed_at });
+    });
+    if (!records.length){ alert('No rows had any mapped answers to import.'); return; }
+
+    const btn = document.getElementById('sb-import-run-btn');
+    btn.disabled = true; const orig = btn.textContent; btn.textContent = 'Importing…';
+    try {
+      if (!window.supabaseClient) throw new Error('Database connection not available.');
+      for (let i=0;i<records.length;i+=200){
+        const { error } = await window.supabaseClient.from('survey_responses').insert(records.slice(i,i+200));
+        if (error) throw error;
+      }
+      showResult(true, records.length);
+    } catch(err){
+      console.error('Import failed', err);
+      showResult(false, 0, err.message || String(err));
+    } finally {
+      btn.disabled = false; btn.textContent = orig;
+    }
+  };
+
+  function showResult(ok, count, msg){
+    document.getElementById('sb-import-stage-map').style.display = 'none';
+    document.getElementById('sb-import-run-btn').style.display = 'none';
+    const stage = document.getElementById('sb-import-stage-result');
+    stage.style.display = '';
+    stage.innerHTML = ok
+      ? '<div style="text-align:center;padding:24px;"><div style="font-size:2.6rem;">✅</div><h3 style="margin:8px 0 4px;">Imported '+count+' response'+(count===1?'':'s')+'</h3><p style="color:#64748b;margin:0;">They’re now in your Responses and Analytics.</p></div>'
+      : '<div style="text-align:center;padding:24px;"><div style="font-size:2.6rem;">⚠️</div><h3 style="margin:8px 0 4px;">Import failed</h3><p style="color:#64748b;margin:0;">'+escHtml(msg||'Unknown error')+'</p></div>';
+    if (ok) setTimeout(()=>{ sbCloseImportModal(); if (typeof sbShowResponsesTab==='function') sbShowResponsesTab(); }, 1300);
+  }
+
+  // ---------- drag & drop ----------
+  var drop = document.getElementById('sb-import-drop');
+  if (drop){
+    ['dragenter','dragover'].forEach(ev=> drop.addEventListener(ev, function(e){ e.preventDefault(); drop.classList.add('dragover'); }));
+    ['dragleave','drop'].forEach(ev=> drop.addEventListener(ev, function(e){ e.preventDefault(); drop.classList.remove('dragover'); }));
+    drop.addEventListener('drop', function(e){ const f = e.dataTransfer && e.dataTransfer.files; if (f && f[0]){ const inp = document.getElementById('sb-import-file'); inp.files = f; sbImportHandleFile(inp); } });
+  }
 })();
 </script>
 
