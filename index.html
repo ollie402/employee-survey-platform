@@ -4727,7 +4727,7 @@
            incomplete step is expanded; the others collapse to their header.
            Hovering a collapsed card re-inflates it; it deflates on mouse-leave.
            Everything except the header collapses (body + the Create/Save row). */
-        #chat-editor-tab-setup .rw-left-col > .rw-card > :not(.rw-card-header) {
+        #chat-editor-tab-setup .rw-inflatable > :not(.rw-card-header) {
           overflow: hidden;
           max-height: 800px;
           opacity: 1;
@@ -4738,10 +4738,7 @@
                       padding 0.6s cubic-bezier(0.22, 1, 0.36, 1),
                       margin 0.6s cubic-bezier(0.22, 1, 0.36, 1);
         }
-        #chat-editor-tab-setup .rw-left-col > .rw-card.rw-collapsed {
-          cursor: pointer;
-        }
-        #chat-editor-tab-setup .rw-left-col > .rw-card.rw-collapsed > :not(.rw-card-header) {
+        #chat-editor-tab-setup .rw-inflatable.rw-collapsed > :not(.rw-card-header) {
           max-height: 0;
           opacity: 0;
           transform: translateY(-10px);
@@ -4750,20 +4747,41 @@
           margin-top: 0;
           margin-bottom: 0;
         }
-        #chat-editor-tab-setup .rw-left-col > .rw-card.rw-collapsed:hover > :not(.rw-card-header) {
-          max-height: 800px;
-          opacity: 1;
-          transform: translateY(0);
-          /* Wait ~0.28s before inflating so a quick cursor pass-over (e.g. on the
-             way to the Access dropdown) doesn't trigger it; deflate stays instant. */
-          transition-delay: 0.28s;
+
+        /* Collapse/expand chevron in each Setup card header (manual toggle) */
+        #chat-editor-tab-setup .rw-collapse-toggle {
+          margin-left: auto;
+          background: none;
+          border: none;
+          padding: 4px;
+          cursor: pointer;
+          color: #94a3b8;
+          display: flex;
+          align-items: center;
+          flex-shrink: 0;
+          transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), color 0.15s;
         }
-        /* Restore the natural padding when a collapsed card is hovered open */
-        #chat-editor-tab-setup .rw-left-col > .rw-card.rw-collapsed:hover > .rw-card-body {
-          padding-top: 20px; padding-bottom: 20px;
+        #chat-editor-tab-setup .rw-collapse-toggle:hover { color: #475569; }
+        #chat-editor-tab-setup .rw-collapse-toggle svg { width: 18px; height: 18px; }
+        #chat-editor-tab-setup .rw-inflatable.rw-collapsed .rw-collapse-toggle { transform: rotate(-90deg); }
+
+        /* Access + Notifications split into two full-width, side-by-side boxes */
+        #chat-editor-tab-setup .rw-split-row {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 14px;
+          align-items: start;
         }
-        #chat-editor-tab-setup .rw-left-col > .rw-card.rw-collapsed:hover > .rw-save-section {
-          padding-top: 16px; padding-bottom: 16px;
+        /* Standalone Create/Save row — drop the divider line and right-align the buttons */
+        #chat-editor-tab-setup #lc-actions-card .rw-save-section { border-top: none; justify-content: flex-end; }
+        /* Stop the Save button stretching full-width (.rw-btn-save sets width:100%/flex:1),
+           which was squashing the Create Chat button to a sliver */
+        #chat-editor-tab-setup #lc-actions-card .rw-btn-save { width: auto; flex: 0 0 auto; }
+        /* No white card behind the action buttons — just the buttons, bottom-right */
+        #chat-editor-tab-setup #lc-actions-card {
+          background: transparent;
+          border: none;
+          box-shadow: none;
         }
 
         /* Show Getting Started above the "Your Chat Link" card in the right column (Listen) */
@@ -5433,7 +5451,7 @@
                               <div class="rw-left-col">
 
                                 <!-- Card 1: Chat Configuration -->
-                                <div class="rw-card">
+                                <div class="rw-card rw-inflatable" id="lc-config-card">
                                   <div class="rw-card-header">
                                     <div class="rw-card-header-icon purple">
                                       <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
@@ -5442,6 +5460,9 @@
                                       <div class="rw-card-title">Chat Configuration</div>
                                       <div class="rw-card-subtitle">Set up how your chat appears to participants</div>
                                     </div>
+                                    <button class="rw-collapse-toggle" type="button" onclick="rwToggleCard(this)" aria-label="Collapse section">
+                                      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                    </button>
                                   </div>
                                   <div class="rw-card-body">
                                     <div class="rw-field">
@@ -5462,58 +5483,88 @@
                                   </div>
                                 </div>
 
-                                <!-- Card 2: Access & Notifications -->
-                                <div class="rw-card">
-                                  <div class="rw-card-header">
-                                    <div class="rw-card-header-icon pink">
-                                      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-                                    </div>
-                                    <div>
-                                      <div class="rw-card-title">Access & Notifications</div>
-                                      <div class="rw-card-subtitle">Control who can respond and how you're alerted</div>
-                                    </div>
-                                  </div>
-                                  <div class="rw-card-body">
-                                    <div class="rw-field">
-                                      <label>
-                                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064"/></svg>
-                                        Access Type
-                                      </label>
-                                      <select id="chat-access-type">
-                                          <option value="" disabled selected>Select access type…</option>
-                                          <option value="open">Open Access - Anyone with the link can respond</option>
-                                          <option value="closed">Closed Access - Only invited participants via unique links</option>
-                                          <option value="combined">Combined Access - Public link AND invited participants</option>
-                                      </select>
-                                    </div>
-                                    <div class="rw-field">
-                                      <label>
-                                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
-                                        Submission Notifications
-                                      </label>
-                                      <select id="chat-notification-frequency">
-                                          <option value="">Use my default setting</option>
-                                          <option value="instant">Every submission (instant)</option>
-                                          <option value="daily">Daily digest</option>
-                                          <option value="weekly">Weekly digest</option>
-                                          <option value="never">Never</option>
-                                      </select>
-                                      <div class="rw-hint">Override your global notification setting for this specific chat.</div>
-                                    </div>
-                                    <div class="rw-notif-row">
-                                      <div class="rw-notif-left">
-                                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                                        <span>Notifications active — using your default setting</span>
+                                <!-- Access + Notifications: split into two full-width side-by-side boxes -->
+                                <div class="rw-split-row">
+
+                                  <!-- Access (left) -->
+                                  <div class="rw-card rw-inflatable" id="lc-access-card">
+                                    <div class="rw-card-header">
+                                      <div class="rw-card-header-icon pink">
+                                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
                                       </div>
-                                      <div class="rw-notif-pill">Instant</div>
+                                      <div>
+                                        <div class="rw-card-title">Access</div>
+                                        <div class="rw-card-subtitle">Control who can respond</div>
+                                      </div>
+                                      <button class="rw-collapse-toggle" type="button" onclick="rwToggleCard(this)" aria-label="Collapse section">
+                                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                      </button>
+                                    </div>
+                                    <div class="rw-card-body">
+                                      <div class="rw-field">
+                                        <label>
+                                          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064"/></svg>
+                                          Access Type
+                                        </label>
+                                        <select id="chat-access-type">
+                                            <option value="" disabled selected>Select access type…</option>
+                                            <option value="open">Open Access - Anyone with the link can respond</option>
+                                            <option value="closed">Closed Access - Only invited participants via unique links</option>
+                                            <option value="combined">Combined Access - Public link AND invited participants</option>
+                                        </select>
+                                      </div>
                                     </div>
                                   </div>
+
+                                  <!-- Notifications (right) -->
+                                  <div class="rw-card rw-inflatable" id="lc-notifs-card">
+                                    <div class="rw-card-header">
+                                      <div class="rw-card-header-icon pink">
+                                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                                      </div>
+                                      <div>
+                                        <div class="rw-card-title">Notifications</div>
+                                        <div class="rw-card-subtitle">How you're alerted to responses</div>
+                                      </div>
+                                      <button class="rw-collapse-toggle" type="button" onclick="rwToggleCard(this)" aria-label="Collapse section">
+                                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                      </button>
+                                    </div>
+                                    <div class="rw-card-body">
+                                      <div class="rw-field">
+                                        <label>
+                                          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                                          Submission Notifications
+                                        </label>
+                                        <select id="chat-notification-frequency">
+                                            <option value="">Use my default setting</option>
+                                            <option value="instant">Every submission (instant)</option>
+                                            <option value="daily">Daily digest</option>
+                                            <option value="weekly">Weekly digest</option>
+                                            <option value="never">Never</option>
+                                        </select>
+                                        <div class="rw-hint">Override your global notification setting for this specific chat.</div>
+                                      </div>
+                                      <div class="rw-notif-row">
+                                        <div class="rw-notif-left">
+                                          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                          <span>Notifications active — using your default setting</span>
+                                        </div>
+                                        <div class="rw-notif-pill">Instant</div>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                </div>
+
+                                <!-- Create / Save (full width, below the split) -->
+                                <div class="rw-card" id="lc-actions-card">
                                   <div class="rw-save-section">
                                     <button id="create-chat-btn" class="rw-btn-create" onclick="createChat(this)">
                                       <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                                       Create Chat
                                     </button>
-                                    <button onclick="saveListeningAll(this)" id="save-chat-btn" class="rw-btn-save" style="flex:1; padding:11px 20px; background:linear-gradient(135deg,#6c63ff,#8b5cf6) !important; color:#fff !important; border:none; border-radius:9px; font-size:13.5px; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; box-shadow:0 4px 14px rgba(108,99,255,0.35); width:100%;">
+                                    <button onclick="saveListeningAll(this)" id="save-chat-btn" class="rw-btn-save" style="flex:0 0 auto; padding:11px 22px; background:linear-gradient(135deg,#6c63ff,#8b5cf6) !important; color:#fff !important; border:none; border-radius:9px; font-size:13.5px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:8px; box-shadow:0 2px 8px rgba(108,99,255,0.25);">
                                       <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                                       Save Changes
                                     </button>
@@ -20792,36 +20843,12 @@ function gsUpdateProgress() {
     var bar = document.getElementById('gs-progress-bar');
     if (label) label.textContent = done + '/' + total + ' complete';
     if (bar) bar.style.width = (total > 0 ? Math.round((done / total) * 100) : 0) + '%';
-    updateListenCardInflation();
 }
 
-// Is a given Getting Started step currently complete?
-function gsKeyDone(key) {
-    var i = gsCurrentSteps.indexOf(key);
-    return i !== -1 && !!gsStepState[i];
-}
-
-// "Inflatable" Setup cards: expand the card holding the next incomplete step,
-// collapse the rest. Box 1 (Chat Config: name + welcome) stays inflated until
-// both are done, then it deflates and Box 2 (Access) inflates.
-function updateListenCardInflation() {
-    var cards = document.querySelectorAll('#chat-editor-tab-setup .rw-left-col > .rw-card');
-    if (cards.length < 2) return;
-    var configCard = cards[0]; // Chat Name + Welcome Message
-    var accessCard = cards[1]; // Access & Notifications (+ Create/Save)
-    // Base this on the actual field values, NOT gsStepState — changing the access
-    // type rebuilds the checklist and momentarily resets gsStepState, which would
-    // otherwise make the top card flash open and re-collapse.
-    var nameEl = document.getElementById('chat-setup-name');
-    var welcomeEl = document.getElementById('chat-setup-welcome');
-    var configDone = !!(nameEl && nameEl.value.trim()) && !!(welcomeEl && welcomeEl.value.trim());
-    if (!configDone) {
-        configCard.classList.remove('rw-collapsed');
-        accessCard.classList.add('rw-collapsed');
-    } else {
-        configCard.classList.add('rw-collapsed');
-        accessCard.classList.remove('rw-collapsed');
-    }
+// Manual collapse/expand: the chevron in each Setup card's header toggles it.
+function rwToggleCard(btn) {
+    var card = btn.closest('.rw-card');
+    if (card) card.classList.toggle('rw-collapsed');
 }
 
 function gsRebuildForAccessType(accessType) {
