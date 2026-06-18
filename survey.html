@@ -840,14 +840,26 @@
         }
 
         // Show landing page
+        // Read the per-survey logo (stored on the survey object inside the data JSONB column)
+        function getSurveyLogo() {
+            try {
+                const d = typeof currentSurvey.data === 'string' ? JSON.parse(currentSurvey.data) : currentSurvey.data;
+                return d && d.surveyLogo ? d.surveyLogo : '';
+            } catch (e) {
+                return '';
+            }
+        }
+
         function showLanding() {
             document.getElementById('survey-loading').style.display = 'none';
             document.getElementById('survey-landing').style.display = 'block';
 
             const landingContent = currentSurvey.landing_page_content || 'Thank you for taking the time to complete this survey. Your feedback is valuable to us.';
+            const logo = getSurveyLogo();
 
             document.getElementById('survey-landing').innerHTML = `
                 <div class="landing-container">
+                    ${logo ? `<img class="survey-logo notranslate" src="${logo}" alt="Company logo" style="max-height:90px;max-width:240px;object-fit:contain;display:block;margin:0 auto 1.5rem;">` : ''}
                     <h1>${currentSurvey.name || 'Survey'}</h1>
                     ${currentSurvey.description ? `<p class="landing-description">${currentSurvey.description}</p>` : ''}
                     <p class="landing-description">${landingContent}</p>
@@ -895,8 +907,10 @@
                 return;
             }
 
+            const headerLogo = getSurveyLogo();
             let html = `
                 <div class="survey-header">
+                    ${headerLogo ? `<img class="survey-logo notranslate" src="${headerLogo}" alt="Company logo" style="max-height:64px;max-width:200px;object-fit:contain;display:block;margin:0 auto 1rem;">` : ''}
                     <h1 class="survey-title">${survey.name || 'Survey'}</h1>
                     ${survey.description ? `<p class="survey-description">${survey.description}</p>` : ''}
                 </div>

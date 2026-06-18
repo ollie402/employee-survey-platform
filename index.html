@@ -7136,6 +7136,14 @@
                                         <textarea id="sb-landing-content" class="sb-landing-textarea"></textarea>
                                     </div>
 
+                                    <!-- Survey Logo -->
+                                    <div class="sb-settings-section">
+                                        <h3 class="sb-settings-section-title">Survey Logo</h3>
+                                        <p style="font-size:0.85rem;color:#666;margin-bottom:0.5rem;">Shown to participants at the top of the survey. PNG or JPG, up to 2MB.</p>
+                                        <input type="file" id="sb-survey-logo-input" accept="image/*" style="display:none;" onchange="sbHandleLogoUpload(event)">
+                                        <div id="sb-survey-logo-preview"></div>
+                                    </div>
+
                                     <!-- Thank You -->
                                     <div class="sb-settings-section">
                                         <h3 class="sb-settings-section-title">Confirmation Message</h3>
@@ -13873,6 +13881,7 @@ function sbCreateDefaultSurvey() {
         endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
         landingPageContent: 'Thank you for taking the time to complete this survey. Your feedback is valuable to us.',
         thankYouContent: 'Your response has been recorded. Thank you for your feedback!',
+        surveyLogo: '',
         pages: [{ id: sbGenerateShortCode(), title: 'Page 1', instructions: '', questions: [], logic: [] }],
         createdAt: new Date().toISOString()
     };
@@ -19160,6 +19169,59 @@ function sbRenderSettings() {
     const thankyouContent = document.getElementById('sb-thankyou-content');
     if (landingContent) landingContent.value = sbCurrentSurvey.landingPageContent;
     if (thankyouContent) thankyouContent.value = sbCurrentSurvey.thankYouContent;
+
+    // Survey logo
+    sbRenderLogoPreview();
+}
+
+// Render the survey-logo preview / upload prompt in Settings
+function sbRenderLogoPreview() {
+    const el = document.getElementById('sb-survey-logo-preview');
+    if (!el) return;
+    const logo = sbCurrentSurvey && sbCurrentSurvey.surveyLogo;
+    if (logo) {
+        el.innerHTML = `
+            <div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;">
+                <img src="${logo}" alt="Survey logo" style="max-height:64px;max-width:160px;object-fit:contain;border:1px solid #e2e2e2;border-radius:6px;padding:4px;background:#fff;">
+                <button type="button" onclick="document.getElementById('sb-survey-logo-input').click()" style="padding:6px 12px;border:1px solid #d0d0d0;border-radius:6px;background:#fff;cursor:pointer;font-size:0.85rem;">Replace</button>
+                <button type="button" onclick="sbRemoveSurveyLogo()" style="padding:6px 12px;border:1px solid #d0d0d0;border-radius:6px;background:#fff;cursor:pointer;font-size:0.85rem;color:#c0392b;">Remove</button>
+            </div>`;
+    } else {
+        el.innerHTML = `
+            <div onclick="document.getElementById('sb-survey-logo-input').click()" style="cursor:pointer;text-align:center;padding:1.25rem;border:2px dashed #d0d0d0;border-radius:8px;">
+                <div style="font-size:2rem;margin-bottom:0.4rem;">📎</div>
+                <div><strong>Click to upload logo</strong></div>
+                <div style="color:#888;font-size:0.8rem;margin-top:0.25rem;">PNG, JPG up to 2MB</div>
+            </div>`;
+    }
+}
+
+// Handle a survey-logo file selection (base64, stored on the survey object)
+function sbHandleLogoUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) {
+        showToast('File size must be less than 2MB', 'error');
+        event.target.value = '';
+        return;
+    }
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        if (sbCurrentSurvey) {
+            sbCurrentSurvey.surveyLogo = e.target.result;
+            sbRenderLogoPreview();
+            showToast('✅ Logo added — remember to Save', 'success');
+        }
+    };
+    reader.readAsDataURL(file);
+    event.target.value = '';
+}
+
+function sbRemoveSurveyLogo() {
+    if (sbCurrentSurvey) {
+        sbCurrentSurvey.surveyLogo = '';
+        sbRenderLogoPreview();
+    }
 }
 
 function sbSetThemeColor(name) {
