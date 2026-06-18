@@ -4723,6 +4723,52 @@
           display: none !important;
         }
 
+        /* "Inflatable" Setup cards (Listen): the card holding the next
+           incomplete step is expanded; the others collapse to their header.
+           Hovering a collapsed card re-inflates it; it deflates on mouse-leave.
+           Everything except the header collapses (body + the Create/Save row). */
+        #chat-editor-tab-setup .rw-left-col > .rw-card > :not(.rw-card-header) {
+          overflow: hidden;
+          max-height: 800px;
+          opacity: 1;
+          transform: translateY(0);
+          transition: max-height 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+                      opacity 0.45s ease,
+                      transform 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+                      padding 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+                      margin 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        #chat-editor-tab-setup .rw-left-col > .rw-card.rw-collapsed {
+          cursor: pointer;
+        }
+        #chat-editor-tab-setup .rw-left-col > .rw-card.rw-collapsed > :not(.rw-card-header) {
+          max-height: 0;
+          opacity: 0;
+          transform: translateY(-10px);
+          padding-top: 0;
+          padding-bottom: 0;
+          margin-top: 0;
+          margin-bottom: 0;
+        }
+        #chat-editor-tab-setup .rw-left-col > .rw-card.rw-collapsed:hover > :not(.rw-card-header) {
+          max-height: 800px;
+          opacity: 1;
+          transform: translateY(0);
+          /* Wait ~0.28s before inflating so a quick cursor pass-over (e.g. on the
+             way to the Access dropdown) doesn't trigger it; deflate stays instant. */
+          transition-delay: 0.28s;
+        }
+        /* Restore the natural padding when a collapsed card is hovered open */
+        #chat-editor-tab-setup .rw-left-col > .rw-card.rw-collapsed:hover > .rw-card-body {
+          padding-top: 20px; padding-bottom: 20px;
+        }
+        #chat-editor-tab-setup .rw-left-col > .rw-card.rw-collapsed:hover > .rw-save-section {
+          padding-top: 16px; padding-bottom: 16px;
+        }
+
+        /* Show Getting Started above the "Your Chat Link" card in the right column (Listen) */
+        #chat-editor-tab-setup .rw-right-col #getting-started-box { order: -1; }
+
         /* Topic tags — teal */
         #engage-chat-editor-section .rw-tag {
           background: #E1F5EE; color: #085041;
@@ -20746,6 +20792,36 @@ function gsUpdateProgress() {
     var bar = document.getElementById('gs-progress-bar');
     if (label) label.textContent = done + '/' + total + ' complete';
     if (bar) bar.style.width = (total > 0 ? Math.round((done / total) * 100) : 0) + '%';
+    updateListenCardInflation();
+}
+
+// Is a given Getting Started step currently complete?
+function gsKeyDone(key) {
+    var i = gsCurrentSteps.indexOf(key);
+    return i !== -1 && !!gsStepState[i];
+}
+
+// "Inflatable" Setup cards: expand the card holding the next incomplete step,
+// collapse the rest. Box 1 (Chat Config: name + welcome) stays inflated until
+// both are done, then it deflates and Box 2 (Access) inflates.
+function updateListenCardInflation() {
+    var cards = document.querySelectorAll('#chat-editor-tab-setup .rw-left-col > .rw-card');
+    if (cards.length < 2) return;
+    var configCard = cards[0]; // Chat Name + Welcome Message
+    var accessCard = cards[1]; // Access & Notifications (+ Create/Save)
+    // Base this on the actual field values, NOT gsStepState — changing the access
+    // type rebuilds the checklist and momentarily resets gsStepState, which would
+    // otherwise make the top card flash open and re-collapse.
+    var nameEl = document.getElementById('chat-setup-name');
+    var welcomeEl = document.getElementById('chat-setup-welcome');
+    var configDone = !!(nameEl && nameEl.value.trim()) && !!(welcomeEl && welcomeEl.value.trim());
+    if (!configDone) {
+        configCard.classList.remove('rw-collapsed');
+        accessCard.classList.add('rw-collapsed');
+    } else {
+        configCard.classList.add('rw-collapsed');
+        accessCard.classList.remove('rw-collapsed');
+    }
 }
 
 function gsRebuildForAccessType(accessType) {
