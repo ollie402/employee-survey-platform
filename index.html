@@ -19990,6 +19990,11 @@ async function createChat(btn) {
         document.getElementById('chat-setup-name').focus();
         return;
     }
+    if (!accessType) {
+        alert('Please choose an access type first.');
+        document.getElementById('chat-access-type').focus();
+        return;
+    }
 
     var existingId = currentChatId || window.currentEditingChatId;
 
@@ -20397,6 +20402,12 @@ async function saveListeningAll(btn) {
         alert('Please enter a chat name on the Setup tab first');
         return;
     }
+    if (!accessType) {
+        alert('Please choose an access type before saving.');
+        var accSel = document.getElementById('chat-access-type');
+        if (accSel) accSel.focus();
+        return;
+    }
 
     const originalHTML = btn.innerHTML;
     btn.disabled = true;
@@ -20462,6 +20473,14 @@ async function saveListeningAll(btn) {
             currentChatId = newChat.id;
             window.currentEditingChatId = newChat.id;
             window.currentEditingChat = newChat;
+            // Surface the participant link now that the chat exists, and flip the
+            // link button from "Create chat / link" to "Copy"
+            var genLink = document.getElementById('generatedChatLink');
+            if (genLink && newChat.slug) genLink.value = 'https://rworldfeedback.co.uk/chat/' + newChat.slug;
+            var sp = document.getElementById('chat-success-panel');
+            if (sp) sp.style.display = 'block';
+            if (typeof updateLinkPanelForAccessType === 'function') updateLinkPanelForAccessType();
+            if (typeof rwSyncChatLinkButton === 'function') rwSyncChatLinkButton();
         } else {
             // EXISTING CHAT: update settings
             const updateData = {
