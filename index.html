@@ -31,6 +31,11 @@
             border-top: none;
             border-radius: 0 0 8px 8px;
         }
+        /* Simplified rich-text editor for the chat Welcome Message */
+        #chat-setup-welcome-editor .ql-editor { min-height: 92px; font-size: 14px; font-family: inherit; }
+        #chat-setup-welcome-editor .ql-editor.ql-blank::before { font-style: normal; color: #94a3b8; left: 15px; right: 15px; }
+        #chat-setup-welcome-wrap .ql-toolbar.ql-snow { border: 1px solid #cbd5e1; border-radius: 8px 8px 0 0; background: #f8fafc; }
+        #chat-setup-welcome-wrap .ql-container.ql-snow { border: 1px solid #cbd5e1; border-top: none; border-radius: 0 0 8px 8px; }
         /* Email subject row – Gmail-style bar above Quill toolbar */
         .email-subject-row {
             display: flex;
@@ -4632,19 +4637,11 @@
         /* Chat link card: always visible in the grid, never collapse */
         #chat-success-panel.rw-card { display: block !important; }
 
-        /* Placeholder state: when JS sets display:none, show card greyed-out instead */
-        #chat-success-panel[style*="display: none"] .rw-link-panel,
-        #chat-success-panel[style*="display:none"] .rw-link-panel {
-          opacity: 0.35; pointer-events: none;
-        }
-        #chat-success-panel[style*="display: none"] .rw-link-actions,
-        #chat-success-panel[style*="display:none"] .rw-link-actions {
-          pointer-events: none; opacity: 0.35;
-        }
-        #chat-success-panel[style*="display: none"] .rw-card-subtitle::after,
-        #chat-success-panel[style*="display:none"] .rw-card-subtitle::after {
-          content: ' — create a chat first';
-          font-style: italic;
+        /* Before a link exists, the URL box reads as a placeholder, but the action
+           button stays active so it can act as the "Create chat / link" trigger. */
+        #chat-success-panel[style*="display: none"] .rw-link-display,
+        #chat-success-panel[style*="display:none"] .rw-link-display {
+          opacity: 0.45;
         }
 
         /* Disabled state for link panel when Closed access is selected */
@@ -5522,7 +5519,8 @@
                                         <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"/></svg>
                                         Welcome Message
                                       </label>
-                                      <textarea id="chat-setup-welcome" rows="4" placeholder="Hi! Thanks for taking the time to share your feedback with us. Please feel free to tell us about your experience or any suggestions you might have."></textarea>
+                                      <div id="chat-setup-welcome-wrap"><div id="chat-setup-welcome-editor"></div></div>
+                                      <textarea id="chat-setup-welcome" style="display:none;"></textarea>
                                       <div class="rw-hint">This message will appear when participants first open the chat.</div>
                                     </div>
                                   </div>
@@ -5605,10 +5603,6 @@
                                 <!-- Create / Save (full width, below the split) -->
                                 <div class="rw-card" id="lc-actions-card">
                                   <div class="rw-save-section">
-                                    <button id="create-chat-btn" class="rw-btn-create" onclick="createChat(this)">
-                                      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                                      Create Chat
-                                    </button>
                                     <button onclick="saveListeningAll(this)" id="save-chat-btn" class="rw-btn-save" style="flex:0 0 auto; padding:11px 22px; background:linear-gradient(135deg,#6c63ff,#8b5cf6) !important; color:#fff !important; border:none; border-radius:9px; font-size:13.5px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:8px; box-shadow:0 2px 8px rgba(108,99,255,0.25);">
                                       <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                                       Save Changes
@@ -5640,11 +5634,11 @@
                                         <input type="text" id="generatedChatLink" readonly>
                                       </div>
                                       <div class="rw-link-actions">
-                                        <button onclick="copyGeneratedLink()" id="copyLinkBtn" class="rw-btn-copy" style="flex:1; padding:9px; background:#6c63ff !important; color:#fff !important; border:none; border-radius:7px; font-size:12.5px; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;">
-                                          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:14px;height:14px;flex-shrink:0;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
-                                          Copy Link
+                                        <button onclick="rwChatLinkAction()" id="copyLinkBtn" class="rw-btn-copy" style="flex:1; padding:9px; background:#6c63ff !important; color:#fff !important; border:none; border-radius:7px; font-size:12.5px; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;">
+                                          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:14px;height:14px;flex-shrink:0;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                          Create chat / link
                                         </button>
-                                        <button class="rw-btn-qr" title="QR Code (coming soon)" style="width:38px;height:38px;flex-shrink:0;padding:0;">
+                                        <button class="rw-btn-qr" onclick="rwShowChatQR()" title="Show QR code" style="width:38px;height:38px;flex-shrink:0;padding:0;">
                                           <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
                                         </button>
                                       </div>
@@ -7735,6 +7729,8 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <!-- SheetJS for parsing imported Excel (.xlsx) response files -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<!-- qrcode-generator for the chat-link QR code -->
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <script src="assets/js/analytics-dashboard.js"></script>
 <script src="assets/js/auth-wizard.js"></script>
 <script src="assets/js/app.js?v=20250908-2125"></script>
@@ -7867,6 +7863,24 @@ function initQuillEditors() {
 
     quillInviteEditor.root.innerHTML = defaultInvite;
     quillReminderEditor.root.innerHTML = defaultReminder;
+
+    // Simplified rich-text editor for the chat Welcome Message (bold/italic/underline,
+    // colour, lists). Mirrors its HTML into the hidden #chat-setup-welcome textarea so
+    // every existing read of that field keeps working unchanged.
+    if (document.getElementById('chat-setup-welcome-editor')) {
+        quillWelcomeEditor = new Quill('#chat-setup-welcome-editor', {
+            theme: 'snow',
+            modules: { toolbar: [['bold', 'italic', 'underline'], [{ 'color': [] }], [{ 'list': 'ordered' }, { 'list': 'bullet' }]] },
+            placeholder: 'Hi! Thanks for taking the time to share your feedback with us. Please feel free to tell us about your experience or any suggestions you might have.'
+        });
+        var welcomeMirror = document.getElementById('chat-setup-welcome');
+        quillWelcomeEditor.on('text-change', function () {
+            if (!welcomeMirror) return;
+            var plain = quillWelcomeEditor.getText().trim();
+            welcomeMirror.value = plain ? quillWelcomeEditor.root.innerHTML : '';
+            welcomeMirror.dispatchEvent(new Event('input'));
+        });
+    }
 }
 
 // Helper to get HTML from Quill editors
@@ -7893,6 +7907,21 @@ function setReminderEditorHTML(html) {
     if (quillReminderEditor) { quillReminderEditor.root.innerHTML = html; return; }
     var el = document.getElementById('email-reminder-template');
     if (el) el.value = html;
+}
+
+// Set the chat Welcome Message editor (and keep the hidden mirror textarea in sync).
+// Emptiness is judged from the HTML string (Quill's getText() is stale right after a
+// direct innerHTML set), so clearing reliably leaves the mirror as ''.
+function setWelcomeEditorHTML(html) {
+    var mirror = document.getElementById('chat-setup-welcome');
+    var raw = (html || '').trim();
+    var isEmpty = !raw || raw === '<p><br></p>' || raw.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, '').trim() === '';
+    if (typeof quillWelcomeEditor !== 'undefined' && quillWelcomeEditor) {
+        quillWelcomeEditor.root.innerHTML = isEmpty ? '<p><br></p>' : html;
+        if (mirror) mirror.value = isEmpty ? '' : html;
+        return;
+    }
+    if (mirror) mirror.value = isEmpty ? '' : html;
 }
 
 // Initialize editors once DOM is ready
@@ -14163,7 +14192,7 @@ function openChatEditor(chatId = null) {
         // New chat - reset form
         document.getElementById('chat-editor-name').value = '';
         document.getElementById('chat-setup-name').value = '';
-        document.getElementById('chat-setup-welcome').value = '';
+        if (typeof setWelcomeEditorHTML === 'function') setWelcomeEditorHTML(''); else document.getElementById('chat-setup-welcome').value = '';
         // Reset dropdown to unselected — user must actively choose an access type
         const accessDropdown = document.getElementById('chat-access-type');
         if (accessDropdown) accessDropdown.value = '';
@@ -14176,9 +14205,7 @@ function openChatEditor(chatId = null) {
         // Clear participants data for new chat
         chatParticipantsData = [];
         if (typeof updateLinkPanelForAccessType === 'function') updateLinkPanelForAccessType();
-        // Show Create Chat button for new chats
-        var createBtn = document.getElementById('create-chat-btn');
-        if (createBtn) { createBtn.style.display = ''; createBtn.textContent = 'Create Chat'; }
+        if (typeof rwSyncChatLinkButton === 'function') rwSyncChatLinkButton(); // new chat → "Create chat / link"
     } else {
         // Existing chat - load from database
         loadChatIntoEditor(chatId);
@@ -14222,7 +14249,8 @@ async function loadChatIntoEditor(chatId) {
 
         if (chatEditorName) chatEditorName.value = chat.name || '';
         if (chatSetupName) chatSetupName.value = chat.name || '';
-        if (chatSetupWelcome) chatSetupWelcome.value = chat.welcome_message || '';
+        if (typeof setWelcomeEditorHTML === 'function') setWelcomeEditorHTML(chat.welcome_message || '');
+        else if (chatSetupWelcome) chatSetupWelcome.value = chat.welcome_message || '';
 
         // Set access type dropdown value
         const accessTypeDropdown = document.getElementById('chat-access-type');
@@ -14275,6 +14303,7 @@ async function loadChatIntoEditor(chatId) {
                 generatedChatLink.value = 'https://rworldfeedback.co.uk/chat/' + chat.slug;
             }
         }
+        if (typeof rwSyncChatLinkButton === 'function') rwSyncChatLinkButton(); // existing chat → "Copy"
 
         // Load email template content into Quill editors
         if (chat.email_invite_text) setInviteEditorHTML(chat.email_invite_text);
@@ -14806,6 +14835,7 @@ function showSuccessPanelWithLink(chatName) {
 
     // Show success panel
     successPanel.style.display = 'block';
+    if (typeof rwSyncChatLinkButton === 'function') rwSyncChatLinkButton();
 }
 
 // Show participant entry panel for Invite Only
@@ -19960,6 +19990,11 @@ async function createChat(btn) {
         document.getElementById('chat-setup-name').focus();
         return;
     }
+    if (!accessType) {
+        alert('Please choose an access type first.');
+        document.getElementById('chat-access-type').focus();
+        return;
+    }
 
     var existingId = currentChatId || window.currentEditingChatId;
 
@@ -19984,10 +20019,11 @@ async function createChat(btn) {
     } catch (error) {
         console.error('Error creating chat:', error);
     } finally {
-        // Restore button
+        // Restore button — reflects link state (becomes "Copy" once the link exists)
         if (btn) {
             btn.disabled = false;
-            btn.innerHTML = 'Create Chat';
+            if (typeof rwSyncChatLinkButton === 'function') rwSyncChatLinkButton();
+            else btn.innerHTML = 'Create chat / link';
         }
     }
 }
@@ -20366,6 +20402,12 @@ async function saveListeningAll(btn) {
         alert('Please enter a chat name on the Setup tab first');
         return;
     }
+    if (!accessType) {
+        alert('Please choose an access type before saving.');
+        var accSel = document.getElementById('chat-access-type');
+        if (accSel) accSel.focus();
+        return;
+    }
 
     const originalHTML = btn.innerHTML;
     btn.disabled = true;
@@ -20431,6 +20473,14 @@ async function saveListeningAll(btn) {
             currentChatId = newChat.id;
             window.currentEditingChatId = newChat.id;
             window.currentEditingChat = newChat;
+            // Surface the participant link now that the chat exists, and flip the
+            // link button from "Create chat / link" to "Copy"
+            var genLink = document.getElementById('generatedChatLink');
+            if (genLink && newChat.slug) genLink.value = 'https://rworldfeedback.co.uk/chat/' + newChat.slug;
+            var sp = document.getElementById('chat-success-panel');
+            if (sp) sp.style.display = 'block';
+            if (typeof updateLinkPanelForAccessType === 'function') updateLinkPanelForAccessType();
+            if (typeof rwSyncChatLinkButton === 'function') rwSyncChatLinkButton();
         } else {
             // EXISTING CHAT: update settings
             const updateData = {
@@ -22879,6 +22929,96 @@ function engageGsReset() {
     ['dragleave','drop'].forEach(ev=> drop.addEventListener(ev, function(e){ e.preventDefault(); drop.classList.remove('dragover'); }));
     drop.addEventListener('drop', function(e){ const f = e.dataTransfer && e.dataTransfer.files; if (f && f[0]){ const inp = document.getElementById('sb-import-file'); inp.files = f; sbImportHandleFile(inp); } });
   }
+})();
+</script>
+
+<!-- ===== Chat-link QR code (Listen) ===== -->
+<style>
+  .rw-qr-overlay { position:fixed; inset:0; background:rgba(15,23,42,0.55); z-index:100000; display:flex; align-items:center; justify-content:center; padding:20px; }
+  .rw-qr-dialog { background:#fff; border-radius:14px; padding:24px; width:340px; max-width:100%; text-align:center; position:relative; box-shadow:0 24px 60px rgba(0,0,0,0.3); font-family:inherit; }
+  .rw-qr-dialog h3 { margin:0 0 14px; font-size:1rem; color:#1e293b; }
+  .rw-qr-close { position:absolute; top:8px; right:12px; background:none; border:none; font-size:1.7rem; line-height:1; cursor:pointer; color:#94a3b8; }
+  #rw-qr-img { width:240px; height:240px; image-rendering:pixelated; border:1px solid #e2e8f0; border-radius:8px; }
+  .rw-qr-url { margin:12px 0; font-size:0.78rem; color:#64748b; word-break:break-all; }
+  .rw-qr-actions { display:flex; justify-content:center; gap:10px; }
+  .rw-qr-btn { padding:9px 18px; border:none; background:linear-gradient(135deg,#6c63ff,#8b5cf6); color:#fff; border-radius:8px; cursor:pointer; font-size:0.85rem; font-weight:600; }
+  .rw-qr-btn.secondary { background:#fff; color:#475569; border:1px solid #cbd5e1; }
+</style>
+<div id="rw-qr-modal" class="rw-qr-overlay" style="display:none;" onclick="if(event.target===this)rwCloseQR()">
+  <div class="rw-qr-dialog">
+    <button class="rw-qr-close" onclick="rwCloseQR()" aria-label="Close">&times;</button>
+    <h3>Scan to open the chat</h3>
+    <img id="rw-qr-img" alt="Chat QR code">
+    <div id="rw-qr-url" class="rw-qr-url"></div>
+    <div class="rw-qr-actions">
+      <button class="rw-qr-btn" onclick="rwDownloadQR()">Download PNG</button>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  window.rwShowChatQR = function(){
+    var input = document.getElementById('generatedChatLink');
+    var url = input ? (input.value || '').trim() : '';
+    if (!url){ alert('Create the chat first to generate its link, then you can show its QR code.'); return; }
+    if (typeof qrcode === 'undefined'){ alert('QR generator is still loading — please try again in a moment.'); return; }
+    try {
+      var qr = qrcode(0, 'M');       // auto type, medium error-correction
+      qr.addData(url);
+      qr.make();
+      window.rwQrDataUrl = qr.createDataURL(8, 4); // cellSize, margin (modules)
+      document.getElementById('rw-qr-img').src = window.rwQrDataUrl;
+      document.getElementById('rw-qr-url').textContent = url;
+      document.getElementById('rw-qr-modal').style.display = 'flex';
+    } catch(err){
+      console.error('QR generation failed', err);
+      alert('Sorry, the QR code could not be generated.');
+    }
+  };
+  window.rwCloseQR = function(){ document.getElementById('rw-qr-modal').style.display = 'none'; };
+  window.rwDownloadQR = function(){
+    if (!window.rwQrDataUrl) return;
+    var img = new Image();
+    img.onload = function(){
+      var c = document.createElement('canvas');
+      c.width = img.width; c.height = img.height;
+      var ctx = c.getContext('2d');
+      ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height);
+      ctx.drawImage(img, 0, 0);
+      var a = document.createElement('a');
+      try { a.href = c.toDataURL('image/png'); } catch(e){ a.href = window.rwQrDataUrl; }
+      a.download = 'chat-qr-code.png';
+      document.body.appendChild(a); a.click(); a.remove();
+    };
+    img.onerror = function(){ var a=document.createElement('a'); a.href=window.rwQrDataUrl; a.download='chat-qr-code.gif'; a.click(); };
+    img.src = window.rwQrDataUrl;
+  };
+})();
+</script>
+
+<!-- ===== Chat-link button: Create chat/link -> Copy (Listen) ===== -->
+<script>
+(function(){
+  var COPY_ICON = '<svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:14px;height:14px;flex-shrink:0;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>';
+  var PLUS_ICON = '<svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:14px;height:14px;flex-shrink:0;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>';
+  // Reflect link state on the chat-link button: no link -> "Create chat / link", link -> "Copy"
+  window.rwSyncChatLinkButton = function(){
+    var btn = document.getElementById('copyLinkBtn');
+    if (!btn) return;
+    var input = document.getElementById('generatedChatLink');
+    var hasLink = !!(input && (input.value || '').trim());
+    btn.innerHTML = hasLink ? (COPY_ICON + 'Copy') : (PLUS_ICON + 'Create chat / link');
+    btn.setAttribute('title', hasLink ? 'Copy the chat link' : 'Create the chat and generate its link');
+  };
+  // Click: create the chat/link if there isn't one yet, otherwise copy it
+  window.rwChatLinkAction = function(){
+    var input = document.getElementById('generatedChatLink');
+    if (input && (input.value || '').trim()){
+      if (typeof copyGeneratedLink === 'function') copyGeneratedLink();
+    } else if (typeof createChat === 'function'){
+      createChat(document.getElementById('copyLinkBtn'));
+    }
+  };
 })();
 </script>
 
