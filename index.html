@@ -2198,6 +2198,12 @@
             transform: scale(1.01);
         }
 
+        /* Questions auto-added by the smart importer — pastel pink so they stand out */
+        .survey-builder-container .sb-question-card.sb-question-imported {
+            background: #fdf2f8;
+            border-left-color: #ec4899;
+        }
+
         .survey-builder-container .sb-question-drag-handle {
             display: flex;
             align-items: center;
@@ -5653,13 +5659,25 @@
 
                 <!-- 360 Section (placeholder) -->
                 <div id="survey360-section" class="hidden">
-                    <div style="padding: 40px;">
-                        <div style="max-width: 760px; margin: 0 auto; background: #ffffff; border-radius: 12px; padding: 40px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
-                            <h2 style="font-size: 28px; font-weight: 700; color: #1e293b; margin: 0 0 12px 0;">360</h2>
-                            <div style="width: 50px; height: 3px; background: #1e2a3b; margin-bottom: 20px;"></div>
-                            <p style="color: #64748b; font-size: 15px; line-height: 1.7; margin: 0 0 20px;">360-degree feedback — gather rounded, multi-rater input on your people from managers, peers and direct reports.</p>
-                            <div style="display: inline-flex; align-items: center; gap: 8px; background: #f1f5f9; color: #475569; padding: 8px 14px; border-radius: 999px; font-size: 13px; font-weight: 500;">
-                                <span style="width: 8px; height: 8px; border-radius: 50%; background: #d6366c;"></span> Coming soon
+                    <!-- 360 header -->
+                    <div style="padding: 24px 40px 0;">
+                        <h1 style="font-size: 24px; font-weight: 700; color: #1e293b; margin: 0 0 4px 0;">360</h1>
+                        <p style="color: #64748b; font-size: 14px; margin: 0;">360-degree feedback</p>
+                    </div>
+                    <!-- 360 tab bar -->
+                    <div style="display: flex; gap: 0; border-bottom: 1px solid #e2e8f0; padding: 16px 40px 0;">
+                        <button class="s360-tab active" data-tab="action-planning" onclick="show360Tab('action-planning')" style="padding: 12px 20px; border: none; background: none; cursor: pointer; font-size: 14px; color: #3b82f6; border-bottom: 2px solid #3b82f6; font-weight: 600;">Action Planning</button>
+                    </div>
+                    <!-- 360 tab content -->
+                    <div style="padding: 32px 40px;">
+                        <div id="s360-tab-action-planning" class="s360-tab-content">
+                            <div style="max-width: 760px; background: #ffffff; border-radius: 12px; padding: 40px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+                                <h2 style="font-size: 22px; font-weight: 700; color: #1e293b; margin: 0 0 12px 0;">Action Planning</h2>
+                                <div style="width: 50px; height: 3px; background: #1e2a3b; margin-bottom: 20px;"></div>
+                                <p style="color: #64748b; font-size: 15px; line-height: 1.7; margin: 0 0 20px;">Turn 360 feedback into concrete next steps — capture actions, assign owners and track progress on what comes out of each review.</p>
+                                <div style="display: inline-flex; align-items: center; gap: 8px; background: #f1f5f9; color: #475569; padding: 8px 14px; border-radius: 999px; font-size: 13px; font-weight: 500;">
+                                    <span style="width: 8px; height: 8px; border-radius: 50%; background: #d6366c;"></span> Coming soon
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -14752,6 +14770,19 @@ async function loadChatIntoEditor(chatId) {
 }
 
 // Show Chat Editor tab
+// 360 section tab switching (Action Planning + any future tabs)
+function show360Tab(tabName) {
+    document.querySelectorAll('#survey360-section .s360-tab-content').forEach(function(c){ c.style.display = 'none'; });
+    document.querySelectorAll('#survey360-section .s360-tab').forEach(function(t){
+        var active = t.getAttribute('data-tab') === tabName;
+        t.classList.toggle('active', active);
+        t.style.color = active ? '#3b82f6' : '#64748b';
+        t.style.borderBottomColor = active ? '#3b82f6' : 'transparent';
+    });
+    var content = document.getElementById('s360-tab-' + tabName);
+    if (content) content.style.display = '';
+}
+
 function showChatEditorTab(tabName) {
     // Guard: redirect to setup if participants tab is disabled
     if (tabName === 'participants') {
@@ -18467,7 +18498,7 @@ function sbRenderQuestionCard(question, qIndex) {
     ` : '';
 
     return `
-        <div class="sb-card sb-question-card"
+        <div class="sb-card sb-question-card${question.importSource ? ' sb-question-imported' : ''}"
              id="sb-question-${qIndex}"
              draggable="true"
              ondragstart="sbHandleQuestionDragStart(event, ${qIndex})"
@@ -23141,6 +23172,8 @@ function engageGsReset() {
   .sb-import-btn-secondary { padding:9px 16px; border:1px solid #cbd5e1; background:#fff; border-radius:8px; cursor:pointer; font-size:0.85rem; }
   .sb-import-btn-primary { padding:9px 18px; border:none; background:linear-gradient(135deg,#6c63ff,#8b5cf6); color:#fff; border-radius:8px; cursor:pointer; font-size:0.85rem; font-weight:600; }
   .sb-import-btn-primary:disabled { opacity:0.6; cursor:default; }
+  .sb-import-newtag { display:inline-block; background:#fce7f3; color:#be185d; font-size:0.66rem; font-weight:700; padding:1px 7px; border-radius:999px; vertical-align:middle; letter-spacing:0.02em; }
+  .sb-import-typesel { flex:0 0 auto; width:138px; padding:7px 9px; border:1px solid #cbd5e1; border-radius:7px; font-size:0.82rem; background:#fff; }
 </style>
 <div id="sb-import-modal" class="sb-import-overlay" style="display:none;">
   <div class="sb-import-dialog">
@@ -23173,7 +23206,7 @@ function engageGsReset() {
 </div>
 <script>
 (function(){
-  window.sbImport = { headers: [], rows: [], mapping: {}, dateCol: '' };
+  window.sbImport = { headers: [], rows: [], cols: {}, dateCol: '', surveyTitle: '' };
 
   function escHtml(s){ return String(s==null?'':s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
   function escAttr(s){ return escHtml(s).replace(/'/g,'&#39;'); }
@@ -23183,7 +23216,7 @@ function engageGsReset() {
       alert('Please save your survey first, then import responses.');
       return;
     }
-    window.sbImport = { headers: [], rows: [], mapping: {}, dateCol: '' };
+    window.sbImport = { headers: [], rows: [], cols: {}, dateCol: '', surveyTitle: '' };
     document.getElementById('sb-import-stage-file').style.display = '';
     document.getElementById('sb-import-stage-map').style.display = 'none';
     document.getElementById('sb-import-stage-result').style.display = 'none';
@@ -23270,40 +23303,6 @@ function engageGsReset() {
     if (isExcel) reader.readAsArrayBuffer(file); else reader.readAsText(file);
   };
 
-  // ---------- mapping ----------
-  function norm(s){ return String(s||'').toLowerCase().replace(/^q\d+\s*[:.\-]?\s*/,'').replace(/[^a-z0-9]+/g,' ').trim(); }
-  function guessColumn(question, qIndex, headers){
-    const qn = norm(question.text || question.title || ('question ' + (qIndex+1)));
-    let hit = qn && headers.find(h => norm(h) === qn); if (hit) return hit;
-    hit = headers.find(h => new RegExp('^\\s*q'+(qIndex+1)+'\\b','i').test(h)); if (hit) return hit;
-    if (qn) hit = headers.find(h => { const hn = norm(h); return hn && (hn.includes(qn) || qn.includes(hn)); });
-    return hit || '';
-  }
-  function guessDateColumn(headers){ return headers.find(h => /submit|date|time|completed|created/i.test(h)) || ''; }
-
-  function buildMapping(){
-    const questions = (typeof sbGetAllQuestions === 'function') ? sbGetAllQuestions() : [];
-    const headers = window.sbImport.headers;
-    const mapping = {}; const used = new Set();
-    questions.forEach((q,i)=>{ const g = guessColumn(q,i,headers); if (g && !used.has(g)){ mapping[q.id]=g; used.add(g);} else mapping[q.id]=''; });
-    window.sbImport.mapping = mapping;
-    window.sbImport.dateCol = guessDateColumn(headers);
-
-    const dateOpts = '<option value="">— use today’s date —</option>' + headers.map(h=>`<option value="${escAttr(h)}" ${h===window.sbImport.dateCol?'selected':''}>${escHtml(h)}</option>`).join('');
-    let html = `<div class="sb-import-map-row"><div class="sb-import-q"><strong>Submitted date</strong><small>optional — when each response was completed</small></div><select onchange="sbImport.dateCol=this.value;sbImportRenderPreview()">${dateOpts}</select></div>`;
-    html += questions.map((q,i)=>{
-      const title = escHtml(q.text || q.title || ('Question '+(i+1)));
-      const opts = '<option value="">— ignore —</option>' + headers.map(h=>`<option value="${escAttr(h)}" ${h===mapping[q.id]?'selected':''}>${escHtml(h)}</option>`).join('');
-      return `<div class="sb-import-map-row"><div class="sb-import-q">Q${i+1}: ${title}<small>${escHtml(q.type||'')}</small></div><select onchange="sbImport.mapping['${q.id}']=this.value;sbImportRenderPreview()">${opts}</select></div>`;
-    }).join('');
-    document.getElementById('sb-import-mapping').innerHTML = html;
-
-    document.getElementById('sb-import-stage-file').style.display = 'none';
-    document.getElementById('sb-import-stage-map').style.display = '';
-    document.getElementById('sb-import-run-btn').style.display = '';
-    sbImportRenderPreview();
-  }
-
   // ---------- coercion ----------
   function coerceValue(raw, q){
     if (raw === undefined || raw === null) return undefined;
@@ -23320,45 +23319,216 @@ function engageGsReset() {
   }
   function coerceDisplay(raw, q){ const c = coerceValue(raw,q); if (c===undefined) return ''; if (Array.isArray(c)) return c.map(x=> (x && x.content) ? x.content : x).join(', '); return String(c); }
 
+  // ---------- sampling + heuristic fallback ----------
+  function norm(s){ return String(s||'').toLowerCase().replace(/^q\d+\s*[:.\-]?\s*/,'').replace(/[^a-z0-9]+/g,' ').trim(); }
+  function guessDateColumn(headers){ return headers.find(h => /submit|date|time|completed|created/i.test(h)) || ''; }
+  function inferType(samples){
+    const vals = (samples||[]).map(s=>String(s).trim()).filter(Boolean);
+    if (!vals.length) return 'text';
+    if (vals.every(v=> /^-?\d+(\.\d+)?$/.test(v))) return 'rating';
+    if (vals.every(v=> /[-/]/.test(v) && !isNaN(Date.parse(v)))) return 'calendar';
+    if (vals.some(v=> /[;,|]/.test(v))) return 'multi';
+    const distinct = new Set(vals);
+    if (distinct.size <= Math.min(8, Math.max(2, Math.ceil(vals.length*0.6)))) return 'single';
+    return 'text';
+  }
+  function columnSamples(){
+    const headers = window.sbImport.headers, rows = window.sbImport.rows;
+    return headers.map(h => {
+      const samples = [];
+      for (let i=0;i<rows.length && samples.length<5;i++){ const v = rows[i][h]; const sv = v==null?'':String(v).trim(); if (sv && samples.indexOf(sv)===-1) samples.push(sv.slice(0,100)); }
+      return { name: h, samples };
+    });
+  }
+  function heuristicPlan(questions, headers, samples){
+    const plan = {}; const usedH = new Set(); const dateCol = guessDateColumn(headers);
+    questions.forEach((q,i)=>{
+      const qn = norm(q.text || q.title || ('question '+(i+1)));
+      let h = qn && headers.find(x=> !usedH.has(x) && norm(x)===qn);
+      if (!h) h = headers.find(x=> !usedH.has(x) && new RegExp('^\\s*q'+(i+1)+'\\b','i').test(x));
+      if (!h && qn) h = headers.find(x=> { if (usedH.has(x)) return false; const xn=norm(x); return xn && (xn.includes(qn)||qn.includes(xn)); });
+      if (h){ plan[h] = { action:'map', questionId:q.id }; usedH.add(h); }
+    });
+    headers.forEach((h,i)=>{ if (plan[h]) return; if (h===dateCol){ plan[h]={action:'ignore'}; return; } plan[h] = { action:'new', newQuestion:{ text:h, type: inferType(samples[i].samples), options: [] } }; });
+    return plan;
+  }
+
+  // ---------- build the per-column plan (AI first, heuristic fallback) ----------
+  async function buildMapping(){
+    const questions = (typeof sbGetAllQuestions === 'function') ? sbGetAllQuestions() : [];
+    const headers = window.sbImport.headers;
+    const samples = columnSamples();
+    window.sbImportSamplesArr = {}; window.sbImportSamplesByCol = {};
+    samples.forEach(s=>{ window.sbImportSamplesArr[s.name] = s.samples; window.sbImportSamplesByCol[s.name] = s.samples.slice(0,3).join(' · '); });
+    window.sbImport.dateCol = guessDateColumn(headers);
+    window.sbImport.surveyTitle = '';
+    window.sbImport.cols = heuristicPlan(questions, headers, samples);
+
+    document.getElementById('sb-import-stage-file').style.display = 'none';
+    document.getElementById('sb-import-stage-map').style.display = '';
+    document.getElementById('sb-import-run-btn').style.display = '';
+    renderMapping(true);
+
+    try {
+      const resp = await fetch('/api/import-map', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ columns: samples, existingQuestions: questions.map(q=>({ id:q.id, text:q.text||q.title||'', type:q.type, options:q.options||[] })) })
+      });
+      if (resp.ok){
+        const ai = await resp.json();
+        if (ai && Array.isArray(ai.columns)){
+          const byName = {}; headers.forEach(h=> byName[String(h).toLowerCase().trim()] = h);
+          const validQ = new Set(questions.map(q=>q.id)); const usedQ = new Set(); const plan = {};
+          ai.columns.forEach(c=>{
+            const h = byName[String(c.column||'').toLowerCase().trim()]; if (!h || plan[h]) return;
+            if (c.action==='map' && validQ.has(c.questionId) && !usedQ.has(c.questionId)){ plan[h]={action:'map',questionId:c.questionId}; usedQ.add(c.questionId); }
+            else if (c.action==='new' && c.newQuestion){
+              const t = ['rating','single','multi','text','calendar'].indexOf(c.newQuestion.type)>=0 ? c.newQuestion.type : 'text';
+              plan[h]={action:'new',newQuestion:{ text:String(c.newQuestion.text||h), type:t, options: Array.isArray(c.newQuestion.options)?c.newQuestion.options.map(String):[] }};
+            } else plan[h]={action:'ignore'};
+          });
+          headers.forEach(h=>{ if (!plan[h]) plan[h]={action:'ignore'}; });
+          window.sbImport.cols = plan;
+          if (!questions.length && ai.surveyTitle) window.sbImport.surveyTitle = String(ai.surveyTitle);
+        }
+      }
+    } catch(e){ console.warn('AI mapping unavailable; using heuristic.', e); }
+
+    renderMapping(false);
+  }
+
+  // ---------- render the per-column mapping UI ----------
+  function renderMapping(thinking){
+    const questions = (typeof sbGetAllQuestions === 'function') ? sbGetAllQuestions() : [];
+    const headers = window.sbImport.headers, cols = window.sbImport.cols;
+    const samplesByCol = window.sbImportSamplesByCol || {};
+    const typeLabels = {rating:'Rating',single:'Multiple choice',multi:'Checkboxes',text:'Text',calendar:'Date'};
+    const note = document.querySelector('#sb-import-stage-map .sb-import-note');
+    if (note) note.innerHTML = thinking
+      ? '✨ <strong>Reading your file…</strong> matching columns to questions and drafting new ones where needed.'
+      : (questions.length
+          ? 'Each column is mapped. Columns with no match become a <span class="sb-import-newtag">New</span> question (added to your survey, highlighted pink). Tweak anything, then import.'
+          : 'This survey is empty, so every column becomes a new question — added to the survey (highlighted pink). Tweak anything, then import.');
+
+    const dateOpts = '<option value="">— use today’s date —</option>' + headers.map(h=>`<option value="${escAttr(h)}" ${h===window.sbImport.dateCol?'selected':''}>${escHtml(h)}</option>`).join('');
+    let html = `<div class="sb-import-map-row"><div class="sb-import-q"><strong>Submitted date</strong><small>optional</small></div><select onchange="sbImportSetDate(this.value)">${dateOpts}</select></div>`;
+
+    headers.forEach(h=>{
+      const plan = cols[h] || {action:'ignore'};
+      let opts = `<option value="ignore" ${plan.action==='ignore'?'selected':''}>— Ignore —</option>`
+               + `<option value="new" ${plan.action==='new'?'selected':''}>✚ New question</option>`;
+      if (questions.length){
+        opts += '<optgroup label="Map to existing question">' + questions.map((q,i)=>`<option value="q:${escAttr(q.id)}" ${(plan.action==='map'&&plan.questionId===q.id)?'selected':''}>Q${i+1}: ${escHtml((q.text||q.title||'Question').slice(0,55))}</option>`).join('') + '</optgroup>';
+      }
+      const ch = escAttr(h);
+      let typeSel = '';
+      if (plan.action==='new'){
+        typeSel = `<select class="sb-import-typesel" data-col="${ch}" onchange="sbImportSetNewType(this.getAttribute('data-col'), this.value)">` + ['rating','single','multi','text','calendar'].map(t=>`<option value="${t}" ${(plan.newQuestion&&plan.newQuestion.type===t)?'selected':''}>${typeLabels[t]}</option>`).join('') + '</select>';
+      }
+      const tag = plan.action==='new' ? ' <span class="sb-import-newtag">New</span>' : '';
+      html += `<div class="sb-import-map-row"><div class="sb-import-q">${escHtml(h)}${tag}<small>${escHtml(String(samplesByCol[h]||'').slice(0,60))}</small></div><div style="display:flex;gap:6px;align-items:center;flex:1;min-width:0;"><select data-col="${ch}" onchange="sbImportSetCol(this.getAttribute('data-col'), this.value)" style="flex:1;min-width:0;">${opts}</select>${typeSel}</div></div>`;
+    });
+
+    document.getElementById('sb-import-mapping').innerHTML = html;
+    sbImportRenderPreview();
+  }
+
+  window.sbImportSetDate = function(v){ window.sbImport.dateCol = v; sbImportRenderPreview(); };
+  window.sbImportSetCol = function(col, val){
+    const cols = window.sbImport.cols;
+    if (val === 'ignore') cols[col] = { action:'ignore' };
+    else if (val === 'new'){
+      const prev = cols[col] && cols[col].newQuestion;
+      const samples = (window.sbImportSamplesArr && window.sbImportSamplesArr[col]) || [];
+      cols[col] = { action:'new', newQuestion:{ text: (prev&&prev.text)||col, type: (prev&&prev.type)||inferType(samples), options: (prev&&prev.options)||[] } };
+    } else if (val.indexOf('q:') === 0){ cols[col] = { action:'map', questionId: val.slice(2) }; }
+    renderMapping(false);
+  };
+  window.sbImportSetNewType = function(col, t){ const c = window.sbImport.cols[col]; if (c && c.action==='new' && c.newQuestion){ c.newQuestion.type = t; sbImportRenderPreview(); } };
+
+  // ---------- preview ----------
   window.sbImportRenderPreview = function(){
     const questions = (typeof sbGetAllQuestions === 'function') ? sbGetAllQuestions() : [];
-    const rows = window.sbImport.rows;
+    const qById = {}; questions.forEach(q=> qById[q.id]=q);
+    const cols = window.sbImport.cols, rows = window.sbImport.rows, headers = window.sbImport.headers;
     document.getElementById('sb-import-rowcount').textContent = '(' + rows.length + ' row' + (rows.length===1?'':'s') + ')';
-    let html = '<thead><tr><th>Submitted</th>' + questions.map((q,i)=>'<th>Q'+(i+1)+'</th>').join('') + '</tr></thead><tbody>';
+    const active = headers.filter(h=> cols[h] && cols[h].action!=='ignore');
+    let head = '<thead><tr><th>Submitted</th>' + active.map(h=>{
+      const p = cols[h];
+      const label = p.action==='new' ? (escHtml((p.newQuestion.text||h).slice(0,28))+' <span class="sb-import-newtag">New</span>') : escHtml(((qById[p.questionId]||{}).text||'Question').slice(0,28));
+      return '<th>'+label+'</th>';
+    }).join('') + '</tr></thead>';
+    let body = '<tbody>';
     rows.slice(0,8).forEach(r=>{
       const dateVal = window.sbImport.dateCol ? r[window.sbImport.dateCol] : '';
-      html += '<tr><td>'+escHtml(dateVal || '(today)')+'</td>';
-      questions.forEach(q=>{ const col = window.sbImport.mapping[q.id]; html += '<td>'+escHtml(coerceDisplay(col ? r[col] : '', q))+'</td>'; });
-      html += '</tr>';
+      body += '<tr><td>'+escHtml(dateVal||'(today)')+'</td>';
+      active.forEach(h=>{ const p = cols[h]; const q = p.action==='new' ? {type:p.newQuestion.type} : (qById[p.questionId]||{type:'text'}); body += '<td>'+escHtml(coerceDisplay(r[h], q))+'</td>'; });
+      body += '</tr>';
     });
-    html += '</tbody>';
-    document.getElementById('sb-import-preview').innerHTML = html;
+    body += '</tbody>';
+    document.getElementById('sb-import-preview').innerHTML = head + body;
   };
 
-  // ---------- run ----------
+  // ---------- run: create new questions, persist, insert responses ----------
   window.sbImportRun = async function(){
-    const questions = (typeof sbGetAllQuestions === 'function') ? sbGetAllQuestions() : [];
-    const rows = window.sbImport.rows, mapping = window.sbImport.mapping, dateCol = window.sbImport.dateCol;
-    if (!Object.values(mapping).some(Boolean)){ alert('Please map at least one column to a question before importing.'); return; }
-    const records = [];
-    rows.forEach(r=>{
-      const responses = {};
-      questions.forEach(q=>{ const col = mapping[q.id]; if (!col) return; const c = coerceValue(r[col], q); if (c !== undefined) responses[q.id] = c; });
-      if (!Object.keys(responses).length) return;
-      let completed_at = new Date().toISOString();
-      if (dateCol && r[dateCol]){ const d = new Date(r[dateCol]); if (!isNaN(d.getTime())) completed_at = d.toISOString(); }
-      records.push({ survey_id: sbCurrentSurvey.id, respondent_id: sbGenerateId(), responses, response_language: (sbCurrentSurvey.defaultLanguage||'EN-GB'), completed_at });
-    });
-    if (!records.length){ alert('No rows had any mapped answers to import.'); return; }
+    const cols = window.sbImport.cols, rows = window.sbImport.rows, dateCol = window.sbImport.dateCol, headers = window.sbImport.headers;
+    const active = headers.filter(h=> cols[h] && cols[h].action!=='ignore');
+    if (!active.length){ alert('Map at least one column (or set it to “New question”) before importing.'); return; }
 
     const btn = document.getElementById('sb-import-run-btn');
     btn.disabled = true; const orig = btn.textContent; btn.textContent = 'Importing…';
     try {
       if (!window.supabaseClient) throw new Error('Database connection not available.');
+      if (typeof sbCurrentSurvey === 'undefined' || !sbCurrentSurvey) throw new Error('No survey is open.');
+      if (!sbCurrentSurvey.pages || !sbCurrentSurvey.pages.length){
+        sbCurrentSurvey.pages = [{ id: (typeof sbGenerateShortCode==='function'?sbGenerateShortCode():'p1'), title:'Page 1', instructions:'', questions:[], logic:[] }];
+      }
+      const page = sbCurrentSurvey.pages[0];
+
+      // 1) create new questions for "new" columns (flagged importSource for the pink highlight)
+      const colToQid = {}; let createdAny = false;
+      active.forEach(h=>{
+        const p = cols[h];
+        if (p.action === 'map'){ colToQid[h] = p.questionId; return; }
+        const nq = (typeof sbCreateDefaultQuestion === 'function')
+          ? sbCreateDefaultQuestion(p.newQuestion.type)
+          : { id: (typeof sbGenerateShortCode==='function'?sbGenerateShortCode():Math.random().toString(36).slice(2)), type: p.newQuestion.type };
+        nq.text = p.newQuestion.text || h;
+        nq.importSource = true;
+        if (p.newQuestion.type === 'single' || p.newQuestion.type === 'multi'){
+          nq.options = (p.newQuestion.options && p.newQuestion.options.length) ? p.newQuestion.options.slice() : ['Option 1'];
+        }
+        page.questions.push(nq);
+        colToQid[h] = nq.id; createdAny = true;
+      });
+
+      // name an empty survey from the AI's suggested title
+      if (createdAny && window.sbImport.surveyTitle && (!sbCurrentSurvey.name || sbCurrentSurvey.name === 'Untitled Survey')){
+        sbCurrentSurvey.name = window.sbImport.surveyTitle;
+      }
+
+      // 2) persist the survey so the new questions exist alongside the responses
+      if (createdAny && typeof sbSaveSurvey === 'function'){ await sbSaveSurvey(); }
+
+      // 3) build + insert response records
+      const allQ = (typeof sbGetAllQuestions === 'function') ? sbGetAllQuestions() : [];
+      const qById = {}; allQ.forEach(q=> qById[q.id]=q);
+      const records = [];
+      rows.forEach(r=>{
+        const responses = {};
+        active.forEach(h=>{ const qid = colToQid[h]; const q = qById[qid]; if (!q) return; const c = coerceValue(r[h], q); if (c !== undefined) responses[qid] = c; });
+        if (!Object.keys(responses).length) return;
+        let completed_at = new Date().toISOString();
+        if (dateCol && r[dateCol]){ const d = new Date(r[dateCol]); if (!isNaN(d.getTime())) completed_at = d.toISOString(); }
+        records.push({ survey_id: sbCurrentSurvey.id, respondent_id: sbGenerateId(), responses, response_language: (sbCurrentSurvey.defaultLanguage||'EN-GB'), completed_at });
+      });
+      if (!records.length) throw new Error('No rows had any values to import.');
       for (let i=0;i<records.length;i+=200){
         const { error } = await window.supabaseClient.from('survey_responses').insert(records.slice(i,i+200));
         if (error) throw error;
       }
+
+      if (typeof sbRenderBuilder === 'function') sbRenderBuilder(); // show the new pink questions
       showResult(true, records.length);
     } catch(err){
       console.error('Import failed', err);
