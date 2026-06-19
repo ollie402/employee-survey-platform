@@ -1058,6 +1058,12 @@
         document.getElementById('chat-title').textContent = sessionConfig.name || 'Feedback Session';
         document.getElementById('chat-subtitle').textContent = sessionConfig.welcomeMessage || 'Welcome!';
 
+        // Custom chat logo (replaces the default Realworld logo when set)
+        if (window.currentChat && window.currentChat.chat_logo) {
+            var _headerLogo = document.querySelector('.chat-header-logo img');
+            if (_headerLogo) { _headerLogo.src = window.currentChat.chat_logo; _headerLogo.alt = 'Logo'; }
+        }
+
         // Configure interface based on chat type
         switch (chatType) {
             case 'listening':

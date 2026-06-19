@@ -4405,6 +4405,35 @@
         .rw-field textarea { resize: vertical; min-height: 110px; line-height: 1.6; }
         .rw-field .rw-hint { font-size: 11.5px; color: var(--rw-text-soft); margin-top: 5px; }
 
+        /* Access type — multiple-choice cards (replaces the dropdown; a hidden <select> keeps the data wiring) */
+        .rw-access-hidden-select { display: none !important; }
+        .rw-access-choices { display: flex; flex-direction: column; gap: 10px; }
+        .rw-access-option {
+          display: flex; align-items: flex-start; gap: 12px;
+          width: 100%; text-align: left; cursor: pointer;
+          padding: 12px 14px; border: 1.5px solid var(--rw-border); border-radius: 10px;
+          background: #fafbfc; font-family: inherit;
+          transition: border-color .15s, background .15s, box-shadow .15s;
+        }
+        .rw-access-option:hover { border-color: #c7d2fe; background: #f5f3ff; }
+        .rw-access-option.selected { border-color: var(--rw-accent2); background: #f5f3ff; box-shadow: 0 0 0 3px rgba(108,99,255,0.08); }
+        .rw-access-radio {
+          flex-shrink: 0; width: 18px; height: 18px; margin-top: 1px;
+          border: 2px solid #cbd5e1; border-radius: 50%; position: relative; transition: border-color .15s;
+        }
+        .rw-access-option.selected .rw-access-radio { border-color: var(--rw-accent2); }
+        .rw-access-option.selected .rw-access-radio::after { content: ''; position: absolute; inset: 3px; border-radius: 50%; background: var(--rw-accent2); }
+        .rw-access-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+        .rw-access-title { font-size: 13.5px; font-weight: 600; color: var(--rw-text); }
+        .rw-access-desc { font-size: 12px; color: var(--rw-text-soft); line-height: 1.45; }
+        /* Dark mode */
+        #chat-editor-tab-setup.rw-dark .rw-access-option { background: #1f1f23; border-color: #3a3a40; }
+        #chat-editor-tab-setup.rw-dark .rw-access-option:hover { background: #26262c; border-color: #4b4b55; }
+        #chat-editor-tab-setup.rw-dark .rw-access-option.selected { background: #2a2740; border-color: var(--rw-accent2); }
+        #chat-editor-tab-setup.rw-dark .rw-access-title { color: #f1f5f9; }
+        #chat-editor-tab-setup.rw-dark .rw-access-desc { color: #9ca3af; }
+        #chat-editor-tab-setup.rw-dark .rw-access-radio { border-color: #4b4b55; }
+
         /* Engage Topics tag input */
         .rw-tags-input-wrap {
           display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
@@ -4536,6 +4565,19 @@
           gap: 8px;
           align-items: center;
         }
+        /* Link + auto QR side by side (QR wraps below on a narrow rail) */
+        .rw-link-grid { display: flex; gap: 16px; align-items: stretch; flex-wrap: wrap; }
+        .rw-link-left { flex: 1 1 240px; min-width: 0; display: flex; flex-direction: column; }
+        .rw-link-left .rw-link-display { margin-bottom: 10px; }
+        .rw-link-left .rw-link-actions { margin-top: auto; }
+        .rw-link-qr { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+        .rw-link-qr img { width: 118px; height: 118px; display: block; background: #fff; border-radius: 8px; padding: 6px; box-sizing: border-box; }
+        .rw-inline-qr-dl {
+          background: rgba(255,255,255,0.12); color: #fff;
+          border: 1px solid rgba(255,255,255,0.2); border-radius: 6px;
+          font-family: inherit; font-size: 11px; padding: 4px 10px; cursor: pointer;
+        }
+        .rw-inline-qr-dl:hover { background: rgba(255,255,255,0.2); }
         .rw-btn-copy {
           flex: 1;
           padding: 9px;
@@ -4812,8 +4854,195 @@
           display: grid;
           grid-template-columns: 1fr 1fr;
           gap: 14px;
-          align-items: start;
+          align-items: stretch;
         }
+        /* Getting Started as a full-width horizontal flowchart across the top */
+        #chat-editor-tab-setup #getting-started-box.gs-flow { grid-column: 1 / -1; }
+        #chat-editor-tab-setup #getting-started-box.gs-flow #gs-steps-list {
+          flex-direction: row !important;
+          flex-wrap: wrap;
+          gap: 14px 18px !important;
+        }
+        #chat-editor-tab-setup #getting-started-box.gs-flow #gs-steps-list > li {
+          flex: 1 1 150px;
+          min-width: 150px;
+        }
+        /* Chat Logo (right column) — compact drop zone */
+        #lc-logo-zone .lc-drop {
+          border: 2px dashed #cbd5e1;
+          border-radius: 10px;
+          padding: 22px 14px;
+          text-align: center;
+          cursor: pointer;
+          transition: border-color .15s, background .15s;
+        }
+        #lc-logo-zone .lc-drop:hover, #lc-logo-zone .lc-drop.dragover {
+          border-color: #6c63ff;
+          background: #f5f3ff;
+        }
+        /* Concept A: left column is a single stacked form */
+        #chat-editor-tab-setup .rw-left-col { display: flex; flex-direction: column; gap: 14px; }
+        /* Layout preview switcher */
+        .rw-layout-switch { display: flex; align-items: center; gap: 8px; padding: 0 28px 14px; }
+        .rw-layout-switch span { font-size: 12px; color: #94a3b8; }
+        .rw-layout-switch button { padding: 5px 12px; border: 1px solid #cbd5e1; background: #fff; border-radius: 7px; font-size: 12px; cursor: pointer; color: #475569; }
+        .rw-layout-switch button.active { background: #6c63ff; color: #fff; border-color: #6c63ff; }
+        /* Concept B: one centred single column, no live preview */
+        #chat-editor-tab-setup.rw-layout-b .rw-setup-grid { grid-template-columns: minmax(0, 600px); justify-content: center; }
+        #chat-editor-tab-setup.rw-layout-b #rw-preview-card { display: none; }
+        /* Concept B refinements: one cohesive guided card */
+        #chat-editor-tab-setup.rw-layout-b .rw-left-col {
+          display: grid; grid-template-columns: 1fr 1fr; gap: 16px 18px; align-items: start;
+          background: #fff; border: 0.5px solid #e2e8f0; border-radius: 14px; padding: 22px 24px;
+        }
+        #chat-editor-tab-setup.rw-layout-b #lc-config-card,
+        #chat-editor-tab-setup.rw-layout-b #lc-logo-card { grid-column: 1 / -1; }
+        #chat-editor-tab-setup.rw-layout-b .rw-left-col > .rw-card {
+          background: transparent; border: none; box-shadow: none; border-radius: 0; animation: none;
+        }
+        #chat-editor-tab-setup.rw-layout-b .rw-left-col > .rw-card > .rw-card-header { display: none; }
+        #chat-editor-tab-setup.rw-layout-b .rw-left-col > .rw-card > .rw-card-body {
+          padding: 0; max-height: none !important; opacity: 1 !important; transform: none !important; overflow: visible !important;
+        }
+        #chat-editor-tab-setup.rw-layout-b #gs-steps-list { flex-wrap: nowrap !important; gap: 6px !important; }
+        #chat-editor-tab-setup.rw-layout-b #gs-steps-list > li { font-size: 12px !important; min-width: 0 !important; flex: 1 1 0 !important; }
+        /* Wizard: a definite-width centred column so the Getting Started bar can't collapse (a content-sized grid of 1fr tracks has no intrinsic width); wide enough for all 6 steps in one row */
+        #chat-editor-tab-setup.rw-wiz .rw-setup-grid { grid-template-columns: min(960px, 100%) !important; }
+        /* Getting Started steps inside the wizard: always one row, however many steps the access type adds (6 or 8) */
+        #chat-editor-tab-setup.rw-wiz #gs-steps-list { display: grid !important; grid-template-columns: none !important; grid-auto-flow: column !important; grid-auto-columns: minmax(0, 1fr) !important; gap: 10px !important; }
+        #chat-editor-tab-setup.rw-wiz #gs-steps-list > li { flex: none !important; min-width: 0 !important; font-size: 12px !important; gap: 7px !important; }
+        #chat-editor-tab-setup.rw-wiz #gs-steps-list > li > span:first-child { width: 20px !important; height: 20px !important; font-size: 11px !important; }
+        /* Wizard: the access & alerts steps span the full card width with their content centred (kills the empty right-hand gutter from the 2-col grid) */
+        #chat-editor-tab-setup.rw-wiz #lc-access-card,
+        #chat-editor-tab-setup.rw-wiz #lc-notifs-card { grid-column: 1 / -1; }
+        #chat-editor-tab-setup.rw-wiz #lc-access-card .rw-card-body,
+        #chat-editor-tab-setup.rw-wiz #lc-notifs-card .rw-card-body { max-width: 520px; margin: 0 auto; }
+        /* Concept C: tidy cards — config full width, access | notifs side by side, logo full; link + save in the right rail; no live preview */
+        #chat-editor-tab-setup.rw-layout-c #rw-preview-card { display: none; }
+        #chat-editor-tab-setup.rw-layout-c .rw-left-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: stretch; }
+        #chat-editor-tab-setup.rw-layout-c #lc-config-card,
+        #chat-editor-tab-setup.rw-layout-c #lc-logo-card { grid-column: 1 / -1; }
+        /* Creation wizard mode */
+        #chat-editor-tab-setup .rw-wiz-track, #chat-editor-tab-setup .rw-wiz-nav { display: none; }
+        #chat-editor-tab-setup.rw-wiz .rw-wiz-nav { display: flex; gap: 10px; justify-content: space-between; max-width: 580px; margin: 18px auto 0; }
+        /* The Getting Started bar is now the wizard's progress tracker (replaces the 1–5 step dots); hidden on the full setup page */
+        #chat-editor-tab-setup:not(.rw-wiz) #getting-started-box { display: none; }
+        #chat-editor-tab-setup.rw-wiz .rw-right-col { display: none; }
+        #chat-editor-tab-setup.rw-wiz .rw-left-col > .rw-card { display: none; }
+        #chat-editor-tab-setup.rw-wiz .rw-left-col > .rw-card.rw-wiz-on { display: block; }
+        .rw-wiz-tstep { display: flex; align-items: center; gap: 7px; font-size: 13px; color: #94a3b8; white-space: nowrap; }
+        .rw-wiz-tdot { width: 22px; height: 22px; border-radius: 50%; background: #e2e8f0; color: #64748b; font-size: 12px; display: flex; align-items: center; justify-content: center; font-weight: 600; }
+        .rw-wiz-tstep.active { color: #1e293b; }
+        .rw-wiz-tstep.active .rw-wiz-tdot { background: #6c63ff; color: #fff; }
+        .rw-wiz-tstep.done .rw-wiz-tdot { background: #1d9e75; color: #fff; }
+        .rw-wiz-tline { flex: 1; height: 1px; background: #e2e8f0; }
+        .rw-wiz-nav button { padding: 10px 22px; border-radius: 9px; font-size: 13.5px; font-weight: 600; cursor: pointer; border: 1px solid #cbd5e1; background: #fff; color: #475569; }
+        .rw-wiz-nav .rw-wiz-next, .rw-wiz-nav .rw-wiz-create { background: linear-gradient(135deg, #6c63ff, #8b5cf6); color: #fff; border: none; }
+        /* Wizard step 4 = overview: hide the form, centre the right column, keep the tracker */
+        #chat-editor-tab-setup #rw-ov-summary { display: none; }
+        #chat-editor-tab-setup.rw-wiz.rw-wiz-ov .rw-left-col { display: none; }
+        #chat-editor-tab-setup.rw-wiz.rw-wiz-ov .rw-right-col { display: flex !important; max-width: 560px; margin: 0 auto; }
+        #chat-editor-tab-setup.rw-wiz.rw-wiz-ov #rw-ov-summary { display: block; }
+        #chat-editor-tab-setup.rw-wiz.rw-wiz-ov .rw-wiz-nav { display: none; }
+        /* Wizard step 5 = create link: show only the chat link card */
+        #chat-editor-tab-setup.rw-wiz.rw-wiz-link .rw-left-col { display: none; }
+        #chat-editor-tab-setup.rw-wiz.rw-wiz-link .rw-right-col { display: flex !important; width: min(620px, 100%); max-width: 620px; margin: 0 auto; }
+        #chat-editor-tab-setup.rw-wiz.rw-wiz-link #rw-ov-summary,
+        #chat-editor-tab-setup.rw-wiz.rw-wiz-link #lc-actions-card,
+        #chat-editor-tab-setup.rw-wiz.rw-wiz-link #rw-preview-card { display: none; }
+        /* Dark-mode toggle button */
+        #chat-editor-tab-setup { position: relative; }
+        .rw-dark-toggle { position: absolute; right: 28px; top: 6px; padding: 5px 12px; border: 1px solid #cbd5e1; background: #fff; border-radius: 7px; font-size: 12px; cursor: pointer; color: #475569; z-index: 6; }
+        /* Dark mode for the Setup wizard (matches the dark mockup) */
+        #chat-editor-tab-setup.rw-dark { background: #202024; }
+        #chat-editor-tab-setup.rw-dark .rw-dark-toggle { background: #2b2b30; color: #e5e7eb; border-color: #3a3a40; }
+        #chat-editor-tab-setup.rw-dark .rw-left-col,
+        #chat-editor-tab-setup.rw-dark .rw-card { background: #2b2b30 !important; border-color: #3a3a40 !important; }
+        #chat-editor-tab-setup.rw-dark .rw-card-title,
+        #chat-editor-tab-setup.rw-dark .rw-field label,
+        #chat-editor-tab-setup.rw-dark .rw-card-body,
+        #chat-editor-tab-setup.rw-dark #rw-ov-body { color: #e5e7eb !important; }
+        #chat-editor-tab-setup.rw-dark .rw-card-subtitle,
+        #chat-editor-tab-setup.rw-dark .rw-hint { color: #9ca3af !important; }
+        #chat-editor-tab-setup.rw-dark input,
+        #chat-editor-tab-setup.rw-dark select,
+        #chat-editor-tab-setup.rw-dark textarea,
+        #chat-editor-tab-setup.rw-dark .ql-editor,
+        #chat-editor-tab-setup.rw-dark .ql-toolbar.ql-snow,
+        #chat-editor-tab-setup.rw-dark .ql-container.ql-snow { background: #1f1f23 !important; color: #e5e7eb !important; border-color: #3a3a40 !important; }
+        #chat-editor-tab-setup.rw-dark .ql-editor.ql-blank::before { color: #6b7280 !important; }
+        #chat-editor-tab-setup.rw-dark .ql-snow .ql-stroke { stroke: #cbd5e1 !important; }
+        #chat-editor-tab-setup.rw-dark .ql-snow .ql-fill { fill: #cbd5e1 !important; }
+        #chat-editor-tab-setup.rw-dark .rw-wiz-tstep { color: #9ca3af; }
+        #chat-editor-tab-setup.rw-dark .rw-wiz-tdot { background: #3a3a40; color: #cbd5e1; }
+        #chat-editor-tab-setup.rw-dark .rw-wiz-tstep.active { color: #e5e7eb; }
+        #chat-editor-tab-setup.rw-dark .lc-drop { border-color: #3a3a40; }
+        /* Dark mode extends across the WHOLE chat editor (header, tabs, content area) — not just the cards */
+        #chat-editor-section.rw-dark { background: #202024; }
+        #chat-editor-section.rw-dark .rw-ce-header,
+        #chat-editor-section.rw-dark .rw-ce-tabs { background: #202024 !important; border-bottom-color: #3a3a40 !important; }
+        #chat-editor-section.rw-dark .rw-ce-content { background: #202024 !important; }
+        #chat-editor-section.rw-dark .rw-ce-header input { color: #f1f5f9 !important; }
+        #chat-editor-section.rw-dark .rw-ce-header button { color: #cbd5e1 !important; }
+        #chat-editor-section.rw-dark .rw-ce-tabs .chat-editor-tab:not(.active) { color: #9ca3af !important; }
+        #chat-editor-section.rw-dark .rw-tab-hint { color: #9ca3af !important; }
+        /* Simpler overview (wizard step 6) — clean centred confirmation instead of a recap card */
+        #rw-ov-summary { text-align: center; padding: 6px 4px 2px; }
+        #rw-ov-summary .rw-ov-logo img { max-height: 44px; max-width: 150px; object-fit: contain; margin-bottom: 12px; }
+        #rw-ov-summary .rw-ov-ready { font-size: 12px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: #1d9e75; }
+        #rw-ov-summary .rw-ov-name { font-size: 21px; font-weight: 700; color: #1e293b; margin-top: 6px; line-height: 1.25; }
+        #rw-ov-summary .rw-ov-access { font-size: 13px; color: #64748b; margin-top: 7px; }
+        #chat-editor-tab-setup.rw-dark #rw-ov-summary .rw-ov-name { color: #f1f5f9; }
+        #chat-editor-tab-setup.rw-dark #rw-ov-summary .rw-ov-access { color: #9ca3af; }
+        /* Dark mode — Getting Started box (shows on the full setup page / layout C) */
+        #chat-editor-tab-setup.rw-dark .rw-checklist-title { color: #f1f5f9 !important; }
+        #chat-editor-tab-setup.rw-dark #gs-steps-list > li { color: #cbd5e1 !important; }
+        #chat-editor-tab-setup.rw-dark .rw-progress-bar-bg { background: #3a3a40 !important; }
+
+        /* ===== Overview summary panel (rw-ov mode): settings as "label : value" rows + edit pencil ===== */
+        #chat-editor-tab-setup #rw-ov-panel { display: none; }
+        #chat-editor-tab-setup.rw-ov #rw-ov-panel { display: block; }
+        #chat-editor-tab-setup.rw-ov .rw-left-col { display: none; }
+        /* While editing one step from the overview, hide the Getting Started bar */
+        #chat-editor-tab-setup.rw-wiz.rw-editing #getting-started-box { display: none; }
+        .rw-ov-rows { display: flex; flex-direction: column; }
+        .rw-ov-row { display: flex; align-items: center; gap: 14px; padding: 13px 2px; border-bottom: 1px solid var(--rw-border); }
+        .rw-ov-row:last-child { border-bottom: none; }
+        .rw-ov-row-label { flex: 0 0 140px; font-size: 13px; font-weight: 600; color: var(--rw-text); }
+        .rw-ov-row-value { flex: 1 1 auto; min-width: 0; font-size: 13px; color: var(--rw-text-soft); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .rw-ov-row-value img { max-height: 28px; max-width: 90px; object-fit: contain; vertical-align: middle; }
+        .rw-ov-edit { flex: 0 0 auto; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--rw-border); background: #fff; border-radius: 8px; cursor: pointer; color: #64748b; transition: color .15s, border-color .15s, background .15s; }
+        .rw-ov-edit:hover { color: var(--rw-accent2); border-color: var(--rw-accent2); background: #f5f3ff; }
+        .rw-ov-edit svg { width: 15px; height: 15px; }
+        #chat-editor-tab-setup.rw-dark .rw-ov-row { border-bottom-color: #3a3a40; }
+        #chat-editor-tab-setup.rw-dark .rw-ov-row-label { color: #f1f5f9; }
+        #chat-editor-tab-setup.rw-dark .rw-ov-row-value { color: #9ca3af; }
+        #chat-editor-tab-setup.rw-dark .rw-ov-edit { background: #1f1f23; border-color: #3a3a40; color: #cbd5e1; }
+        #chat-editor-tab-setup.rw-dark .rw-ov-edit:hover { background: #2a2740; border-color: var(--rw-accent2); color: #fff; }
+        /* The participant preview window is intentionally white — keep it out of the read-only overview */
+        #chat-editor-tab-setup.rw-ov #rw-preview-card { display: none; }
+
+        /* Proper dark mode also darkens the top app bar + page background (reset on leaving the editor) */
+        main.main-content.rw-dark { background: #202024; }
+        main.main-content.rw-dark > .content-area { background: #202024; }
+        main.main-content.rw-dark > .header { background: #1c1c20 !important; border-bottom-color: #3a3a40 !important; }
+        main.main-content.rw-dark > .header .menu-toggle,
+        main.main-content.rw-dark > .header .breadcrumb,
+        main.main-content.rw-dark > .header .breadcrumb-item.current,
+        main.main-content.rw-dark > .header #current-language,
+        main.main-content.rw-dark > .header #user-name { color: #e5e7eb !important; }
+        main.main-content.rw-dark > .header #user-role { color: #9ca3af !important; }
+        main.main-content.rw-dark > .header .language-btn { background: #2b2b30 !important; border-color: #3a3a40 !important; color: #e5e7eb !important; }
+        #chat-editor-section.rw-dark .rw-tab-hint { background: #2b2b30 !important; color: #9ca3af !important; border-color: #3a3a40 !important; }
+        /* Live preview window (right column) */
+        #rw-preview-card .rw-prev-window { border: 0.5px solid #e2e8f0; border-radius: 10px; overflow: hidden; background: #fff; }
+        #rw-preview-card .rw-prev-head { background: #1e2a3b; padding: 12px 14px; display: flex; align-items: center; gap: 10px; }
+        #rw-preview-card .rw-prev-logo { height: 24px; max-width: 130px; object-fit: contain; }
+        #rw-preview-card .rw-prev-title { color: #fff; font-size: 13px; font-weight: 600; }
+        #rw-preview-card .rw-prev-body { padding: 16px 14px; background: #f8fafc; min-height: 96px; }
+        #rw-preview-card .rw-prev-bubble { background: #fff; border: 0.5px solid #e2e8f0; border-radius: 2px 12px 12px 12px; padding: 10px 12px; font-size: 13px; color: #334155; line-height: 1.5; max-width: 95%; }
+        #rw-preview-card .rw-prev-bubble p { margin: 0 0 6px; }
+        #rw-preview-card .rw-prev-bubble p:last-child { margin: 0; }
         /* Standalone Create/Save row — drop the divider line and right-align the buttons */
         #chat-editor-tab-setup #lc-actions-card .rw-save-section { border-top: none; justify-content: flex-end; }
         /* Stop the Save button stretching full-width (.rw-btn-save sets width:100%/flex:1),
@@ -5242,6 +5471,9 @@
                     <div class="nav-item" onclick="showSection('survey-builder')">
                         <span>Explore</span>
                     </div>
+                    <div class="nav-item" onclick="showSection('survey360')">
+                        <span>360</span>
+                    </div>
                 </div>
 
             </nav>
@@ -5419,6 +5651,20 @@
                     </div>
                 </div>
 
+                <!-- 360 Section (placeholder) -->
+                <div id="survey360-section" class="hidden">
+                    <div style="padding: 40px;">
+                        <div style="max-width: 760px; margin: 0 auto; background: #ffffff; border-radius: 12px; padding: 40px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+                            <h2 style="font-size: 28px; font-weight: 700; color: #1e293b; margin: 0 0 12px 0;">360</h2>
+                            <div style="width: 50px; height: 3px; background: #1e2a3b; margin-bottom: 20px;"></div>
+                            <p style="color: #64748b; font-size: 15px; line-height: 1.7; margin: 0 0 20px;">360-degree feedback — gather rounded, multi-rater input on your people from managers, peers and direct reports.</p>
+                            <div style="display: inline-flex; align-items: center; gap: 8px; background: #f1f5f9; color: #475569; padding: 8px 14px; border-radius: 999px; font-size: 13px; font-weight: 500;">
+                                <span style="width: 8px; height: 8px; border-radius: 50%; background: #d6366c;"></span> Coming soon
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Listen Section (Chats) -->
                 <div id="listen-section" class="hidden">
                     <div class="chats-container">
@@ -5462,7 +5708,7 @@
                 <!-- Chat Editor Section -->
                 <div id="chat-editor-section" class="hidden">
                     <!-- Top Header Bar -->
-                    <div style="display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; border-bottom: 1px solid #e2e8f0; background: white;">
+                    <div class="rw-ce-header" style="display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; border-bottom: 1px solid #e2e8f0; background: white;">
                         <div style="display: flex; align-items: center; gap: 16px;">
                             <button onclick="showSection('listen')" style="background: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 4px; color: #64748b; font-size: 14px;">
                                 ← Back
@@ -5474,7 +5720,7 @@
                     </div>
 
                     <!-- Tab Navigation -->
-                    <div style="display: flex; gap: 0; border-bottom: 1px solid #e2e8f0; background: white;">
+                    <div class="rw-ce-tabs" style="display: flex; gap: 0; border-bottom: 1px solid #e2e8f0; background: white;">
                         <button class="chat-editor-tab active" onclick="showChatEditorTab('setup')" data-tab="setup" style="padding: 16px 24px; border: none; background: none; cursor: pointer; font-size: 14px; color: #3b82f6; border-bottom: 2px solid #3b82f6; font-weight: 500;">Setup</button>
                         <span class="rw-tab-wrapper" id="participants-tab-wrapper"><button class="chat-editor-tab" onclick="showChatEditorTab('participants')" data-tab="participants" style="padding: 16px 24px; border: none; background: none; cursor: pointer; font-size: 14px; color: #64748b; border-bottom: 2px solid transparent;">Participants</button><span class="rw-tab-hint">Not needed for Open Access</span></span>
                         <button class="chat-editor-tab" onclick="showChatEditorTab('responses')" data-tab="responses" style="padding: 16px 24px; border: none; background: none; cursor: pointer; font-size: 14px; color: #64748b; border-bottom: 2px solid transparent;">Responses</button>
@@ -5482,18 +5728,88 @@
                     </div>
 
                     <!-- Tab Content Area -->
-                    <div style="padding: 32px; background: #f8fafc; min-height: calc(100vh - 140px);">
+                    <div class="rw-ce-content" style="padding: 32px; background: #f8fafc; min-height: calc(100vh - 140px);">
 
                         <!-- Setup Tab -->
-                        <div id="chat-editor-tab-setup" class="chat-editor-tab-content">
+                        <div id="chat-editor-tab-setup" class="chat-editor-tab-content rw-layout-b">
+                            <!-- Creation wizard step tracker (shown in wizard mode) -->
+                            <button type="button" class="rw-dark-toggle" onclick="rwToggleDark()">Dark mode</button>
+                            <div class="rw-wiz-track">
+                              <div class="rw-wiz-tstep" data-wt="1" onclick="rwWizGoto(1)"><span class="rw-wiz-tdot">1</span> Basics</div>
+                              <div class="rw-wiz-tline"></div>
+                              <div class="rw-wiz-tstep" data-wt="2" onclick="rwWizGoto(2)"><span class="rw-wiz-tdot">2</span> Logo</div>
+                              <div class="rw-wiz-tline"></div>
+                              <div class="rw-wiz-tstep" data-wt="3" onclick="rwWizGoto(3)"><span class="rw-wiz-tdot">3</span> Audience</div>
+                              <div class="rw-wiz-tline"></div>
+                              <div class="rw-wiz-tstep" data-wt="4" onclick="rwWizGoto(4)"><span class="rw-wiz-tdot">4</span> Alerts</div>
+                              <div class="rw-wiz-tline"></div>
+                              <div class="rw-wiz-tstep" data-wt="5" onclick="rwWizGoto(5)"><span class="rw-wiz-tdot">5</span> Create link</div>
+                            </div>
                             <!-- SETUP GRID -->
                             <div class="rw-setup-grid">
+
+                              <!-- Getting Started (full-width flowchart across the top) -->
+                              <div class="rw-card gs-flow" id="getting-started-box">
+                                <div class="rw-checklist-header">
+                                  <div class="rw-checklist-title-row">
+                                    <div class="rw-checklist-title">Getting Started</div>
+                                    <span id="gs-progress" class="rw-progress-fraction">0/6 complete</span>
+                                  </div>
+                                  <div class="rw-progress-bar-bg">
+                                    <div class="rw-progress-bar-fill" id="gs-progress-bar" style="width: 0%;"></div>
+                                  </div>
+                                </div>
+                                <div class="rw-checklist-items">
+                                  <ol id="gs-steps-list" style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 12px;">
+                                    <!-- Steps rendered dynamically by JavaScript -->
+                                  </ol>
+                                </div>
+                              </div>
+
+                              <!-- OVERVIEW SUMMARY (shown after the wizard / for existing chats) -->
+                              <div class="rw-card" id="rw-ov-panel">
+                                <div class="rw-card-header">
+                                  <div>
+                                    <div class="rw-card-title">Chat overview</div>
+                                    <div class="rw-card-subtitle">Your settings — use the pencil to edit any of them</div>
+                                  </div>
+                                </div>
+                                <div class="rw-card-body">
+                                  <div class="rw-ov-rows">
+                                    <div class="rw-ov-row">
+                                      <div class="rw-ov-row-label">Name</div>
+                                      <div class="rw-ov-row-value" id="ov-val-name">—</div>
+                                      <button type="button" class="rw-ov-edit" onclick="rwEditStep(1)" title="Edit name" aria-label="Edit name"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+                                    </div>
+                                    <div class="rw-ov-row">
+                                      <div class="rw-ov-row-label">Welcome message</div>
+                                      <div class="rw-ov-row-value" id="ov-val-welcome">—</div>
+                                      <button type="button" class="rw-ov-edit" onclick="rwEditStep(1)" title="Edit welcome message" aria-label="Edit welcome message"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+                                    </div>
+                                    <div class="rw-ov-row">
+                                      <div class="rw-ov-row-label">Logo</div>
+                                      <div class="rw-ov-row-value" id="ov-val-logo">None</div>
+                                      <button type="button" class="rw-ov-edit" onclick="rwEditStep(2)" title="Edit logo" aria-label="Edit logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+                                    </div>
+                                    <div class="rw-ov-row">
+                                      <div class="rw-ov-row-label">Access</div>
+                                      <div class="rw-ov-row-value" id="ov-val-access">Not set</div>
+                                      <button type="button" class="rw-ov-edit" onclick="rwEditStep(3)" title="Edit access" aria-label="Edit access"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+                                    </div>
+                                    <div class="rw-ov-row">
+                                      <div class="rw-ov-row-label">Alerts</div>
+                                      <div class="rw-ov-row-value" id="ov-val-alerts">Use my default setting</div>
+                                      <button type="button" class="rw-ov-edit" onclick="rwEditStep(4)" title="Edit alerts" aria-label="Edit alerts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
 
                               <!-- LEFT COLUMN -->
                               <div class="rw-left-col">
 
-                                <!-- Card 1: Chat Configuration -->
-                                <div class="rw-card rw-inflatable" id="lc-config-card">
+                                <!-- Card 1: Chat Configuration (full width) -->
+                                <div class="rw-card rw-inflatable" id="lc-config-card" data-wizstep="1">
                                   <div class="rw-card-header">
                                     <div class="rw-card-header-icon purple">
                                       <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
@@ -5512,7 +5828,7 @@
                                         <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
                                         Chat Name
                                       </label>
-                                      <input type="text" id="chat-setup-name" placeholder="e.g., General Feedback, Customer Insights">
+                                      <input type="text" id="chat-setup-name" placeholder="e.g., General Feedback, Customer Insights" oninput="window.rwUpdatePreview&&rwUpdatePreview()">
                                     </div>
                                     <div class="rw-field">
                                       <label>
@@ -5526,11 +5842,8 @@
                                   </div>
                                 </div>
 
-                                <!-- Access + Notifications: split into two full-width side-by-side boxes -->
-                                <div class="rw-split-row">
-
-                                  <!-- Access (left) -->
-                                  <div class="rw-card rw-inflatable" id="lc-access-card">
+                                <!-- Access -->
+                                <div class="rw-card rw-inflatable" id="lc-access-card" data-wizstep="3">
                                     <div class="rw-card-header">
                                       <div class="rw-card-header-icon pink">
                                         <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
@@ -5547,9 +5860,33 @@
                                       <div class="rw-field">
                                         <label>
                                           <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064"/></svg>
-                                          Access Type
+                                          Who can respond
                                         </label>
-                                        <select id="chat-access-type">
+                                        <div class="rw-access-choices" id="rw-access-choices">
+                                          <button type="button" class="rw-access-option" data-access="open" onclick="rwSelectAccess('open')">
+                                            <span class="rw-access-radio"></span>
+                                            <span class="rw-access-text">
+                                              <span class="rw-access-title">Open Access</span>
+                                              <span class="rw-access-desc">Anyone with the link can respond — no invite or sign-in needed.</span>
+                                            </span>
+                                          </button>
+                                          <button type="button" class="rw-access-option" data-access="closed" onclick="rwSelectAccess('closed')">
+                                            <span class="rw-access-radio"></span>
+                                            <span class="rw-access-text">
+                                              <span class="rw-access-title">Closed Access</span>
+                                              <span class="rw-access-desc">Invite-only: each person gets their own private link (no public link).</span>
+                                            </span>
+                                          </button>
+                                          <button type="button" class="rw-access-option" data-access="combined" onclick="rwSelectAccess('combined')">
+                                            <span class="rw-access-radio"></span>
+                                            <span class="rw-access-text">
+                                              <span class="rw-access-title">Combined Access</span>
+                                              <span class="rw-access-desc">A public link anyone can use, plus private invites for specific people.</span>
+                                            </span>
+                                          </button>
+                                        </div>
+                                        <!-- Hidden select keeps every existing read/validation/Getting-Started hook working -->
+                                        <select id="chat-access-type" class="rw-access-hidden-select" aria-hidden="true" tabindex="-1">
                                             <option value="" disabled selected>Select access type…</option>
                                             <option value="open">Open Access — Anyone with the link can respond, no invite or sign-in needed</option>
                                             <option value="closed">Closed Access — Invite-only: each person gets their own private link (no public link)</option>
@@ -5560,7 +5897,7 @@
                                   </div>
 
                                   <!-- Notifications (right) -->
-                                  <div class="rw-card rw-inflatable" id="lc-notifs-card">
+                                  <div class="rw-card rw-inflatable" id="lc-notifs-card" data-wizstep="4">
                                     <div class="rw-card-header">
                                       <div class="rw-card-header-icon pink">
                                         <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
@@ -5577,9 +5914,47 @@
                                       <div class="rw-field">
                                         <label>
                                           <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
-                                          Submission Notifications
+                                          Alerts
                                         </label>
-                                        <select id="chat-notification-frequency">
+                                        <div class="rw-access-choices" id="rw-alerts-choices">
+                                          <button type="button" class="rw-access-option" data-alert="" onclick="rwSelectAlerts('')">
+                                            <span class="rw-access-radio"></span>
+                                            <span class="rw-access-text">
+                                              <span class="rw-access-title">Use my default setting</span>
+                                              <span class="rw-access-desc">Follow your account-wide notification preference.</span>
+                                            </span>
+                                          </button>
+                                          <button type="button" class="rw-access-option" data-alert="instant" onclick="rwSelectAlerts('instant')">
+                                            <span class="rw-access-radio"></span>
+                                            <span class="rw-access-text">
+                                              <span class="rw-access-title">Every submission</span>
+                                              <span class="rw-access-desc">Get notified the moment someone responds.</span>
+                                            </span>
+                                          </button>
+                                          <button type="button" class="rw-access-option" data-alert="daily" onclick="rwSelectAlerts('daily')">
+                                            <span class="rw-access-radio"></span>
+                                            <span class="rw-access-text">
+                                              <span class="rw-access-title">Daily digest</span>
+                                              <span class="rw-access-desc">One summary email per day.</span>
+                                            </span>
+                                          </button>
+                                          <button type="button" class="rw-access-option" data-alert="weekly" onclick="rwSelectAlerts('weekly')">
+                                            <span class="rw-access-radio"></span>
+                                            <span class="rw-access-text">
+                                              <span class="rw-access-title">Weekly digest</span>
+                                              <span class="rw-access-desc">One summary email per week.</span>
+                                            </span>
+                                          </button>
+                                          <button type="button" class="rw-access-option" data-alert="never" onclick="rwSelectAlerts('never')">
+                                            <span class="rw-access-radio"></span>
+                                            <span class="rw-access-text">
+                                              <span class="rw-access-title">Never</span>
+                                              <span class="rw-access-desc">Don't send notifications for this chat.</span>
+                                            </span>
+                                          </button>
+                                        </div>
+                                        <!-- Hidden select keeps save/load working -->
+                                        <select id="chat-notification-frequency" class="rw-access-hidden-select" aria-hidden="true" tabindex="-1">
                                             <option value="">Use my default setting</option>
                                             <option value="instant">Every submission (instant)</option>
                                             <option value="daily">Daily digest</option>
@@ -5588,25 +5963,27 @@
                                         </select>
                                         <div class="rw-hint">Override your global notification setting for this specific chat.</div>
                                       </div>
-                                      <div class="rw-notif-row">
-                                        <div class="rw-notif-left">
-                                          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                                          <span>Notifications active — using your default setting</span>
-                                        </div>
-                                        <div class="rw-notif-pill">Instant</div>
-                                      </div>
                                     </div>
                                   </div>
 
-                                </div>
-
-                                <!-- Create / Save (full width, below the split) -->
-                                <div class="rw-card" id="lc-actions-card">
-                                  <div class="rw-save-section">
-                                    <button onclick="saveListeningAll(this)" id="save-chat-btn" class="rw-btn-save" style="flex:0 0 auto; padding:11px 22px; background:linear-gradient(135deg,#6c63ff,#8b5cf6) !important; color:#fff !important; border:none; border-radius:9px; font-size:13.5px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:8px; box-shadow:0 2px 8px rgba(108,99,255,0.25);">
-                                      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                                      Save Changes
+                                <!-- Chat Logo -->
+                                <div class="rw-card rw-inflatable rw-collapsed" id="lc-logo-card" data-wizstep="2">
+                                  <div class="rw-card-header">
+                                    <div class="rw-card-header-icon purple">
+                                      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                    </div>
+                                    <div>
+                                      <div class="rw-card-title">Chat Logo <span class="rw-info" tabindex="0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg><span class="rw-tip">Upload a logo or image (PNG/JPG, up to 2MB) to show at the top of the chat for participants, in place of the default logo.</span></span></div>
+                                      <div class="rw-card-subtitle">Shown at the top of the chat</div>
+                                    </div>
+                                    <button class="rw-collapse-toggle" type="button" onclick="rwToggleCard(this)" aria-label="Collapse section">
+                                      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                                     </button>
+                                  </div>
+                                  <div class="rw-card-body">
+                                    <input type="hidden" id="chat-setup-logo">
+                                    <input type="file" id="lc-logo-file" accept="image/*" style="display:none;" onchange="lcHandleLogoInput(this)">
+                                    <div id="lc-logo-zone"></div>
                                   </div>
                                 </div>
 
@@ -5614,6 +5991,35 @@
 
                               <!-- RIGHT COLUMN -->
                               <div class="rw-right-col">
+
+                                <!-- Overview summary (wizard step 6) — simple confirmation -->
+                                <div id="rw-ov-summary">
+                                  <div class="rw-ov-logo" id="rw-ov-logo"></div>
+                                  <div class="rw-ov-ready">Your chat is ready</div>
+                                  <div class="rw-ov-name" id="rw-ov-name">Untitled chat</div>
+                                  <div class="rw-ov-access" id="rw-ov-access"></div>
+                                </div>
+
+                                <!-- Live preview of the participant chat -->
+                                <div class="rw-card" id="rw-preview-card">
+                                  <div class="rw-card-header">
+                                    <div>
+                                      <div class="rw-card-title">Preview</div>
+                                      <div class="rw-card-subtitle">How participants will see it</div>
+                                    </div>
+                                  </div>
+                                  <div class="rw-card-body">
+                                    <div class="rw-prev-window">
+                                      <div class="rw-prev-head">
+                                        <img id="rw-prev-logo" class="rw-prev-logo" src="/assets/images/rworld-in-line-logo-white.svg" alt="">
+                                        <span id="rw-prev-title" class="rw-prev-title">Untitled chat</span>
+                                      </div>
+                                      <div class="rw-prev-body">
+                                        <div class="rw-prev-bubble" id="rw-prev-welcome"><span style="color:#94a3b8;">Your welcome message will appear here…</span></div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
 
                                 <!-- Your Chat Link Card -->
                                 <div class="rw-card" id="chat-success-panel" style="display: none;">
@@ -5629,43 +6035,47 @@
                                   <div class="rw-card-body">
                                     <div class="rw-link-panel">
                                       <div class="rw-link-panel-label">Participant URL</div>
-                                      <div class="rw-link-display">
-                                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
-                                        <input type="text" id="generatedChatLink" readonly>
-                                      </div>
-                                      <div class="rw-link-actions">
-                                        <button onclick="rwChatLinkAction()" id="copyLinkBtn" class="rw-btn-copy" style="flex:1; padding:9px; background:#6c63ff !important; color:#fff !important; border:none; border-radius:7px; font-size:12.5px; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;">
-                                          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:14px;height:14px;flex-shrink:0;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                                          Create chat / link
-                                        </button>
-                                        <button class="rw-btn-qr" onclick="rwShowChatQR()" title="Show QR code" style="width:38px;height:38px;flex-shrink:0;padding:0;">
-                                          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
-                                        </button>
+                                      <div class="rw-link-grid">
+                                        <div class="rw-link-left">
+                                          <div class="rw-link-display">
+                                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+                                            <input type="text" id="generatedChatLink" readonly>
+                                          </div>
+                                          <div class="rw-link-actions">
+                                            <button onclick="rwChatLinkAction()" id="copyLinkBtn" class="rw-btn-copy" style="flex:1; padding:9px; background:#6c63ff !important; color:#fff !important; border:none; border-radius:7px; font-size:12.5px; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;">
+                                              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:14px;height:14px;flex-shrink:0;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                              Create chat / link
+                                            </button>
+                                          </div>
+                                        </div>
+                                        <!-- QR auto-generates beside the link once it exists -->
+                                        <div class="rw-link-qr" id="rw-inline-qr" style="display:none;">
+                                          <img id="rw-inline-qr-img" alt="Chat QR code">
+                                          <button type="button" class="rw-inline-qr-dl" onclick="rwDownloadQR()">Download</button>
+                                        </div>
                                       </div>
                                     </div>
                                   </div>
                                 </div>
 
-                                <!-- Getting Started Checklist -->
-                                <div class="rw-card" id="getting-started-box">
-                                  <div class="rw-checklist-header">
-                                    <div class="rw-checklist-title-row">
-                                      <div class="rw-checklist-title">Getting Started</div>
-                                      <span id="gs-progress" class="rw-progress-fraction">0/6 complete</span>
-                                    </div>
-                                    <div class="rw-progress-bar-bg">
-                                      <div class="rw-progress-bar-fill" id="gs-progress-bar" style="width: 0%;"></div>
-                                    </div>
-                                  </div>
-                                  <div class="rw-checklist-items">
-                                    <ol id="gs-steps-list" style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 12px;">
-                                      <!-- Steps rendered dynamically by JavaScript -->
-                                    </ol>
+                                <!-- Save (under the chat link, full width) -->
+                                <div class="rw-card" id="lc-actions-card">
+                                  <div class="rw-save-section">
+                                    <button onclick="saveListeningAll(this)" id="save-chat-btn" class="rw-btn-save" style="width:100%; padding:11px 22px; background:linear-gradient(135deg,#6c63ff,#8b5cf6) !important; color:#fff !important; border:none; border-radius:9px; font-size:13.5px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:8px; box-shadow:0 2px 8px rgba(108,99,255,0.25);">
+                                      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                      Save Changes
+                                    </button>
                                   </div>
                                 </div>
 
                               </div>
 
+                            </div>
+                            <!-- Creation wizard navigation (shown in wizard mode) -->
+                            <div class="rw-wiz-nav">
+                              <button type="button" class="rw-wiz-back" onclick="rwWizBack()">Back</button>
+                              <button type="button" class="rw-wiz-next" onclick="rwWizNext()">Next</button>
+                              <button type="button" class="rw-wiz-create" onclick="rwWizCreate(this)">Create chat</button>
                             </div>
                         </div>
 
@@ -7879,6 +8289,7 @@ function initQuillEditors() {
             var plain = quillWelcomeEditor.getText().trim();
             welcomeMirror.value = plain ? quillWelcomeEditor.root.innerHTML : '';
             welcomeMirror.dispatchEvent(new Event('input'));
+            if (window.rwUpdatePreview) rwUpdatePreview();
         });
     }
 }
@@ -7919,9 +8330,11 @@ function setWelcomeEditorHTML(html) {
     if (typeof quillWelcomeEditor !== 'undefined' && quillWelcomeEditor) {
         quillWelcomeEditor.root.innerHTML = isEmpty ? '<p><br></p>' : html;
         if (mirror) mirror.value = isEmpty ? '' : html;
+        if (window.rwUpdatePreview) rwUpdatePreview();
         return;
     }
     if (mirror) mirror.value = isEmpty ? '' : html;
+    if (window.rwUpdatePreview) rwUpdatePreview();
 }
 
 // Initialize editors once DOM is ready
@@ -12261,6 +12674,9 @@ console.log('editChatSettings function exists:', typeof editChatSettings);
 function showSection(sectionName) {
     console.log(`🔄 showSection called with: ${sectionName}`);
 
+    // Dark mode is a chat-editor feature — leaving it returns the app chrome to light
+    if (sectionName !== 'chat-editor' && typeof rwApplyDark === 'function') rwApplyDark(false);
+
     // Clear any stored content when navigating to prevent conflicts
     if (window.originalContentHTML) {
         console.log('🧹 Clearing stored content for section navigation');
@@ -14193,12 +14609,15 @@ function openChatEditor(chatId = null) {
         document.getElementById('chat-editor-name').value = '';
         document.getElementById('chat-setup-name').value = '';
         if (typeof setWelcomeEditorHTML === 'function') setWelcomeEditorHTML(''); else document.getElementById('chat-setup-welcome').value = '';
+        if (typeof lcSetLogo === 'function') lcSetLogo('');
         // Reset dropdown to unselected — user must actively choose an access type
         const accessDropdown = document.getElementById('chat-access-type');
         if (accessDropdown) accessDropdown.value = '';
+        if (typeof rwSyncAccessChoices === 'function') rwSyncAccessChoices();
         // Reset notification dropdown to default
         const notifDropdown = document.getElementById('chat-notification-frequency');
         if (notifDropdown) notifDropdown.value = '';
+        if (typeof rwSyncAlertsChoices === 'function') rwSyncAlertsChoices();
         // Clear generated link from previous chat
         const generatedLinkInput = document.getElementById('generatedChatLink');
         if (generatedLinkInput) generatedLinkInput.value = '';
@@ -14206,6 +14625,7 @@ function openChatEditor(chatId = null) {
         chatParticipantsData = [];
         if (typeof updateLinkPanelForAccessType === 'function') updateLinkPanelForAccessType();
         if (typeof rwSyncChatLinkButton === 'function') rwSyncChatLinkButton(); // new chat → "Create chat / link"
+        if (typeof rwWizStart === 'function') rwWizStart(); // new chat → step-by-step creation wizard
     } else {
         // Existing chat - load from database
         loadChatIntoEditor(chatId);
@@ -14251,6 +14671,8 @@ async function loadChatIntoEditor(chatId) {
         if (chatSetupName) chatSetupName.value = chat.name || '';
         if (typeof setWelcomeEditorHTML === 'function') setWelcomeEditorHTML(chat.welcome_message || '');
         else if (chatSetupWelcome) chatSetupWelcome.value = chat.welcome_message || '';
+        if (typeof lcSetLogo === 'function') lcSetLogo(chat.chat_logo || '');
+        if (typeof rwShowOverview === 'function') rwShowOverview(); // existing chat → overview/manage
 
         // Set access type dropdown value
         const accessTypeDropdown = document.getElementById('chat-access-type');
@@ -14264,6 +14686,7 @@ async function loadChatIntoEditor(chatId) {
                 accessTypeDropdown.value = 'open';
             }
         }
+        if (typeof rwSyncAccessChoices === 'function') rwSyncAccessChoices();
         if (typeof updateLinkPanelForAccessType === 'function') updateLinkPanelForAccessType();
 
         // Hide Create Chat button for existing chats — Save is the primary action
@@ -14275,6 +14698,8 @@ async function loadChatIntoEditor(chatId) {
         if (notifDropdown) {
             notifDropdown.value = chat.notification_frequency || '';
         }
+        if (typeof rwSyncAlertsChoices === 'function') rwSyncAlertsChoices();
+        if (typeof rwRenderOvPanel === 'function') rwRenderOvPanel(); // refresh overview summary now that all fields are populated
 
         // Handle panel display based on access type
         const successPanel = document.getElementById('chat-success-panel');
@@ -15450,6 +15875,35 @@ function getSelectedAccessType() {
         return 'open';
     }
     return 'open';
+}
+
+// Multiple-choice cards — write through to a hidden <select> so all existing hooks fire
+function rwSelectChoice(selectId, containerId, attr, val) {
+    var sel = document.getElementById(selectId);
+    if (sel) { sel.value = val; sel.dispatchEvent(new Event('change', { bubbles: true })); }
+    rwSyncChoices(selectId, containerId, attr);
+}
+// Highlight the card matching the hidden select's current value (call after any programmatic value change)
+function rwSyncChoices(selectId, containerId, attr) {
+    var sel = document.getElementById(selectId);
+    var val = sel ? sel.value : '';
+    var opts = document.querySelectorAll('#' + containerId + ' .rw-access-option');
+    for (var i = 0; i < opts.length; i++) {
+        opts[i].classList.toggle('selected', opts[i].getAttribute(attr) === val);
+    }
+}
+// Access type cards
+function rwSelectAccess(val) { rwSelectChoice('chat-access-type', 'rw-access-choices', 'data-access', val); }
+function rwSyncAccessChoices() { rwSyncChoices('chat-access-type', 'rw-access-choices', 'data-access'); }
+// Alerts (notification frequency) cards
+function rwSelectAlerts(val) { rwSelectChoice('chat-notification-frequency', 'rw-alerts-choices', 'data-alert', val); }
+function rwSyncAlertsChoices() { rwSyncChoices('chat-notification-frequency', 'rw-alerts-choices', 'data-alert'); }
+// Used by Create/Save validation when no access is chosen yet
+function rwFocusAccess() {
+    var card = document.getElementById('lc-access-card');
+    if (card) card.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    var first = document.querySelector('#rw-access-choices .rw-access-option');
+    if (first) first.focus();
 }
 
 // Create HTML email template for invite
@@ -19992,7 +20446,7 @@ async function createChat(btn) {
     }
     if (!accessType) {
         alert('Please choose an access type first.');
-        document.getElementById('chat-access-type').focus();
+        if (typeof rwFocusAccess === 'function') rwFocusAccess();
         return;
     }
 
@@ -20404,8 +20858,7 @@ async function saveListeningAll(btn) {
     }
     if (!accessType) {
         alert('Please choose an access type before saving.');
-        var accSel = document.getElementById('chat-access-type');
-        if (accSel) accSel.focus();
+        if (typeof rwFocusAccess === 'function') rwFocusAccess();
         return;
     }
 
@@ -20460,6 +20913,8 @@ async function saveListeningAll(btn) {
                 email_reminder_subject: document.getElementById('email-reminder-subject').value.trim() || 'A reminder to share your feedback',
                 notification_frequency: notifFreq
             };
+            var _logoIns = (document.getElementById('chat-setup-logo') || {}).value;
+            if (_logoIns) chatData.chat_logo = _logoIns;
 
             const { data: newChat, error } = await window.supabaseClient
                 .from('listening_chats')
@@ -20493,6 +20948,8 @@ async function saveListeningAll(btn) {
                 email_reminder_subject: document.getElementById('email-reminder-subject').value.trim() || 'A reminder to share your feedback',
                 notification_frequency: notifFreq
             };
+            var _logoUpd = (document.getElementById('chat-setup-logo') || {}).value;
+            if (_logoUpd) updateData.chat_logo = _logoUpd;
 
             const { data: updatedChat, error } = await window.supabaseClient
                 .from('listening_chats')
@@ -20874,14 +21331,14 @@ let gsStepState = [];
 let gsCurrentSteps = [];
 
 const gsStepDefs = {
-    name:         { label: '<strong>Name your chat</strong> — Enter a name in the Chat Name field', key: 'name' },
-    welcome:      { label: '<strong>Set your welcome message</strong> — Customise the message respondents see when they open the chat', key: 'welcome' },
-    access:       { label: '<strong>Choose access type</strong> — Select who can access your chat link', key: 'access' },
-    create:       { label: '<strong>Create your chat</strong> — Click the "Create Chat" button to generate your unique link', key: 'create' },
-    copyLink:     { label: '<strong>Copy your link</strong> — Use the Copy button to share your chat link with participants', key: 'copyLink' },
-    goParticipants: { label: '<strong>Go to Participants</strong> — Switch to the Participants tab to manage your audience', key: 'goParticipants' },
-    addParticipants: { label: '<strong>Add participants</strong> — Add participant names and emails', key: 'addParticipants' },
-    save:         { label: '<strong>Save your chat</strong> — Click "Save" to store your settings', key: 'save' }
+    name:         { label: 'Name chat', key: 'name' },
+    welcome:      { label: 'Welcome message', key: 'welcome' },
+    access:       { label: 'Access type', key: 'access' },
+    create:       { label: 'Create link', key: 'create' },
+    copyLink:     { label: 'Copy link', key: 'copyLink' },
+    goParticipants: { label: 'Participants', key: 'goParticipants' },
+    addParticipants: { label: 'Add participants', key: 'addParticipants' },
+    save:         { label: 'Save', key: 'save' }
 };
 
 const gsAccessSteps = {
@@ -22993,6 +23450,21 @@ function engageGsReset() {
     img.onerror = function(){ var a=document.createElement('a'); a.href=window.rwQrDataUrl; a.download='chat-qr-code.gif'; a.click(); };
     img.src = window.rwQrDataUrl;
   };
+  // Inline QR shown beside the link in the chat-link card; auto-renders whenever a link exists
+  window.rwRenderInlineQR = function(){
+    var input = document.getElementById('generatedChatLink');
+    var url = input ? (input.value || '').trim() : '';
+    var box = document.getElementById('rw-inline-qr');
+    var img = document.getElementById('rw-inline-qr-img');
+    if (!box || !img) return;
+    if (!url || typeof qrcode === 'undefined'){ box.style.display = 'none'; return; }
+    try {
+      var qr = qrcode(0, 'M'); qr.addData(url); qr.make();
+      window.rwQrDataUrl = qr.createDataURL(6, 2);
+      img.src = window.rwQrDataUrl;
+      box.style.display = '';
+    } catch(err){ console.error('Inline QR failed', err); box.style.display = 'none'; }
+  };
 })();
 </script>
 
@@ -23004,20 +23476,209 @@ function engageGsReset() {
   // Reflect link state on the chat-link button: no link -> "Create chat / link", link -> "Copy"
   window.rwSyncChatLinkButton = function(){
     var btn = document.getElementById('copyLinkBtn');
-    if (!btn) return;
     var input = document.getElementById('generatedChatLink');
     var hasLink = !!(input && (input.value || '').trim());
-    btn.innerHTML = hasLink ? (COPY_ICON + 'Copy') : (PLUS_ICON + 'Create chat / link');
-    btn.setAttribute('title', hasLink ? 'Copy the chat link' : 'Create the chat and generate its link');
+    if (btn){
+      btn.innerHTML = hasLink ? (COPY_ICON + 'Copy') : (PLUS_ICON + 'Create chat / link');
+      btn.setAttribute('title', hasLink ? 'Copy the chat link' : 'Create the chat and generate its link');
+    }
+    if (typeof rwRenderInlineQR === 'function') rwRenderInlineQR(); // keep the inline QR in sync with the link
   };
-  // Click: create the chat/link if there isn't one yet, otherwise copy it
+  // Click: when there's no link yet, this one button creates the link, SAVES the chat, and makes the QR.
+  // Once a link exists it just copies it.
   window.rwChatLinkAction = function(){
     var input = document.getElementById('generatedChatLink');
     if (input && (input.value || '').trim()){
       if (typeof copyGeneratedLink === 'function') copyGeneratedLink();
-    } else if (typeof createChat === 'function'){
-      createChat(document.getElementById('copyLinkBtn'));
+      return;
     }
+    var inbox = document.getElementById('copyLinkBtn');
+    if (inbox){ inbox.disabled = true; inbox.innerHTML = '<span class="btn-spinner"></span> Creating…'; }
+    // saveListeningAll persists the chat AND surfaces the link; pass the hidden Save button so it
+    // doesn't clobber the in-box button's text (it restores whatever button it's given).
+    var saveBtn = document.getElementById('save-chat-btn');
+    Promise.resolve(typeof saveListeningAll === 'function' ? saveListeningAll(saveBtn) : null)
+      .then(function(){
+        if (inbox) inbox.disabled = false;
+        window.rwSyncChatLinkButton(); // → "Copy" + renders the inline QR
+      })
+      .catch(function(err){
+        console.error('Create chat / link failed', err);
+        if (inbox) inbox.disabled = false;
+        window.rwSyncChatLinkButton();
+      });
+  };
+})();
+</script>
+
+<!-- ===== Listen chat logo upload (drag & drop) ===== -->
+<script>
+(function(){
+  function zone(){ return document.getElementById('lc-logo-zone'); }
+  function field(){ return document.getElementById('chat-setup-logo'); }
+
+  window.lcRenderLogoPreview = function(){
+    var z = zone(); if (!z) return;
+    var val = field() ? field().value : '';
+    if (val) {
+      z.innerHTML = '<div style="display:flex;flex-direction:column;gap:10px;align-items:center;">'
+        + '<img src="' + val + '" alt="Chat logo" style="max-height:96px;max-width:100%;object-fit:contain;border:1px solid #e2e8f0;border-radius:8px;padding:6px;background:#fff;">'
+        + '<div style="display:flex;gap:8px;">'
+        + '<button type="button" onclick="document.getElementById(\'lc-logo-file\').click()" style="padding:6px 12px;border:1px solid #cbd5e1;border-radius:7px;background:#fff;cursor:pointer;font-size:0.82rem;">Replace</button>'
+        + '<button type="button" onclick="lcRemoveLogo()" style="padding:6px 12px;border:1px solid #cbd5e1;border-radius:7px;background:#fff;cursor:pointer;font-size:0.82rem;color:#c0392b;">Remove</button>'
+        + '</div></div>';
+    } else {
+      z.innerHTML = '<div class="lc-drop" onclick="document.getElementById(\'lc-logo-file\').click()" '
+        + 'ondragover="event.preventDefault();this.classList.add(\'dragover\')" '
+        + 'ondragleave="this.classList.remove(\'dragover\')" '
+        + 'ondrop="lcHandleDrop(event)">'
+        + '<div><strong>Drag &amp; drop</strong> a logo here, or click to choose</div>'
+        + '<div style="color:#94a3b8;font-size:0.78rem;margin-top:0.3rem;">PNG or JPG, up to 2MB</div>'
+        + '</div>';
+    }
+    if (window.rwUpdatePreview) rwUpdatePreview();
+  };
+
+  function readImage(file){
+    if (!file) return;
+    if (!/^image\//.test(file.type || '')){ alert('Please choose an image file.'); return; }
+    if (file.size > 2 * 1024 * 1024){ alert('Image must be under 2MB.'); return; }
+    var r = new FileReader();
+    r.onload = function(e){ if (field()){ field().value = e.target.result; lcRenderLogoPreview(); } };
+    r.readAsDataURL(file);
+  }
+  window.lcHandleLogoInput = function(input){ readImage(input.files && input.files[0]); input.value = ''; };
+  window.lcHandleDrop = function(e){
+    e.preventDefault();
+    var d = zone() && zone().querySelector('.lc-drop'); if (d) d.classList.remove('dragover');
+    readImage(e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]);
+  };
+  window.lcRemoveLogo = function(){ if (field()) field().value = ''; lcRenderLogoPreview(); };
+  window.lcSetLogo = function(val){ if (field()) field().value = val || ''; lcRenderLogoPreview(); };
+
+  // Switch the Setup page between layout concepts (for choosing a design)
+  window.rwSetLayout = function(x){
+    var root = document.getElementById('chat-editor-tab-setup');
+    if (!root) return;
+    root.classList.remove('rw-layout-a', 'rw-layout-b', 'rw-layout-c');
+    root.classList.add('rw-layout-' + x);
+    var btns = document.querySelectorAll('.rw-layout-switch button');
+    for (var i = 0; i < btns.length; i++) btns[i].classList.toggle('active', btns[i].getAttribute('data-layout') === x);
+    if (window.rwUpdatePreview) rwUpdatePreview();
+  };
+
+  // Live preview (Concept A): reflect name, welcome message and logo into the preview window
+  window.rwUpdatePreview = function(){
+    var t = document.getElementById('rw-prev-title');
+    if (t) { var n = (document.getElementById('chat-setup-name')||{}).value || ''; t.textContent = n.trim() || 'Untitled chat'; }
+    var w = document.getElementById('rw-prev-welcome');
+    if (w) {
+      var html = '';
+      if (typeof quillWelcomeEditor !== 'undefined' && quillWelcomeEditor && quillWelcomeEditor.getText().trim()) html = quillWelcomeEditor.root.innerHTML;
+      else html = (document.getElementById('chat-setup-welcome')||{}).value || '';
+      var hasText = html && html.replace(/<[^>]*>/g,'').replace(/&nbsp;/g,'').trim();
+      w.innerHTML = hasText ? html : '<span style="color:#94a3b8;">Your welcome message will appear here…</span>';
+    }
+    var l = document.getElementById('rw-prev-logo');
+    if (l) { var logo = (document.getElementById('chat-setup-logo')||{}).value || ''; l.src = logo || '/assets/images/rworld-in-line-logo-white.svg'; }
+  };
+
+  // ===== Creation wizard: Basics(1) -> Logo(2) -> Audience(3) -> Alerts(4) -> Create link(5) -> overview summary =====
+  var rwWiz = { step: 1, max: 5, editing: false };
+  function rwWizCards(){ return document.querySelectorAll('#chat-editor-tab-setup .rw-left-col > .rw-card'); }
+  function rwEsc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+  window.rwRenderOverview = function(){
+    var sum = document.getElementById('rw-ov-summary'); if (!sum) return;
+    var name = (document.getElementById('chat-setup-name') || {}).value || 'Untitled chat';
+    var accSel = document.getElementById('chat-access-type');
+    var access = (accSel && accSel.value) ? accSel.options[accSel.selectedIndex].text : '';
+    var logo = (document.getElementById('chat-setup-logo') || {}).value || '';
+    var logoEl = document.getElementById('rw-ov-logo'); if (logoEl) logoEl.innerHTML = logo ? '<img src="' + rwEsc(logo) + '" alt="">' : '';
+    var nameEl = document.getElementById('rw-ov-name'); if (nameEl) nameEl.textContent = name;
+    var accEl = document.getElementById('rw-ov-access'); if (accEl) accEl.textContent = access;
+  };
+  // Fill the overview summary rows (name / welcome / logo / access / alerts)
+  window.rwRenderOvPanel = function(){
+    var get = function(id){ return document.getElementById(id); };
+    var accMap = { open: 'Open Access', closed: 'Closed Access', combined: 'Combined Access' };
+    var name = (get('chat-setup-name') || {}).value || '';
+    var welEl = get('chat-setup-welcome');
+    var welText = (welEl ? (welEl.value || '') : '').replace(/<[^>]*>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
+    if (welText.length > 90) welText = welText.slice(0, 90) + '…';
+    var accSel = get('chat-access-type');
+    var access = (accSel && accSel.value) ? (accMap[accSel.value] || accSel.options[accSel.selectedIndex].text) : '';
+    var alertSel = get('chat-notification-frequency');
+    var alerts = (alertSel && alertSel.selectedIndex >= 0) ? alertSel.options[alertSel.selectedIndex].text : '';
+    var logo = (get('chat-setup-logo') || {}).value || '';
+    var setText = function(id, val, fallback){ var el = get(id); if (el) el.textContent = (val && String(val).trim()) ? val : fallback; };
+    setText('ov-val-name', name, 'Untitled chat');
+    setText('ov-val-welcome', welText, 'Not set');
+    setText('ov-val-access', access, 'Not set');
+    setText('ov-val-alerts', alerts, 'Use my default setting');
+    var logoEl = get('ov-val-logo');
+    if (logoEl) logoEl.innerHTML = logo ? '<img src="' + rwEsc(logo) + '" alt="logo">' : 'None';
+  };
+  window.rwWizRender = function(){
+    var root = document.getElementById('chat-editor-tab-setup'); if (!root) return;
+    root.classList.toggle('rw-wiz-link', rwWiz.step === 5);  // step 5: create link
+    var cards = rwWizCards();
+    for (var i = 0; i < cards.length; i++) cards[i].classList.toggle('rw-wiz-on', rwWiz.step <= 4 && cards[i].getAttribute('data-wizstep') === String(rwWiz.step));
+    var steps = document.querySelectorAll('.rw-wiz-tstep');
+    for (var j = 0; j < steps.length; j++) { var n = parseInt(steps[j].getAttribute('data-wt'), 10); steps[j].classList.toggle('active', n === rwWiz.step); steps[j].classList.toggle('done', n < rwWiz.step); }
+    var back = document.querySelector('.rw-wiz-back'), next = document.querySelector('.rw-wiz-next'), create = document.querySelector('.rw-wiz-create');
+    if (create) create.style.display = 'none';
+    if (rwWiz.editing) {
+      // Editing a single setting from the overview → Cancel / Save changes
+      if (back) { back.style.visibility = 'visible'; back.textContent = 'Cancel'; }
+      if (next) { next.style.display = ''; next.textContent = 'Save changes'; }
+    } else {
+      // Normal wizard nav. The chat-link card's own button creates+saves; from step 5, Next → overview.
+      if (back) { back.style.visibility = (rwWiz.step === 1) ? 'hidden' : 'visible'; back.textContent = 'Back'; }
+      if (next) { next.style.display = ''; next.textContent = 'Next'; }
+    }
+  };
+  window.rwWizGoto = function(n){ rwWiz.step = Math.max(1, Math.min(rwWiz.max, n)); rwWizRender(); };
+  window.rwWizNext = function(){
+    if (rwWiz.editing) { rwSaveAndReturnOverview(); return; }
+    if (rwWiz.step >= rwWiz.max) { rwShowOverview(); return; }
+    rwWizGoto(rwWiz.step + 1);
+  };
+  window.rwWizBack = function(){
+    if (rwWiz.editing) { rwWiz.editing = false; rwShowOverview(); return; }  // Cancel edit → back to overview
+    if (rwWiz.step > 1) rwWizGoto(rwWiz.step - 1);
+  };
+  window.rwWizStart = function(){ var r = document.getElementById('chat-editor-tab-setup'); if (!r) return; rwWiz.editing = false; r.classList.remove('rw-ov', 'rw-layout-c', 'rw-editing'); r.classList.add('rw-wiz', 'rw-layout-b'); rwWizGoto(1); };
+  // Overview = read-only summary of the settings (rw-ov) + the link/QR rail; edit pencils jump back into the wizard
+  window.rwShowOverview = function(){ var r = document.getElementById('chat-editor-tab-setup'); if (!r) return; rwWiz.editing = false; r.classList.remove('rw-wiz', 'rw-wiz-link', 'rw-wiz-ov', 'rw-layout-b', 'rw-layout-c', 'rw-editing'); r.classList.add('rw-ov'); rwWiz.step = 1; rwRenderOvPanel(); };
+  // Edit one setting from the overview: re-enter the wizard at its step (Save changes / Cancel return here)
+  window.rwEditStep = function(step){ var r = document.getElementById('chat-editor-tab-setup'); if (!r) return; rwWiz.editing = true; r.classList.remove('rw-ov', 'rw-layout-c'); r.classList.add('rw-wiz', 'rw-layout-b', 'rw-editing'); rwWizGoto(step); };
+  function rwSaveAndReturnOverview(){
+    var saveBtn = document.getElementById('save-chat-btn');
+    rwWiz.editing = false;
+    Promise.resolve(typeof saveListeningAll === 'function' ? saveListeningAll(saveBtn) : null)
+      .then(function(){ rwShowOverview(); })
+      .catch(function(e){ console.error('Save (edit) failed', e); rwShowOverview(); });
+  }
+  window.rwWizCreate = async function(){
+    var saveBtn = document.getElementById('save-chat-btn');
+    if (typeof saveListeningAll === 'function' && saveBtn) {
+      try { await saveListeningAll(saveBtn); } catch (e) { console.error('Wizard create failed', e); }
+    }
+    rwWizRender(); // link now exists -> "Continue" appears so the user can move to Overview
+  };
+  // Apply/remove dark mode across the whole editor view: setup, the editor section, AND the page chrome (top bar + background)
+  window.rwApplyDark = function(on){
+    var setup = document.getElementById('chat-editor-tab-setup');
+    var sec = document.getElementById('chat-editor-section');
+    var main = document.querySelector('main.main-content');
+    if (setup) setup.classList.toggle('rw-dark', on);
+    if (sec) sec.classList.toggle('rw-dark', on);
+    if (main) main.classList.toggle('rw-dark', on);
+    var b = document.querySelector('.rw-dark-toggle'); if (b) b.textContent = on ? 'Light mode' : 'Dark mode';
+  };
+  window.rwToggleDark = function(){
+    var r = document.getElementById('chat-editor-tab-setup'); if (!r) return;
+    rwApplyDark(!r.classList.contains('rw-dark'));
   };
 })();
 </script>
