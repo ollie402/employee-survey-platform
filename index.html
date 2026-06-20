@@ -34,6 +34,7 @@
         /* Simplified rich-text editor for the chat Welcome Message */
         #chat-setup-welcome-editor .ql-editor { min-height: 92px; font-size: 14px; font-family: inherit; }
         #chat-setup-welcome-editor .ql-editor.ql-blank::before { font-style: normal; color: #94a3b8; left: 15px; right: 15px; }
+        #chat-setup-welcome-editor .ql-editor img { max-width: 100%; height: auto; border-radius: 6px; }
         #chat-setup-welcome-wrap .ql-toolbar.ql-snow { border: 1px solid #cbd5e1; border-radius: 8px 8px 0 0; background: #f8fafc; }
         #chat-setup-welcome-wrap .ql-container.ql-snow { border: 1px solid #cbd5e1; border-top: none; border-radius: 0 0 8px 8px; }
         /* Email subject row – Gmail-style bar above Quill toolbar */
@@ -3950,6 +3951,49 @@
             stroke-linejoin: round;
             fill: none;
         }
+
+        /* Tiles / rows view toggle */
+        .chats-container .chats-header-row {
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 16px; flex-wrap: wrap; margin-bottom: 32px;
+        }
+        .chats-container .chats-header-row .chat-dashboard-section-title { margin-bottom: 0; }
+        .rw-view-toggle { display: inline-flex; gap: 3px; background: #eef2f7; border-radius: 9px; padding: 3px; }
+        .rw-view-toggle .rw-view-btn {
+            width: 34px; height: 30px; border: none; background: transparent; border-radius: 7px;
+            cursor: pointer; color: #64748b; display: flex; align-items: center; justify-content: center;
+            transition: background .15s, color .15s;
+        }
+        .rw-view-toggle .rw-view-btn:hover { color: #334155; }
+        .rw-view-toggle .rw-view-btn.active { background: #fff; color: #3b82f6; box-shadow: 0 1px 2px rgba(0,0,0,0.12); }
+        .rw-view-toggle .rw-view-btn svg { width: 17px; height: 17px; }
+        .chats-container .chats-header-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+        .rw-chat-search { position: relative; display: inline-flex; align-items: center; }
+        .rw-chat-search svg { position: absolute; left: 11px; width: 16px; height: 16px; color: #94a3b8; pointer-events: none; }
+        .rw-chat-search input {
+            padding: 8px 12px 8px 34px; border: 1px solid #cbd5e1; border-radius: 9px;
+            font-size: 14px; font-family: inherit; color: #1e293b; background: #fff;
+            width: 220px; max-width: 48vw; outline: none; transition: border-color .15s, box-shadow .15s;
+        }
+        .rw-chat-search input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.12); }
+        .rw-chat-search input::placeholder { color: #94a3b8; }
+        .chats-search-empty { padding: 28px 4px; color: #64748b; font-size: 14px; }
+
+        /* Rows (list) view */
+        .chats-grid-container.rw-rows-view .chats-grid { display: flex; flex-direction: column; gap: 10px; }
+        .chats-grid-container.rw-rows-view .chat-stack { display: none !important; }
+        .chats-grid-container.rw-rows-view .new-chat-card {
+            flex-direction: row; min-height: 0; justify-content: flex-start; gap: 12px; padding: 14px 20px;
+        }
+        .chats-grid-container.rw-rows-view .new-chat-card svg { width: 24px; height: 24px; margin-bottom: 0; }
+        .chats-grid-container.rw-rows-view .chat-card { display: flex; align-items: stretch; }
+        .chats-grid-container.rw-rows-view .chat-card-header { height: auto; width: 6px; border-radius: 8px 0 0 8px; flex-shrink: 0; }
+        .chats-grid-container.rw-rows-view .chat-card-body {
+            flex: 1; min-width: 0; padding: 14px 18px; padding-right: 48px;
+            display: flex; align-items: center; gap: 16px;
+        }
+        .chats-grid-container.rw-rows-view .chat-card-title { margin-bottom: 0; flex: 1; min-width: 0; }
+        .chats-grid-container.rw-rows-view .chat-card-meta { flex-shrink: 0; }
         /* ============================================== */
         /* CHATS SECTION STYLES - END                     */
         /* ============================================== */
@@ -4907,6 +4951,10 @@
           background: transparent; border: none; box-shadow: none; border-radius: 0; animation: none;
         }
         #chat-editor-tab-setup.rw-layout-b .rw-left-col > .rw-card > .rw-card-header { display: none; }
+        /* In the wizard, surface the active step's header (title + ⓘ info tooltip) — one per page */
+        #chat-editor-tab-setup.rw-wiz.rw-layout-b .rw-left-col > .rw-card.rw-wiz-on > .rw-card-header { display: flex; align-items: flex-start; gap: 8px; padding: 0 0 16px; border: none; }
+        #chat-editor-tab-setup.rw-wiz .rw-left-col > .rw-card.rw-wiz-on .rw-card-header-icon,
+        #chat-editor-tab-setup.rw-wiz .rw-left-col > .rw-card.rw-wiz-on .rw-collapse-toggle { display: none; }
         #chat-editor-tab-setup.rw-layout-b .rw-left-col > .rw-card > .rw-card-body {
           padding: 0; max-height: none !important; opacity: 1 !important; transform: none !important; overflow: visible !important;
         }
@@ -5687,13 +5735,25 @@
                 <div id="listen-section" class="hidden">
                     <div class="chats-container">
                         <main class="chat-dashboard-main">
-                            <h1 class="chat-dashboard-section-title">My chats</h1>
+                            <div class="chats-header-row">
+                                <h1 class="chat-dashboard-section-title">My chats</h1>
+                                <div class="chats-header-actions">
+                                    <div class="rw-chat-search">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                                        <input type="text" id="listen-chat-search" placeholder="Search chats…" oninput="renderChatList()" autocomplete="off">
+                                    </div>
+                                    <div class="rw-view-toggle" id="rw-listen-view-toggle">
+                                        <button type="button" class="rw-view-btn active" data-view="tiles" onclick="setListenView('tiles')" title="Tile view" aria-label="Tile view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></button>
+                                        <button type="button" class="rw-view-btn" data-view="rows" onclick="setListenView('rows')" title="Row view" aria-label="Row view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></button>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="chats-grid-container">
                                 <div class="chats-grid" id="chats-grid">
                                     <!-- New Chat Card -->
                                     <div class="new-chat-card" onclick="openChatEditor()">
                                         <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                                        <span>Blank</span>
+                                        <span>New chat</span>
                                     </div>
                                     <!-- Chat cards will be loaded dynamically from database -->
 
@@ -5816,7 +5876,7 @@
                                     </div>
                                     <div class="rw-ov-row">
                                       <div class="rw-ov-row-label">Alerts</div>
-                                      <div class="rw-ov-row-value" id="ov-val-alerts">Use my default setting</div>
+                                      <div class="rw-ov-row-value" id="ov-val-alerts">Not set</div>
                                       <button type="button" class="rw-ov-edit" onclick="rwEditStep(4)" title="Edit alerts" aria-label="Edit alerts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
                                     </div>
                                   </div>
@@ -5921,7 +5981,7 @@
                                         <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
                                       </div>
                                       <div>
-                                        <div class="rw-card-title">Notifications <span class="rw-info" tabindex="0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg><span class="rw-tip">How you're alerted to new responses: every submission as it arrives, a daily or weekly digest, or never. "Use my default setting" follows your account-wide notification preference.</span></span></div>
+                                        <div class="rw-card-title">Notifications <span class="rw-info" tabindex="0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg><span class="rw-tip">How you're alerted to new responses: every submission as it arrives, a daily or weekly digest, or never.</span></span></div>
                                         <div class="rw-card-subtitle">How you're alerted to responses</div>
                                       </div>
                                       <button class="rw-collapse-toggle" type="button" onclick="rwToggleCard(this)" aria-label="Collapse section">
@@ -5932,16 +5992,9 @@
                                       <div class="rw-field">
                                         <label>
                                           <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
-                                          Alerts
+                                          Notifications
                                         </label>
                                         <div class="rw-access-choices" id="rw-alerts-choices">
-                                          <button type="button" class="rw-access-option" data-alert="" onclick="rwSelectAlerts('')">
-                                            <span class="rw-access-radio"></span>
-                                            <span class="rw-access-text">
-                                              <span class="rw-access-title">Use my default setting</span>
-                                              <span class="rw-access-desc">Follow your account-wide notification preference.</span>
-                                            </span>
-                                          </button>
                                           <button type="button" class="rw-access-option" data-alert="instant" onclick="rwSelectAlerts('instant')">
                                             <span class="rw-access-radio"></span>
                                             <span class="rw-access-text">
@@ -5973,13 +6026,12 @@
                                         </div>
                                         <!-- Hidden select keeps save/load working -->
                                         <select id="chat-notification-frequency" class="rw-access-hidden-select" aria-hidden="true" tabindex="-1">
-                                            <option value="">Use my default setting</option>
+                                            <option value="">Not set</option>
                                             <option value="instant">Every submission (instant)</option>
                                             <option value="daily">Daily digest</option>
                                             <option value="weekly">Weekly digest</option>
                                             <option value="never">Never</option>
                                         </select>
-                                        <div class="rw-hint">Override your global notification setting for this specific chat.</div>
                                       </div>
                                     </div>
                                   </div>
@@ -6046,7 +6098,7 @@
                                       <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
                                     </div>
                                     <div>
-                                      <div class="rw-card-title">Your Chat Link</div>
+                                      <div class="rw-card-title">Your Chat Link <span class="rw-info" tabindex="0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg><span class="rw-tip">This is the link you share with participants — anyone with it can open the chat. Use the QR code on posters, screens or printed materials so people can scan to join.</span></span></div>
                                       <div class="rw-card-subtitle">Share this with your participants</div>
                                     </div>
                                   </div>
@@ -8304,12 +8356,69 @@ function initQuillEditors() {
         var welcomeMirror = document.getElementById('chat-setup-welcome');
         quillWelcomeEditor.on('text-change', function () {
             if (!welcomeMirror) return;
-            var plain = quillWelcomeEditor.getText().trim();
-            welcomeMirror.value = plain ? quillWelcomeEditor.root.innerHTML : '';
+            // Treat the message as non-empty if it has text OR an embedded image
+            var hasContent = quillWelcomeEditor.getText().trim() || quillWelcomeEditor.root.querySelector('img');
+            welcomeMirror.value = hasContent ? quillWelcomeEditor.root.innerHTML : '';
             welcomeMirror.dispatchEvent(new Event('input'));
             if (window.rwUpdatePreview) rwUpdatePreview();
         });
+        // Paste an image (e.g. a screenshot) straight into the welcome message
+        quillWelcomeEditor.root.addEventListener('paste', function (e) {
+            var items = (e.clipboardData && e.clipboardData.items) || [];
+            for (var i = 0; i < items.length; i++) {
+                if (items[i].type && items[i].type.indexOf('image') === 0) {
+                    e.preventDefault(); e.stopPropagation();
+                    var file = items[i].getAsFile();
+                    if (file) rwInsertWelcomeImage(file);
+                    return;
+                }
+            }
+        }, true);
+        // Drag & drop an image file onto the welcome message
+        quillWelcomeEditor.root.addEventListener('dragover', function (e) {
+            if (e.dataTransfer && Array.prototype.some.call(e.dataTransfer.items || [], function (it) { return it.kind === 'file'; })) e.preventDefault();
+        });
+        quillWelcomeEditor.root.addEventListener('drop', function (e) {
+            var files = (e.dataTransfer && e.dataTransfer.files) || [];
+            for (var i = 0; i < files.length; i++) {
+                if (files[i].type && files[i].type.indexOf('image') === 0) {
+                    e.preventDefault(); e.stopPropagation();
+                    rwInsertWelcomeImage(files[i]);
+                    return;
+                }
+            }
+        }, true);
     }
+}
+
+// Insert a pasted/dropped image into the chat Welcome Message editor (downscaled to keep the saved message light)
+function rwInsertWelcomeImage(file) {
+    if (!file || !/^image\//.test(file.type) || typeof quillWelcomeEditor === 'undefined' || !quillWelcomeEditor) return;
+    if (file.size > 6 * 1024 * 1024) { alert('That image is too large — please use one under 6MB.'); return; }
+    var reader = new FileReader();
+    reader.onload = function (e) {
+        rwDownscaleImage(e.target.result, 1000, function (dataUrl) {
+            var range = quillWelcomeEditor.getSelection(true) || { index: quillWelcomeEditor.getLength() };
+            quillWelcomeEditor.insertEmbed(range.index, 'image', dataUrl, 'user');
+            quillWelcomeEditor.setSelection(range.index + 1, 0, 'silent');
+        });
+    };
+    reader.readAsDataURL(file);
+}
+// Downscale an image data URL to at most maxDim px on its longest side (keeps embedded images small)
+function rwDownscaleImage(dataUrl, maxDim, cb) {
+    var img = new Image();
+    img.onload = function () {
+        var scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+        if (scale >= 1) { cb(dataUrl); return; }
+        var cw = Math.round(img.width * scale), ch = Math.round(img.height * scale);
+        var c = document.createElement('canvas'); c.width = cw; c.height = ch;
+        c.getContext('2d').drawImage(img, 0, 0, cw, ch);
+        var isPng = /^data:image\/png/i.test(dataUrl);
+        try { cb(c.toDataURL(isPng ? 'image/png' : 'image/jpeg', 0.85)); } catch (err) { cb(dataUrl); }
+    };
+    img.onerror = function () { cb(dataUrl); };
+    img.src = dataUrl;
 }
 
 // Helper to get HTML from Quill editors
@@ -8344,7 +8453,8 @@ function setReminderEditorHTML(html) {
 function setWelcomeEditorHTML(html) {
     var mirror = document.getElementById('chat-setup-welcome');
     var raw = (html || '').trim();
-    var isEmpty = !raw || raw === '<p><br></p>' || raw.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, '').trim() === '';
+    var hasImg = /<img/i.test(raw);
+    var isEmpty = !raw || raw === '<p><br></p>' || (!hasImg && raw.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, '').trim() === '');
     if (typeof quillWelcomeEditor !== 'undefined' && quillWelcomeEditor) {
         quillWelcomeEditor.root.innerHTML = isEmpty ? '<p><br></p>' : html;
         if (mirror) mirror.value = isEmpty ? '' : html;
@@ -14632,7 +14742,7 @@ function openChatEditor(chatId = null) {
         const accessDropdown = document.getElementById('chat-access-type');
         if (accessDropdown) accessDropdown.value = '';
         if (typeof rwSyncAccessChoices === 'function') rwSyncAccessChoices();
-        // Reset notification dropdown to default
+        // Reset notification to unselected — no pre-selection; user must actively pick an alert option
         const notifDropdown = document.getElementById('chat-notification-frequency');
         if (notifDropdown) notifDropdown.value = '';
         if (typeof rwSyncAlertsChoices === 'function') rwSyncAlertsChoices();
@@ -16291,7 +16401,7 @@ function createChatCardHTML(chat) {
             <div class="chat-card-body">
                 <div class="chat-card-title">${chat.name}</div>
                 <div class="chat-card-meta">
-                    <span>Opened ${formatChatDate(chat.created_at)}</span>
+                    <span>Created ${formatChatDate(chat.created_at)}</span>
                 </div>
             </div>
         </div>
@@ -16325,66 +16435,102 @@ const MAX_VISIBLE_TILES = 8;
 window.overflowChats = [];
 
 // Render all chat cards with stacking for overflow
+// Listen "My chats" tiles/rows view toggle
+function getListenView() { return localStorage.getItem('rw_listen_view') === 'rows' ? 'rows' : 'tiles'; }
+function applyListenView() {
+    const mode = getListenView();
+    const container = document.querySelector('#listen-section .chats-grid-container');
+    if (container) container.classList.toggle('rw-rows-view', mode === 'rows');
+    document.querySelectorAll('#rw-listen-view-toggle .rw-view-btn').forEach(b =>
+        b.classList.toggle('active', b.getAttribute('data-view') === mode));
+}
+function setListenView(mode) {
+    localStorage.setItem('rw_listen_view', mode === 'rows' ? 'rows' : 'tiles');
+    applyListenView();
+    renderChatCards();
+}
+
 async function renderChatCards() {
     const chats = await loadListeningChats();
+    window.__allListenChats = Array.isArray(chats) ? chats : [];
+    renderChatList();
+}
+
+// Render chats into the grid from the cached list, applying the current search term + view mode.
+// Called on load (via renderChatCards) and on every search keystroke (no DB re-fetch).
+function renderChatList() {
     const chatsGrid = document.getElementById('chats-grid');
     const stack = document.getElementById('chatStack');
     const overflowExpanded = document.getElementById('chatsOverflowExpanded');
     const overflowGrid = document.getElementById('overflowGrid');
+    if (!chatsGrid) { console.error('Chats grid container not found'); return; }
 
-    if (!chatsGrid) {
-        console.error('Chats grid container not found');
-        return;
-    }
-
-    // Clear existing chat cards (but keep structure)
-    const existingCards = chatsGrid.querySelectorAll('.chat-card');
-    existingCards.forEach(card => card.remove());
-
-    // Reset stack and overflow
+    // Clear existing chat cards + reset overflow
+    chatsGrid.querySelectorAll('.chat-card').forEach(card => card.remove());
     if (stack) stack.style.display = 'none';
     if (overflowExpanded) overflowExpanded.style.display = 'none';
     if (overflowGrid) overflowGrid.innerHTML = '';
     window.overflowChats = [];
 
-    // Ensure new chat card exists
+    // Apply the saved tiles/rows view
+    applyListenView();
+
+    // Ensure the "New chat" card exists
     let newChatCard = chatsGrid.querySelector('.new-chat-card');
     if (!newChatCard) {
-        const newChatHTML = `
-            <div class="new-chat-card" onclick="openChatEditor()">
-                <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                <span>Blank</span>
-            </div>
-        `;
-        chatsGrid.insertAdjacentHTML('afterbegin', newChatHTML);
+        chatsGrid.insertAdjacentHTML('afterbegin',
+            '<div class="new-chat-card" onclick="openChatEditor()"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg><span>New chat</span></div>');
         newChatCard = chatsGrid.querySelector('.new-chat-card');
     }
 
-    if (!chats || chats.length === 0) {
+    // Filter by the search term
+    const term = (document.getElementById('listen-chat-search')?.value || '').trim().toLowerCase();
+    const all = window.__allListenChats || [];
+    const chats = term ? all.filter(c => (c.name || '').toLowerCase().includes(term)) : all;
+
+    // While searching, hide the "New chat" tile so results read as a clean list
+    if (newChatCard) newChatCard.style.display = term ? 'none' : '';
+
+    // Empty-results message (only while searching)
+    let emptyEl = document.getElementById('listen-search-empty');
+    if (term && chats.length === 0) {
+        if (!emptyEl) {
+            emptyEl = document.createElement('div');
+            emptyEl.id = 'listen-search-empty';
+            emptyEl.className = 'chats-search-empty';
+            (chatsGrid.parentElement || chatsGrid).appendChild(emptyEl);
+        }
+        emptyEl.textContent = 'No chats match “' + term + '”.';
+        emptyEl.style.display = '';
+    } else if (emptyEl) {
+        emptyEl.style.display = 'none';
+    }
+
+    if (chats.length === 0) return;
+
+    // Rows view, or while searching → render every match (no tile-overflow stacking)
+    if (getListenView() === 'rows' || term) {
+        if (stack) stack.style.display = 'none';
+        chats.forEach(chat => {
+            const cardHTML = createChatCardHTML(chat);
+            if (stack) stack.insertAdjacentHTML('beforebegin', cardHTML);
+            else chatsGrid.insertAdjacentHTML('beforeend', cardHTML);
+        });
         return;
     }
 
-    // Split chats into visible and overflow
+    // Tiles view (no search): visible tiles + overflow stack
     const visibleChats = chats.slice(0, MAX_VISIBLE_TILES);
     const overflowChatsData = chats.slice(MAX_VISIBLE_TILES);
-
-    // Render visible tiles (insert before the stack element)
     visibleChats.forEach(chat => {
         const cardHTML = createChatCardHTML(chat);
-        if (stack) {
-            stack.insertAdjacentHTML('beforebegin', cardHTML);
-        } else {
-            chatsGrid.insertAdjacentHTML('beforeend', cardHTML);
-        }
+        if (stack) stack.insertAdjacentHTML('beforebegin', cardHTML);
+        else chatsGrid.insertAdjacentHTML('beforeend', cardHTML);
     });
-
-    // Show stack if there are overflow chats
     if (overflowChatsData.length > 0 && stack) {
         stack.style.display = 'block';
         const stackCount = stack.querySelector('.stack-count');
-        if (stackCount) {
-            stackCount.textContent = `+${overflowChatsData.length} more`;
-        }
+        if (stackCount) stackCount.textContent = `+${overflowChatsData.length} more`;
         window.overflowChats = overflowChatsData;
     }
 }
@@ -21365,6 +21511,7 @@ const gsStepDefs = {
     name:         { label: 'Name chat', key: 'name' },
     welcome:      { label: 'Welcome message', key: 'welcome' },
     access:       { label: 'Access type', key: 'access' },
+    notifications:{ label: 'Notifications', key: 'notifications' },
     create:       { label: 'Create link', key: 'create' },
     copyLink:     { label: 'Copy link', key: 'copyLink' },
     goParticipants: { label: 'Participants', key: 'goParticipants' },
@@ -21373,9 +21520,9 @@ const gsStepDefs = {
 };
 
 const gsAccessSteps = {
-    open:     ['name', 'welcome', 'access', 'create', 'copyLink', 'save'],
-    closed:   ['name', 'welcome', 'access', 'create', 'goParticipants', 'addParticipants', 'save'],
-    combined: ['name', 'welcome', 'access', 'create', 'copyLink', 'goParticipants', 'addParticipants', 'save']
+    open:     ['name', 'welcome', 'access', 'notifications', 'create', 'copyLink', 'save'],
+    closed:   ['name', 'welcome', 'access', 'notifications', 'create', 'goParticipants', 'addParticipants', 'save'],
+    combined: ['name', 'welcome', 'access', 'notifications', 'create', 'copyLink', 'goParticipants', 'addParticipants', 'save']
 };
 
 function gsRenderSteps(stepKeys) {
@@ -21458,6 +21605,8 @@ function gsEvaluateState() {
         if (welcome && welcome.value.trim()) gsCompleteByKey('welcome');
         var accessSel = document.getElementById('chat-access-type');
         if (accessSel && accessSel.value) gsCompleteByKey('access');
+        var notifSel = document.getElementById('chat-notification-frequency');
+        if (notifSel && notifSel.value) gsCompleteByKey('notifications');
         if (panelVisible || isExisting) gsCompleteByKey('create');
         if (isExisting) {
             gsCompleteByKey('copyLink');
@@ -21502,6 +21651,15 @@ function gsReset() {
         if (accessSelect) {
             accessSelect.addEventListener('change', function() {
                 gsRebuildForAccessType(this.value);
+            });
+        }
+
+        // Notifications: tick when a frequency is chosen (alert cards write through to this select + dispatch change)
+        var notifSelect = document.getElementById('chat-notification-frequency');
+        if (notifSelect) {
+            notifSelect.addEventListener('change', function() {
+                if (this.value) gsCompleteByKey('notifications');
+                else gsUncompleteByKey('notifications');
             });
         }
 
@@ -23784,7 +23942,7 @@ function engageGsReset() {
     setText('ov-val-name', name, 'Untitled chat');
     setText('ov-val-welcome', welText, 'Not set');
     setText('ov-val-access', access, 'Not set');
-    setText('ov-val-alerts', alerts, 'Use my default setting');
+    setText('ov-val-alerts', alerts, 'Not set');
     var logoEl = get('ov-val-logo');
     if (logoEl) logoEl.innerHTML = logo ? '<img src="' + rwEsc(logo) + '" alt="logo">' : 'None';
   };
