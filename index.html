@@ -23807,10 +23807,12 @@ function engageGsReset() {
     var input = document.getElementById('generatedChatLink');
     var hasLink = !!(input && (input.value || '').trim());
     if (btn){
+      btn.disabled = false; // never leave the button disabled/spinning once we know the link state
       btn.innerHTML = hasLink ? (COPY_ICON + 'Copy') : (PLUS_ICON + 'Create chat / link');
       btn.setAttribute('title', hasLink ? 'Copy the chat link' : 'Create the chat and generate its link');
     }
-    if (typeof rwRenderInlineQR === 'function') rwRenderInlineQR(); // keep the inline QR in sync with the link
+    // QR is non-critical — never let a QR error bubble up and leave the button stuck on "Creating…"
+    if (typeof rwRenderInlineQR === 'function') { try { rwRenderInlineQR(); } catch(e){ console.warn('Inline QR render failed', e); } }
   };
   // Click: when there's no link yet, this one button creates the link, SAVES the chat, and makes the QR.
   // Once a link exists it just copies it.
@@ -23825,16 +23827,22 @@ function engageGsReset() {
     // saveListeningAll persists the chat AND surfaces the link; pass the hidden Save button so it
     // doesn't clobber the in-box button's text (it restores whatever button it's given).
     var saveBtn = document.getElementById('save-chat-btn');
-    Promise.resolve(typeof saveListeningAll === 'function' ? saveListeningAll(saveBtn) : null)
-      .then(function(){
-        if (inbox) inbox.disabled = false;
-        window.rwSyncChatLinkButton(); // → "Copy" + renders the inline QR
-      })
-      .catch(function(err){
-        console.error('Create chat / link failed', err);
-        if (inbox) inbox.disabled = false;
-        window.rwSyncChatLinkButton();
-      });
+    var settled = false;
+    var finish = function(){ settled = true; if (inbox) inbox.disabled = false; window.rwSyncChatLinkButton(); }; // → "Copy" + inline QR
+    // Safety net: if the chat/link actually gets created but the save promise never settles
+    // (e.g. a hung auth/network call), un-stick the button once a link exists. Guarded on the link
+    // being present, so it can never re-fire a create or produce a duplicate.
+    setTimeout(function(){
+      if (settled) return;
+      var lnk = document.getElementById('generatedChatLink');
+      if (lnk && (lnk.value || '').trim()) finish();
+    }, 6000);
+    // Run inside a promise chain so even a synchronous throw becomes a rejection, and the button is
+    // ALWAYS resynced afterwards — the final .then runs whether the save resolved or rejected.
+    Promise.resolve()
+      .then(function(){ return (typeof saveListeningAll === 'function') ? saveListeningAll(saveBtn) : null; })
+      .catch(function(err){ console.error('Create chat / link failed', err); })
+      .then(finish);
   };
 })();
 </script>
