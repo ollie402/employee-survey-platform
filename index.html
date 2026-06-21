@@ -3977,6 +3977,15 @@
         }
         .rw-chat-search input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.12); }
         .rw-chat-search input::placeholder { color: #94a3b8; }
+        .rw-chat-sort select {
+            padding: 8px 30px 8px 12px; border: 1px solid #cbd5e1; border-radius: 9px;
+            font-size: 14px; font-family: inherit; color: #1e293b; background-color: #fff;
+            cursor: pointer; outline: none; transition: border-color .15s, box-shadow .15s;
+            -webkit-appearance: none; -moz-appearance: none; appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+            background-repeat: no-repeat; background-position: right 10px center;
+        }
+        .rw-chat-sort select:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.12); }
         .chats-search-empty { padding: 28px 4px; color: #64748b; font-size: 14px; }
 
         /* Rows (list) view */
@@ -5741,6 +5750,14 @@
                                     <div class="rw-chat-search">
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                                         <input type="text" id="listen-chat-search" placeholder="Search chats…" oninput="renderChatList()" autocomplete="off">
+                                    </div>
+                                    <div class="rw-chat-sort">
+                                        <select id="listen-chat-sort" onchange="setListenSort(this.value)" aria-label="Sort chats by" title="Sort chats">
+                                            <option value="newest">Newest first</option>
+                                            <option value="oldest">Oldest first</option>
+                                            <option value="name-asc">Name A–Z</option>
+                                            <option value="name-desc">Name Z–A</option>
+                                        </select>
                                     </div>
                                     <div class="rw-view-toggle" id="rw-listen-view-toggle">
                                         <button type="button" class="rw-view-btn active" data-view="tiles" onclick="setListenView('tiles')" title="Tile view" aria-label="Tile view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></button>
@@ -16436,12 +16453,28 @@ window.overflowChats = [];
 // Render all chat cards with stacking for overflow
 // Listen "My chats" tiles/rows view toggle
 function getListenView() { return localStorage.getItem('rw_listen_view') === 'rows' ? 'rows' : 'tiles'; }
+function getListenSort() { return localStorage.getItem('rw_listen_sort') || 'newest'; }
+function setListenSort(v) { localStorage.setItem('rw_listen_sort', v); renderChatList(); }
+function sortListenChats(list, sort) {
+    const arr = (list || []).slice();
+    const time = c => { const d = new Date(c && c.created_at ? c.created_at : 0).getTime(); return isNaN(d) ? 0 : d; };
+    const name = c => ((c && c.name) || '').toLowerCase();
+    switch (sort) {
+        case 'oldest':    arr.sort((a, b) => time(a) - time(b)); break;
+        case 'name-asc':  arr.sort((a, b) => name(a).localeCompare(name(b))); break;
+        case 'name-desc': arr.sort((a, b) => name(b).localeCompare(name(a))); break;
+        default:          arr.sort((a, b) => time(b) - time(a)); break; // 'newest'
+    }
+    return arr;
+}
 function applyListenView() {
     const mode = getListenView();
     const container = document.querySelector('#listen-section .chats-grid-container');
     if (container) container.classList.toggle('rw-rows-view', mode === 'rows');
     document.querySelectorAll('#rw-listen-view-toggle .rw-view-btn').forEach(b =>
         b.classList.toggle('active', b.getAttribute('data-view') === mode));
+    const sortSel = document.getElementById('listen-chat-sort');
+    if (sortSel) sortSel.value = getListenSort();
 }
 function setListenView(mode) {
     localStorage.setItem('rw_listen_view', mode === 'rows' ? 'rows' : 'tiles');
@@ -16485,7 +16518,8 @@ function renderChatList() {
     // Filter by the search term
     const term = (document.getElementById('listen-chat-search')?.value || '').trim().toLowerCase();
     const all = window.__allListenChats || [];
-    const chats = term ? all.filter(c => (c.name || '').toLowerCase().includes(term)) : all;
+    const filtered = term ? all.filter(c => (c.name || '').toLowerCase().includes(term)) : all;
+    const chats = sortListenChats(filtered, getListenSort());
 
     // While searching, hide the "New chat" tile so results read as a clean list
     if (newChatCard) newChatCard.style.display = term ? 'none' : '';
