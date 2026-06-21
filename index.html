@@ -4647,7 +4647,7 @@
         }
         .rw-btn-copy svg { width: 14px; height: 14px; flex-shrink: 0; }
         /* Override JS-set backgrounds on copy link button */
-        #copyLinkBtn.rw-btn-copy {
+        #copyLinkBtn.rw-btn-copy, #rwLinkBtn.rw-btn-copy {
           background: #6c63ff !important;
           color: #fff !important;
         }
@@ -6112,9 +6112,8 @@
                                             <input type="text" id="generatedChatLink" readonly>
                                           </div>
                                           <div class="rw-link-actions">
-                                            <button onclick="rwChatLinkAction()" id="copyLinkBtn" class="rw-btn-copy" style="flex:1; padding:9px; background:#6c63ff !important; color:#fff !important; border:none; border-radius:7px; font-size:12.5px; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;">
-                                              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:14px;height:14px;flex-shrink:0;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                                              Create chat / link
+                                            <button onclick="rwLinkButton()" id="rwLinkBtn" type="button" class="rw-btn-copy" style="flex:1; padding:9px; background:#6c63ff !important; color:#fff !important; border:none; border-radius:7px; font-size:12.5px; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;">
+                                              <span id="rwLinkBtnLabel">Create chat / link</span>
                                             </button>
                                           </div>
                                         </div>
@@ -23802,17 +23801,45 @@ function engageGsReset() {
   var COPY_ICON = '<svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:14px;height:14px;flex-shrink:0;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>';
   var PLUS_ICON = '<svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:14px;height:14px;flex-shrink:0;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>';
   // Reflect link state on the chat-link button: no link -> "Create chat / link", link -> "Copy"
+  // Resting state for the share-link button: "Copy link" if a link exists, else "Create chat / link".
   window.rwSyncChatLinkButton = function(){
-    var btn = document.getElementById('copyLinkBtn');
+    var btn = document.getElementById('rwLinkBtn');
+    var label = document.getElementById('rwLinkBtnLabel');
     var input = document.getElementById('generatedChatLink');
     var hasLink = !!(input && (input.value || '').trim());
-    if (btn){
-      btn.disabled = false; // never leave the button disabled/spinning once we know the link state
-      btn.innerHTML = hasLink ? (COPY_ICON + 'Copy') : (PLUS_ICON + 'Create chat / link');
-      btn.setAttribute('title', hasLink ? 'Copy the chat link' : 'Create the chat and generate its link');
-    }
-    // QR is non-critical — never let a QR error bubble up and leave the button stuck on "Creating…"
+    if (btn){ btn.disabled = false; btn.setAttribute('title', hasLink ? 'Copy the chat link' : 'Create the chat and generate its link'); }
+    if (label) label.textContent = hasLink ? 'Copy link' : 'Create chat / link';
+    // QR is non-critical — never let a QR error bubble up.
     if (typeof rwRenderInlineQR === 'function') { try { rwRenderInlineQR(); } catch(e){ console.warn('Inline QR render failed', e); } }
+  };
+  // Clean, self-contained handler for the share-link button. Creates the chat/link (or copies an existing
+  // one) and NEVER stays stuck: it polls for the link and flips to the resting state the instant the link
+  // appears — independent of whether the underlying save promise resolves, rejects, or hangs. Hard-stops
+  // at 25s. No dependency on the old rwChatLinkAction chain or any other button handler.
+  window.rwLinkButton = function(){
+    var btn = document.getElementById('rwLinkBtn');
+    var label = document.getElementById('rwLinkBtnLabel');
+    var linkEl = document.getElementById('generatedChatLink');
+    var current = linkEl ? (linkEl.value || '').trim() : '';
+    if (current){ // link already exists → copy it
+      try { navigator.clipboard.writeText(current); } catch(e){}
+      if (label) label.textContent = 'Copied!';
+      setTimeout(function(){ window.rwSyncChatLinkButton(); }, 1500);
+      return;
+    }
+    if (btn) btn.disabled = true;
+    if (label) label.textContent = 'Creating…';
+    var done = false;
+    var settle = function(){ if (done) return; done = true; clearInterval(poll); clearTimeout(giveUp); if (btn) btn.disabled = false; window.rwSyncChatLinkButton(); };
+    // Poll: flip to "Copy link" the instant a link appears, however the save resolves/hangs.
+    var poll = setInterval(function(){ var l = document.getElementById('generatedChatLink'); if (l && (l.value || '').trim()) settle(); }, 400);
+    // Hard stop so it can never spin forever (the save can hang on a Supabase auth/token-refresh stall).
+    var giveUp = setTimeout(settle, 25000);
+    var saveBtn = document.getElementById('save-chat-btn');
+    Promise.resolve()
+      .then(function(){ return (typeof saveListeningAll === 'function') ? saveListeningAll(saveBtn) : null; })
+      .catch(function(e){ console.error('Create link failed', e); })
+      .then(settle);
   };
   // Click: when there's no link yet, this one button creates the link, SAVES the chat, and makes the QR.
   // Once a link exists it just copies it.
