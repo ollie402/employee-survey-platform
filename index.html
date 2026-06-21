@@ -23829,20 +23829,23 @@ function engageGsReset() {
     var saveBtn = document.getElementById('save-chat-btn');
     var settled = false;
     var finish = function(){ settled = true; if (inbox) inbox.disabled = false; window.rwSyncChatLinkButton(); }; // → "Copy" + inline QR
-    // Safety net: if the chat/link actually gets created but the save promise never settles
-    // (e.g. a hung auth/network call), un-stick the button once a link exists. Guarded on the link
-    // being present, so it can never re-fire a create or produce a duplicate.
-    setTimeout(function(){
-      if (settled) return;
+    // Safety net: POLL every second rather than a single one-shot check. On dev the save promise can
+    // hang (a Supabase auth/token-refresh stall) while the link still gets created a moment later — a
+    // one-shot timer that fires before the link appears would miss it and leave the button spinning.
+    // Resync the instant a link exists; give up after ~20s and resync regardless so it can never spin
+    // forever. Guarded on the link, so it never re-fires a create or makes a duplicate.
+    var polls = 0;
+    var poller = setInterval(function(){
+      polls++;
       var lnk = document.getElementById('generatedChatLink');
-      if (lnk && (lnk.value || '').trim()) finish();
-    }, 6000);
+      if (settled || (lnk && (lnk.value || '').trim()) || polls >= 20) { clearInterval(poller); finish(); }
+    }, 1000);
     // Run inside a promise chain so even a synchronous throw becomes a rejection, and the button is
-    // ALWAYS resynced afterwards — the final .then runs whether the save resolved or rejected.
+    // ALWAYS resynced once it settles too — whether the save resolved or rejected.
     Promise.resolve()
       .then(function(){ return (typeof saveListeningAll === 'function') ? saveListeningAll(saveBtn) : null; })
       .catch(function(err){ console.error('Create chat / link failed', err); })
-      .then(finish);
+      .then(function(){ clearInterval(poller); finish(); });
   };
 })();
 </script>
