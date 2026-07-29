@@ -205,6 +205,7 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
+// Bind to PORT and begin listening for incoming requests
 // Start server
 const server = app.listen(PORT, () => {
   console.log(`
