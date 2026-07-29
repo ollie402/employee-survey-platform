@@ -218,7 +218,7 @@ Ready to test email functionality!
   `);
 });
 
-// Handle shutdown gracefully
+// Handle shutdown gracefully — listens for SIGINT (Ctrl+C) to close cleanly
 process.on('SIGINT', () => {
   console.log('\nShutting down server...');
   server.close(() => {
